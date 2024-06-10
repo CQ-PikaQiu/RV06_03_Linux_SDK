@@ -1,6 +1,5 @@
-*.o
 out
-source/busybox
+source/busybox/
 tools/board/android-tools/android-tools/
 tools/board/dosfstools/dosfstools*
 tools/board/e2fsprogs/e2fsprogs*
@@ -13,7 +12,6 @@ tools/board/gdb/gdb*
 tools/board/memtester/memtester*
 tools/board/mtd-utils/mtd-utils-*
 tools/board/mtd-utils/out
-tools/board/security
 tools/board/strace/strace*
 tools/board/stressapptest/stressapptest-master
 tools/board/sysstat/sysstat*
@@ -21,4 +19,4 @@ tools/board/toolkits/openssl/openssl*
 tools/board/toolkits/zlib/zlib*
 tools/board/valgrind/valgrind-*
 tools/pc/toolkits/resource_tool
-util-linux-*
+tools/board/eudev/util-linux-*
