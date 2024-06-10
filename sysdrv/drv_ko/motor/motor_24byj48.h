@@ -11,8 +11,8 @@
 #include <linux/hrtimer.h>
 
 #define MAX_GPIO_NUM 4
-#define HORIZONTAL_MAX_STEPS 4000
-#define VERTICAL_MAX_STEPS 2000
+#define HORIZONTAL_MAX_STEPS 8000
+#define VERTICAL_MAX_STEPS 1000
 /* motor speed */
 #define MOTOR_MAX_SPEED	1800000      /*us*/
 #define MOTOR_MIN_SPEED	9000000

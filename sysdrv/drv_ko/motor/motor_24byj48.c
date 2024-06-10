@@ -648,7 +648,7 @@ static long motor_ioctl(struct file *file, unsigned int cmd, unsigned long value
 		printk("saved location x is %d, y is %d \n", data.x_cur_steps, data.y_cur_steps);
 		ret = motor_set_calibrated_message(mdev,data);
 		if (ret) {
-			dev_err("motor_set_calibrated_messgae fail\n");
+			dev_err(mdev->dev, "motor_set_calibrated_messgae fail\n");
 			ret = -1;
 		}
 		break;
