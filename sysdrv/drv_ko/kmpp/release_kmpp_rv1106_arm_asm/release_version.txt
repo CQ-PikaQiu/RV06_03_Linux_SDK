@@ -1,0 +1,8 @@
+commit 67a7527e859365a36081a74fb82a9b98539bcbc6
+Author: Yandong Lin <yandong.lin@rock-chips.com>
+Date:   Wed Jan 17 11:44:08 2024 +0800
+
+    [h264e_sps]: fix constraint_set value issue
+    
+    Signed-off-by: Yandong Lin <yandong.lin@rock-chips.com>
+    Change-Id: Ic63e9a2335bbd5bcf0230eabc58871aa1e157d75

@@ -1,0 +1,8 @@
+commit 79ed770c5fecf9f0081256a87b4e64b384d13b99
+Author: Zhihua Wang <hogan.wang@rock-chips.com>
+Date:   Sat Dec 9 10:24:36 2023 +0800
+
+    [venc]: remove osd buf_map limit
+    
+    Signed-off-by: Zhihua Wang <hogan.wang@rock-chips.com>
+    Change-Id: I7df997eefd7c4fe60f1460f4c86d8ae776089700

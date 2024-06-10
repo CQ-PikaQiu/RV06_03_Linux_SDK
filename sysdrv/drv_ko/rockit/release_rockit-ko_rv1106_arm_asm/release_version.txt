@@ -1,0 +1,8 @@
+commit a9dd19f6acbf3ae9d621a285aa64278d958f9b03
+Author: aaron.sun <aaron.sun@rock-chips.com>
+Date:   Tue Jan 9 21:17:56 2024 +0800
+
+    sys: fix bug cap write file error
+    
+    Signed-off-by: aaron.sun <aaron.sun@rock-chips.com>
+    Change-Id: Idaa926170ff3c2a7e9d153a02570e3021fe47183

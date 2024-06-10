@@ -1,6 +1,4 @@
 *.o
-cfg
-drv_ko
 out
 source
 source/busybox
