@@ -1,5 +1,6 @@
 
 tools_board-builds: \
+		board-build-4gnet \
 		board-build-toolkits \
 		board-build-gdb \
 		board-build-eudev \
@@ -33,6 +34,10 @@ tools_board-clean:
 	$(MAKE) -C $(SYSDRV_DIR)/tools/board/i2c-tools distclean
 	$(MAKE) -C $(SYSDRV_DIR)/tools/board/dosfstools distclean
 	$(MAKE) -C $(SYSDRV_DIR)/tools/board/exfatprogs distclean
+	$(MAKE) -C $(SYSDRV_DIR)/tools/board/4gnet
+
+board-build-4gnet:
+	$(MAKE) -C $(SYSDRV_DIR)/tools/board/4gnet
 
 board-build-toolkits:
 	$(MAKE) -C $(SYSDRV_DIR)/tools/board/toolkits
