@@ -12,5 +12,4 @@ app/uvc_app
 app/uvc_app_tiny
 app/wifi_app/
 image/
-make_meta
 out/
