@@ -28,6 +28,13 @@ else
 SYSDRV_LIB_TYPE ?= glibc
 endif
 
+ifneq ($(RK_BUILDROOT_DEFCONFIG),)
+BUILDROOT_DEFCONFIG := $(RK_BUILDROOT_DEFCONFIG)
+endif
+ifeq ($(BUILDROOT_DEFCONFIG),)
+BUILDROOT_DEFCONFIG := rv1103_lbc_defconfig
+endif
+
 SYSDRV_ROOTFS_FS_TYPE ?= $(fs_type)
 ifneq ($(RK_ROOTFS_FS_TPYE),)
 SYSDRV_ROOTFS_FS_TYPE := $(RK_ROOTFS_FS_TPYE)
@@ -98,6 +105,22 @@ endif
 ifneq ($(OUTPUT_SYSDRV_RAMDISK_DIR),)
 SYSDRV_BUILD_RAMDISK_FLAG := YES
 endif
+
+################################################################################
+##   rootfs Select
+################################################################################
+ifneq ($(RK_TARGET_ROOTFS),)
+   TARGET_ROOTFS := $(RK_TARGET_ROOTFS)
+else
+   TARGET_ROOTFS := busybox
+endif
+
+ifneq ($(findstring $(TARGET_ROOTFS),buildroot),)
+   ROOTFS_BUILD_ENV := rootfs_prepare pctools buildroot boardtools drv
+else
+   ROOTFS_BUILD_ENV := rootfs_prepare pctools busybox boardtools drv
+endif
+
 ################################################################################
 ##   Public Configuraton
 ################################################################################
@@ -247,6 +270,9 @@ BUSYBOX_CFG ?= config_normal
 BUSYBOX_VER ?= busybox-1.27.2
 BUSYBOX_DIR := $(SYSDRV_DIR)/source/busybox
 
+BUILDROOT_VER ?= buildroot-2024.02.2
+BUILDROOT_DIR := $(SYSDRV_DIR)/source/buildroot
+
 TOOLCHAIN_RUNTIME_LIB_C:=lib.tar.bz2
 
 EXT4_TOOL:=mkfs_ext4.sh
@@ -288,7 +314,7 @@ endif
 ################################################################################
 all: uboot kernel rootfs env
 
-clean: uboot_clean kernel_clean busybox_clean pctools_clean boardtools_clean rootfs_clean drv_clean
+clean: uboot_clean kernel_clean busybox_clean buildroot_clean pctools_clean boardtools_clean rootfs_clean drv_clean
 
 distclean: clean out_clean
 
@@ -351,6 +377,7 @@ help:
 	@echo -e "$(C_YELLOW)        make rootfs_erofs        # force package erofs rootfs image$(C_NORMAL)"
 	@echo -e "$(C_YELLOW)        make rootfs_initramfs    # force package initramfs rootfs image$(C_NORMAL)"
 	@echo -e "$(C_YELLOW)        make busybox_menuconfig  # config busybox $(C_NORMAL)"
+	@echo -e "$(C_YELLOW)        make buildroot_menuconfig  # config buildroot $(C_NORMAL)"
 	@echo -e "$(C_YELLOW)------------------------------------------------------------------------- $(C_NORMAL)"
 
 ################################################################################
@@ -502,6 +529,55 @@ endif
 busybox_clean:
 	$(AT)rm -rf $(BUSYBOX_DIR)/$(BUSYBOX_VER)
 
+buildroot_menuconfig:
+	cp -v $(SYSDRV_DIR)/tools/board/buildroot/$(BUILDROOT_DEFCONFIG) $(BUILDROOT_DIR)/$(BUILDROOT_VER)/configs/
+	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) $(BUILDROOT_DEFCONFIG) -C $(BUILDROOT_DIR)/$(BUILDROOT_VER)
+	$(MAKE) menuconfig -C $(BUILDROOT_DIR)/$(BUILDROOT_VER)
+	$(MAKE) savedefconfig -C $(BUILDROOT_DIR)/$(BUILDROOT_VER)
+	cp -v $(BUILDROOT_DIR)/$(BUILDROOT_VER)/configs/$(BUILDROOT_DEFCONFIG) $(SYSDRV_DIR)/tools/board/buildroot/$(BUILDROOT_DEFCONFIG)
+
+buildroot: prepare
+	@echo -e "$(C_GREEN) ==sysdrv== build buildroot   $(C_NORMAL)"
+	test -d $(BUILDROOT_DIR)/$(BUILDROOT_VER) || (\
+		rm $(BUILDROOT_DIR)/$(BUILDROOT_VER) -rf ;\
+		mkdir -p $(BUILDROOT_DIR) ;\
+		tar xzf $(SYSDRV_DIR)/tools/board/buildroot/$(BUILDROOT_VER).tar.gz -C $(BUILDROOT_DIR) ;\
+		cp -v $(SYSDRV_DIR)/tools/board/buildroot/patch/busybox/* $(BUILDROOT_DIR)/$(BUILDROOT_VER)/package/busybox/ ;\
+		mkdir -p $(BUILDROOT_DIR)/dl ;\
+		ln -sf $(BUILDROOT_DIR)/dl $(BUILDROOT_DIR)/$(BUILDROOT_VER)/dl ;\
+	);
+
+	cp -v $(SYSDRV_DIR)/tools/board/buildroot/$(BUILDROOT_DEFCONFIG) $(BUILDROOT_DIR)/$(BUILDROOT_VER)/configs/
+	cp -v $(SYSDRV_DIR)/tools/board/buildroot/busybox.config $(BUILDROOT_DIR)/$(BUILDROOT_VER)/package/busybox/
+
+	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) $(BUILDROOT_DEFCONFIG) -C $(BUILDROOT_DIR)/$(BUILDROOT_VER)
+	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) source -C $(BUILDROOT_DIR)/$(BUILDROOT_VER)
+	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -j$(SYSDRV_JOBS) -C $(BUILDROOT_DIR)/$(BUILDROOT_VER)
+
+ifeq ($(SYSDRV_BUILD_RAMDISK_FLAG),YES)
+    tar xf $(SYSDRV_DIR)/tools/board/rootfs_script.tar -C $(BUILDROOT_DIR)/$(BUILDROOT_VER)/output/target
+	ifneq ($(OUTPUT_SYSDRV_RAMDISK_TINY_ROOTFS_DIR),)
+		$(call MAROC_COPY_PKG_TO_SYSDRV_OUTPUT, $(OUTPUT_SYSDRV_RAMDISK_TINY_ROOTFS_DIR), \
+			$(SYSDRV_DIR)/tools/board/buildroot/busybox/init \
+			$(BUILDROOT_DIR)/$(BUILDROOT_VER)/output/target)
+	else
+		$(call MAROC_COPY_PKG_TO_SYSDRV_OUTPUT, $(SYSDRV_DIR_OUT_ROOTFS), \
+			$(SYSDRV_DIR)/tools/board/buildroot/busybox/init \
+			$(BUILDROOT_DIR)/$(BUILDROOT_VER)/output/target)
+	endif
+else
+	tar xf $(BUILDROOT_DIR)/$(BUILDROOT_VER)/output/images/rootfs.tar -C $(SYSDRV_DIR_OUT_ROOTFS)
+	cp $(SYSDRV_DIR)/tools/board/buildroot/shadow_defconfig $(SYSDRV_DIR_OUT_ROOTFS)/etc/shadow
+	cp $(SYSDRV_DIR)/tools/board/buildroot/sshd_defconfig $(SYSDRV_DIR_OUT_ROOTFS)/etc/ssh/sshd_config
+
+	cp $(SYSDRV_DIR)/tools/board/buildroot/S50sshd $(SYSDRV_DIR_OUT_ROOTFS)/etc/init.d/
+	cp $(SYSDRV_DIR)/tools/board/buildroot/S99python $(SYSDRV_DIR_OUT_ROOTFS)/etc/init.d/
+
+endif
+
+buildroot_clean:
+	$(MAKE) distclean -C $(BUILDROOT_DIR)/$(BUILDROOT_VER)
+
 ##########################################################################################
 #	build pc tools
 ##########################################################################################
@@ -547,7 +623,7 @@ drv_clean:
 ##########################################################################################
 #	build rootfs
 ##########################################################################################
-rootfs: rootfs_prepare pctools busybox boardtools drv
+rootfs: $(ROOTFS_BUILD_ENV)
 	@echo -e "$(C_GREEN) ==sysdrv== build rootfs  $(C_NORMAL)"
 	make -C $(SYSDRV_DIR) strip
 	pushd $(SYSDRV_DIR)/out;tar cf $(OUT_ROOTFS).tar $(OUT_ROOTFS);popd
