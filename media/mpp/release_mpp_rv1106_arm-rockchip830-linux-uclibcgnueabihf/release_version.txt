@@ -1,0 +1,8 @@
+commit 2e25ab7ce2694905a72e19b81d066894758bd27c
+Author: hdl <hdl@rock-chips.com>
+Date:   Fri Jan 5 14:35:48 2024 +0800
+
+    [mpp]: Adding smt param for mpi_enc_test.
+    
+    Signed-off-by: hdl <hdl@rock-chips.com>
+    Change-Id: I55dda3114bb0fa837aaab3796d99f03fd2105e3e

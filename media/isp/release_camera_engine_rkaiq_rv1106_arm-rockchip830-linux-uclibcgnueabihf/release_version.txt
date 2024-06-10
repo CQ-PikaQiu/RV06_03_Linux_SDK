@@ -1,0 +1,8 @@
+commit c0e5c92c8cfdb7f994ae6e2d4037fda38c633284
+Author: hjl <jialong.huang@rock-chips.com>
+Date:   Fri Jan 12 18:09:50 2024 +0800
+
+    fastboot: set first exp if start once
+    
+    Signed-off-by: hjl <jialong.huang@rock-chips.com>
+    Change-Id: I23a9339de83b25a4ae64532fa941494b945edae0
