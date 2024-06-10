@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Busybox version: 1.27.2
-# Mon Mar 28 14:30:32 2022
+# Wed May  8 15:20:55 2024
 #
 CONFIG_HAVE_DOT_CONFIG=y
 
@@ -614,7 +614,7 @@ CONFIG_IPCS=y
 # CONFIG_FEATURE_LAST_FANCY is not set
 # CONFIG_LOSETUP is not set
 # CONFIG_LSPCI is not set
-# CONFIG_LSUSB is not set
+CONFIG_LSUSB=y
 CONFIG_MDEV=y
 CONFIG_FEATURE_MDEV_CONF=y
 CONFIG_FEATURE_MDEV_RENAME=y
@@ -983,7 +983,7 @@ CONFIG_LSOF=y
 # CONFIG_MPSTAT is not set
 # CONFIG_NMETER is not set
 # CONFIG_PGREP is not set
-# CONFIG_PKILL is not set
+CONFIG_PKILL=y
 # CONFIG_PIDOF is not set
 # CONFIG_FEATURE_PIDOF_SINGLE is not set
 # CONFIG_FEATURE_PIDOF_OMIT is not set
@@ -1051,8 +1051,8 @@ CONFIG_SH_IS_ASH=y
 # CONFIG_SH_IS_HUSH is not set
 # CONFIG_SH_IS_NONE is not set
 # CONFIG_BASH_IS_ASH is not set
-# CONFIG_BASH_IS_HUSH is not set
-CONFIG_BASH_IS_NONE=y
+CONFIG_BASH_IS_HUSH=y
+# CONFIG_BASH_IS_NONE is not set
 CONFIG_ASH=y
 CONFIG_ASH_OPTIMIZE_FOR_SIZE=y
 CONFIG_ASH_INTERNAL_GLOB=y
