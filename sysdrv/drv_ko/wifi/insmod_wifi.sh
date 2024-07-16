@@ -28,6 +28,15 @@ if [ "${1}"x = "y"x ];then
 	exit 0
 fi
 
+#AIC8800D40
+cat /proc/device-tree/wireless-wlan/wifi_chip_type | grep "AIC8800D80"
+if [ $? -eq 0 ];then
+	insmod cfg80211.ko
+	insmod aic_load_fw.ko aic_fw_path=/oem/usr/ko/aic8800D80
+	insmod aic8800_fdrv.ko
+	insmod aic_btusb.ko
+fi
+
 #AIC8800DW
 cat /sys/bus/sdio/devices/*/uevent | grep "8800"
 if [ $? -eq 0 ];then
