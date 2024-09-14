@@ -2010,49 +2010,49 @@ mpp_frame_set_idr_request:
 	.size	mpp_frame_set_idr_request, .-mpp_frame_set_idr_request
 	.section	.rodata
 	.set	.LANCHOR1,. + 0
-	.type	__FUNCTION__.8732, %object
-	.size	__FUNCTION__.8732, 20
-__FUNCTION__.8732:
+	.type	__FUNCTION__.8743, %object
+	.size	__FUNCTION__.8743, 20
+__FUNCTION__.8743:
 	.ascii	"mpp_frame_pool_init\000"
-	.type	__FUNCTION__.8736, %object
-	.size	__FUNCTION__.8736, 22
-__FUNCTION__.8736:
+	.type	__FUNCTION__.8747, %object
+	.size	__FUNCTION__.8747, 22
+__FUNCTION__.8747:
 	.ascii	"mpp_frame_pool_deinit\000"
-	.type	__func__.8746, %object
-	.size	__func__.8746, 19
-__func__.8746:
+	.type	__func__.8757, %object
+	.size	__func__.8757, 19
+__func__.8757:
 	.ascii	"check_is_mpp_frame\000"
-	.type	__func__.8753, %object
-	.size	__func__.8753, 15
-__func__.8753:
+	.type	__func__.8764, %object
+	.size	__func__.8764, 15
+__func__.8764:
 	.ascii	"mpp_frame_init\000"
-	.type	__FUNCTION__.8754, %object
-	.size	__FUNCTION__.8754, 15
-__FUNCTION__.8754:
+	.type	__FUNCTION__.8765, %object
+	.size	__FUNCTION__.8765, 15
+__FUNCTION__.8765:
 	.ascii	"mpp_frame_init\000"
-	.type	__func__.8759, %object
-	.size	__func__.8759, 17
-__func__.8759:
+	.type	__func__.8770, %object
+	.size	__func__.8770, 17
+__func__.8770:
 	.ascii	"mpp_frame_deinit\000"
-	.type	__FUNCTION__.8760, %object
-	.size	__FUNCTION__.8760, 17
-__FUNCTION__.8760:
+	.type	__FUNCTION__.8771, %object
+	.size	__FUNCTION__.8771, 17
+__FUNCTION__.8771:
 	.ascii	"mpp_frame_deinit\000"
-	.type	__FUNCTION__.8784, %object
-	.size	__FUNCTION__.8784, 21
-__FUNCTION__.8784:
+	.type	__FUNCTION__.8795, %object
+	.size	__FUNCTION__.8795, 21
+__FUNCTION__.8795:
 	.ascii	"mpp_frame_set_buffer\000"
-	.type	__FUNCTION__.8805, %object
-	.size	__FUNCTION__.8805, 18
-__FUNCTION__.8805:
+	.type	__FUNCTION__.8816, %object
+	.size	__FUNCTION__.8816, 18
+__FUNCTION__.8816:
 	.ascii	"mpp_frame_add_osd\000"
-	.type	__func__.8834, %object
-	.size	__func__.8834, 15
-__func__.8834:
+	.type	__func__.8845, %object
+	.size	__func__.8845, 15
+__func__.8845:
 	.ascii	"mpp_frame_copy\000"
-	.type	__func__.8841, %object
-	.size	__func__.8841, 19
-__func__.8841:
+	.type	__func__.8852, %object
+	.size	__func__.8852, 19
+__func__.8852:
 	.ascii	"mpp_frame_info_cmp\000"
 	.bss
 	.align	2

@@ -876,6 +876,8 @@ typedef enum rkVENC_SCENE_MODE_E {
     SCENE_1  = 1,
     /* RW; It has regular continuous motion at medium bit rate and the encoding pressure is relatively large*/
     SCENE_2  = 2,
+    /* RW; A scene in which the camera for IPC_PTZ */
+    SCENE_3  = 3,
     SCENE_BUTT
 } VENC_SCENE_MODE_E;
 
@@ -978,6 +980,22 @@ typedef struct rkVENC_FILTER_S {
     RK_U32 u32StrengthI; /* RW; Range:[0,3] */
     RK_U32 u32StrengthP; /* RW; Range:[0,3] */
 } VENC_FILTER_S;
+
+typedef struct rkVENC_H265_CU_DQP_S {
+    RK_U32 u32CuDqp; /* RW; Range:[0, 2] */
+} VENC_H265_CU_DQP_S;
+
+typedef struct rkVENC_ANTI_RING_S {
+    RK_U32 u32AntiRing; /* RW; Range:[0, 3] */
+} VENC_ANTI_RING_S;
+
+typedef struct rkVENC_ANTI_LINE_S {
+    RK_U32 u32AntiLine; /* RW; Range:[0, 3] */
+} VENC_ANTI_LINE_S;
+
+typedef struct rkVENC_LAMBDA_S {
+    RK_U32 u32Lambda; /* RW; Range:[0, 8] */
+} VENC_LAMBDA_S;
 
 #ifdef __cplusplus
 #if __cplusplus

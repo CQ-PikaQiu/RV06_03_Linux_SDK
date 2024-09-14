@@ -90,7 +90,7 @@ mpp_vcodec_msg_handle:
 	cmp	r2, #1
 	bne	.L8
 	ldr	r2, .L24+4
-	movw	r3, #10784
+	movw	r3, #13856
 	ldr	r4, [r2, r3]
 .L9:
 	ldr	r3, [r6, #8]
@@ -134,37 +134,37 @@ mpp_chan_clear_buf_resource:
 	push	{r4, lr}
 	.save {r4, lr}
 	mov	r4, r0
-	ldr	r0, [r0, #140]
+	ldr	r0, [r0, #188]
 	cbz	r0, .L27
 	bl	hal_bufs_deinit
 	movs	r3, #0
-	str	r3, [r4, #140]
+	str	r3, [r4, #188]
 .L27:
-	ldr	r0, [r4, #144]
+	ldr	r0, [r4, #192]
 	cbz	r0, .L28
 	ldr	r1, .L43
 	bl	mpp_buffer_put_with_caller
 	movs	r3, #0
-	str	r3, [r4, #144]
+	str	r3, [r4, #192]
 .L28:
-	ldr	r0, [r4, #152]
+	ldr	r0, [r4, #200]
 	cbz	r0, .L29
 	ldr	r1, .L43
 	bl	mpp_buffer_put_with_caller
 	movs	r3, #0
-	str	r3, [r4, #152]
+	str	r3, [r4, #200]
 .L29:
-	ldr	r0, [r4, #148]
+	ldr	r0, [r4, #196]
 	cbz	r0, .L30
 	ldr	r1, .L43
 	bl	mpp_buffer_put_with_caller
 	movs	r3, #0
-	str	r3, [r4, #148]
+	str	r3, [r4, #196]
 .L30:
 	movs	r3, #0
-	strd	r3, r3, [r4, #128]
-	str	r3, [r4, #156]
-	str	r3, [r4, #136]
+	strd	r3, r3, [r4, #176]
+	str	r3, [r4, #204]
+	str	r3, [r4, #184]
 	pop	{r4, pc}
 .L44:
 	.align	2
@@ -189,9 +189,9 @@ mpp_vcodec_clear_buf_resource:
 	ldr	r5, .L48
 .L46:
 	adds	r0, r5, r4
-	adds	r4, r4, #160
+	adds	r4, r4, #208
 	bl	mpp_chan_clear_buf_resource
-	cmp	r4, #10240
+	cmp	r4, #13312
 	bne	.L46
 	movs	r0, #0
 	pop	{r3, r4, r5, pc}
@@ -231,7 +231,7 @@ __refcount_sub_and_test.constprop.5:
 	mov	r0, r1
 	pld	[r1]
 	.syntax unified
-@ 224 "./arch/arm/include/asm/atomic.h" 1
+@ 224 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_fetch_sub
 1:	ldrex	r3, [r0]
 	sub	r2, r3, #1
@@ -313,7 +313,7 @@ mpp_vcodec_get_free_chan:
 	.save {r4, lr}
 	bne	.L66
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -325,13 +325,13 @@ mpp_vcodec_get_free_chan:
 	ldr	r1, [r3, #60]
 	cbz	r1, .L67
 	adds	r4, r4, #1
-	adds	r3, r3, #160
+	adds	r3, r3, #208
 	cmp	r4, #64
 	bne	.L68
 	mov	r4, #-1
 .L67:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -379,7 +379,7 @@ mpp_vcodec_get_chan_entry:
 	b	.L76
 .L78:
 	ldr	r2, .L81+4
-	movs	r3, #160
+	movs	r3, #208
 	mla	r0, r3, r0, r2
 .L76:
 	pop	{r3, pc}
@@ -475,17 +475,17 @@ mpp_vcodec_get_chan_num:
 	.save {r3, lr}
 	bne	.L94
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r3, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	ldr	r1, .L96
-	movw	r2, #10256
+	movw	r2, #13328
 	ldr	r0, [r1, r2]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r3	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -521,19 +521,19 @@ mpp_vcodec_inc_chan_num:
 	mov	r2, r0
 	bne	.L99
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r0, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	ldr	r1, .L102
-	movw	r2, #10256
+	movw	r2, #13328
 	ldr	r3, [r1, r2]
 	adds	r3, r3, #1
 	str	r3, [r1, r2]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r0	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -566,19 +566,19 @@ mpp_vcodec_dec_chan_num:
 	mov	r2, r0
 	bne	.L105
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r0, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	ldr	r1, .L108
-	movw	r2, #10256
+	movw	r2, #13328
 	ldr	r3, [r1, r2]
 	subs	r3, r3, #1
 	str	r3, [r1, r2]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r0	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -612,14 +612,14 @@ mpp_vcodec_chan_setup_hal_bufs:
 	ldrd	r6, r7, [r1, #32]
 	.pad #36
 	sub	sp, sp, #36
-	ldrd	r1, r3, [r0, #128]
+	ldrd	r1, r3, [r0, #176]
 	mov	r4, r0
 	mul	r2, r7, r6
 	muls	r3, r1, r3
 	cmp	r2, r3
 	bhi	.L111
 	ldr	r2, [r5, #40]
-	ldr	r3, [r0, #156]
+	ldr	r3, [r0, #204]
 	cmp	r2, r3
 	bls	.L112
 .L111:
@@ -632,11 +632,11 @@ mpp_vcodec_chan_setup_hal_bufs:
 	ldr	r0, .L161
 	ldr	r9, [r5, #40]
 	bl	printk
-	ldr	r0, [r4, #140]
+	ldr	r0, [r4, #188]
 	cbz	r0, .L113
 	bl	hal_bufs_deinit
 	movs	r3, #0
-	str	r3, [r4, #140]
+	str	r3, [r4, #188]
 .L113:
 	add	fp, r6, #63
 	add	r10, r7, #63
@@ -644,7 +644,7 @@ mpp_vcodec_chan_setup_hal_bufs:
 	bic	r6, r10, #63
 	addw	r2, r3, #511
 	addw	r7, r6, #1023
-	add	r0, r4, #140
+	add	r0, r4, #188
 	str	r3, [sp, #12]
 	asrs	r7, r7, #10
 	asrs	r2, r2, #9
@@ -703,7 +703,7 @@ mpp_vcodec_chan_setup_hal_bufs:
 	str	r3, [sp, #28]
 	mov	r1, r8
 	add	r3, sp, #16
-	ldr	r0, [r4, #140]
+	ldr	r0, [r4, #188]
 	bl	hal_bufs_setup
 	ldr	r3, [r5, #32]
 	ldr	r2, [r5, #36]
@@ -747,14 +747,14 @@ mpp_vcodec_chan_setup_hal_bufs:
 	add	r1, r1, r0
 	add	r6, r6, r1
 .L121:
-	ldr	r0, [r4, #144]
+	ldr	r0, [r4, #192]
 	cbz	r0, .L123
 	ldr	r1, .L161+8
 	bl	mpp_buffer_put_with_caller
 .L123:
 	ldr	r3, .L161+8
 	mov	r2, r6
-	add	r1, r4, #144
+	add	r1, r4, #192
 	str	r3, [sp]
 	movs	r3, #0
 	mov	r0, r3
@@ -771,38 +771,38 @@ mpp_vcodec_chan_setup_hal_bufs:
 	it	cc
 	strdcc	r3, r2, [r5, #32]
 	ldr	r6, [r5, #32]
-	ldr	r3, [r4, #128]
+	ldr	r3, [r4, #176]
 	cmp	r6, r3
 	bhi	.L132
 .L133:
 	ldr	r3, [r5, #32]
-	str	r3, [r4, #128]
+	str	r3, [r4, #176]
 	ldr	r3, [r5, #36]
-	str	r3, [r4, #132]
+	str	r3, [r4, #180]
 	ldr	r3, [r5, #40]
-	str	r3, [r4, #156]
+	str	r3, [r4, #204]
 .L112:
 	bl	get_vsm_ops
 	mov	r6, r0
 	cmp	r0, #0
 	bne	.L138
 	ldr	r5, [r5, #16]
-	ldr	r3, [r4, #136]
+	ldr	r3, [r4, #184]
 	cmp	r5, r3
 	bls	.L110
-	ldr	r0, [r4, #152]
+	ldr	r0, [r4, #200]
 	cmp	r5, #16384
 	it	cc
 	movcc	r5, #16384
 	cbz	r0, .L137
 	ldr	r1, .L161+12
 	bl	mpp_buffer_put_with_caller
-	str	r6, [r4, #152]
+	str	r6, [r4, #200]
 .L137:
 	ldr	r3, .L161+12
 	addw	r2, r5, #4095
 	bic	r2, r2, #4080
-	add	r1, r4, #152
+	add	r1, r4, #200
 	bic	r2, r2, #15
 	str	r3, [sp]
 	movs	r3, #0
@@ -810,7 +810,7 @@ mpp_vcodec_chan_setup_hal_bufs:
 	bl	mpp_ring_buffer_get_with_tag
 	cmp	r0, #0
 	bne	.L125
-	str	r5, [r4, #136]
+	str	r5, [r4, #184]
 .L110:
 	add	sp, sp, #36
 	@ sp needed
@@ -826,7 +826,7 @@ mpp_vcodec_chan_setup_hal_bufs:
 	mul	fp, fp, r10
 	movw	r1, #8191
 	cmp	r6, #0
-	ldr	r0, [r4, #140]
+	ldr	r0, [r4, #188]
 	str	r7, [sp, #24]
 	mov	r2, r6
 	it	lt
@@ -851,7 +851,7 @@ mpp_vcodec_chan_setup_hal_bufs:
 	b	.L128
 .L130:
 	mov	r1, r6
-	ldr	r0, [r4, #140]
+	ldr	r0, [r4, #188]
 	bl	hal_bufs_get_buf
 	cbz	r0, .L125
 	adds	r6, r6, #1
@@ -859,12 +859,12 @@ mpp_vcodec_chan_setup_hal_bufs:
 .L132:
 	cmp	r6, #3072
 	bls	.L133
-	ldr	r0, [r4, #148]
+	ldr	r0, [r4, #196]
 	cbz	r0, .L134
 	ldr	r1, .L161+12
 	bl	mpp_buffer_put_with_caller
 	movs	r3, #0
-	str	r3, [r4, #148]
+	str	r3, [r4, #196]
 .L134:
 	adds	r6, r6, #63
 	ldr	r3, .L161+12
@@ -886,7 +886,7 @@ mpp_vcodec_chan_setup_hal_bufs:
 	cmp	r2, r1
 	it	lt
 	movlt	r2, r1
-	add	r1, r4, #148
+	add	r1, r4, #196
 	bl	mpp_buffer_get_with_tag
 	cmp	r0, #0
 	beq	.L133
@@ -929,30 +929,33 @@ mpp_vcodec_chan_entry_init:
 	mov	r5, r0
 	cbnz	r0, .L164
 	movw	r2, #485
-	ldr	r1, .L170
-	ldr	r0, .L170+4
+	ldr	r1, .L176
+	ldr	r0, .L176+4
 	bl	printk
 	mov	r0, #-1
 .L163:
 	pop	{r3, r4, r5, r6, r7, r8, r9, pc}
 .L164:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r6, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	mov	r3, #-1
-	ldr	r2, .L170+8
+	ldr	r2, .L176+8
 	strd	r3, r3, [r4, #4]
 	add	r0, r4, #52
 	movs	r3, #0
-	ldr	r1, .L170+12
+	ldr	r1, .L176+12
 	str	r3, [r4, #84]
 	str	r9, [r4, #44]
 	str	r3, [r4, #88]
 	strd	r8, r7, [r4, #12]
+	str	r3, [r4, #92]
+	str	r3, [r4, #96]
+	str	r3, [r4, #100]
 	str	r3, [r4, #36]
 	str	r3, [r4, #24]
 	add	r3, r4, #68
@@ -962,31 +965,42 @@ mpp_vcodec_chan_entry_init:
 	str	r3, [r4, #76]
 	str	r3, [r4, #80]
 	bl	__init_waitqueue_head
-	ldr	r2, .L170+8
-	ldr	r1, .L170+16
+	ldr	r2, .L176+8
+	ldr	r1, .L176+16
 	add	r0, r4, #60
 	bl	__init_waitqueue_head
 	ldr	r3, [r5, #28]
 	cbz	r3, .L166
-	ldr	r2, [r4, #48]
-	cbnz	r2, .L166
+	ldr	r3, [r4, #48]
+	cbnz	r3, .L166
+	ldr	r3, [r5, #44]
+	cbnz	r3, .L167
+.L169:
 	movs	r0, #1
+.L168:
+	ldr	r3, [r5, #28]
 	blx	r3
 	str	r0, [r4, #48]
 .L166:
 	movs	r3, #1
 	str	r3, [r4, #28]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r6	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	movs	r0, #0
 	b	.L163
-.L171:
+.L167:
+	ldr	r0, [r4]
+	blx	r3
+	cmp	r0, #0
+	beq	.L169
+	b	.L168
+.L177:
 	.align	2
-.L170:
+.L176:
 	.word	.LANCHOR0+72
 	.word	.LC6
 	.word	.LANCHOR2
@@ -1009,17 +1023,17 @@ mpp_vcodec_chan_entry_deinit:
 	.save {r4, r5, r6, lr}
 	mov	r4, r0
 	bl	get_mpibuf_ops
-	cbnz	r0, .L173
-	movw	r2, #522
-	ldr	r1, .L179
-	ldr	r0, .L179+4
+	cbnz	r0, .L179
+	movw	r2, #531
+	ldr	r1, .L185
+	ldr	r0, .L185+4
 	bl	printk
 	mov	r0, #-1
-.L172:
+.L178:
 	pop	{r4, r5, r6, pc}
-.L173:
+.L179:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r6, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -1032,13 +1046,13 @@ mpp_vcodec_chan_entry_deinit:
 	str	r5, [r4, #40]
 	strd	r3, r3, [r4, #4]
 	ldr	r3, [r0, #32]
-	cbz	r3, .L175
+	cbz	r3, .L181
 	ldr	r0, [r4, #48]
 	blx	r3
 	str	r5, [r4, #48]
-.L175:
+.L181:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r6	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -1048,10 +1062,10 @@ mpp_vcodec_chan_entry_deinit:
 	str	r5, [r4, #36]
 	bl	mpp_chan_clear_buf_resource
 	mov	r0, r5
-	b	.L172
-.L180:
+	b	.L178
+.L186:
 	.align	2
-.L179:
+.L185:
 	.word	.LANCHOR0+99
 	.word	.LC6
 	.fnend
@@ -1072,22 +1086,22 @@ stream_packet_free:
 	.pad #12
 	subs	r0, r0, #20
 	str	r0, [sp, #4]
-	cbnz	r0, .L182
-	movw	r2, #554
-	ldr	r1, .L184
-	ldr	r0, .L184+4
+	cbnz	r0, .L188
+	movw	r2, #563
+	ldr	r1, .L190
+	ldr	r0, .L190+4
 	bl	printk
-.L181:
+.L187:
 	add	sp, sp, #12
 	@ sp needed
 	ldr	pc, [sp], #4
-.L182:
+.L188:
 	add	r0, sp, #4
 	bl	mpp_packet_deinit
-	b	.L181
-.L185:
+	b	.L187
+.L191:
 	.align	2
-.L184:
+.L190:
 	.word	.LANCHOR0+128
 	.word	.LC9
 	.fnend
@@ -1107,7 +1121,7 @@ mpp_vcodec_stream_clear:
 	.save {r4, r5, r6, r7, r8, lr}
 	mov	r5, r0
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r7, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -1117,26 +1131,26 @@ mpp_vcodec_stream_clear:
 	ldr	r4, [r8, #68]!
 	ldr	r6, [r4], #-12
 	subs	r6, r6, #12
-.L187:
+.L193:
 	add	r3, r4, #12
 	cmp	r3, r8
-	bne	.L189
+	bne	.L195
 	mov	r8, r5
 	ldr	r4, [r8, #76]!
 	ldr	r6, [r4], #-12
 	subs	r6, r6, #12
-.L190:
+.L196:
 	add	r3, r4, #12
 	cmp	r3, r8
-	bne	.L192
+	bne	.L198
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r7	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	pop	{r4, r5, r6, r7, r8, pc}
-.L189:
+.L195:
 	ldrd	r1, r2, [r4, #12]
 	adds	r4, r4, #20
 	movs	r0, #1
@@ -1147,14 +1161,14 @@ mpp_vcodec_stream_clear:
 	str	r3, [r4, #-4]
 	mov	r1, r4
 	bl	__refcount_sub_and_test.constprop.5
-	cbz	r0, .L188
+	cbz	r0, .L194
 	mov	r0, r4
 	bl	stream_packet_free
-.L188:
+.L194:
 	add	r3, r5, #84
 	pld	[r3]
 	.syntax unified
-@ 224 "./arch/arm/include/asm/atomic.h" 1
+@ 224 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_sub
 1:	ldrex	r2, [r3]
 	sub	r2, r2, #1
@@ -1167,8 +1181,8 @@ mpp_vcodec_stream_clear:
 	ldr	r3, [r6, #12]
 	mov	r4, r6
 	sub	r6, r3, #12
-	b	.L187
-.L192:
+	b	.L193
+.L198:
 	ldrd	r1, r2, [r4, #12]
 	adds	r4, r4, #20
 	movs	r0, #1
@@ -1179,14 +1193,14 @@ mpp_vcodec_stream_clear:
 	str	r3, [r4, #-4]
 	mov	r1, r4
 	bl	__refcount_sub_and_test.constprop.5
-	cbz	r0, .L191
+	cbz	r0, .L197
 	mov	r0, r4
 	bl	stream_packet_free
-.L191:
+.L197:
 	add	r3, r5, #88
 	pld	[r3]
 	.syntax unified
-@ 224 "./arch/arm/include/asm/atomic.h" 1
+@ 224 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_sub
 1:	ldrex	r2, [r3]
 	sub	r2, r2, #1
@@ -1199,7 +1213,7 @@ mpp_vcodec_stream_clear:
 	ldr	r3, [r6, #12]
 	mov	r4, r6
 	sub	r6, r3, #12
-	b	.L190
+	b	.L196
 	.fnend
 	.size	mpp_vcodec_stream_clear, .-mpp_vcodec_stream_clear
 	.align	1
@@ -1214,11 +1228,11 @@ mpp_vcodec_get_enc_module_entry:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
-	ldr	r0, .L200
+	ldr	r0, .L206
 	bx	lr
-.L201:
+.L207:
 	.align	2
-.L200:
+.L206:
 	.word	g_vcodec_entry
 	.fnend
 	.size	mpp_vcodec_get_enc_module_entry, .-mpp_vcodec_get_enc_module_entry
@@ -1236,64 +1250,64 @@ enc_chan_update_chan_prior_tab:
 	push	{r4, r5, r6, r7, lr}
 	.save {r4, r5, r6, r7, lr}
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r5, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r2, .L221
-	movw	r3, #10264
+	ldr	r2, .L227
+	movw	r3, #13336
 	movs	r1, #0
-	movw	r6, #10276
+	movw	r6, #13348
 	mov	r0, r1
 	mov	r4, r1
 	str	r1, [r2, r3]
-	movw	r3, #10260
+	movw	r3, #13332
 	str	r1, [r2, r3]
 	mov	r3, r2
-.L204:
+.L210:
 	ldr	r7, [r2, #44]
 	cmp	r7, #3
-	bne	.L203
+	bne	.L209
 	ldrb	r1, [r2, #36]	@ zero_extendqisi2
 	add	r7, r3, r0, lsl #3
 	adds	r1, r1, #1
 	str	r1, [r7, r6]
-	addw	r1, r0, #1284
+	addw	r1, r0, #1668
 	adds	r0, r0, #1
 	str	r4, [r3, r1, lsl #3]
 	movs	r1, #1
-.L203:
+.L209:
 	adds	r4, r4, #1
-	adds	r2, r2, #160
+	adds	r2, r2, #208
 	cmp	r4, #64
-	bne	.L204
-	cbz	r1, .L205
-	movw	r2, #10260
+	bne	.L210
+	cbz	r1, .L211
+	movw	r2, #13332
 	str	r0, [r3, r2]
-.L205:
-	movw	r2, #10260
+.L211:
+	movw	r2, #13332
 	ldr	r2, [r3, r2]
-	addw	r1, r2, #1284
+	addw	r1, r2, #1668
 	add	r3, r3, r1, lsl #3
 	movs	r1, #0
-.L206:
+.L212:
 	cmp	r2, #63
 	add	r3, r3, #8
-	ble	.L207
-	ldr	r3, .L221+4
+	ble	.L213
+	ldr	r3, .L227+4
 	movs	r1, #0
-.L211:
+.L217:
 	adds	r1, r1, #1
 	mov	r2, r3
 	movs	r4, #0
 	mov	r0, r1
-.L209:
+.L215:
 	ldr	r6, [r3, #-4]
 	ldr	r7, [r2, #4]
 	cmp	r6, r7
-	bge	.L208
+	bge	.L214
 	ldr	r7, [r2]
 	ldr	r4, [r3, #-8]
 	str	r7, [r3, #-8]
@@ -1301,32 +1315,32 @@ enc_chan_update_chan_prior_tab:
 	str	r7, [r3, #-4]
 	strd	r4, r6, [r2]
 	mov	r4, #-1
-.L208:
+.L214:
 	adds	r0, r0, #1
 	adds	r2, r2, #8
 	cmp	r0, #64
-	bne	.L209
-	cbz	r4, .L210
+	bne	.L215
+	cbz	r4, .L216
 	cmp	r1, #63
 	add	r3, r3, #8
-	bne	.L211
-.L210:
+	bne	.L217
+.L216:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r5	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	pop	{r4, r5, r6, r7, pc}
-.L207:
+.L213:
 	strd	r1, r1, [r3, #-8]
 	adds	r2, r2, #1
-	b	.L206
-.L222:
+	b	.L212
+.L228:
 	.align	2
-.L221:
+.L227:
 	.word	g_vcodec_entry
-	.word	g_vcodec_entry+10280
+	.word	g_vcodec_entry+13352
 	.fnend
 	.size	enc_chan_update_chan_prior_tab, .-enc_chan_update_chan_prior_tab
 	.align	1
@@ -1343,61 +1357,61 @@ enc_chan_update_tab_after_enc:
 	push	{r4, r5, r6, r7, lr}
 	.save {r4, r5, r6, r7, lr}
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r5, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r2, .L232
-	movw	r1, #10264
+	ldr	r2, .L238
+	movw	r1, #13336
 	movs	r3, #0
-	ldr	r4, .L232+4
+	ldr	r4, .L238+4
 	str	r3, [r2, r1]
-	movw	r1, #10260
+	movw	r1, #13332
 	ldr	r1, [r2, r1]
-.L224:
+.L230:
 	cmp	r1, r3
-	bne	.L227
-	cbz	r1, .L229
+	bne	.L233
+	cbz	r1, .L235
 	movs	r3, #0
-	b	.L228
-.L227:
+	b	.L234
+.L233:
 	ldr	r6, [r4, r3, lsl #3]
 	cmp	r6, r0
-	bne	.L225
-.L228:
-	addw	r4, r3, #1285
+	bne	.L231
+.L234:
+	addw	r4, r3, #1669
 	subs	r6, r1, #1
 	add	r4, r2, r4, lsl #3
-.L226:
+.L232:
 	cmp	r6, r3
 	add	r4, r4, #8
-	bhi	.L230
-	addw	r1, r1, #1283
+	bhi	.L236
+	addw	r1, r1, #1667
 	str	r0, [r2, r1, lsl #3]
-.L229:
+.L235:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r5	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	movs	r0, #0
 	pop	{r4, r5, r6, r7, pc}
-.L225:
+.L231:
 	adds	r3, r3, #1
-	b	.L224
-.L230:
+	b	.L230
+.L236:
 	ldr	r7, [r4, #-8]
 	adds	r3, r3, #1
 	str	r7, [r4, #-16]
-	b	.L226
-.L233:
+	b	.L232
+.L239:
 	.align	2
-.L232:
+.L238:
 	.word	g_vcodec_entry
-	.word	g_vcodec_entry+10272
+	.word	g_vcodec_entry+13344
 	.fnend
 	.size	enc_chan_update_tab_after_enc, .-enc_chan_update_tab_after_enc
 	.align	1
@@ -1414,31 +1428,31 @@ enc_chan_get_high_prior_chan:
 	push	{r4, r5, lr}
 	.save {r4, r5, lr}
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r0, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r3, .L235
-	movw	r1, #10264
+	ldr	r3, .L241
+	movw	r1, #13336
 	ldr	r2, [r3, r1]
-	addw	r4, r2, #1284
+	addw	r4, r2, #1668
 	adds	r2, r2, #1
 	str	r2, [r3, r1]
 	ldr	r5, [r3, r4, lsl #3]
-	movw	r4, #10268
+	movw	r4, #13340
 	str	r5, [r3, r4]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r0	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	pop	{r4, r5, pc}
-.L236:
+.L242:
 	.align	2
-.L235:
+.L241:
 	.word	g_vcodec_entry
 	.fnend
 	.size	enc_chan_get_high_prior_chan, .-enc_chan_get_high_prior_chan
@@ -1456,14 +1470,14 @@ mpp_vcodec_init:
 	push	{r0, r1, r2, r4, r5, lr}
 	.save {r4, r5, lr}
 	.pad #12
-	movw	r2, #10792
-	ldr	r4, .L240
+	movw	r2, #13864
+	ldr	r4, .L246
 	movs	r1, #0
 	mov	r0, r4
 	str	r4, [sp, #4]
 	bl	memset
 	mov	r1, #3264
-	ldr	r0, .L240+4
+	ldr	r0, .L246+4
 	bl	kstrdup
 	movs	r3, #0
 	mov	r1, r3
@@ -1471,22 +1485,22 @@ mpp_vcodec_init:
 	mov	r4, #-1
 	ldr	r0, [sp, #4]
 	mov	r2, r0
-.L238:
+.L244:
 	str	r3, [r2, #16]
 	adds	r3, r3, #1
 	cmp	r3, #64
 	str	r4, [r2, #28]
 	str	r1, [r2, #60]
-	add	r2, r2, #160
-	bne	.L238
-	movw	r3, #10256
-	ldr	r5, .L240+8
+	add	r2, r2, #208
+	bne	.L244
+	movw	r3, #13328
+	ldr	r5, .L246+8
 	str	r1, [r0, r3]
 	bl	vcodec_thread_create
 	movs	r1, #1
 	mov	r4, r0
 	bl	vcodec_thread_set_count
-	ldr	r1, .L240+12
+	ldr	r1, .L246+12
 	mov	r0, r4
 	ldr	r2, [sp, #4]
 	bl	vcodec_thread_set_callback
@@ -1502,15 +1516,15 @@ mpp_vcodec_init:
 	ldr	r3, [sp, #4]
 	add	r2, sp, #4
 	str	r2, [r3]
-	movw	r3, #10784
+	movw	r3, #13856
 	ldr	r2, [sp, #4]
 	str	r4, [r2, r3]
 	add	sp, sp, #12
 	@ sp needed
 	pop	{r4, r5, pc}
-.L241:
+.L247:
 	.align	2
-.L240:
+.L246:
 	.word	g_vcodec_entry
 	.word	.LC10
 	.word	.LANCHOR1
@@ -1531,27 +1545,27 @@ mpp_vcodec_unregister_mpidev:
 	push	{r3, r4, r5, lr}
 	.save {r3, r4, r5, lr}
 	bl	get_mpidev_ops
-	cbz	r0, .L244
+	cbz	r0, .L250
 	ldr	r3, [r0, #4]
-	cbz	r3, .L245
-	ldr	r5, .L247
+	cbz	r3, .L251
+	ldr	r5, .L253
 	movs	r4, #0
 	ldr	r0, [r5, #8]
-	cbz	r0, .L242
+	cbz	r0, .L248
 	blx	r3
 	mov	r0, r4
 	str	r4, [r5, #8]
-.L242:
-	pop	{r3, r4, r5, pc}
-.L244:
-	mov	r0, #-1
-	b	.L242
-.L245:
-	mov	r0, r3
-	b	.L242
 .L248:
+	pop	{r3, r4, r5, pc}
+.L250:
+	mov	r0, #-1
+	b	.L248
+.L251:
+	mov	r0, r3
+	b	.L248
+.L254:
 	.align	2
-.L247:
+.L253:
 	.word	g_vcodec_entry
 	.fnend
 	.size	mpp_vcodec_unregister_mpidev, .-mpp_vcodec_unregister_mpidev
@@ -1569,31 +1583,31 @@ mpp_vcodec_deinit:
 	push	{r4, r5, r6, lr}
 	.save {r4, r5, r6, lr}
 	movs	r5, #0
-	ldr	r4, .L256
+	ldr	r4, .L262
 	add	r6, r4, #16
-.L250:
+.L256:
 	adds	r0, r6, r5
-	adds	r5, r5, #160
+	adds	r5, r5, #208
 	bl	mpp_chan_clear_buf_resource
-	cmp	r5, #10240
-	bne	.L250
-	movw	r5, #10784
+	cmp	r5, #13312
+	bne	.L256
+	movw	r5, #13856
 	ldr	r0, [r4, r5]
-	cbz	r0, .L251
+	cbz	r0, .L257
 	bl	vcodec_thread_stop
 	ldr	r0, [r4, r5]
 	bl	vcodec_thread_destroy
 	movs	r3, #0
 	str	r3, [r4, r5]
-.L251:
+.L257:
 	bl	mpp_packet_pool_deinit
 	bl	mpp_frame_pool_deinit
 	bl	mpp_buffer_pool_deinit
 	movs	r0, #0
 	pop	{r4, r5, r6, pc}
-.L257:
+.L263:
 	.align	2
-.L256:
+.L262:
 	.word	g_vcodec_entry
 	.fnend
 	.size	mpp_vcodec_deinit, .-mpp_vcodec_deinit
@@ -1602,29 +1616,29 @@ mpp_vcodec_deinit:
 	.global	mpp_vcodec_debug
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__FUNCTION__.25543, %object
-	.size	__FUNCTION__.25543, 28
-__FUNCTION__.25543:
+	.type	__FUNCTION__.25472, %object
+	.size	__FUNCTION__.25472, 28
+__FUNCTION__.25472:
 	.ascii	"mpp_chan_clear_buf_resource\000"
-	.type	__FUNCTION__.25538, %object
-	.size	__FUNCTION__.25538, 13
-__FUNCTION__.25538:
+	.type	__FUNCTION__.25467, %object
+	.size	__FUNCTION__.25467, 13
+__FUNCTION__.25467:
 	.ascii	"get_wrap_buf\000"
-	.type	__FUNCTION__.25577, %object
-	.size	__FUNCTION__.25577, 31
-__FUNCTION__.25577:
+	.type	__FUNCTION__.25506, %object
+	.size	__FUNCTION__.25506, 31
+__FUNCTION__.25506:
 	.ascii	"mpp_vcodec_chan_setup_hal_bufs\000"
-	.type	__func__.25588, %object
-	.size	__func__.25588, 27
-__func__.25588:
+	.type	__func__.25517, %object
+	.size	__func__.25517, 27
+__func__.25517:
 	.ascii	"mpp_vcodec_chan_entry_init\000"
-	.type	__func__.25615, %object
-	.size	__func__.25615, 29
-__func__.25615:
+	.type	__func__.25554, %object
+	.size	__func__.25554, 29
+__func__.25554:
 	.ascii	"mpp_vcodec_chan_entry_deinit\000"
-	.type	__func__.25634, %object
-	.size	__func__.25634, 19
-__func__.25634:
+	.type	__func__.25573, %object
+	.size	__func__.25573, 19
+__func__.25573:
 	.ascii	"stream_packet_free\000"
 	.type	__param_str_max_stream_cnt, %object
 	.size	__param_str_max_stream_cnt, 26
@@ -1646,16 +1660,16 @@ max_stream_cnt:
 	.bss
 	.align	3
 	.set	.LANCHOR2,. + 0
-	.type	__key.25608, %object
-	.size	__key.25608, 0
-__key.25608:
-	.type	__key.25609, %object
-	.size	__key.25609, 0
-__key.25609:
+	.type	__key.25546, %object
+	.size	__key.25546, 0
+__key.25546:
+	.type	__key.25547, %object
+	.size	__key.25547, 0
+__key.25547:
 	.type	g_vcodec_entry, %object
-	.size	g_vcodec_entry, 10792
+	.size	g_vcodec_entry, 13864
 g_vcodec_entry:
-	.space	10792
+	.space	13864
 	.type	mpp_vcodec_debug, %object
 	.size	mpp_vcodec_debug, 4
 mpp_vcodec_debug:

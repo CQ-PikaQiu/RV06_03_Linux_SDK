@@ -40,6 +40,7 @@ extern "C" {
 #include "sample_comm_aov.h"
 
 static sem_t g_iva_semaphore;
+static RK_S32 g_enable_sleep = 1;
 static SAMPLE_IVA_CTX_S iva_ctx;
 static char *path = NULL;
 static RK_S32 loop_count = 0;
@@ -65,13 +66,15 @@ static void program_normal_exit(const char *func, RK_U32 line) {
 	quit_result = RK_SUCCESS;
 }
 
-static RK_CHAR optstr[] = "?:w:h:l:p:";
+static RK_CHAR optstr[] = "?:w:h:l:p:r:e:s:";
 static const struct option long_options[] = {
     {"loop_count", required_argument, NULL, 'l'},
     {"path", required_argument, NULL, 'p'},
     {"width", required_argument, NULL, 'w'},
     {"height", required_argument, NULL, 'h'},
     {"suspend_time", required_argument, NULL, 's' + 't'},
+    {"framerate", optional_argument, NULL, 'r'},
+    {"enable_sleep", optional_argument, NULL, 'e' + 's'},
     {"help", optional_argument, NULL, '?'},
     {NULL, 0, NULL, 0},
 };
@@ -86,7 +89,9 @@ static void print_usage(const RK_CHAR *name) {
 	printf("\t-h | --height: input image height, Default 480\n");
 	printf("\t-l | --loop_count: test loop count, 1\n");
 	printf("\t-p | --path: input image path, Default NULL\n");
+	printf("\t-r | --framerate: iva detect framerate, Default 10\n");
 	printf("\t--suspend_time: set aov suspend time, Default: 1000ms\n");
+	printf("\t--enable_sleep: enable enter sleep, Default: 1\n");
 }
 
 static void rkIvaEvent_callback(const RockIvaDetectResult *result,
@@ -123,6 +128,9 @@ static void *send_frame_to_iva_thread(void *pArgs) {
 	MB_BLK blk;
 	void *input_image_vaddr;
 	RK_S32 input_image_fd;
+	struct timespec iva_start_time, iva_end_time;
+	long delay_time = (1000 / iva_ctx.u32IvaDetectFrameRate);
+	long cost_time = 0;
 
 	memset(&pool_cfg, 0, sizeof(MB_POOL_CONFIG_S));
 	pool_cfg.u64MBSize = size;
@@ -159,6 +167,7 @@ static void *send_frame_to_iva_thread(void *pArgs) {
 
 	while (!quit && i < loop_count) {
 		RK_LOGI("loop count %d", i++);
+		clock_gettime(CLOCK_MONOTONIC, &iva_start_time);
 		// send test image to iva
 		input_image.info.transformMode = iva_ctx.eImageTransform;
 		input_image.info.width = iva_ctx.u32ImageWidth;
@@ -177,8 +186,17 @@ static void *send_frame_to_iva_thread(void *pArgs) {
 		// wait for iva resule
 		sem_wait(&g_iva_semaphore);
 
+		clock_gettime(CLOCK_MONOTONIC, &iva_end_time);
+		cost_time = (iva_end_time.tv_sec * 1000L + iva_end_time.tv_nsec / 1000000L) -
+			(iva_start_time.tv_sec * 1000L + iva_start_time.tv_nsec / 1000000L);
+		RK_LOGI("iva cost time %ld ms, delay for %ld ms"
+				, cost_time
+				, delay_time > cost_time ? (delay_time - cost_time) : 0);
+		if (delay_time > cost_time)
+			usleep((delay_time - cost_time) * 1000);
 		// suspend and resume
-		SAMPLE_COMM_AOV_EnterSleep();
+		if (g_enable_sleep)
+			SAMPLE_COMM_AOV_EnterSleep();
 	}
 
 	sem_destroy(&g_iva_semaphore);
@@ -211,6 +229,7 @@ int main(int argc, char *argv[]) {
 
 	signal(SIGINT, sigterm_handler);
 
+	printf("%s initial start\n", __func__);
 	int c;
 	while ((c = getopt_long(argc, argv, optstr, long_options, NULL)) != -1) {
 		const char *tmp_optarg = optarg;
@@ -224,8 +243,14 @@ int main(int argc, char *argv[]) {
 		case 'l':
 			loop_count = atoi(optarg);
 			break;
+		case 'r':
+			u32IvaDetectFrameRate = atoi(optarg);
+			break;
 		case 's' + 't':
 			s32SuspendTime = atoi(optarg);
+			break;
+		case 'e' + 's':
+			g_enable_sleep = atoi(optarg);
 			break;
 		case 'p':
 			path = optarg;

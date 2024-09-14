@@ -384,8 +384,6 @@ static void RKADK_PARAM_CheckAudioCfg(char *path) {
 
   change = RKADK_PARAM_CheckCfgStr(pstAudioCfg->ai_audio_node, AUDIO_DEVICE_NAME,
                                    RKADK_BUFFER_LEN, "ai_audio_node");
-  change |= RKADK_PARAM_CheckCfgStr(pstAudioCfg->ao_audio_node, AUDIO_DEVICE_NAME,
-                                   RKADK_BUFFER_LEN, "ao_audio_node");
   change |= RKADK_PARAM_CheckCfgU32((RKADK_U32 *)&pstAudioCfg->bit_width,
                                     AUDIO_BIT_WIDTH_8, AUDIO_BIT_WIDTH_32,
                                     AUDIO_BIT_WIDTH, "bit_width");
@@ -789,7 +787,6 @@ static void RKADK_PARAM_DefAudioCfg(char *path) {
 
   memset(pstAudioCfg, 0, sizeof(RKADK_PARAM_AUDIO_CFG_S));
   memcpy(pstAudioCfg->ai_audio_node, AUDIO_DEVICE_NAME, strlen(AUDIO_DEVICE_NAME));
-  memcpy(pstAudioCfg->ao_audio_node, AUDIO_DEVICE_NAME, strlen(AUDIO_DEVICE_NAME));
   pstAudioCfg->ai_depth = AI_DEPTH;
   pstAudioCfg->bit_width = AUDIO_BIT_WIDTH;
   pstAudioCfg->channels = AUDIO_CHANNEL;
@@ -1077,7 +1074,6 @@ static void RKADK_PARAM_Dump() {
 
   printf("Audio Config\n");
   printf("\tai_audio_node: %s\n", pstCfg->stAudioCfg.ai_audio_node);
-  printf("\tao_audio_node: %s\n", pstCfg->stAudioCfg.ao_audio_node);
   printf("\tai_depth: %d\n", pstCfg->stAudioCfg.ai_depth);
   printf("\tbit_width: %d\n", pstCfg->stAudioCfg.bit_width);
   printf("\tchannels: %d\n", pstCfg->stAudioCfg.channels);
@@ -2153,8 +2149,6 @@ PIXEL_FORMAT_E RKADK_PARAM_GetPixFmt(char *pixFmt,
     enPixelFormat = RK_FMT_RGB_BAYER_SGRBG_12BPP;
   else if (!strcmp(pixFmt, "RGB_BAYER_SRGGB_12BPP"))
     enPixelFormat = RK_FMT_RGB_BAYER_SRGGB_12BPP;
-  else if (!strcmp(pixFmt, "RGB_BAYER_14BPP"))
-    enPixelFormat = RK_FMT_RGB_BAYER_14BPP;
   else if (!strcmp(pixFmt, "RGB_BAYER_SBGGR_16BPP"))
     enPixelFormat = RK_FMT_RGB_BAYER_SBGGR_16BPP;
   else
@@ -3052,6 +3046,8 @@ RKADK_PARAM_RES_E RKADK_PARAM_GetResType(RKADK_U32 width, RKADK_U32 height) {
     type = RKADK_RES_4320P;
   else if (width == RKADK_WIDTH_4480P && height == RKADK_HEIGHT_4480P)
     type = RKADK_RES_4480P;
+  else if (width == RKADK_WIDTH_3672P && height == RKADK_HEIGHT_3672P)
+    type = RKADK_RES_3672P;
   else
     RKADK_LOGE("Unsupport resolution(%d*%d)", width, height);
 
@@ -3116,6 +3112,10 @@ RKADK_S32 RKADK_PARAM_GetResolution(RKADK_PARAM_RES_E type, RKADK_U32 *width,
   case RKADK_RES_4480P:
     *width = RKADK_WIDTH_4480P;
     *height = RKADK_HEIGHT_4480P;
+    break;
+  case RKADK_RES_3672P:
+    *width = RKADK_WIDTH_3672P;
+    *height = RKADK_HEIGHT_3672P;
     break;
   default:
     RKADK_LOGE("Unsupport resolution type: %d, set to 1080P", type);
@@ -3925,7 +3925,7 @@ RKADK_VOID RKADK_PARAM_SetDefPath() {
   memset(g_stPARAMCtx.defPath, 0, RKADK_PATH_LEN);
   if (pDefPath) {
     u32PathLen = strlen(pDefPath) + strlen("rkadk_defsetting_sensor_0.ini");
-    if (u32PathLen < RKADK_PATH_LEN) {
+    if (u32PathLen < (RKADK_PATH_LEN - 1)) {
       sprintf(g_stPARAMCtx.defPath, "%s/%s", pDefPath, "rkadk_defsetting.ini");
       RKADK_LOGI("defPath: %s", g_stPARAMCtx.defPath);
 
@@ -3954,35 +3954,45 @@ RKADK_VOID RKADK_PARAM_SetDefPath() {
 }
 
 RKADK_VOID RKADK_PARAM_SetPath(char *path, char **sensorPath) {
+  int i;
   RKADK_U32 u32PathLen;
   RKADK_U32 sPathCount = 0;
   char *sPath = NULL;
+  const char *pDirPath = NULL;
+  bool bDone = false;
+
+  pDirPath = getenv("rkadk_ini_path");
 
   memset(g_stPARAMCtx.path, 0, RKADK_PATH_LEN);
   if (path) {
     u32PathLen = strlen(path);
-    if (u32PathLen > (RKADK_PATH_LEN - 1)) {
-      RKADK_LOGW("path[%s] len[%d] > %d", path, u32PathLen, RKADK_PATH_LEN - 1);
-      memcpy(g_stPARAMCtx.path, RKADK_PARAM_PATH, strlen(RKADK_PARAM_PATH));
-    } else {
+    if (u32PathLen < RKADK_PATH_LEN) {
       memcpy(g_stPARAMCtx.path, path, u32PathLen);
+      bDone = true;
     }
-  } else {
-    memcpy(g_stPARAMCtx.path, RKADK_PARAM_PATH, strlen(RKADK_PARAM_PATH));
+  } else if (pDirPath) {
+    u32PathLen = strlen(pDirPath) + strlen("rkadk_setting.ini");
+    if (u32PathLen < (RKADK_PATH_LEN - 1)) {
+      sprintf(g_stPARAMCtx.path, "%s/%s", pDirPath, "rkadk_setting.ini");
+      bDone = true;
+    }
   }
+
+  if (!bDone)
+    memcpy(g_stPARAMCtx.path, RKADK_PARAM_PATH, strlen(RKADK_PARAM_PATH));
+  else
+    bDone = false;
+
   RKADK_LOGI("path: %s", g_stPARAMCtx.path);
 
   if (sensorPath) {
     while ((sPath = *sensorPath++) != NULL) {
       if (sPathCount == RKADK_MAX_SENSOR_CNT) {
-        RKADK_LOGW("input sensor path count > RKADK_MAX_SENSOR_CNT[%d]",
-                   RKADK_MAX_SENSOR_CNT);
+        RKADK_LOGW("input sensor path count > RKADK_MAX_SENSOR_CNT[%d]", RKADK_MAX_SENSOR_CNT);
         break;
       }
 
-      u32PathLen = strlen(sPath) > (RKADK_PATH_LEN - 1) ? (RKADK_PATH_LEN - 1)
-                                                        : strlen(sPath);
-
+      u32PathLen = strlen(sPath) > (RKADK_PATH_LEN - 1) ? (RKADK_PATH_LEN - 1) : strlen(sPath);
       memset(g_stPARAMCtx.sensorPath[sPathCount], 0, RKADK_PATH_LEN);
       memcpy(g_stPARAMCtx.sensorPath[sPathCount], sPath, u32PathLen);
       RKADK_LOGI("sensorPath[%d]: %s[%d]", sPathCount,
@@ -3990,8 +4000,23 @@ RKADK_VOID RKADK_PARAM_SetPath(char *path, char **sensorPath) {
 
       sPathCount++;
     }
-  } else {
-    for (int i = 0; i < RKADK_MAX_SENSOR_CNT; i++) {
+
+    bDone = true;
+  } else if (pDirPath) {
+    u32PathLen = strlen(pDirPath) + strlen("rkadk_setting_sensor_0.ini");
+    if (u32PathLen < (RKADK_PATH_LEN - 1)) {
+      for (i = 0; i < RKADK_MAX_SENSOR_CNT; i++) {
+        memset(g_stPARAMCtx.sensorPath[i], 0, RKADK_PATH_LEN);
+        sprintf(g_stPARAMCtx.sensorPath[i], "%s/%s_%d.ini", pDirPath, "rkadk_setting_sensor", i);
+        RKADK_LOGI("sensorPath[%d]: %s", i, g_stPARAMCtx.sensorPath[i]);
+      }
+
+      bDone = true;
+    }
+  }
+
+  if (!bDone) {
+    for (i = 0; i < RKADK_MAX_SENSOR_CNT; i++) {
       memset(g_stPARAMCtx.sensorPath[i], 0, RKADK_PATH_LEN);
       sprintf(g_stPARAMCtx.sensorPath[i], "%s_%d.ini",
               RKADK_PARAM_PATH_SENSOR_PREFIX, i);

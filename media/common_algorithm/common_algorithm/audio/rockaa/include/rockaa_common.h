@@ -41,6 +41,12 @@
 #define ROCKAA_VERSION     "V1.1.0"
 #define DEFAULT_FRAME_GAP  16
 
+#define ROCKAA_ALSA_BIT_FORMAT      0x8000000
+
+typedef enum _alsa_snd_pcm_format_part {
+    ALSA_SND_PCM_FORMAT_S16 = 2,
+} alsa_snd_pcm_format_part;
+
 typedef int8_t       INT8;
 typedef int16_t      INT16;
 typedef int32_t      INT32;

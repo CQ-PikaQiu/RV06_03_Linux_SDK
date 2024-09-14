@@ -218,6 +218,8 @@ typedef struct rkVENC_RC_PARAM2_S {
     RK_U32 u32ThrdP[16];
     RK_S32 s32AqStepI[17];
     RK_S32 s32AqStepP[17];
+    RK_U32 u32RowQpDelta; // RW; Range:[0, 10]
+    RK_U32 u32RowIQpDelta; // RW; Range:[0, 10]
 } VENC_RC_PARAM2_S;
 
 #ifdef __cplusplus

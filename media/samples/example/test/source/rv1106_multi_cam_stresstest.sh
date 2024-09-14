@@ -1,5 +1,6 @@
 #!/bin/sh
 
+set -x
 #test loop
 test_loop=10000
 
@@ -37,9 +38,22 @@ else
     ifEnableHDR=on
 fi
 
+if [ "$rk_dbg_only" = "1" ];then
+	test_loop=10
+	vi_framerate_switch_loop=50
+	ordinary_stream_test_framecount=450
+fi
+
 # get script path
 script_path=$(dirname $0)
 
+__echo_test_cmd_msg()
+{
+	echo -e "$1" | tee -a $test_result_path
+	if [ $? -ne 0 ]; then
+		echo -e "$1"
+	fi
+}
 multi_isp_test()
 {
     # echo "example: <test_mod=on> $0 <test_result_path> <test_loop> <test_frame> <isp_group_mode> <vi_frame_switch_test_loop> <vi_chnid> <vi_buff_cnt> <vi_resolution>"
@@ -62,7 +76,7 @@ multi_isp_test()
     eval $1 $script_path/multi_isp_stresstest.sh $test_result_path $test_loop $test_frame $isp_group_mode $vi_framerate_switch_loop $vi_chnid $vi_buff_cnt $vi_resolution
 
     if [ $? != 0 ]; then
-        echo "$1 $script_path/multi_isp_stresstest.sh $test_result_path $test_loop $test_frame $isp_group_mode $vi_framerate_switch_loop $vi_chnid $vi_buff_cnt $vi_resolution   -----test failure"
+        __echo_test_cmd_msg "$1 $script_path/multi_isp_stresstest.sh $test_result_path $test_loop $test_frame $isp_group_mode $vi_framerate_switch_loop $vi_chnid $vi_buff_cnt $vi_resolution   -----test failure"
         exit 1
     fi
 
@@ -72,7 +86,7 @@ multi_isp_test()
     eval $1 $script_path/multi_isp_stresstest.sh $test_result_path $test_loop $test_frame $isp_group_mode $vi_framerate_switch_loop $vi_chnid $vi_buff_cnt $vi_resolution
 
     if [ $? != 0 ]; then
-        echo "$1 $script_path/multi_isp_stresstest.sh $test_result_path $test_loop $test_frame $isp_group_mode $vi_framerate_switch_loop $vi_chnid $vi_buff_cnt $vi_resolution -----test failure"
+        __echo_test_cmd_msg "$1 $script_path/multi_isp_stresstest.sh $test_result_path $test_loop $test_frame $isp_group_mode $vi_framerate_switch_loop $vi_chnid $vi_buff_cnt $vi_resolution -----test failure"
         exit 1
     fi
 
@@ -98,7 +112,7 @@ avs_stresstest()
     eval $1 $script_path/avs_stresstest.sh $test_result_path $test_loop $test_frame $vi_chnid $vi_buff_cnt $vi_resolution $avs_chn0_resolution
 
     if [ $? != 0 ]; then
-        echo "$1 $script_path/avs_stresstest.sh $test_result_path $test_loop $test_frame $vi_chnid $vi_buff_cnt $vi_resolution $avs_chn0_resolution  -----test failure"
+        __echo_test_cmd_msg "$1 $script_path/avs_stresstest.sh $test_result_path $test_loop $test_frame $vi_chnid $vi_buff_cnt $vi_resolution $avs_chn0_resolution  -----test failure"
         exit 1
     fi
 
@@ -126,7 +140,7 @@ demo_vi_avs_venc_stresstest()
     eval $1 $script_path/demo_vi_avs_venc_stresstest.sh $test_result_path $test_loop $test_frame $vi_chnid $ordinary_stream_test_framecount $vi_buff_cnt $vi_resolution $avs_chn0_resolution $avs_chn1_resolution
 
     if [ $? != 0 ]; then
-        echo "$1 $script_path/demo_vi_avs_venc_stresstest.sh $test_result_path $test_loop $test_frame $vi_chnid $ordinary_stream_test_framecount $vi_buff_cnt $vi_resolution $avs_chn0_resolution $avs_chn1_resolution -----test failure"
+        __echo_test_cmd_msg "$1 $script_path/demo_vi_avs_venc_stresstest.sh $test_result_path $test_loop $test_frame $vi_chnid $ordinary_stream_test_framecount $vi_buff_cnt $vi_resolution $avs_chn0_resolution $avs_chn1_resolution -----test failure"
         exit 1
     fi
 

@@ -21,6 +21,53 @@
 #include "rk_meta_app_param.h"
 #include "rk_meta_wakeup_param.h"
 
+#ifdef IS_NAND_FLASH
+#include "mtd_utils_all.h"
+#endif
+
+static int write_item_to_file(int fd, uint32_t offset, uint8_t *from, int len);
+
+__attribute__((weak)) int flash_write_buf(char *file_path, char *input_buf, size_t start, size_t len) {
+	int fd = 0;
+
+	fd = open(file_path, O_RDWR);
+	if (fd < 0) {
+		printf("Open meta file failed.\n");
+		return -1;
+	}
+
+	if (write_item_to_file(fd, start, (uint8_t *)input_buf, len)) {
+		close(fd);
+		return -1;
+	}
+
+	close(fd);
+	return 0;
+}
+
+__attribute__((weak)) int flash_read_buf(char *file_path, char *output_buf, size_t start, size_t len) {
+	int read_len = 0;
+	int fd = 0;
+
+	fd = open(file_path, O_RDONLY);
+	if (fd < 0)	{
+		printf("Open meta file failed.\n");
+		return -1;
+	}
+
+	lseek(fd, start, SEEK_SET);
+
+	read_len = read(fd, output_buf, len);
+	if (read_len < 0) {
+		printf("read meta failed\n");
+		close(fd);
+		return -1;
+	}
+
+	close(fd);
+	return 0;
+}
+
 /*      META layout        */
 /***************************/      /* ----- ITEM start -----*/
 /**     META_HEAD         **/
@@ -108,6 +155,21 @@ static uint32_t g_rk_iqbin_main_offset = 0;
 static int g_app_param_need = META_FALSE;
 static int g_cmdline_need = META_FALSE;
 static uint8_t g_cmdline_need_clean = META_FALSE;
+static uint8_t g_is_nand_flash = META_FALSE;
+
+static int g_meta_startup_part_num = 0;
+static uint32_t g_meta_startup_part_offset = 0;
+static uint32_t g_meta_per_part_size = 0;
+/* multiple part parameter */
+#ifdef IS_NAND_FLASH
+static uint32_t g_meta_total_part_num = 2; /* Modify the number of parts. */
+static uint32_t g_meta_part_flag = 1; /* 0 or 1 */
+static uint32_t g_meta_part_reserved_size = 256 * 1024; /* Modify reserved size. */
+#else
+static uint32_t g_meta_total_part_num = 1;
+static uint32_t g_meta_part_flag = 0;
+static uint32_t g_meta_part_reserved_size = 0;
+#endif
 
 static const char g_sensor_init_head[4] = {'S', 'N', 'I', 'F'};
 static const char g_cmdline_head[4] = {'C', 'M', 'D', 'L'};
@@ -115,6 +177,8 @@ static const char g_ae_awb_table_head[4] = {'A', 'E', 'A', 'W'};
 static const char g_sensor_iq_head[4] = {'S', 'N', 'I', 'Q'};
 static const char g_app_param_head[4] = {'A', 'P', 'R', 'A'};
 static const char g_wakeup_param_head[4] = {'W', 'K', 'U', 'P'};
+
+static uint8_t g_set_als_type_none = META_FALSE;
 
 /* ========================================================================= */
 
@@ -301,6 +365,122 @@ static int _get_file_size(const char* filename, int file_max_size)
 out:
 	close(fd);
 	return len_buffer;
+}
+
+static uint32_t _get_meta_size(const char* filename)
+{
+	int fd = -1;
+	int item_len = sizeof(struct meta_head);
+	char item_buf[sizeof(struct meta_head)];
+
+	memset(item_buf, 0xff, item_len);
+	fd = open(filename, O_RDONLY);
+	if (fd < 0) {
+		printf("open %s fail: %s\n", filename, strerror(errno));
+		return -1;
+	}
+	if (read(fd, item_buf, item_len) < 0) {
+		printf("read meta file failed:%s\n", strerror(errno));
+		close(fd);
+		return -1;
+	}
+	close(fd);
+	struct meta_head *meta_head_p = (struct meta_head *)item_buf;
+
+	return meta_head_p->size;
+}
+
+static int _get_startup_part_num(const char* filename) {
+	int ret = 0;
+	uint32_t i = 1;
+	unsigned int meta_buf_size = META_INFO_SIZE;
+
+	/* Todo for emmc and spi_nor */
+	if (g_is_nand_flash != META_TRUE) {
+		return 1;
+	}
+
+	if (access(filename, R_OK) != 0) {
+		printf("%s:%d can't be read\n", filename, __LINE__ );
+		return -1;
+	}
+
+	uint8_t *meta_buf = (uint8_t *)malloc(meta_buf_size);
+	if (meta_buf == NULL) {
+		printf("malloc meta buf failed:%s\n", strerror(errno));
+		return -1;
+	}
+
+	ret = flash_read_buf((char *)filename, (char *)meta_buf, 0, meta_buf_size);
+	if (ret) {
+		printf("read meta file failed: %d\n", ret);
+		free(meta_buf);
+		return -1;
+	}
+
+	struct meta_head *meta_head_p = (struct meta_head *)(meta_buf + META_INFO_HEAD_OFFSET);
+	uint32_t nand_part_flag = meta_head_p->part_flag;
+	g_meta_per_part_size = meta_head_p->size + meta_head_p->part_reserved_size;
+
+	for (i = 1; i < g_meta_total_part_num; i++) {
+		ret = flash_read_buf((char *)filename, (char *)meta_buf, i * g_meta_per_part_size, meta_buf_size);
+		if (ret) {
+			printf("read meta file failed: %d\n", ret);
+			free(meta_buf);
+			return -1;
+		}
+
+		meta_head_p = (struct meta_head *)(meta_buf + META_INFO_HEAD_OFFSET);
+		if (meta_head_p->tag != RK_META) {
+			printf("Not read meta tag from meta part[%d], think that part[%d]:part_flag = 0\n", i, i);
+			meta_head_p->part_flag = 0;
+		}
+
+		printf("Check part[%d]:part_flag=%d  part[%d]:part_flag=%d\n", i - 1, nand_part_flag, i, meta_head_p->part_flag);
+		if (nand_part_flag != meta_head_p->part_flag) {
+			free(meta_buf);
+			return i;
+		}
+	}
+
+	free(meta_buf);
+	return i;
+}
+
+static int read_cmdline_to_buf(void *buf, int len)
+{
+	int fd;
+	int ret;
+	if (buf == NULL || len < 0) {
+		printf("%s: illegal para\n", __func__);
+		return -1;
+	}
+	memset(buf, 0, len);
+	fd = open("/proc/cmdline", O_RDONLY);
+	if (fd < 0) {
+		perror("open:");
+		return -1;
+	}
+	ret = read(fd, buf, len);
+	close(fd);
+	return ret;
+}
+
+static int check_str_cmd(const char *string)
+{
+	char *addr;
+	int ret = META_FALSE;
+	char cmdline[1024];
+
+	memset(cmdline, 0, sizeof(cmdline));
+	read_cmdline_to_buf(cmdline, sizeof(cmdline));
+
+	addr = strstr(cmdline, string);
+	if (addr) {
+		ret = META_TRUE;
+		printf("found %s\n", string);
+	}
+	return ret;
 }
 
 int init_secondary_sensor_init_buf(uint8_t *buf)
@@ -609,7 +789,7 @@ static int dump_sensor_init(struct sensor_init_cfg *sensor_init, const char *sen
 	return 0;
 }
 
-static int dump_rtt_log (void)
+static int dump_rtt_log (uint8_t flag)
 {
 #define RTT_LOG_PARAM "/proc/device-tree/reserved-memory/ramoops@rtos_log/reg"
 #define MAP_MASK (sysconf(_SC_PAGE_SIZE) - 1)
@@ -646,20 +826,24 @@ static int dump_rtt_log (void)
 	printf ( "rtt log addr [%#x]\n", log_param.LogAddr );
 	printf ( "rtt log size [%#x]\n", log_param.LogSize );
 
-	if ((mem_fd = open("/dev/mem", O_RDONLY)) < 0) {
+	if ((mem_fd = open("/dev/mem", O_RDWR )) < 0) {
 		printf("cannot open /dev/mem.\n");
 		return -1;
 	}
 
-	RttLogVirMem = mmap(NULL, log_param.LogSize, PROT_READ, MAP_SHARED, mem_fd,
+	RttLogVirMem = mmap(NULL, log_param.LogSize, PROT_READ | PROT_WRITE, MAP_SHARED, mem_fd,
 			log_param.LogAddr & ~(MAP_MASK));
 	if (RttLogVirMem != MAP_FAILED) {
 		char *p = (char *)RttLogVirMem;
 		for ( ; p < (log_param.LogSize + (char*)RttLogVirMem); p++ ) {
-			printf ( "%c", *p );
+			if (flag == META_TRUE) {
+				printf ( "%c", *p );
+			} else {
+				*p = 0;
+			}
 		}
 	} else {
-		printf ( "map rtt log mem error\n" );
+		printf ( "map rtt log mem error [%s]\n", strerror(errno) );
 	}
 	if (RttLogVirMem != MAP_FAILED)
 		munmap(RttLogVirMem, log_param.LogSize);
@@ -671,31 +855,43 @@ static int dump_rtt_log (void)
 
 int dump_meta(const char *path)
 {
+	int ret = 0;
+	unsigned int buf_size = MAX_META_SEGMENT_SIZE + ITEM_SIZE;
 
-	uint8_t *buf = (uint8_t *)malloc(g_meta_part_size);
+	uint8_t *buf = (uint8_t *)malloc(buf_size);
 	if (buf == NULL) {
 		printf("malloc dump buf failed:%s\n", strerror(errno));
 		return -1;
 	}
 
-	int fd = open(path, O_RDONLY);
-	if (fd < 0)
-	{
-		free(buf);
-		return -1;
-	}
+	if (g_is_nand_flash == META_TRUE) {
+		printf("\n[dump meta]: Found nand flash. Current part number: %d, total: %d\n", g_meta_startup_part_num, g_meta_total_part_num);
+		ret = flash_read_buf((char *)path, (char *)buf, g_meta_startup_part_offset, buf_size);
+		if (ret) {
+			printf("read meta file failed: %d\n", ret);
+			free(buf);
+			return -1;
+		}
+	} else {
+		int fd = open(path, O_RDONLY);
+		if (fd < 0)
+		{
+			free(buf);
+			return -1;
+		}
 
-	printf("dump meta:\n");
+		printf("dump meta:\n");
 
-	int len = read(fd, buf, g_meta_part_size);
-	if (len == 0) {
-		printf("empty file\n");
-		free(buf);
+		int len = read(fd, buf, buf_size);
+		if (len == 0) {
+			printf("empty file\n");
+			free(buf);
+			close(fd);
+			return -1;
+		}
+
 		close(fd);
-		return -1;
 	}
-
-	close(fd);
 
 	if (*(uint32_t *)buf != RK_META) {
 		printf("Invalid meta head\n");
@@ -708,6 +904,21 @@ int dump_meta(const char *path)
 		free(buf);
 		return -1;
 	}
+
+	struct meta_head *meta_head_p = (struct meta_head *)(buf + META_INFO_HEAD_OFFSET);
+	printf ( "\nmeta head info:\n");
+	printf("  load addr            : 0x%08x\n", meta_head_p->load);
+	printf("  size                 : 0x%08x\n", meta_head_p->size);
+	printf("  comp_type            : %d\n", meta_head_p->comp_type);
+	printf("  comp_size            : 0x%08x\n", meta_head_p->comp_size);
+	printf("  comp_off             : 0x%08x\n", meta_head_p->comp_off);
+	printf("  iq_item_size         : 0x%08x\n", meta_head_p->iq_item_size);
+	printf("  total_part_num       : %d\n", meta_head_p->total_part_num);
+	printf("  part_flag            : %d\n", meta_head_p->part_flag);
+	printf("  part_reserved_size   : 0x%08x\n", meta_head_p->part_reserved_size);
+	printf("  crc32                : 0x%08x\n", meta_head_p->crc32);
+	printf("  meta_flags           : 0x%08x\n", meta_head_p->meta_flags);
+	printf ( "\n" );
 
 	struct cmdline_info *cmdline_p = (struct cmdline_info *)(buf + CMDLINE_OFFSET);
 	uint32_t *cmdline_head_p = (uint32_t *)&g_cmdline_head;
@@ -885,24 +1096,43 @@ int dump_meta(const char *path)
 int recover_meta(const char *path)
 {
 	int ret = -1, repair = 0;
+	int meta_fd = 0;
 
-	uint8_t *buf = (uint8_t *)malloc(MAX_META_SEGMENT_SIZE);
+	g_meta_part_size = _get_meta_size(path);
+	if ( g_meta_part_size == -1 ) {
+		printf ( "recovery get meta part size error\n" );
+		return -1;
+	}
+
+	uint8_t *buf = (uint8_t *)malloc(g_meta_part_size);
 	if (buf == NULL) {
 		printf("malloc dump buf failed:%s\n", strerror(errno));
 		return -1;
 	}
 
-	int meta_fd = open(path, O_RDWR);
-	if (meta_fd < 0) {
-		free(buf);
-		return -1;
+	/********************************************/
+	if (g_is_nand_flash == META_TRUE) {
+		printf ( "found nand flash\n");
+		ret = flash_read_buf(g_meta_path, (char *)buf, g_meta_startup_part_offset, g_meta_part_size);
+		if (ret) {
+			printf("read meta file failed: %d\n", ret);
+			goto err;
+		}
 	}
+	else {
+		meta_fd = open(path, O_RDWR);
+		if (meta_fd < 0) {
+			free(buf);
+			return -1;
+		}
 
-	int len = read(meta_fd, buf, MAX_META_SEGMENT_SIZE);
-	if (len == 0) {
-		printf("empty file\n");
-		goto err;
+		int len = read(meta_fd, buf, g_meta_part_size);
+		if (len == 0) {
+			printf("empty file\n");
+			goto err;
+		}
 	}
+	/********************************************/
 
 	if (*(uint32_t *)buf != RK_META) {
 		printf("Invalid meta head\n");
@@ -920,11 +1150,7 @@ int recover_meta(const char *path)
 	uint32_t *cmdline_head_p = (uint32_t *)&g_cmdline_head;
 	chk_crc32 = crc32(0, (uint8_t *)cmdline_p, sizeof(struct cmdline_info)-4);
 	if ((cmdline_p->tag == *cmdline_head_p) && (cmdline_p->crc32 == chk_crc32)) {
-		ret = write_item_to_file(meta_fd, CMDLINE_OFFSET, (uint8_t *)cmdline_p, ITEM_SIZE);
-		if (ret < 0) {
-			printf("failed to write cmdline to meta file\n");
-			goto err;
-		}
+		write_item_to_buffer(buf + CMDLINE_OFFSET, (uint8_t *)cmdline_p, ITEM_SIZE);
 		printf("recover cmdline data success.\n");
 		repair++;
 	} else {
@@ -935,43 +1161,18 @@ int recover_meta(const char *path)
 	uint32_t *sensor_init_head_p = (uint32_t *)&g_sensor_init_head;
 	chk_crc32 = crc32(0, (uint8_t *)sensor_init->data, sensor_init->len);
 	if ((sensor_init->tag == *sensor_init_head_p) && (sensor_init->crc32 == chk_crc32)) {
-		ret = write_item_to_file(meta_fd, SENSOR_INIT_OFFSET, (uint8_t *)sensor_init, ITEM_SIZE);
-		if (ret < 0) {
-			printf("failed to write sensor init to meta file\n");
-			goto err;
-		}
+		write_item_to_buffer(buf + SENSOR_INIT_OFFSET, (uint8_t *)sensor_init, ITEM_SIZE);
 		printf("recover sensor init success.\n");
 		repair++;
 	} else {
 		printf("Invalid sensor init setting, repair...\n");
 	}
 
-	if (g_rk_cam_num == 2) {
-		struct meta_item *secondary_sensor_init = (struct meta_item *)(buf + SECONDARY_SENSOR_INIT_OFFSET + BACKUP_META_SIZE - ITEM_SIZE);
-		uint32_t *secondary_sensor_init_head_p = (uint32_t *)&g_sensor_init_head;
-		chk_crc32 = crc32(0, (uint8_t *)secondary_sensor_init->data, secondary_sensor_init->len);
-		if ((secondary_sensor_init->tag == *secondary_sensor_init_head_p) && (secondary_sensor_init->crc32 == chk_crc32)) {
-			ret = write_item_to_file(meta_fd, SECONDARY_SENSOR_INIT_OFFSET, (uint8_t *)secondary_sensor_init, ITEM_SIZE);
-			if (ret < 0) {
-				printf("failed to write sensor init to meta file\n");
-				goto err;
-			}
-			printf("recover secondary sensor init success.\n");
-			repair++;
-		} else {
-			printf("Invalid secondary sensor init setting, repair...\n");
-		}
-	}
-
 	struct meta_item *ae_awb = (struct meta_item *)(buf + AE_TABLE_OFFSET + BACKUP_META_SIZE - ITEM_SIZE);
 	chk_crc32 = crc32(0, ae_awb->data, ae_awb->len);
 	uint32_t *ae_awb_head_p = (uint32_t *)g_ae_awb_table_head;
 	if ((ae_awb->tag == *ae_awb_head_p) && (ae_awb->crc32 == chk_crc32)) {
-		ret = write_item_to_file(meta_fd, AE_TABLE_OFFSET, (uint8_t *)ae_awb, ITEM_SIZE);
-		if (ret < 0) {
-			printf("failed to write sensor ae awb to meta file\n");
-			goto err;
-		}
+		write_item_to_buffer(buf + AE_TABLE_OFFSET, (uint8_t *)ae_awb, ITEM_SIZE);
 		printf("recover ae awb success.\n");
 		repair++;
 	} else {
@@ -982,25 +1183,48 @@ int recover_meta(const char *path)
 	chk_crc32 = crc32(0, (uint8_t *)pApp, pApp->len);
 	uint32_t *app_param_head_p = (uint32_t *)g_app_param_head;
 	if ((pApp->head == *app_param_head_p) && (pApp->crc32 == chk_crc32)) {
-		ret = write_item_to_file(meta_fd, APP_PARAM_OFFSET, (uint8_t *)pApp, ITEM_SIZE);
-		if (ret < 0) {
-			printf("failed to write app param to meta file\n");
-			goto err;
-		}
+		write_item_to_buffer(buf + APP_PARAM_OFFSET, (uint8_t *)pApp, ITEM_SIZE);
 		printf("recover app param success.\n");
 		repair++;
 	} else {
 		printf("Invalid app param head, repair faild...\n");
 	}
 
-	ret = 0;
+	if (pApp->cam_num == 2) {
+		struct meta_item *secondary_sensor_init = (struct meta_item *)(buf + SECONDARY_SENSOR_INIT_OFFSET + BACKUP_META_SIZE - ITEM_SIZE);
+		uint32_t *secondary_sensor_init_head_p = (uint32_t *)&g_sensor_init_head;
+		chk_crc32 = crc32(0, (uint8_t *)secondary_sensor_init->data, secondary_sensor_init->len);
+		if ((secondary_sensor_init->tag == *secondary_sensor_init_head_p) && (secondary_sensor_init->crc32 == chk_crc32)) {
+			write_item_to_buffer(buf + SECONDARY_SENSOR_INIT_OFFSET, (uint8_t *)secondary_sensor_init, ITEM_SIZE);
+			printf("recover secondary sensor init success.\n");
+			repair++;
+		} else {
+			printf("Invalid secondary sensor init setting, repair...\n");
+		}
+	}
+
+	if (g_is_nand_flash == META_TRUE) {
+		ret = flash_write_buf(g_meta_path, (char *)buf, g_meta_startup_part_offset, g_meta_part_size);
+		if (ret) {
+			printf("write failed, ret=%d\n", ret);
+			goto err;
+		}
+	} else {
+		ret = write_item_to_file(meta_fd, META_INFO_HEAD_OFFSET, (uint8_t *)buf, g_meta_part_size);
+		if (ret < 0) {
+			printf("failed to write meta file\n");
+			goto err;
+		}
+	}
 	if (repair)
 		printf("recover %d items\n", repair);
-	else
-		printf("meta is ok\n");
 err:
-	close(meta_fd);
-	free(buf);
+	if (meta_fd) {
+		close(meta_fd);
+	}
+	if (buf) {
+		free(buf);
+	}
 
 	return ret;
 }
@@ -1230,10 +1454,12 @@ static int parse_args (int argc, char *argv[])
 			{"create", no_argument, 0, 0},
 			{"update", no_argument, 0, 0},
 			{"rtt-log", no_argument, 0 , 0} ,
+			{"rtt-log-clean", no_argument, 0 , 0} ,
 			{"no-compress-iq", no_argument, 0 , 0} ,
 			{"crc32", required_argument , 0 , 0} ,
 			{"meta_path", required_argument, 0, 0},
 			{"cmdline", required_argument, 0, 0},
+			{"als_tpye_none", no_argument, 0, 0},
 			{RK_CAM_W           , required_argument , 0 , 0} ,
 			{RK_CAM_H           , required_argument , 0 , 0} ,
 			{RK_VENC_W           , required_argument , 0 , 0} ,
@@ -1282,10 +1508,15 @@ static int parse_args (int argc, char *argv[])
 			} else if (strcmp(option, "no-compress-iq") == 0) {
 				g_meta_compress_flag = !META_COMPRESS_TYPE_GZ;
 			} else if (strcmp(option, "rtt-log") == 0) {
-				dump_rtt_log();
+				dump_rtt_log(META_TRUE);
+				exit(EXIT_SUCCESS);
+			} else if (strcmp(option, "rtt-log-clean") == 0) {
+				dump_rtt_log(META_FALSE);
 				exit(EXIT_SUCCESS);
 			} else if (strcmp(option, "meta_path") == 0) {
 				_META_STRNCPY(g_meta_path, optarg);
+			} else if (strcmp(option, "als_tpye_none") == 0) {
+				g_set_als_type_none = META_TRUE;
 			} else if (strcmp(option, "cmdline") == 0) {
 				sprintf(g_cmdline+strlen(g_cmdline), "%s ", optarg);
 				g_cmdline_need = META_TRUE;
@@ -1466,6 +1697,16 @@ static int parse_args (int argc, char *argv[])
 		exit(EXIT_SUCCESS);
 	}
 
+	if (!g_update) {
+		g_meta_startup_part_num = _get_startup_part_num(g_meta_path);
+		if (g_meta_startup_part_num <= 0) {
+			printf("Get startup part number failed. Error number: %d\n", g_meta_startup_part_num);
+			return -1;
+		}
+		/* The first part offset starts at 0x0 offset. */
+		g_meta_startup_part_offset = (g_meta_startup_part_num - 1) * g_meta_per_part_size;
+	}
+
 	if (g_dump) {
 		if (access(g_meta_path, R_OK) != 0) {
 			printf("%s:%d can't be read\n", g_meta_path, __LINE__ );
@@ -1580,12 +1821,18 @@ static void update_meta_head (uint8_t *meta_buf)
 	 meta_head_p->comp_size = g_meta_compress_size;
 	 meta_head_p->comp_type = g_meta_compress_flag;
 	 meta_head_p->iq_item_size = sizeof(struct sensor_iq_info);
+	meta_head_p->total_part_num = g_meta_total_part_num;
+	meta_head_p->part_flag = g_meta_part_flag;
+	meta_head_p->part_reserved_size = g_meta_part_reserved_size;
 
 	printf ( "info: meta load address   [0x%08x]\n", meta_head_p->load );
 	printf ( "info: meta partition size [0x%08x]\n", meta_head_p->size );
 	printf ( "info: meta comp offset    [0x%08x]\n", meta_head_p->comp_off);
 	printf ( "info: meta comp size      [0x%08x]\n", meta_head_p->comp_size);
 	printf ( "info: item IQ head size   [%d]\n", meta_head_p->iq_item_size);
+	printf ( "info: meta total part num [%d]\n", meta_head_p->total_part_num);
+	printf ( "info: part flag           [%d]\n", meta_head_p->part_flag);
+	printf ( "info: part reserve size   [0x%08x]\n", meta_head_p->part_reserved_size);
 	memset(meta_head_p->reserved, 0x0, META_HEAD_RESERVED_SIZE);
 	meta_head_p->crc32 = crc32(0, (unsigned char *)meta_head_p, sizeof(struct meta_head) - 4 - 4);
 	*(uint32_t *)(meta_buf + MAX_META_SEGMENT_SIZE - 4) = RK_META_END;
@@ -1599,16 +1846,25 @@ int main(int argc, char *argv[])
 	int meta_fd = 0, meta_len = 0;
 	uint8_t *item_buf = NULL;
 	uint8_t *meta_buf = NULL;
+	uint32_t meta_final_file_size = 0;
 
 	if (argc == 1) {
 		usage();
 		return 0;
 	}
 
+	g_is_nand_flash = check_str_cmd("mtdparts=spi-nand0");
+
 	pre_parse_args(argc, argv);
 	if (g_update) {
 		if (access(g_meta_path, R_OK | W_OK) != 0) {
 			printf("%s can't be accessed\n", g_meta_path);
+			return -1;
+		}
+
+		g_meta_part_size = _get_meta_size(g_meta_path);
+		if ( g_meta_part_size == -1 ) {
+			printf ( "get meta part size error\n" );
 			return -1;
 		}
 
@@ -1626,27 +1882,49 @@ int main(int argc, char *argv[])
 			ret = -1;
 			goto free_buf;
 		}
-		meta_fd = open(g_meta_path, O_RDWR);
-		if (meta_fd < 0) {
-			printf("open %s fail: %s\n", g_meta_path, strerror(errno));
-			ret = -1;
-			goto free_buf2;
-		}
 
-		meta_len = read(meta_fd, meta_buf, g_meta_part_size);
-		if (meta_len < 0) {
-			printf("read meta file failed:%s\n", strerror(errno));
+		g_meta_startup_part_num = _get_startup_part_num(g_meta_path);
+		if (g_meta_startup_part_num <= 0) {
+			printf("Get startup part number failed. Error number: %d\n", g_meta_startup_part_num);
 			ret = -1;
-			goto close_file;
-		} else if (meta_len == 0) {
-			printf("empty meta file\n");
-			ret = -1;
-			goto close_file;
-		} else if (meta_len != g_meta_part_size) {
-			printf("invalid meta size:%d\n", meta_len);
-			ret = -1;
-			goto close_file;
+			goto free_buf;
 		}
+		/* The first part offset starts at 0x0 offset. */
+		g_meta_startup_part_offset = (g_meta_startup_part_num - 1) * g_meta_per_part_size;
+
+		/******************************************/
+		if (g_is_nand_flash == META_TRUE) {
+			printf ( "found nand flash\n");
+			ret = flash_read_buf(g_meta_path, (char *)meta_buf, g_meta_startup_part_offset, g_meta_part_size);
+			if (ret) {
+				printf("read meta file failed: %d\n", ret);
+				goto free_buf;
+			}
+			meta_len = g_meta_part_size;
+		} else {
+			meta_fd = open(g_meta_path, O_RDWR);
+			if (meta_fd < 0) {
+				printf("open %s fail: %s\n", g_meta_path, strerror(errno));
+				ret = -1;
+				goto free_buf2;
+			}
+
+			meta_len = read(meta_fd, meta_buf, g_meta_part_size);
+			if (meta_len < 0) {
+				printf("read meta file failed:%s\n", strerror(errno));
+				ret = -1;
+				goto close_file;
+			} else if (meta_len == 0) {
+				printf("empty meta file\n");
+				ret = -1;
+				goto close_file;
+			} else if (meta_len != g_meta_part_size) {
+				printf("invalid meta size:%d\n", meta_len);
+				ret = -1;
+				goto close_file;
+			}
+		}
+		/******************************************/
 
 		/* verify valid meta or not */
 		if (*(uint32_t *)meta_buf != RK_META) {
@@ -1679,12 +1957,14 @@ int main(int argc, char *argv[])
 	printf("  g_secondary_sensor_iq_bin=%s\n" , g_secondary_sensor_iq_bin);
 
 	if (g_create) {
-		meta_buf = (uint8_t *)malloc(g_meta_part_size);
+		meta_final_file_size = (g_meta_part_size + g_meta_part_reserved_size) * g_meta_total_part_num;
+
+		meta_buf = (uint8_t *)malloc(meta_final_file_size);
 		if (meta_buf == NULL) {
 			printf("malloc meta buffer failed:%s\n", strerror(errno));
 			return -1;
 		}
-		memset(meta_buf, 0xff, g_meta_part_size);
+		memset(meta_buf, 0xff, meta_final_file_size);
 
 		item_buf = (uint8_t *)malloc(ITEM_SIZE);
 		if (item_buf == NULL) {
@@ -1700,7 +1980,7 @@ int main(int argc, char *argv[])
 			goto free_buf2;
 		}
 
-		meta_len = g_meta_part_size;
+		meta_len = meta_final_file_size;
 	}
 	printf("info: size of iqbin for main camera sensor %d\n" , g_rk_iqbin_main_size);
 	printf("info: size of iqbin for secondary camera sensor %d\n" , g_rk_iqbin_secondary_size);
@@ -1710,24 +1990,21 @@ int main(int argc, char *argv[])
 		struct sensor_init_cfg *cam_cfg = (struct sensor_init_cfg *)(meta_buf + SENSOR_INIT_OFFSET);
 		cam_cfg->cam_w = g_rk_cam_w;
 		cam_cfg->cam_h = g_rk_cam_h;
+		if ( g_set_als_type_none == META_TRUE ) {
+			cam_cfg->als_type = ALS_TYPE_NONE;
+			cam_cfg->als_value = FIX2INT16(0.0);
+		}
 		struct meta_item *sensor_init = (struct meta_item *)(meta_buf + SENSOR_INIT_OFFSET);
 		sensor_init->crc32 = crc32(0, sensor_init->data, sensor_init->len);
-		ret = write_item_to_file(meta_fd, SENSOR_INIT_OFFSET, (uint8_t *)sensor_init, SENSOR_INIT_MAX_SIZE);
-		if (ret < 0) {
-			printf("main sensor: failed to update cam_w or cam_h to meta file\n");
-			goto close_file;
-		}
 
-		struct sensor_init_cfg *cam2_cfg = (struct sensor_init_cfg *)(meta_buf + SECONDARY_SENSOR_INIT_OFFSET);
-		if (cam2_cfg->head == *(uint32_t *)g_sensor_init_head) {
-			cam2_cfg->cam_w = g_rk_cam2_w;
-			cam2_cfg->cam_h = g_rk_cam2_h;
-			struct meta_item *sensor2_init = (struct meta_item *)(meta_buf + SECONDARY_SENSOR_INIT_OFFSET);
-			sensor2_init->crc32 = crc32(0, sensor2_init->data, sensor2_init->len);
-			ret = write_item_to_file(meta_fd, SECONDARY_SENSOR_INIT_OFFSET, (uint8_t *)sensor2_init, SECONDARY_SENSOR_INIT_MAX_SIZE);
-			if (ret < 0) {
-				printf("secondary sensor: failed to update cam_w or cam_h to meta file\n");
-				goto close_file;
+		if (g_rk_cam_num == 2) {
+			struct sensor_init_cfg *cam2_cfg = (struct sensor_init_cfg *)(meta_buf + SECONDARY_SENSOR_INIT_OFFSET);
+			if (cam2_cfg->head == *(uint32_t *)g_sensor_init_head) {
+				cam2_cfg->cam_w = g_rk_cam2_w;
+				cam2_cfg->cam_h = g_rk_cam2_h;
+				if ( g_set_als_type_none == META_TRUE ) { /* TODO */ }
+				struct meta_item *sensor2_init = (struct meta_item *)(meta_buf + SECONDARY_SENSOR_INIT_OFFSET);
+				sensor2_init->crc32 = crc32(0, sensor2_init->data, sensor2_init->len);
 			}
 		}
 	}
@@ -1741,10 +2018,7 @@ int main(int argc, char *argv[])
 			goto close_file;
 		}
 
-		if (g_create)
-			ret = write_item_to_buffer(meta_buf + SENSOR_INIT_OFFSET, sensor_init_buf, SENSOR_INIT_MAX_SIZE);
-		else if (g_update)
-			ret = write_item_to_file(meta_fd, SENSOR_INIT_OFFSET, sensor_init_buf, SENSOR_INIT_MAX_SIZE);
+		ret = write_item_to_buffer(meta_buf + SENSOR_INIT_OFFSET, sensor_init_buf, SENSOR_INIT_MAX_SIZE);
 
 		if (ret < 0) {
 			printf("failed to write senser_init to meta file\n");
@@ -1761,10 +2035,7 @@ int main(int argc, char *argv[])
 			goto close_file;
 		}
 
-		if (g_create)
-			ret = write_item_to_buffer(meta_buf + SECONDARY_SENSOR_INIT_OFFSET, secondary_sensor_init_buf, SECONDARY_SENSOR_INIT_MAX_SIZE);
-		else if (g_update)
-			ret = write_item_to_file(meta_fd, SECONDARY_SENSOR_INIT_OFFSET, secondary_sensor_init_buf, SECONDARY_SENSOR_INIT_MAX_SIZE);
+		ret = write_item_to_buffer(meta_buf + SECONDARY_SENSOR_INIT_OFFSET, secondary_sensor_init_buf, SECONDARY_SENSOR_INIT_MAX_SIZE);
 
 		if (ret < 0) {
 			printf("failed to write secondary senser_init to meta file\n");
@@ -1823,10 +2094,7 @@ int main(int argc, char *argv[])
 		pApp->len = sizeof(struct app_param_info) - 4;
 		pApp->crc32 = crc32(0, app_c, pApp->len);
 
-		if (g_create)
-			ret = write_item_to_buffer(meta_buf + APP_PARAM_OFFSET, app_c, APP_PARAM_MAX_SIZE);
-		else if (g_update)
-			ret = write_item_to_file(meta_fd, APP_PARAM_OFFSET, app_c, APP_PARAM_MAX_SIZE);
+		ret = write_item_to_buffer(meta_buf + APP_PARAM_OFFSET, app_c, APP_PARAM_MAX_SIZE);
 
 		if (ret < 0) {
 			printf("failed to write app param to meta file\n");
@@ -1848,10 +2116,7 @@ int main(int argc, char *argv[])
 			goto close_file;
 		}
 
-		if (g_create)
-			ret = write_item_to_buffer(meta_buf + AE_TABLE_OFFSET, ae_awb_table_buf, AE_TABLE_MAX_SIZE);
-		else if (g_update)
-			ret = write_item_to_file(meta_fd, AE_TABLE_OFFSET, ae_awb_table_buf, AE_TABLE_MAX_SIZE);
+		ret = write_item_to_buffer(meta_buf + AE_TABLE_OFFSET, ae_awb_table_buf, AE_TABLE_MAX_SIZE);
 
 		if (ret < 0) {
 			printf("failed to write senser_init to meta file\n");
@@ -1908,10 +2173,7 @@ int main(int argc, char *argv[])
 			goto close_file;
 		}
 
-		if (g_create)
-			ret = write_item_to_buffer(meta_buf + SENSOR_IQ_BIN_OFFSET, buf, sensor_iqbin_max_size);
-		else if (g_update)
-			ret = write_item_to_file(meta_fd, SENSOR_IQ_BIN_OFFSET, buf, sensor_iqbin_max_size);
+		ret = write_item_to_buffer(meta_buf + SENSOR_IQ_BIN_OFFSET, buf, sensor_iqbin_max_size);
 
 		free(buf);
 
@@ -2061,10 +2323,7 @@ int main(int argc, char *argv[])
 		strcpy((void *)(cmd_c + MAX_HEAD_SIZE), g_cmdline);
 		cmdline_p->crc32 = crc32(0, cmd_c, sizeof(struct cmdline_info)-4);
 
-		if (g_create)
-			ret = write_item_to_buffer(meta_buf + CMDLINE_OFFSET, (uint8_t *)cmdline_p, CMDLINE_MAX_SIZE);
-		else if (g_update)
-			ret = write_item_to_file(meta_fd, CMDLINE_OFFSET, (uint8_t *)cmdline_p, CMDLINE_MAX_SIZE);
+		ret = write_item_to_buffer(meta_buf + CMDLINE_OFFSET, (uint8_t *)cmdline_p, CMDLINE_MAX_SIZE);
 
 		if (ret < 0) {
 			printf("failed to write cmdline to meta file\n");
@@ -2086,20 +2345,43 @@ int main(int argc, char *argv[])
 		if (access(g_sensor_iq_bin, R_OK) == 0) {
 			update_meta_head(meta_buf);
 		}
-		ret = write_item_to_file(meta_fd, META_INFO_HEAD_OFFSET, (uint8_t *)meta_buf, META_INFO_SIZE);
-		if (ret < 0) {
-			printf("failed to update meta_head to meta file\n");
-			goto close_file;
+
+		/* If the current part is the last one, reverse flag. */
+		if (g_meta_total_part_num > 1 && g_meta_startup_part_num == g_meta_total_part_num) {
+			struct meta_head *meta_head_p = (struct meta_head *)meta_buf;
+			meta_head_p->part_flag = (meta_head_p->part_flag == 0) ? 1 : 0;
+			meta_head_p->crc32 = crc32(0, (unsigned char *)meta_head_p, sizeof(struct meta_head) - 4 - 4);
+		}
+
+		uint32_t meta_next_startup_offset = (g_meta_startup_part_num % g_meta_total_part_num) * g_meta_per_part_size;
+		if (g_is_nand_flash == META_TRUE) {
+			ret = flash_write_buf(g_meta_path, (char *)meta_buf, meta_next_startup_offset, g_meta_part_size);
+			if (ret) {
+				printf("write failed, ret=%d\n", ret);
+				goto close_file;
+			}
+		} else {
+			ret = write_item_to_file(meta_fd, META_INFO_HEAD_OFFSET + meta_next_startup_offset, (uint8_t *)meta_buf, g_meta_part_size);
+			if (ret < 0) {
+				printf("failed to update meta_head to meta file\n");
+				goto close_file;
+			}
 		}
 	}
 
 
 close_file:
-	close(meta_fd);
+	if (meta_fd) {
+		close(meta_fd);
+	}
 free_buf2:
-	free(item_buf);
+	if (item_buf) {
+		free(item_buf);
+	}
 free_buf:
-	free(meta_buf);
+	if (meta_buf) {
+		free(meta_buf);
+	}
 
     return ret;
 }

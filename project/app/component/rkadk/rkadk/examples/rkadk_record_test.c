@@ -20,6 +20,7 @@
 #include "rkadk_param.h"
 #include "rkadk_record.h"
 #include "isp/sample_isp.h"
+#include "isp/sample_iio_aiq.h"
 #include <getopt.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -31,7 +32,7 @@
 extern int optind;
 extern char *optarg;
 
-static RKADK_CHAR optstr[] = "a:I:p:m:kh";
+static RKADK_CHAR optstr[] = "a:I:p:m:keh";
 
 static bool is_quit = false;
 #define IQ_FILE_PATH "/etc/iqfiles"
@@ -46,6 +47,9 @@ static void print_usage(const RKADK_CHAR *name) {
   printf("\t-p: param ini directory path, Default:/data/rkadk\n");
   printf("\t-k: key frame fragment, Default: disable\n");
   printf("\t-m: multiple sensors, Default:0, options: 1(all isp sensors), 2(isp+ahd sensors)\n");
+#ifdef ENABLE_EIS
+  printf("\t-e: enable eis, Default: disable\n");
+#endif
 }
 
 static RKADK_S32
@@ -159,6 +163,8 @@ static void sigterm_handler(int sig) {
 
 static int PostIspCallback(RK_VOID *pParam, RK_VOID *pPrivateData) {
   int ret = 0;
+
+#ifdef RKAIQ
   RKADK_S32 s32CamId = (RKADK_S32)pPrivateData;
   rk_ainr_param *pAinrParam = (rk_ainr_param *)pParam;
 
@@ -175,6 +181,10 @@ static int PostIspCallback(RK_VOID *pParam, RK_VOID *pPrivateData) {
   }
 
   RKADK_LOGD("aiisp cam %d enable %d", s32CamId, ((rk_ainr_param *)pAinrParam)->enable);
+#else
+  RKADK_LOGW("Don't enable aiq");
+#endif
+
   return ret;
 }
 
@@ -193,7 +203,12 @@ int main(int argc, char *argv[]) {
   char path[RKADK_PATH_LEN];
   char sensorPath[RKADK_MAX_SENSOR_CNT][RKADK_PATH_LEN];
   RKADK_S32 s32CamId = 0;
-  FILE_CACHE_ATTR_S stFileCacheAttr;
+  FILE_CACHE_ARG stFileCacheAttr;
+
+#ifdef ENABLE_EIS
+  bool bEnableEis = false;
+  rk_aiq_mems_sensor_intf_t eis_api;
+#endif
 
   //aiisp
   bool bAiispEnable = true;
@@ -241,6 +256,11 @@ int main(int argc, char *argv[]) {
     case 'k':
       stRecAttr.u32FragKeyFrame = 1;
       break;
+#ifdef ENABLE_EIS
+    case 'e':
+      bEnableEis = true;
+      break;
+#endif
     case 'h':
     default:
       print_usage(argv[0]);
@@ -274,6 +294,23 @@ int main(int argc, char *argv[]) {
     RKADK_PARAM_Init(NULL, NULL);
   }
 
+#ifdef ENABLE_EIS
+  memset(&eis_api, 0, sizeof(rk_aiq_mems_sensor_intf_t));
+  eis_api.createContext             = rkiio_aiq_sensor_ctx_create;
+  eis_api.destroyContext            = rkiio_aiq_sensor_ctx_destroy;
+  eis_api.getSensorList             = rkiio_aiq_sensors_list_get;
+  eis_api.releaseSensorList         = rkiio_aiq_sensors_list_release;
+  eis_api.getSensorCapabilities     = rkiio_aiq_sensor_cap_get;
+  eis_api.releaseSensorCapabilities = rkiio_aiq_sensor_cap_release;
+  eis_api.getConfig                 = rkiio_aiq_sensor_config_get;
+  eis_api.setConfig                 = rkiio_aiq_sensor_config_set;
+  eis_api.createHandle              = rkiio_aiq_sensor_handle_create;
+  eis_api.destroyHandle             = rkiio_aiq_sensor_handle_destroy;
+  eis_api.getData                   = rkiio_aiq_getData;
+  eis_api.getLastNSamples           = rkiio_aiq_getLastNSamples;
+  eis_api.releaseSamplesData        = rkiio_aiq_sensor_data_release;
+#endif
+
 record:
 #ifdef RKAIQ
   stFps.enStreamType = RKADK_STREAM_TYPE_SENSOR;
@@ -286,7 +323,13 @@ record:
   stIspParam.WDRMode = RK_AIQ_WORKING_MODE_NORMAL;
   stIspParam.bMultiCam = bMultiCam;
   stIspParam.fps = stFps.u32Framerate;
+
+#ifdef ENABLE_EIS
+  if (bEnableEis)
+    stIspParam.pEisApi = &eis_api;
+#endif
   SAMPLE_ISP_Start(s32CamId, stIspParam);
+
   RKADK_BUFINFO("isp[%d] init", s32CamId);
   //IspProcess(s32CamId);
 
@@ -311,9 +354,12 @@ record:
   stPostIspAttr.stAiIspCallback.pfUpdateCallback = PostIspCallback;
   stPostIspAttr.u32FrameBufCnt = 2;
 
-  stFileCacheAttr.pSdcardPath = "/dev/mmcblk1p1";
-  stFileCacheAttr.u32TotalCache = 7 * 1024 * 1024; // 7M
-  stFileCacheAttr.u32WriteCache = 1024 * 1024; // 1M
+  memset(&stFileCacheAttr, 0, sizeof(FILE_CACHE_ARG));
+  stFileCacheAttr.sdcard_path = "/dev/mmcblk1p1";
+  stFileCacheAttr.total_cache = 7 * 1024 * 1024; // 7M
+  stFileCacheAttr.write_cache = 1024 * 1024; // 1M
+  stFileCacheAttr.write_thread_arg.sched_policy = FILE_SCHED_FIFO;
+  stFileCacheAttr.write_thread_arg.priority = 99;
   RKADK_RECORD_FileCacheInit(&stFileCacheAttr);
 
   stRecAttr.s32CamID = s32CamId;
@@ -572,6 +618,7 @@ record:
   }
 
   RKADK_RECORD_FileCacheDeInit();
+
   RKADK_MPI_SYS_Exit();
   RKADK_LOGD("exit!");
   return 0;

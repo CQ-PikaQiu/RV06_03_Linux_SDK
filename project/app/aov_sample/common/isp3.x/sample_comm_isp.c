@@ -111,34 +111,6 @@ RK_S32 SAMPLE_COMM_PreInit_devBufCnt(RK_S32 CamId, RK_S32 Bufcnt) {
 	return 0;
 }
 
-#define MAX_CMDLINE_SIZE 4096
-static int extractValueFromCmdline(const char *param) {
-	FILE *cmdline_file = fopen("/proc/cmdline", "r");
-	if (cmdline_file == NULL) {
-		perror("Error opening /proc/cmdline");
-		return -1;
-	}
-
-	char cmdline[MAX_CMDLINE_SIZE];
-	if (fgets(cmdline, sizeof(cmdline), cmdline_file) == NULL) {
-		perror("Error reading /proc/cmdline");
-		fclose(cmdline_file);
-		return -1;
-	}
-
-	fclose(cmdline_file);
-
-	int value = -1;
-
-	// Find the position of the parameter in the string
-	const char *param_str = strstr(cmdline, param);
-	if (param_str != NULL) {
-		sscanf(param_str, "%*[^=]=%d", &value);
-	}
-
-	return value;
-}
-
 RK_S32 SAMPLE_COMM_ISP_Init(RK_S32 CamId, rk_aiq_working_mode_t WDRMode, RK_BOOL MultiCam,
                             const char *iq_file_dir) {
 	if (CamId >= MAX_AIQ_CTX) {
@@ -176,11 +148,11 @@ RK_S32 SAMPLE_COMM_ISP_Init(RK_S32 CamId, rk_aiq_working_mode_t WDRMode, RK_BOOL
 	int rk_cam_mirror_flip = -1;
 	int rk_cam_fps = -1;
 	if (CamId == 0) {
-		rk_cam_fps = extractValueFromCmdline("rk_cam_fps");
-		rk_cam_mirror_flip = extractValueFromCmdline("rk_cam_mirror_flip");
+		rk_cam_fps = SAMPLE_COMM_ExtractValueFromCmdline("rk_cam_fps");
+		rk_cam_mirror_flip = SAMPLE_COMM_ExtractValueFromCmdline("rk_cam_mirror_flip");
 	} else if (CamId == 1) {
-		rk_cam_fps = extractValueFromCmdline("rk_cam2_fps");
-		rk_cam_mirror_flip = extractValueFromCmdline("rk_cam2_mirror_flip");
+		rk_cam_fps = SAMPLE_COMM_ExtractValueFromCmdline("rk_cam2_fps");
+		rk_cam_mirror_flip = SAMPLE_COMM_ExtractValueFromCmdline("rk_cam2_mirror_flip");
 	}
 	if (rk_cam_fps != -1) {
 		SAMPLE_COMM_ISP_SetFrameRate(CamId, rk_cam_fps);
@@ -397,6 +369,17 @@ RK_S32 SAMPLE_COMM_ISP_SetFrameRate(RK_S32 CamId, RK_U32 uFps) {
 	return ret;
 }
 
+RK_S32 SAMPLE_COMM_ISP_GetFrameRate(RK_S32 CamId) {
+	if (CamId >= MAX_AIQ_CTX || !g_aiq_ctx[CamId]) {
+		printf("%s : CamId is over 3 or not init\n", __FUNCTION__);
+		return -1;
+	}
+	int ret;
+	Uapi_ExpSwAttrV2_t expSwAttr;
+	ret = rk_aiq_user_api2_ae_getExpSwAttr(g_aiq_ctx[CamId], &expSwAttr);
+	return expSwAttr.stAuto.stFrmRate.FpsValue;
+}
+
 RK_S32 SAMPLE_COMM_ISP_CamGroup_SetFrameRate(RK_S32 CamId, RK_U32 uFps) {
 	if (CamId >= MAX_AIQ_CTX || !g_aiq_camgroup_ctx[CamId]) {
 		printf("%s : CamId is over 3 or not init\n", __FUNCTION__);
@@ -524,6 +507,7 @@ RK_S32 SAMPLE_COMM_ISP_SingleFrame(int cam_id) {
 	int ret;
 	rk_aiq_uapi2_sysctl_pause(g_aiq_ctx[cam_id], true);
 	printf("cam %d rk_aiq_uapi2_sysctl_pause ret = %d\n", cam_id, ret);
+	SAMPLE_COMM_DumpDebugInfoToTmp();
 	return ret;
 }
 
@@ -532,6 +516,53 @@ RK_S32 SAMPLE_COMM_ISP_MultiFrame(int cam_id) {
 	rk_aiq_uapi2_sysctl_resume(g_aiq_ctx[cam_id]);
 	printf("cam %d rk_aiq_uapi2_sysctl_resume ret = %d\n", cam_id, ret);
 	return ret;
+}
+
+RK_BOOL SAMPLE_COMM_ISP_IsExpBigChange(int cam_id) {
+	if (cam_id >= MAX_AIQ_CTX || !g_aiq_ctx[cam_id]) {
+		printf("%s : CamId is over %d or not init\n", __FUNCTION__, MAX_AIQ_CTX);
+		return RK_FALSE;
+	}
+	Uapi_ExpQueryInfo_t expInfo;
+	Uapi_LinExpAttrV2_t linExpAttr;
+	memset(&expInfo, 0, sizeof(Uapi_ExpQueryInfo_t));
+	memset(&linExpAttr, 0, sizeof(Uapi_LinExpAttrV2_t));
+	rk_aiq_user_api2_ae_queryExpResInfo(g_aiq_ctx[cam_id], &expInfo);
+	rk_aiq_user_api2_ae_getLinExpAttr(g_aiq_ctx[cam_id], &linExpAttr);
+	if (fabs(expInfo.LinAeInfo.LumaDeviation) * 100 >
+	    linExpAttr.Params.ToleranceOut * 4) {
+		Uapi_ExpQueryInfo_t *info;
+		info = &expInfo;
+		printf("Cur Exp Info :\n");
+		printf("ToleranceOut %f LumaDeviation %f\n", linExpAttr.Params.ToleranceOut,
+		       fabs(expInfo.LinAeInfo.LumaDeviation) * 100);
+		printf("IsConverged: %d\n", info->IsConverged);
+		printf("EnvChange: %d\n", info->EnvChange);
+		printf("IsExpMax: %d\n", info->IsExpMax);
+		printf("LinePeriodsPerField: %f\n", info->LinePeriodsPerField);
+		printf("PixelPeriodsPerLine: %f\n", info->PixelPeriodsPerLine);
+		printf("PixelClockFreqMHZ: %f\n", info->PixelClockFreqMHZ);
+		printf("GlobalEnvLv: %f\n", info->GlobalEnvLv);
+		printf("OverExpROIPdf: %f\n", info->OverExpROIPdf);
+		printf("HighLightROIPdf: %f\n", info->HighLightROIPdf);
+		printf("LowLightROIPdf: %f\n", info->LowLightROIPdf);
+		printf("Fps: %f\n", info->Fps);
+		return RK_TRUE;
+	}
+	return RK_FALSE;
+}
+RK_BOOL SAMPLE_COMM_ISP_IsExpConverge(int cam_id) {
+	if (cam_id >= MAX_AIQ_CTX || !g_aiq_ctx[cam_id]) {
+		printf("%s : CamId is over %d or not init\n", __FUNCTION__, MAX_AIQ_CTX);
+		return RK_TRUE;
+	}
+	Uapi_ExpQueryInfo_t expInfo;
+	memset(&expInfo, 0, sizeof(Uapi_ExpQueryInfo_t));
+	rk_aiq_user_api2_ae_queryExpResInfo(g_aiq_ctx[cam_id], &expInfo);
+	if (expInfo.IsConverged) {
+		return RK_TRUE;
+	}
+	return RK_FALSE;
 }
 
 #ifdef __cplusplus

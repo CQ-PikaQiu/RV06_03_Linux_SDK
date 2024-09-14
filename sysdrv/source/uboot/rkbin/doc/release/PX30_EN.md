@@ -1,5 +1,44 @@
 # PX30 Release Note
 
+## px30_bl32_v2.16.bin
+
+| Date       | File                | Build commit | Severity  |
+| ---------- | :------------------ | ------------ | --------- |
+| 2024-04-16 | px30_bl32_v2.16.bin | 185dc3c92    | important |
+
+### New
+
+1. Optimization parameter check to enhance security.
+2. Support printing TEE memory usage information.
+3. Hardware crypto supports addresses exceeding 4G.
+4. Support printing FWVER information.
+
+------
+
+## px30_ddr_333MHz_v2.09.bin
+
+| Date       | file                      | Build commit | Severity |
+| ---------- | ------------------------- | ------------ | -------- |
+| 2023-12-20 | px30_ddr_333MHz_v2.09.bin | 131f35b      | moderate |
+
+### New
+
+1. Add DQS weak pull up/down.
+
+------
+
+## px30_bl31_v1.34.elf
+
+| Date       | file                | Build commit | Severity |
+| ---------- | ------------------- | ------------ | -------- |
+| 2023-12-26 | px30_bl31_v1.34.elf | 46064b2d5    | moderate |
+
+### New
+
+1. Support DDR Extended temperature range which should used with 2x, 4x refresh rate ddr bin file.
+
+------
+
 ## px30_bl32_v2.15.bin
 
 | Date       | File                | Build commit | Severity  |

@@ -753,12 +753,12 @@ static int uvc_video_set_format(struct uvc_device *dev) {
   fmt.fmt.pix.pixelformat = dev->fcc;
   fmt.fmt.pix.field = V4L2_FIELD_NONE;
   if (dev->fcc == V4L2_PIX_FMT_MJPEG)
-    fmt.fmt.pix.sizeimage = dev->width * dev->height * 2 /*1.5*/;
+    fmt.fmt.pix.sizeimage = dev->width * dev->height/*1.5*/;
   if ((dev->fcc == V4L2_PIX_FMT_H264) || (dev->fcc == V4L2_PIX_FMT_H265))
-#ifndef RK_ENABLE_FASTBOOT
-    fmt.fmt.pix.sizeimage = dev->width * dev->height * 2;
-#else
+#ifdef RK_ENABLE_FASTBOOT
     fmt.fmt.pix.sizeimage = dev->width * dev->height / 2;
+#else
+    fmt.fmt.pix.sizeimage = dev->width * dev->height;
 #endif
   ret = ioctl(dev->uvc_fd, VIDIOC_S_FMT, &fmt);
   if (ret < 0) {
@@ -1469,9 +1469,16 @@ static void uvc_fill_streaming_control(struct uvc_device *dev,
     ctrl->dwMaxVideoFrameSize = frame->width * frame->height * 2;
     break;
   case V4L2_PIX_FMT_MJPEG:
+    dev->imgsize = frame->width * frame->height;
+    ctrl->dwMaxVideoFrameSize = dev->imgsize;
+  break;
   case V4L2_PIX_FMT_H264:
   case V4L2_PIX_FMT_H265:
-    dev->imgsize = frame->width * frame->height * 2 /*1.5*/;
+#ifdef RK_ENABLE_FASTBOOT
+    dev->imgsize = frame->width * frame->height / 2;
+#else
+    dev->imgsize = frame->width * frame->height;
+#endif
     ctrl->dwMaxVideoFrameSize = dev->imgsize;
     break;
   }
@@ -3528,10 +3535,15 @@ static int uvc_events_process_data(struct uvc_device *dev,
       fmt.fmt.pix.sizeimage = (fmt.fmt.pix.width * fmt.fmt.pix.height * 2);
       break;
     case V4L2_PIX_FMT_MJPEG:
+      fmt.fmt.pix.sizeimage = (fmt.fmt.pix.width * fmt.fmt.pix.height);
+    break;
     case V4L2_PIX_FMT_H264:
     case V4L2_PIX_FMT_H265:
-      fmt.fmt.pix.sizeimage =
-          (fmt.fmt.pix.width * fmt.fmt.pix.height * 2 /*1.5*/); // dev->imgsize;
+#ifdef RK_ENABLE_FASTBOOT
+      fmt.fmt.pix.sizeimage = (fmt.fmt.pix.width * fmt.fmt.pix.height) / 2;
+#else
+      fmt.fmt.pix.sizeimage = (fmt.fmt.pix.width * fmt.fmt.pix.height);
+#endif
       break;
     }
 
@@ -3805,7 +3817,7 @@ int uvc_gadget_main(struct uvc_function_config *fc) {
   udev->height = (default_resolution == 0) ? 480 : 720;
   udev->imgsize = (default_format == 0)
                       ? (udev->width * udev->height * 2)
-                      : (udev->width * udev->height * 2 /*1.5*/);
+                      : (udev->width * udev->height);
   switch (default_format) {
   case 1:
     udev->fcc = V4L2_PIX_FMT_MJPEG;

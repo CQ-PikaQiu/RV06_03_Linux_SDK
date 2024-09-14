@@ -312,9 +312,9 @@ pp_service_cmd_poll:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__func__.7670, %object
-	.size	__func__.7670, 20
-__func__.7670:
+	.type	__func__.7676, %object
+	.size	__func__.7676, 20
+__func__.7676:
 	.ascii	"pp_service_cmd_send\000"
 	.type	pp_srv_api, %object
 	.size	pp_srv_api, 40

@@ -113,6 +113,75 @@ RK_S32 test_init_ai_vqe(RK_S32 s32SampleRate) {
 	return RK_SUCCESS;
 }
 
+static RK_S32 init_ai_bcd() {
+	int s32DevId = 0;
+	int s32ChnIndex = 0;
+	int s32DeviceChannel = 2;
+	RK_S32 result;
+
+	AI_BCD_CONFIG_S stAiBcdConfig, stAiBcdConfig2;
+	memset(&stAiBcdConfig, 0, sizeof(AI_BCD_CONFIG_S));
+	memset(&stAiBcdConfig2, 0, sizeof(AI_BCD_CONFIG_S));
+
+	stAiBcdConfig.mFrameLen = 60;
+	stAiBcdConfig.mConfirmProb = 0.85f;
+        switch (s32DeviceChannel) {
+        case 4:
+            // just for example: 2mic + 2ref
+            stAiBcdConfig.stSedCfg.s64RecChannelType = 0x03;
+            break;
+        case 6:
+            // just for example: 4mic + 2ref
+            stAiBcdConfig.stSedCfg.s64RecChannelType = 0x0f;
+            break;
+        case 8:
+            // just for example: 6mic + 2ref
+            stAiBcdConfig.stSedCfg.s64RecChannelType = 0x3f;
+            break;
+        default:
+            // by default is 1mic + 1ref, it will be set by internal if is not specified.
+            // stAiBcdConfig.stSedCfg.s64RecChannelType = 0x01;
+            break;
+        }
+
+	// stAiBcdConfig.stSedCfg.s32FrameLen = 90; // by default is 90 if is not specified.
+	if (stAiBcdConfig.stSedCfg.s64RecChannelType != 0 ||
+		stAiBcdConfig.stSedCfg.s32FrameLen != 0)
+		stAiBcdConfig.stSedCfg.bUsed = RK_TRUE;
+
+	char *pBcdModelPath = "/oem/usr/share/vqefiles/rkaudio_model_sed_bcd.rknn";
+	memcpy(stAiBcdConfig.aModelPath, pBcdModelPath, strlen(pBcdModelPath));
+
+	result = RK_MPI_AI_SetBcdAttr(s32DevId, s32ChnIndex, &stAiBcdConfig);
+	if (result != RK_SUCCESS) {
+		RK_LOGE("%s: SetBcdAttr(%d,%d) failed with %#x", __FUNCTION__, s32DevId,
+		        s32ChnIndex, result);
+		return result;
+	}
+
+	result = RK_MPI_AI_GetBcdAttr(s32DevId, s32ChnIndex, &stAiBcdConfig2);
+	if (result != RK_SUCCESS) {
+		RK_LOGE("%s: SetBcdAttr(%d,%d) failed with %#x", __FUNCTION__, s32DevId,
+		        s32ChnIndex, result);
+		return result;
+	}
+
+	result = memcmp(&stAiBcdConfig, &stAiBcdConfig2, sizeof(AI_BCD_CONFIG_S));
+	if (result != RK_SUCCESS) {
+		RK_LOGE("%s: set/get aed config is different: %d", __FUNCTION__, result);
+		return result;
+	}
+
+	result = RK_MPI_AI_EnableBcd(s32DevId, s32ChnIndex);
+	if (result != RK_SUCCESS) {
+		RK_LOGE("%s: EnableBcd(%d,%d) failed with %#x", __FUNCTION__, s32DevId,
+		        s32ChnIndex, result);
+		return result;
+	}
+
+	return RK_SUCCESS;
+}
+
 RK_S32 ai_set_other(RK_S32 s32SetVolume) {
 	printf("\n=======%s=======\n", __func__);
 	int s32DevId = 0;
@@ -128,8 +197,8 @@ RK_S32 ai_set_other(RK_S32 s32SetVolume) {
 	return 0;
 }
 
-RK_S32 open_device_ai(RK_S32 InputSampleRate, RK_S32 OutputSampleRate, RK_S32 u32FrameCnt,
-                      RK_S32 vqeEnable) {
+RK_S32 open_device_ai(RK_S32 deviceSampleRate, RK_S32 outputSampleRate, RK_S32 u32FrameCnt,
+                      RK_S32 vqeEnable, RK_S32 bcdEnable) {
 	printf("\n=======%s=======\n", __func__);
 	AIO_ATTR_S aiAttr;
 	AI_CHN_PARAM_S pstParams;
@@ -138,7 +207,7 @@ RK_S32 open_device_ai(RK_S32 InputSampleRate, RK_S32 OutputSampleRate, RK_S32 u3
 	int aiChn = 0;
 	memset(&aiAttr, 0, sizeof(AIO_ATTR_S));
 
-	RK_BOOL needResample = (InputSampleRate != OutputSampleRate) ? RK_TRUE : RK_FALSE;
+	RK_BOOL needResample = (deviceSampleRate != outputSampleRate) ? RK_TRUE : RK_FALSE;
 #ifdef RV1126_RV1109
 	//这是RV1126 声卡打开设置，RV1106设置无效，可以不设置
 	result = RK_MPI_AMIX_SetControl(aiDevId, "Capture MIC Path", (char *)"Main Mic");
@@ -152,10 +221,10 @@ RK_S32 open_device_ai(RK_S32 InputSampleRate, RK_S32 OutputSampleRate, RK_S32 u3
 
 	// s32DeviceSampleRate和s32SampleRate,s32SampleRate可以使用其他采样率，需要调用重采样函数。默认一样采样率。
 	aiAttr.soundCard.channels = 2;
-	aiAttr.soundCard.sampleRate = InputSampleRate;
+	aiAttr.soundCard.sampleRate = deviceSampleRate;
 	aiAttr.soundCard.bitWidth = AUDIO_BIT_WIDTH_16;
 	aiAttr.enBitwidth = AUDIO_BIT_WIDTH_16;
-	aiAttr.enSamplerate = (AUDIO_SAMPLE_RATE_E)OutputSampleRate;
+	aiAttr.enSamplerate = (AUDIO_SAMPLE_RATE_E)outputSampleRate;
 	aiAttr.enSoundmode = AUDIO_SOUND_MODE_MONO;
 	aiAttr.u32PtNumPerFrm = u32FrameCnt;
 	//以下参数无特殊需求，无需变动，保持默认值即可
@@ -207,7 +276,15 @@ RK_S32 open_device_ai(RK_S32 InputSampleRate, RK_S32 OutputSampleRate, RK_S32 u3
 
 	//使用声音增强功能，默认开启
 	if (vqeEnable)
-		test_init_ai_vqe(OutputSampleRate);
+		test_init_ai_vqe(deviceSampleRate);
+
+	if (bcdEnable) {
+		result = init_ai_bcd();
+		if (result != 0) {
+			RK_LOGE("ai bcd init fail, reason = %x, aiChn = %d", result, aiChn);
+			return RK_FAILURE;
+		}
+	}
 
 	result = RK_MPI_AI_EnableChn(aiDevId, aiChn);
 	if (result != 0) {
@@ -217,9 +294,9 @@ RK_S32 open_device_ai(RK_S32 InputSampleRate, RK_S32 OutputSampleRate, RK_S32 u3
 
 	//重采样功能
 	if (needResample == RK_TRUE) {
-		RK_LOGI("need to resample %d -> %d", InputSampleRate, OutputSampleRate);
+		RK_LOGI("need to resample %d -> %d", deviceSampleRate, outputSampleRate);
 		result =
-		    RK_MPI_AI_EnableReSmp(aiDevId, aiChn, (AUDIO_SAMPLE_RATE_E)OutputSampleRate);
+		    RK_MPI_AI_EnableReSmp(aiDevId, aiChn, (AUDIO_SAMPLE_RATE_E)outputSampleRate);
 		if (result != 0) {
 			RK_LOGE("ai enable channel fail, reason = %x, aiChn = %d", result, aiChn);
 			return RK_FAILURE;
@@ -233,19 +310,22 @@ __FAILED:
 	return RK_FAILURE;
 }
 
-static RK_CHAR optstr[] = "?::d:r:o:v:m:";
+static RK_CHAR optstr[] = "?::r:R:t:o:v:b:l:";
 static void print_usage(const RK_CHAR *name) {
 	printf("usage example:\n");
-	printf("\t%s [-r 8000] -o /tmp/ai.pcm\n", name);
-	printf("\t-r: sample rate, Default:16000\n");
+	printf("\t%s [-r 16000] -o /tmp/ai.pcm\n", name);
+	printf("\t-r: device sample rate, Default:16000\n");
+	printf("\t-R: output sample rate, Default:16000\n");
 	printf("\t-o: output path, Default:\"/tmp/ai.pcm\"\n");
 	printf("\t-v: vqe enable, Default:1\n");
 }
 
 int main(int argc, char *argv[]) {
-	RK_S32 u32SampleRate = 16000;
+	RK_S32 s32DeviceSampleRate = 16000;
+	RK_S32 u32OutPutSampleRate = 16000;
 	RK_S32 ret = 0;
 	RK_S32 vqeEnable = 1;
+	RK_S32 bcdEnable = 1;
 	RK_U32 u32FrameCnt = 1024;
 	RK_CHAR *pOutPath = (RK_CHAR *)"/tmp/ai.pcm";
 	int c;
@@ -253,7 +333,10 @@ int main(int argc, char *argv[]) {
 	while ((c = getopt(argc, argv, optstr)) != -1) {
 		switch (c) {
 		case 'r':
-			u32SampleRate = atoi(optarg);
+			s32DeviceSampleRate = atoi(optarg);
+			break;
+		case 'R':
+			u32OutPutSampleRate = atoi(optarg);
 			break;
 		case 'o':
 			pOutPath = optarg;
@@ -261,23 +344,28 @@ int main(int argc, char *argv[]) {
 		case 'v':
 			vqeEnable = atoi(optarg);
 			break;
+		case 'b':
+			bcdEnable = atoi(optarg);
+			break;
 		case '?':
 		default:
 			print_usage(argv[0]);
-			return 0;
+			return -1;
 		}
 	}
 
-	printf("#SampleRate: %d\n", u32SampleRate);
+	printf("#Device SampleRate: %d\n", s32DeviceSampleRate);
+	printf("#Output SampleRate: %d\n", u32OutPutSampleRate);
 	printf("#Frame Count: %d\n", u32FrameCnt);
 	printf("#Output Path: %s\n", pOutPath);
 	printf("#Vqe enable: %d\n", vqeEnable);
+	printf("#Bcd enable: %d\n", bcdEnable);
 
 	if (pOutPath) {
 		save_file = fopen(pOutPath, "w");
 		if (!save_file) {
 			printf("ERROR: open file: %s fail, exit\n", pOutPath);
-			return 0;
+			return -1;
 		}
 	}
 
@@ -285,7 +373,7 @@ int main(int argc, char *argv[]) {
 
 	RK_MPI_SYS_Init();
 
-	open_device_ai(u32SampleRate, u32SampleRate, u32FrameCnt, vqeEnable);
+	open_device_ai(s32DeviceSampleRate, u32OutPutSampleRate, u32FrameCnt, vqeEnable, bcdEnable);
 
 	pthread_t read_thread;
 	pthread_create(&read_thread, NULL, GetMediaBuffer, NULL);
@@ -298,6 +386,9 @@ int main(int argc, char *argv[]) {
 
 	pthread_join(read_thread, NULL);
 
+	if (bcdEnable)
+		RK_MPI_AI_DisableBcd(0, 0);
+
 	if (vqeEnable) {
 		RK_MPI_AI_DisableVqe(0, 0);
 
@@ -306,7 +397,7 @@ int main(int argc, char *argv[]) {
 		    RK_MPI_AMIX_SetControl(0, "I2STDM Digital Loopback Mode", (char *)"Disabled");
 		if (ret != RK_SUCCESS) {
 			RK_LOGE("ai set I2STDM Digital Loopback Mode fail, reason = %x", ret);
-			return RK_FAILURE;
+			return -1;
 		}
 	}
 

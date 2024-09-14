@@ -295,8 +295,7 @@ RK_S32 SAMPLE_COMM_IVA_Create(SAMPLE_IVA_CTX_S *ctx) {
 	ctx->commonParams.imageInfo.transformMode = ctx->eImageTransform;
 
 	/* IVA init */
-	s32Ret =
-	    ROCKIVA_Init(&ctx->ivahandle, ROCKIVA_MODE_PICTURE, &ctx->commonParams, NULL);
+	s32Ret = ROCKIVA_Init(&ctx->ivahandle, ROCKIVA_MODE_VIDEO, &ctx->commonParams, NULL);
 	if (s32Ret != RK_SUCCESS) {
 		RK_LOGE("ROCKIVA_Init failure:%X", s32Ret);
 		return s32Ret;
@@ -307,6 +306,15 @@ RK_S32 SAMPLE_COMM_IVA_Create(SAMPLE_IVA_CTX_S *ctx) {
 	else if (ctx->eIvaMode == ROCKIVA_MODE_DETECT && ctx->detectResultCallback != NULL)
 		s32Ret = SAMPLE_COMM_IVA_Detect_Init(ctx);
 
+	return s32Ret;
+}
+
+RK_S32 SAMPLE_COMM_IVA_SetWorkMode(SAMPLE_IVA_CTX_S *ctx, RockIvaWorkMode wMode) {
+	RK_S32 s32Ret = RK_FAILURE;
+	s32Ret = ROCKIVA_SetWorkMode(ctx->ivahandle, wMode);
+	if (s32Ret != RK_SUCCESS) {
+		RK_LOGE("ROCKIVA_SetWorkMode failure:%X", s32Ret);
+	}
 	return s32Ret;
 }
 

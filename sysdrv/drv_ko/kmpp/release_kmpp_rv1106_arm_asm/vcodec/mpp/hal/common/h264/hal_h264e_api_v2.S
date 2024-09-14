@@ -363,13 +363,13 @@ hal_h264e_init:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__FUNCTION__.19404, %object
-	.size	__FUNCTION__.19404, 17
-__FUNCTION__.19404:
+	.type	__FUNCTION__.19417, %object
+	.size	__FUNCTION__.19417, 17
+__FUNCTION__.19417:
 	.ascii	"hal_h264e_deinit\000"
-	.type	__FUNCTION__.19394, %object
-	.size	__FUNCTION__.19394, 15
-__FUNCTION__.19394:
+	.type	__FUNCTION__.19407, %object
+	.size	__FUNCTION__.19407, 15
+__FUNCTION__.19407:
 	.ascii	"hal_h264e_init\000"
 	.type	hal_api_h264e_v2, %object
 	.size	hal_api_h264e_v2, 64

@@ -523,13 +523,13 @@ mpp_service_set_info:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__func__.7923, %object
-	.size	__func__.7923, 21
-__func__.7923:
+	.type	__func__.7937, %object
+	.size	__func__.7937, 21
+__func__.7937:
 	.ascii	"mpp_service_cmd_send\000"
-	.type	__func__.7912, %object
-	.size	__func__.7912, 21
-__func__.7912:
+	.type	__func__.7926, %object
+	.size	__func__.7926, 21
+__func__.7926:
 	.ascii	"mpp_service_rcb_info\000"
 	.space	2
 	.type	mpp_service_api, %object

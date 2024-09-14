@@ -685,6 +685,8 @@ static int sditf_start_stream(struct sditf_priv *priv)
 	struct rkcif_device *cif_dev = priv->cif_dev;
 	struct v4l2_subdev_format fmt;
 	unsigned int mode = RKCIF_STREAM_MODE_TOISP;
+	int stream_cnt = 0;
+	int i = 0;
 
 	sditf_check_capture_mode(cif_dev);
 	sditf_get_set_fmt(&priv->sd, NULL, &fmt);
@@ -703,16 +705,16 @@ static int sditf_start_stream(struct sditf_priv *priv)
 	}
 
 	if (priv->hdr_cfg.hdr_mode == NO_HDR ||
-	    priv->hdr_cfg.hdr_mode == HDR_COMPR) {
-		rkcif_do_start_stream(&cif_dev->stream[0], mode);
-	} else if (priv->hdr_cfg.hdr_mode == HDR_X2) {
-		rkcif_do_start_stream(&cif_dev->stream[0], mode);
-		rkcif_do_start_stream(&cif_dev->stream[1], mode);
-	} else if (priv->hdr_cfg.hdr_mode == HDR_X3) {
-		rkcif_do_start_stream(&cif_dev->stream[0], mode);
-		rkcif_do_start_stream(&cif_dev->stream[1], mode);
-		rkcif_do_start_stream(&cif_dev->stream[2], mode);
-	}
+	    priv->hdr_cfg.hdr_mode == HDR_COMPR)
+		stream_cnt = 1;
+	else if (priv->hdr_cfg.hdr_mode == HDR_X2)
+		stream_cnt = 2;
+	else if (priv->hdr_cfg.hdr_mode == HDR_X3)
+		stream_cnt = 3;
+
+	cif_dev->is_thunderboot_start = true;
+	for (i = 0; i < stream_cnt; i++)
+		rkcif_do_start_stream(&cif_dev->stream[i], mode);
 	INIT_LIST_HEAD(&priv->buf_free_list);
 	return 0;
 }
@@ -721,6 +723,8 @@ static int sditf_stop_stream(struct sditf_priv *priv)
 {
 	struct rkcif_device *cif_dev = priv->cif_dev;
 	unsigned int mode = RKCIF_STREAM_MODE_TOISP;
+	int stream_cnt = 0;
+	int i = 0;
 
 	if (priv->toisp_inf.link_mode == TOISP0) {
 		sditf_channel_disable(priv, 0);
@@ -747,6 +751,17 @@ static int sditf_stop_stream(struct sditf_priv *priv)
 		rkcif_do_stop_stream(&cif_dev->stream[1], mode);
 		rkcif_do_stop_stream(&cif_dev->stream[2], mode);
 	}
+	if (priv->hdr_cfg.hdr_mode == NO_HDR ||
+	    priv->hdr_cfg.hdr_mode == HDR_COMPR)
+		stream_cnt = 1;
+	else if (priv->hdr_cfg.hdr_mode == HDR_X2)
+		stream_cnt = 2;
+	else if (priv->hdr_cfg.hdr_mode == HDR_X3)
+		stream_cnt = 3;
+
+	for (i = 0; i < stream_cnt; i++)
+		rkcif_do_stop_stream(&cif_dev->stream[i], mode);
+
 	return 0;
 }
 
@@ -824,7 +839,7 @@ static int sditf_s_rx_buffer(struct v4l2_subdev *sd,
 	struct rkcif_stream *stream = NULL;
 	struct rkisp_rx_buf *dbufs;
 	struct rkcif_rx_buffer *rx_buf = NULL;
-	unsigned long flags, buffree_flags;
+	unsigned long flags, buffree_flags, hdr_lock_flags;
 	u32 diff_time = 1000000;
 	u32 early_time = 0;
 	bool is_free = false;
@@ -862,6 +877,12 @@ static int sditf_s_rx_buffer(struct v4l2_subdev *sd,
 	if (!stream)
 		return -EINVAL;
 
+	if (dbufs->sequence == 0) {
+		spin_lock_irqsave(&stream->vbq_lock, flags);
+		cif_dev->is_stop_skip = true;
+		spin_unlock_irqrestore(&stream->vbq_lock, flags);
+	}
+
 	rx_buf = to_cif_rx_buf(dbufs);
 	v4l2_dbg(3, rkcif_debug, &cif_dev->v4l2_dev, "buf back to vicap 0x%x\n",
 		 (u32)rx_buf->dummy.dma_addr);
@@ -870,7 +891,7 @@ static int sditf_s_rx_buffer(struct v4l2_subdev *sd,
 	atomic_inc(&stream->buf_cnt);
 
 	is_single_dev = rkcif_check_single_dev_stream_on(cif_dev->hw_dev);
-	if (!list_empty(&stream->rx_buf_head) &&
+	if (stream->total_buf_num > cif_dev->fb_res_bufs &&
 	    cif_dev->is_thunderboot &&
 	    ((!cif_dev->is_rtt_suspend &&
 	      !cif_dev->is_aov_reserved) ||
@@ -888,13 +909,21 @@ static int sditf_s_rx_buffer(struct v4l2_subdev *sd,
 
 	if (!is_free && (!dbufs->is_switch)) {
 		list_add_tail(&rx_buf->list, &stream->rx_buf_head);
+		rkcif_assign_check_buffer_update_toisp(stream);
 		if (cif_dev->resume_mode != RKISP_RTT_MODE_ONE_FRAME) {
-			rkcif_assign_check_buffer_update_toisp(stream);
 			if (!stream->dma_en) {
 				stream->to_en_dma = RKCIF_DMAEN_BY_ISP;
 				rkcif_enable_dma_capture(stream, true);
-				cif_dev->sensor_work.on = 1;
-				schedule_work(&cif_dev->sensor_work.work);
+				spin_lock_irqsave(&cif_dev->hdr_lock, hdr_lock_flags);
+				if (cif_dev->is_sensor_off) {
+					cif_dev->is_sensor_off = false;
+					spin_unlock_irqrestore(&cif_dev->hdr_lock, hdr_lock_flags);
+					cif_dev->sensor_work.on = 1;
+					rkcif_dphy_quick_stream(stream->cifdev, cif_dev->sensor_work.on);
+					schedule_work(&cif_dev->sensor_work.work);
+				} else {
+					spin_unlock_irqrestore(&cif_dev->hdr_lock, hdr_lock_flags);
+				}
 			}
 		}
 		if (cif_dev->rdbk_debug) {

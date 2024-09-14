@@ -118,7 +118,7 @@ get_dma_buf_phy_addr:
 	cmn	r0, #4096
 	mov	r6, r0
 	bls	.L9
-	movs	r3, #158
+	movs	r3, #183
 	movs	r0, #1
 	ldr	r2, .L14+4
 	movs	r1, #2
@@ -136,7 +136,7 @@ get_dma_buf_phy_addr:
 	cmn	r0, #4096
 	mov	r5, r0
 	bls	.L11
-	movs	r3, #163
+	movs	r3, #188
 	movs	r0, #1
 	ldr	r2, .L14+12
 	movs	r1, #2
@@ -199,60 +199,37 @@ get_mpi_buf:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, lr}
 	.save {r4, lr}
-	bl	dma_buf_get
-	cbnz	r0, .L17
-.L22:
-	movs	r4, #0
-.L16:
-	mov	r0, r4
-	pop	{r4, pc}
-.L17:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	r2, cpsr	@ arch_local_irq_save
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r3, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r3, .L30
-	ldr	r4, [r3]
-.L29:
-	subs	r4, r4, #36
-	add	r1, r4, #36
-	cmp	r1, r3
-	bne	.L21
-	movs	r4, #0
-.L20:
+	ldr	r2, .L24
+	ldr	r4, [r2, r0, lsl #2]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, r2	@ local_irq_restore
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r3	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	bl	dma_buf_put
-	cmp	r4, #0
-	beq	.L22
+	cbz	r4, .L16
 	ldr	r0, [r4, #444]
-	cmp	r0, #0
-	beq	.L16
+	cbz	r0, .L16
 	ldr	r3, [r4, #16]
-	cmp	r3, #0
-	bne	.L16
+	cbnz	r3, .L16
 	mov	r1, r4
 	bl	mpi_buf_pool_request_buf
 	movs	r3, #1
 	str	r3, [r4, #588]
-	b	.L16
-.L21:
-	ldr	r1, [r4, #448]
-	cmp	r1, r0
-	beq	.L20
-	ldr	r4, [r4, #36]
-	b	.L29
-.L31:
+.L16:
+	mov	r0, r4
+	pop	{r4, pc}
+.L25:
 	.align	2
-.L30:
-	.word	mpi_buf_list
+.L24:
+	.word	dma_buf_fd_idr
 	.fnend
 	.size	get_mpi_buf, .-get_mpi_buf
 	.align	1
@@ -269,24 +246,24 @@ valloc_thread_fn:
 	.save {r3, r4, r5, lr}
 	add	r5, r0, #64
 	mov	r4, r0
-.L35:
+.L29:
 	bl	kthread_should_stop
-	cbz	r0, .L36
-.L34:
+	cbz	r0, .L30
+.L28:
 	movs	r0, #0
 	pop	{r3, r4, r5, pc}
-.L36:
+.L30:
 	ldr	r3, [r4, #80]
 	cmp	r3, #0
-	bne	.L34
+	bne	.L28
 	mov	r0, r5
 	bl	down
 	ldr	r0, [r4, #84]
 	bl	mpi_queue_pop_obj
 	cmp	r0, #0
-	beq	.L35
+	beq	.L29
 	bl	mpi_obj_unref
-	b	.L35
+	b	.L29
 	.fnend
 	.size	valloc_thread_fn, .-valloc_thread_fn
 	.align	1
@@ -310,45 +287,45 @@ valloc_read:
 	bl	mpi_fs_buf_read
 	adds	r3, r0, #1
 	mov	r4, r0
-	bne	.L40
-	ldr	r3, .L73
+	bne	.L34
+	ldr	r3, .L67
 	mov	r0, r5
-	ldr	r2, .L73+4
+	ldr	r2, .L67+4
 	mov	r8, #0
-	ldr	r1, .L73+8
+	ldr	r1, .L67+8
 	str	r3, [sp]
-	ldr	r3, .L73+12
+	ldr	r3, .L67+12
 	ldr	r2, [r2, #8]
 	bl	mpi_fs_buf_add
-	ldr	r1, .L73+16
+	ldr	r1, .L67+16
 	mov	r0, r5
-	ldr	r7, .L73+20
+	ldr	r7, .L67+20
 	bl	mpi_fs_buf_add
-	ldr	r1, .L73+24
+	ldr	r1, .L67+24
 	mov	r0, r5
-	ldr	r9, .L73+60
+	ldr	r9, .L67+60
 	bl	mpi_fs_buf_add
 	ldr	r4, [r7]
 	subs	r4, r4, #36
 	str	r7, [sp, #44]
-.L41:
+.L35:
 	ldr	r2, [sp, #44]
 	add	r3, r4, #36
 	cmp	r3, r2
-	beq	.L57
+	beq	.L51
 	ldr	r3, [r4, #444]
 	ldr	r2, [r4]
 	cmp	r3, #0
-	beq	.L66
+	beq	.L60
 	ldr	r3, [r3]
-.L42:
+.L36:
 	ldr	r1, [r4, #448]
 	ldr	r6, [r4, #16]
 	cmp	r1, #0
-	beq	.L67
+	beq	.L61
 	ldr	r1, [r1, #4]
 	ldr	r1, [r1, #28]
-.L43:
+.L37:
 	ldr	r0, [r4, #600]
 	ldr	r7, [r4, #4]
 	cmp	r0, #0
@@ -363,48 +340,50 @@ valloc_read:
 	mov	r0, r5
 	str	r6, [sp]
 	strd	r4, r7, [sp, #12]
-	ldr	r1, .L73+28
+	ldr	r1, .L67+28
 	bl	mpi_fs_buf_add
 	mov	r6, r0
 	cmp	r0, #0
-	beq	.L45
-.L57:
+	beq	.L39
+.L51:
 	mov	r2, r8
-	ldr	r1, .L73+32
+	ldr	r1, .L67+32
 	mov	r0, r5
-	ldr	r7, .L73+36
+	ldr	r7, .L67+36
 	bl	mpi_fs_buf_add
-	ldr	r1, .L73+40
+	ldr	r1, .L67+40
 	mov	r0, r5
-	ldr	r9, .L73+64
+	ldr	r9, .L67+64
 	bl	mpi_fs_buf_add
-	ldr	r1, .L73+44
+	ldr	r1, .L67+44
 	mov	r0, r5
-	ldr	r10, .L73+68
+	ldr	r10, .L67+68
 	bl	mpi_fs_buf_add
 	ldr	r4, [r7]
-	ldr	fp, .L73+48
+	ldr	fp, .L67+48
 	subs	r4, r4, #36
-.L46:
+.L40:
 	add	r3, r4, #36
 	cmp	r3, r7
-	beq	.L64
+	beq	.L58
 	ldr	r1, [r4, #4]
 	mov	r0, r5
 	ldr	r3, [r4, #16]
 	ldr	r2, [r4, #68]
-	str	r1, [sp, #12]
+	str	r1, [sp, #16]
 	ldr	r1, [r4, #56]
-	str	r1, [sp, #8]
+	str	r1, [sp, #12]
 	ldr	r1, [r4, #72]
-	strd	r2, r1, [sp]
+	str	r3, [sp]
+	strd	r2, r1, [sp, #4]
 	mov	r1, r9
+	ldr	r3, [r4, #44]
 	ldr	r2, [r4]
 	bl	mpi_fs_buf_add
 	cmp	r0, #0
-	beq	.L58
-.L64:
-	ldr	r1, .L73+48
+	beq	.L52
+.L58:
+	ldr	r1, .L67+48
 	mov	r0, r5
 	bl	mpi_fs_buf_add
 	mov	r0, r5
@@ -413,34 +392,34 @@ valloc_read:
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	b	mpi_fs_buf_read
-.L66:
+.L60:
 	mov	r3, #-1
-	b	.L42
-.L67:
+	b	.L36
+.L61:
 	mov	r1, #-1
-	b	.L43
-.L45:
-	ldr	fp, .L73+72
+	b	.L37
+.L39:
+	ldr	fp, .L67+72
 	add	r10, r4, #452
-.L54:
+.L48:
 	ldr	r3, [r10], #4
 	subs	r2, r3, #1
 	adds	r2, r2, #3
-	bhi	.L48
+	bhi	.L42
 	ldr	r2, [r9]
-.L71:
+.L65:
 	subs	r2, r2, #36
 	add	r1, r2, #36
 	cmp	r1, r9
-	bne	.L51
+	bne	.L45
 	str	r6, [sp]
 	mov	r2, fp
-	ldr	r1, .L73+52
+	ldr	r1, .L67+52
 	mov	r0, r5
 	bl	mpi_fs_buf_add
-	cbz	r0, .L48
-.L52:
-	ldr	r1, .L73+48
+	cbz	r0, .L42
+.L46:
+	ldr	r1, .L67+48
 	mov	r0, r5
 	bl	mpi_fs_buf_add
 	ldr	r3, [r4, #600]
@@ -451,62 +430,62 @@ valloc_read:
 	ldr	r4, [r4, #36]
 	add	r8, r8, r3
 	subs	r4, r4, #36
-	b	.L41
-.L51:
+	b	.L35
+.L45:
 	cmp	r3, r2
-	bne	.L50
+	bne	.L44
 	ldr	r2, [r3, #44]
 	mov	r0, r5
 	str	r6, [sp]
-	ldr	r1, .L73+56
+	ldr	r1, .L67+56
 	ldr	r3, [r3]
 	ldr	r2, [r2, #44]
 	bl	mpi_fs_buf_add
-.L48:
+.L42:
 	adds	r6, r6, #1
-	cmp	r6, #16
-	bne	.L54
-	b	.L52
-.L50:
+	cmp	r6, #32
+	bne	.L48
+	b	.L46
+.L44:
 	ldr	r2, [r2, #36]
-	b	.L71
-.L58:
+	b	.L65
+.L52:
 	mov	r8, r4
 	ldr	r6, [r8, #84]!
-.L72:
+.L66:
 	subs	r6, r6, #64
 	add	r3, r6, #64
 	cmp	r3, r8
-	beq	.L62
+	beq	.L56
 	ldr	r2, [r6, #44]
 	mov	r1, r10
 	ldr	r3, [r6]
 	mov	r0, r5
 	ldr	r2, [r2, #44]
 	bl	mpi_fs_buf_add
-	cbz	r0, .L60
-.L62:
+	cbz	r0, .L54
+.L56:
 	mov	r1, fp
 	mov	r0, r5
 	bl	mpi_fs_buf_add
 	ldr	r4, [r4, #36]
 	subs	r4, r4, #36
-	b	.L46
-.L60:
+	b	.L40
+.L54:
 	ldr	r6, [r6, #64]
-	b	.L72
-.L40:
-	cbnz	r0, .L39
+	b	.L66
+.L34:
+	cbnz	r0, .L33
 	mov	r0, r5
 	bl	mpi_fs_buf_reset
-.L39:
+.L33:
 	mov	r0, r4
 	add	sp, sp, #52
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L74:
+.L68:
 	.align	2
-.L73:
+.L67:
 	.word	.LC5
 	.word	.LANCHOR0
 	.word	.LC4
@@ -546,43 +525,43 @@ valloc_mb_create:
 	sub	sp, sp, #20
 	ldr	r7, [r0, #128]
 	cmp	r3, #28
-	beq	.L76
-	movw	r3, #401
-	ldr	r2, .L81
+	beq	.L70
+	movw	r3, #419
+	ldr	r2, .L75
 	str	r3, [sp]
-	ldr	r3, .L81+4
-.L80:
+	ldr	r3, .L75+4
+.L74:
 	movs	r1, #2
 	movs	r0, #1
 	bl	vlog
 	mov	r0, #-1
-.L75:
+.L69:
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, r6, r7, pc}
-.L76:
+.L70:
 	ldr	r2, [r1, #16]	@ unaligned
-	ldr	r0, .L81+8
+	ldr	r0, .L75+8
 	ldr	r1, [r1, #20]	@ unaligned
 	bl	mpi_allocator_alloc
 	mov	r5, r0
-	cbnz	r0, .L78
-	mov	r3, #406
-	ldr	r2, .L81+12
+	cbnz	r0, .L72
+	mov	r3, #424
+	ldr	r2, .L75+12
 	str	r3, [sp]
-	ldr	r3, .L81+4
-	b	.L80
-.L78:
+	ldr	r3, .L75+4
+	b	.L74
+.L72:
 	movs	r1, #0
 	bl	mpi_buf_create
 	mov	r4, r0
-	cbnz	r0, .L79
-	movw	r3, #411
-	ldr	r2, .L81+16
+	cbnz	r0, .L73
+	movw	r3, #429
+	ldr	r2, .L75+16
 	str	r3, [sp]
-	ldr	r3, .L81+4
-	b	.L80
-.L79:
+	ldr	r3, .L75+4
+	b	.L74
+.L73:
 	mov	r3, sp
 	bic	r3, r3, #8160
 	bic	r3, r3, #31
@@ -593,19 +572,19 @@ valloc_mb_create:
 	mov	r5, r4
 	bl	dma_buf_put
 	ldr	r3, [r5], #44
-	ldr	r2, .L81+20
+	ldr	r2, .L75+20
 	movs	r1, #5
 	movs	r0, #1
 	str	r3, [r6, #4]	@ unaligned
 	str	r3, [sp, #4]
-	movw	r3, #417
+	movw	r3, #435
 	str	r3, [sp]
-	ldr	r3, .L81+4
+	ldr	r3, .L75+4
 	bl	vlog
 	ldr	r3, [r7, #4]
 	str	r5, [r7, #4]
 	movs	r1, #5
-	ldr	r2, .L81+24
+	ldr	r2, .L75+24
 	movs	r0, #1
 	strd	r7, r3, [r4, #44]
 	str	r5, [r3]
@@ -613,15 +592,15 @@ valloc_mb_create:
 	str	r3, [sp, #8]
 	ldr	r3, [r4, #36]
 	str	r3, [sp, #4]
-	movw	r3, #419
+	movw	r3, #437
 	str	r3, [sp]
-	ldr	r3, .L81+4
+	ldr	r3, .L75+4
 	bl	vlog
 	movs	r0, #0
-	b	.L75
-.L82:
+	b	.L69
+.L76:
 	.align	2
-.L81:
+.L75:
 	.word	.LC18
 	.word	.LANCHOR1+21
 	.word	.LANCHOR0+12
@@ -641,7 +620,7 @@ dma_buf_alloc:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	ldr	r3, .L92
+	ldr	r3, .L86
 	push	{r4, r5, r6, r7, r8, r9, lr}
 	.save {r4, r5, r6, r7, r8, r9, lr}
 	mov	r7, r2
@@ -649,37 +628,37 @@ dma_buf_alloc:
 	.pad #20
 	sub	sp, sp, #20
 	cmp	r5, #0
-	beq	.L83
+	beq	.L77
 	ldr	r4, [r3, #268]
-	cbnz	r4, .L88
+	cbnz	r4, .L82
 	str	r2, [sp, #4]
-	movw	r3, #271
-	ldr	r2, .L92+4
+	mov	r3, #284
+	ldr	r2, .L86+4
 	movs	r1, #5
 	str	r3, [sp]
 	movs	r0, #1
-	ldr	r3, .L92+8
+	ldr	r3, .L86+8
 	movs	r6, #4
 	bl	vlog
-	ldr	r8, .L92+20
-	ldr	r9, .L92+24
-.L85:
+	ldr	r8, .L86+20
+	ldr	r9, .L86+24
+.L79:
 	subs	r6, r6, #1
-	bne	.L87
+	bne	.L81
 	cmn	r4, #4096
-	bls	.L86
-	mov	r3, #282
+	bls	.L80
+	movw	r3, #295
 	str	r7, [sp, #4]
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L92+8
+	ldr	r3, .L86+8
 	movs	r0, #1
-	ldr	r2, .L92+12
+	ldr	r2, .L86+12
 	bl	vlog
-.L88:
+.L82:
 	movs	r5, #0
-	b	.L83
-.L87:
+	b	.L77
+.L81:
 	str	r8, [sp]
 	movs	r3, #0
 	mov	r2, r9
@@ -688,32 +667,32 @@ dma_buf_alloc:
 	bl	rk_dma_heap_buffer_alloc
 	cmn	r0, #4096
 	mov	r4, r0
-	bls	.L86
+	bls	.L80
 	movs	r0, #10
 	bl	msleep
-	b	.L85
-.L86:
+	b	.L79
+.L80:
 	ldr	r3, [r4, #4]
 	movs	r1, #5
-	ldr	r2, .L92+16
+	ldr	r2, .L86+16
 	movs	r0, #1
 	mov	r5, r4
 	ldr	r3, [r3, #28]
 	str	r3, [sp, #12]
 	ldr	r3, [r4]
 	strd	r4, r3, [sp, #4]
-	movw	r3, #285
+	mov	r3, #298
 	str	r3, [sp]
-	ldr	r3, .L92+8
+	ldr	r3, .L86+8
 	bl	vlog
-.L83:
+.L77:
 	mov	r0, r5
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, pc}
-.L93:
+.L87:
 	.align	2
-.L92:
+.L86:
 	.word	.LANCHOR0
 	.word	.LC23
 	.word	.LANCHOR1+38
@@ -736,15 +715,15 @@ free_all_cma:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r3, r4, r5, lr}
 	.save {r3, r4, r5, lr}
-	ldr	r5, .L99
+	ldr	r5, .L93
 	ldr	r3, [r5, #4]
-	cbz	r3, .L94
+	cbz	r3, .L88
 	ldr	r3, [r5]
 	cmp	r3, #65536
-	bls	.L94
-	ldr	r0, .L99+4
+	bls	.L88
+	ldr	r0, .L93+4
 	bl	printk
-	ldr	r0, .L99+8
+	ldr	r0, .L93+8
 	bl	printk
 	ldr	r4, [r5]
 	ldr	r0, [r5, #4]
@@ -754,10 +733,10 @@ free_all_cma:
 	lsrs	r0, r0, #12
 	mov	r1, r4
 	bl	free_contig_range
-	ldr	r3, .L99+12
+	ldr	r3, .L93+12
 	pld	[r3]
 	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
+@ 223 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_add
 1:	ldrex	r2, [r3]
 	add	r2, r2, r4
@@ -769,11 +748,11 @@ free_all_cma:
 	.syntax unified
 	movs	r3, #1
 	str	r3, [r5, #268]
-.L94:
+.L88:
 	pop	{r3, r4, r5, pc}
-.L100:
+.L94:
 	.align	2
-.L99:
+.L93:
 	.word	.LANCHOR0
 	.word	.LC27
 	.word	.LC28
@@ -796,32 +775,32 @@ valloc_mb_get_id:
 	mov	r4, r1
 	ldr	r3, [r1, #12]	@ unaligned
 	cmp	r3, #28
-	beq	.L102
-	mov	r3, #378
-	ldr	r2, .L105
+	beq	.L96
+	mov	r3, #396
+	ldr	r2, .L99
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L105+4
+	ldr	r3, .L99+4
 	movs	r0, #1
 	bl	vlog
-.L104:
+.L98:
 	mov	r0, #-1
-	b	.L101
-.L102:
+	b	.L95
+.L96:
 	ldr	r0, [r1, #8]	@ unaligned
 	bl	get_mpi_buf
 	cmp	r0, #0
-	beq	.L104
+	beq	.L98
 	ldr	r3, [r0]
 	movs	r0, #0
 	str	r3, [r4, #4]	@ unaligned
-.L101:
+.L95:
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, pc}
-.L106:
+.L100:
 	.align	2
-.L105:
+.L99:
 	.word	.LC18
 	.word	.LANCHOR1+52
 	.fnend
@@ -841,38 +820,38 @@ valloc_ioctl:
 	.pad #20
 	sub	sp, sp, #20
 	uxtb	r4, r1
-	movw	r3, #469
+	movw	r3, #487
 	mov	r6, r0
 	str	r3, [sp]
 	mov	r5, r1
-	ldr	r3, .L111
+	ldr	r3, .L105
 	movs	r1, #5
 	mov	r7, r2
 	strd	r4, r4, [sp, #4]
 	movs	r0, #1
-	ldr	r2, .L111+4
+	ldr	r2, .L105+4
 	bl	vlog
-	ldr	r3, .L111+8
+	ldr	r3, .L105+8
 	ldr	r1, [r3, #264]
 	cmp	r1, r4
-	bhi	.L108
-	mov	r3, #472
+	bhi	.L102
+	mov	r3, #490
 	str	r4, [sp, #4]
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L111
+	ldr	r3, .L105
 	movs	r0, #1
-	ldr	r2, .L111+12
+	ldr	r2, .L105+12
 	bl	vlog
-.L109:
-.L107:
+.L103:
+.L101:
 	mvn	r0, #21
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, r6, r7, pc}
-.L108:
+.L102:
 	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
+@ 87 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
 	cmp	r4, r1
 	sbc	r1, r4, r4
 .inst.w 0xf3af8014
@@ -883,17 +862,17 @@ valloc_ioctl:
 	ldr	r1, [r3, #260]
 	movs	r3, #20
 	mla	r1, r3, r4, r1
-	cbnz	r1, .L110
-	movw	r3, #479
-	ldr	r2, .L111+16
+	cbnz	r1, .L104
+	movw	r3, #497
+	ldr	r2, .L105+16
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L111
+	ldr	r3, .L105
 	movs	r0, #1
 	bl	vlog
-	b	.L107
-.L110:
-	ldr	r3, .L111+20
+	b	.L101
+.L104:
+	ldr	r3, .L105+20
 	mov	r2, r5
 	mov	r0, r6
 	str	r3, [r1, #16]
@@ -902,9 +881,9 @@ valloc_ioctl:
 	@ sp needed
 	pop	{r4, r5, r6, r7, lr}
 	b	mpi_ioctl_kernel
-.L112:
+.L106:
 	.align	2
-.L111:
+.L105:
 	.word	.LANCHOR1+69
 	.word	.LC29
 	.word	.LANCHOR0
@@ -930,59 +909,59 @@ valloc_mb_get_phy_addr:
 	.pad #20
 	sub	sp, sp, #20
 	cmp	r3, #28
-	beq	.L114
-	mov	r3, #352
-	ldr	r2, .L119
+	beq	.L108
+	mov	r3, #370
+	ldr	r2, .L113
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L119+4
+	ldr	r3, .L113+4
 	movs	r0, #1
 	bl	vlog
-.L118:
+.L112:
 	mov	r0, #-1
-.L113:
+.L107:
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, pc}
-.L114:
+.L108:
 	movs	r1, #4
 	ldr	r0, [r4, #4]	@ unaligned
 	bl	mpi_obj_from_id
 	mov	r5, r0
-	cbnz	r0, .L116
+	cbnz	r0, .L110
 	ldr	r3, [r4, #4]	@ unaligned
 	movs	r1, #2
-	ldr	r2, .L119+8
+	ldr	r2, .L113+8
 	movs	r0, #1
 	str	r3, [sp, #4]
-	movw	r3, #357
+	movw	r3, #375
 	str	r3, [sp]
-	ldr	r3, .L119+4
+	ldr	r3, .L113+4
 	bl	vlog
-	b	.L118
-.L116:
+	b	.L112
+.L110:
 	ldr	r3, [r0, #608]
-	cbnz	r3, .L117
+	cbnz	r3, .L111
 	ldr	r0, [r0, #448]
 	bl	get_dma_buf_phy_addr
 	str	r0, [r5, #608]
-.L117:
+.L111:
 	ldr	r3, [r5, #608]
 	movs	r1, #5
 	ldr	r2, [r4, #4]	@ unaligned
 	movs	r0, #1
 	str	r3, [r4, #24]	@ unaligned
 	strd	r3, r2, [sp, #4]
-	movw	r3, #363
-	ldr	r2, .L119+12
+	movw	r3, #381
+	ldr	r2, .L113+12
 	str	r3, [sp]
-	ldr	r3, .L119+4
+	ldr	r3, .L113+4
 	bl	vlog
 	movs	r0, #0
-	b	.L113
-.L120:
+	b	.L107
+.L114:
 	.align	2
-.L119:
+.L113:
 	.word	.LC18
 	.word	.LANCHOR1+82
 	.word	.LC32
@@ -1005,37 +984,37 @@ valloc_mb_delete:
 	mov	r3, r1
 	ldr	r2, [r1, #12]	@ unaligned
 	cmp	r2, #28
-	beq	.L122
-	mov	r3, #434
-	ldr	r2, .L134
+	beq	.L116
+	mov	r3, #452
+	ldr	r2, .L128
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L134+4
+	ldr	r3, .L128+4
 	movs	r0, #1
 	bl	vlog
 	mov	r0, #-1
-.L121:
+.L115:
 	add	sp, sp, #16
 	@ sp needed
 	pop	{r4, pc}
-.L122:
+.L116:
 	movs	r1, #4
 	ldr	r0, [r3, #4]	@ unaligned
 	bl	mpi_obj_from_id
 	mov	r4, r0
-	cbnz	r0, .L124
-.L133:
+	cbnz	r0, .L118
+.L127:
 	movs	r0, #0
-	b	.L121
-.L124:
+	b	.L115
+.L118:
 	ldr	r3, [r0, #16]
 	movs	r1, #5
-	ldr	r2, .L134+8
+	ldr	r2, .L128+8
 	strd	r0, r3, [sp, #4]
-	movw	r3, #439
+	movw	r3, #457
 	movs	r0, #1
 	str	r3, [sp]
-	ldr	r3, .L134+4
+	ldr	r3, .L128+4
 	bl	vlog
 	ldrd	r2, r3, [r4, #44]
 	str	r3, [r2, #4]
@@ -1044,17 +1023,17 @@ valloc_mb_delete:
 	mov	r2, #256
 	strd	r2, r3, [r4, #44]
 	ldr	r3, [r4, #444]
-	cbz	r3, .L125
+	cbz	r3, .L119
 	ldr	r3, [r4, #588]
 	cmp	r3, #0
-	beq	.L133
-.L125:
+	beq	.L127
+.L119:
 	mov	r0, r4
 	bl	mpi_obj_unref
-	b	.L133
-.L135:
+	b	.L127
+.L129:
 	.align	2
-.L134:
+.L128:
 	.word	.LC18
 	.word	.LANCHOR1+105
 	.word	.LC34
@@ -1076,23 +1055,23 @@ valloc_version:
 	mov	r4, r1
 	ldr	r3, [r1, #32]	@ unaligned
 	cmp	r3, #76
-	beq	.L137
-	movw	r3, #301
-	ldr	r2, .L141
+	beq	.L131
+	mov	r3, #314
+	ldr	r2, .L135
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L141+4
+	ldr	r3, .L135+4
 	movs	r0, #1
 	bl	vlog
 	mov	r0, #-1
-.L136:
+.L130:
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, pc}
-.L137:
+.L131:
 	movs	r3, #1
 	strb	r3, [r1]
-	ldr	r3, .L141+8
+	ldr	r3, .L135+8
 	movs	r5, #0
 	strb	r5, [r1, #1]
 	strb	r5, [r1, #2]
@@ -1130,10 +1109,10 @@ valloc_version:
 	strb	r0, [r4, #57]
 	strb	r0, [r4, #58]
 	strb	r0, [r4, #59]
-	b	.L136
-.L142:
+	b	.L130
+.L136:
 	.align	2
-.L141:
+.L135:
 	.word	.LC35
 	.word	.LANCHOR1+122
 	.word	.LANCHOR0
@@ -1149,7 +1128,7 @@ valloc_open:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	ldr	r3, .L148
+	ldr	r3, .L142
 	push	{r0, r1, r4, r5, r6, r7, r8, lr}
 	.save {r4, r5, r6, r7, r8, lr}
 	.pad #8
@@ -1158,34 +1137,34 @@ valloc_open:
 	mov	r1, #3520
 	bl	kmem_cache_alloc
 	mov	r4, r0
-	cbnz	r0, .L144
-	movw	r3, #503
-	ldr	r2, .L148+4
+	cbnz	r0, .L138
+	movw	r3, #521
+	ldr	r2, .L142+4
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L148+8
+	ldr	r3, .L142+8
 	movs	r0, #1
 	bl	vlog
-.L147:
+.L141:
 	mov	r5, #-1
-.L143:
+.L137:
 	mov	r0, r5
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, pc}
-.L144:
+.L138:
 	str	r0, [r4]
 	mov	r1, #10240
 	str	r0, [r4, #4]
 	adds	r0, r0, #12
 	bl	mpi_fs_buf_init
 	mov	r5, r0
-	cbz	r0, .L146
+	cbz	r0, .L140
 	mov	r0, r4
 	bl	kfree
-	b	.L147
-.L146:
-	ldr	r6, .L148+12
+	b	.L141
+.L140:
+	ldr	r6, .L142+12
 	add	r7, r6, #96
 	mov	r0, r7
 	bl	mpi_obj_ref
@@ -1194,16 +1173,16 @@ valloc_open:
 	movs	r1, #5
 	str	r4, [r8, #128]
 	movs	r0, #1
-	ldr	r2, .L148+16
+	ldr	r2, .L142+16
 	str	r3, [sp, #4]
-	movw	r3, #515
+	movw	r3, #533
 	str	r3, [sp]
-	ldr	r3, .L148+8
+	ldr	r3, .L142+8
 	bl	vlog
-	b	.L143
-.L149:
+	b	.L137
+.L143:
 	.align	2
-.L148:
+.L142:
 	.word	kmalloc_caches
 	.word	.LC36
 	.word	.LANCHOR1+137
@@ -1224,29 +1203,29 @@ valloc_release:
 	push	{r0, r1, r2, r4, r5, r6, r7, r8, r9, lr}
 	.save {r4, r5, r6, r7, r8, r9, lr}
 	.pad #12
-	movw	r7, #526
+	mov	r7, #544
 	ldr	r5, [r1, #128]
-	ldr	r8, .L153+4
-	ldr	r9, .L153+8
+	ldr	r8, .L155+4
+	ldr	r9, .L155+8
 	ldr	r0, [r5, #8]
 	bl	mpi_obj_unref
 	ldr	r3, [r5, #8]
-	ldr	r2, .L153
+	ldr	r2, .L155
 	movs	r1, #5
 	movs	r0, #1
 	ldr	r3, [r3]
 	str	r3, [sp, #4]
-	mov	r3, #524
+	movw	r3, #542
 	str	r3, [sp]
-	ldr	r3, .L153+4
+	ldr	r3, .L155+4
 	bl	vlog
 	ldr	r4, [r5]
 	ldr	r6, [r4], #-44
 	subs	r6, r6, #44
-.L151:
+.L145:
 	add	r3, r4, #44
 	cmp	r5, r3
-	bne	.L152
+	bne	.L148
 	add	r0, r4, #56
 	bl	mpi_fs_buf_deinit
 	mov	r0, r5
@@ -1255,7 +1234,7 @@ valloc_release:
 	add	sp, sp, #12
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, pc}
-.L152:
+.L148:
 	ldr	r3, [r4]
 	mov	r2, r9
 	movs	r1, #4
@@ -1264,20 +1243,26 @@ valloc_release:
 	mov	r3, r8
 	bl	vlog
 	ldrd	r2, r3, [r4, #44]
-	mov	r0, r4
 	str	r3, [r2, #4]
 	str	r2, [r3]
 	mov	r3, #290
 	mov	r2, #256
 	strd	r2, r3, [r4, #44]
+	ldr	r3, [r4, #444]
+	cbz	r3, .L146
+	ldr	r3, [r4, #588]
+	cbz	r3, .L147
+.L146:
+	mov	r0, r4
 	bl	mpi_obj_unref
+.L147:
 	ldr	r3, [r6, #44]
 	mov	r4, r6
 	sub	r6, r3, #44
-	b	.L151
-.L154:
+	b	.L145
+.L156:
 	.align	2
-.L153:
+.L155:
 	.word	.LC37
 	.word	.LANCHOR1+149
 	.word	.LC38
@@ -1298,7 +1283,7 @@ get_dma_buf:
 	add	r2, r3, #28
 	pld	[r2]
 	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
+@ 223 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_add
 1:	ldrex	r1, [r2]
 	add	r1, r1, #1
@@ -1328,62 +1313,79 @@ valloc_mb_get_fd:
 	.pad #20
 	sub	sp, sp, #20
 	cmp	r3, #28
-	beq	.L157
-	movw	r3, #327
-	ldr	r2, .L161
+	beq	.L159
+	mov	r3, #342
+	ldr	r2, .L163
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L161+4
+	ldr	r3, .L163+4
 	movs	r0, #1
 	bl	vlog
-.L160:
+.L162:
 	mov	r0, #-1
-.L156:
+.L158:
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, pc}
-.L157:
+.L159:
 	movs	r1, #4
 	ldr	r0, [r4, #4]	@ unaligned
 	bl	mpi_obj_from_id
 	mov	r5, r0
-	cbnz	r0, .L159
+	cbnz	r0, .L161
 	ldr	r3, [r4, #4]	@ unaligned
 	movs	r1, #2
-	ldr	r2, .L161+8
+	ldr	r2, .L163+8
 	movs	r0, #1
 	str	r3, [sp, #4]
-	mov	r3, #332
+	movw	r3, #347
 	str	r3, [sp]
-	ldr	r3, .L161+4
+	ldr	r3, .L163+4
 	bl	vlog
-	b	.L160
-.L159:
+	b	.L162
+.L161:
 	movs	r1, #0
 	ldr	r0, [r0, #448]
 	bl	dma_buf_fd
 	str	r0, [r4, #8]	@ unaligned
 	ldr	r0, [r5, #448]
 	bl	get_dma_buf
+	.syntax unified
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r3, cpsr	@ arch_local_irq_save
+	cpsid	i
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	ldr	r2, .L163+12
+	ldr	r1, [r4, #8]	@ unaligned
+	str	r5, [r2, r1, lsl #2]
+	.syntax unified
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r3	@ local_irq_restore
+@ 0 "" 2
+	.thumb
+	.syntax unified
 	ldr	r3, [r4, #4]	@ unaligned
-	ldr	r2, .L161+12
 	movs	r1, #5
+	ldr	r2, .L163+16
 	movs	r0, #1
 	str	r3, [sp, #8]
 	ldr	r3, [r4, #8]	@ unaligned
 	str	r3, [sp, #4]
-	movw	r3, #337
+	movw	r3, #355
 	str	r3, [sp]
-	ldr	r3, .L161+4
+	ldr	r3, .L163+4
 	bl	vlog
 	movs	r0, #0
-	b	.L156
-.L162:
+	b	.L158
+.L164:
 	.align	2
-.L161:
+.L163:
 	.word	.LC18
 	.word	.LANCHOR1+164
 	.word	.LC32
+	.word	dma_buf_fd_idr
 	.word	.LC39
 	.fnend
 	.size	valloc_mb_get_fd, .-valloc_mb_get_fd
@@ -1402,10 +1404,13 @@ valloc_mmap:
 	.save {r4, lr}
 	mov	r4, r0
 	ldr	r0, [r0, #448]
-	cbz	r0, .L163
+	cbz	r0, .L165
+	bl	get_dma_buf_phy_addr
+	str	r0, [r4, #608]
+	ldr	r0, [r4, #448]
 	bl	dma_buf_vmap
 	str	r0, [r4, #604]
-.L163:
+.L165:
 	pop	{r4, pc}
 	.fnend
 	.size	valloc_mmap, .-valloc_mmap
@@ -1425,40 +1430,40 @@ valloc_munmap:
 	.pad #8
 	mov	r4, r0
 	ldr	r1, [r0, #604]
-	cbz	r1, .L168
+	cbz	r1, .L170
 	ldr	r0, [r0, #448]
-	cbz	r0, .L168
+	cbz	r0, .L170
 	mov	r3, sp
 	bic	r3, r3, #8160
 	bic	r3, r3, #31
 	ldr	r5, [r3, #4]
 	bic	r5, r5, #-16777216
 	bic	r5, r5, #255
-	cbnz	r5, .L170
+	cbnz	r5, .L172
 	bl	dma_buf_vunmap
 	str	r5, [r4, #604]
-.L168:
+.L170:
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, pc}
-.L170:
+.L172:
 	movs	r1, #0
 	mov	r0, r1
 	bl	mpi_buf_create
 	mov	r5, r0
-	cbnz	r0, .L171
-	movs	r3, #116
+	cbnz	r0, .L173
+	movs	r3, #141
 	str	r4, [sp, #4]
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L179
+	ldr	r3, .L181
 	movs	r0, #1
-	ldr	r2, .L179+4
+	ldr	r2, .L181+4
 	bl	vlog
-	b	.L168
-.L171:
+	b	.L170
+.L173:
 	ldr	r0, [r4, #448]
-	ldr	r6, .L179+8
+	ldr	r6, .L181+8
 	str	r0, [r5, #448]
 	bl	get_dma_buf
 	ldr	r3, [r4, #604]
@@ -1466,29 +1471,29 @@ valloc_munmap:
 	ldr	r0, [r6, #92]
 	str	r3, [r5, #604]
 	bl	mpi_queue_push_obj
-	cbnz	r0, .L172
+	cbnz	r0, .L174
 	str	r4, [sp, #4]
-	movs	r3, #123
-	ldr	r2, .L179+4
+	movs	r3, #148
+	ldr	r2, .L181+4
 	movs	r1, #2
 	str	r3, [sp]
 	movs	r0, #1
-	ldr	r3, .L179
+	ldr	r3, .L181
 	bl	vlog
 	mov	r0, r5
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, lr}
 	b	mpi_obj_unref
-.L172:
+.L174:
 	add	r0, r6, #72
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, lr}
 	b	up
-.L180:
+.L182:
 	.align	2
-.L179:
+.L181:
 	.word	.LANCHOR1+181
 	.word	.LC40
 	.word	.LANCHOR0
@@ -1510,38 +1515,38 @@ valloc_probe:
 	mov	r7, r0
 	.pad #20
 	sub	sp, sp, #20
-	ldr	r0, .L185
+	ldr	r0, .L187
 	bl	rk_dma_heap_find
-	ldr	r4, .L185+4
+	ldr	r4, .L187+4
 	str	r0, [r4, #68]
-	cbnz	r0, .L182
-	movw	r3, #639
-	ldr	r2, .L185+8
+	cbnz	r0, .L184
+	movw	r3, #658
+	ldr	r2, .L187+8
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L185+12
+	ldr	r3, .L187+12
 	movs	r0, #1
 	bl	vlog
 	mov	r0, #-1
-.L181:
+.L183:
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, r6, r7, pc}
-.L182:
+.L184:
 	ldr	r3, [r4]
 	movs	r1, #4
-	ldr	r2, .L185+16
+	ldr	r2, .L187+16
 	movs	r0, #1
 	movs	r6, #0
 	mov	r5, r4
 	str	r3, [sp, #8]
 	ldr	r3, [r4, #4]
 	str	r3, [sp, #4]
-	movw	r3, #642
+	movw	r3, #661
 	str	r3, [sp]
-	ldr	r3, .L185+12
+	ldr	r3, .L187+12
 	bl	vlog
-	ldr	r3, .L185+20
+	ldr	r3, .L187+20
 	mov	r1, #3264
 	mov	r0, r7
 	str	r6, [r4, #268]
@@ -1552,7 +1557,7 @@ valloc_probe:
 	str	r0, [r5, #8]!
 	add	r0, r4, #12
 	bl	mpi_allocator_register
-	ldr	r3, .L185+24
+	ldr	r3, .L187+24
 	mov	r2, r7
 	movs	r1, #8
 	add	r0, r4, #96
@@ -1562,12 +1567,12 @@ valloc_probe:
 	str	r3, [r4, #264]
 	bl	mpi_dev_register
 	mov	r2, r6
-	ldr	r1, .L185+28
+	ldr	r1, .L187+28
 	add	r0, r4, #96
 	bl	mpi_sysfs_dev_add
 	ldr	r0, [r4, #192]
 	bl	rk_dma_heap_set_dev
-	ldr	r2, .L185+32
+	ldr	r2, .L187+32
 	movs	r1, #4
 	movs	r0, #20
 	bl	mpi_queue_create
@@ -1575,22 +1580,22 @@ valloc_probe:
 	mov	r1, r5
 	strd	r3, r3, [r4, #76]
 	mov	r2, #-1
-	ldr	r3, .L185+36
+	ldr	r3, .L187+36
 	str	r6, [r4, #72]
 	str	r0, [r4, #92]
-	ldr	r0, .L185+40
+	ldr	r0, .L187+40
 	bl	kthread_create_on_node
 	cmn	r0, #4096
 	mov	r5, r0
-	bhi	.L184
+	bhi	.L186
 	bl	wake_up_process
-.L184:
+.L186:
 	str	r5, [r4, #84]
 	movs	r0, #0
-	b	.L181
-.L186:
+	b	.L183
+.L188:
 	.align	2
-.L185:
+.L187:
 	.word	.LC41
 	.word	.LANCHOR0
 	.word	.LC42
@@ -1617,11 +1622,11 @@ valloc_init:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
-	ldr	r0, .L188
+	ldr	r0, .L190
 	b	valloc_probe
-.L189:
+.L191:
 	.align	2
-.L188:
+.L190:
 	.word	.LC44
 	.fnend
 	.size	valloc_init, .-valloc_init
@@ -1643,60 +1648,62 @@ valloc_exit:
 	.size	valloc_exit, .-valloc_exit
 	.global	valloc_mutex
 	.global	g_valloc_dev
+	.global	dma_buf_fd_lock
+	.global	dma_buf_fd_idr
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR1,. + 0
-	.type	__func__.37693, %object
-	.size	__func__.37693, 21
-__func__.37693:
+	.type	__func__.35977, %object
+	.size	__func__.35977, 21
+__func__.35977:
 	.ascii	"get_dma_buf_phy_addr\000"
-	.type	__func__.37785, %object
-	.size	__func__.37785, 17
-__func__.37785:
+	.type	__func__.36061, %object
+	.size	__func__.36061, 17
+__func__.36061:
 	.ascii	"valloc_mb_create\000"
-	.type	__func__.37745, %object
-	.size	__func__.37745, 14
-__func__.37745:
+	.type	__func__.36014, %object
+	.size	__func__.36014, 14
+__func__.36014:
 	.ascii	"dma_buf_alloc\000"
-	.type	__func__.37776, %object
-	.size	__func__.37776, 17
-__func__.37776:
+	.type	__func__.36052, %object
+	.size	__func__.36052, 17
+__func__.36052:
 	.ascii	"valloc_mb_get_id\000"
-	.type	__func__.37810, %object
-	.size	__func__.37810, 13
-__func__.37810:
+	.type	__func__.36086, %object
+	.size	__func__.36086, 13
+__func__.36086:
 	.ascii	"valloc_ioctl\000"
-	.type	__func__.37769, %object
-	.size	__func__.37769, 23
-__func__.37769:
+	.type	__func__.36045, %object
+	.size	__func__.36045, 23
+__func__.36045:
 	.ascii	"valloc_mb_get_phy_addr\000"
-	.type	__func__.37792, %object
-	.size	__func__.37792, 17
-__func__.37792:
+	.type	__func__.36068, %object
+	.size	__func__.36068, 17
+__func__.36068:
 	.ascii	"valloc_mb_delete\000"
-	.type	__func__.37755, %object
-	.size	__func__.37755, 15
-__func__.37755:
+	.type	__func__.36024, %object
+	.size	__func__.36024, 15
+__func__.36024:
 	.ascii	"valloc_version\000"
-	.type	__func__.37832, %object
-	.size	__func__.37832, 12
-__func__.37832:
+	.type	__func__.36108, %object
+	.size	__func__.36108, 12
+__func__.36108:
 	.ascii	"valloc_open\000"
-	.type	__func__.37841, %object
-	.size	__func__.37841, 15
-__func__.37841:
+	.type	__func__.36117, %object
+	.size	__func__.36117, 15
+__func__.36117:
 	.ascii	"valloc_release\000"
-	.type	__func__.37762, %object
-	.size	__func__.37762, 17
-__func__.37762:
+	.type	__func__.36032, %object
+	.size	__func__.36032, 17
+__func__.36032:
 	.ascii	"valloc_mb_get_fd\000"
-	.type	__func__.37674, %object
-	.size	__func__.37674, 14
-__func__.37674:
+	.type	__func__.35958, %object
+	.size	__func__.35958, 14
+__func__.35958:
 	.ascii	"valloc_munmap\000"
-	.type	__func__.37948, %object
-	.size	__func__.37948, 13
-__func__.37948:
+	.type	__func__.36224, %object
+	.size	__func__.36224, 13
+__func__.36224:
 	.ascii	"valloc_probe\000"
 	.type	valloc_driver_fops, %object
 	.size	valloc_driver_fops, 128
@@ -1779,6 +1786,13 @@ rk_dma_heap_base:
 	.size	g_valloc_dev, 264
 g_valloc_dev:
 	.space	264
+	.type	dma_buf_fd_lock, %object
+	.size	dma_buf_fd_lock, 0
+dma_buf_fd_lock:
+	.type	dma_buf_fd_idr, %object
+	.size	dma_buf_fd_idr, 4096
+dma_buf_fd_idr:
+	.space	4096
 	.section	.init.rodata,"a"
 	.type	__setup_str_early_dma_heap_cma, %object
 	.size	__setup_str_early_dma_heap_cma, 16
@@ -1809,12 +1823,12 @@ __UNIQUE_ID_rk_dma_heap_sizetype228:
 .LC2:
 	.ascii	"\033[1;31mmap fail = %d\033[0m\000"
 .LC3:
-	.ascii	"vmpi:a9dd19f6acbf3ae9d621a285aa64278d958f9b03-v1.4."
-	.ascii	"67\000"
+	.ascii	"vmpi:28ee389dbc33c2c7db812cd08e54fd3a0f2f992b-v1.4."
+	.ascii	"81\000"
 .LC4:
 	.ascii	"module: %s\012version: %s\012build: %s\012\000"
 .LC5:
-	.ascii	"-2024-01-22-17:02:23\000"
+	.ascii	"-2024-05-24-16:21:01\000"
 .LC6:
 	.ascii	"*******************************************mpi buf "
 	.ascii	"list***************************************\012\000"
@@ -1831,8 +1845,8 @@ __UNIQUE_ID_rk_dma_heap_sizetype228:
 	.ascii	"*************************************mpi pool list*"
 	.ascii	"**********************************\012\000"
 .LC11:
-	.ascii	"poid-total-free-min-size-------------create--------"
-	.ascii	"---user---------------------------\012\000"
+	.ascii	"poid-nkid-total-free-min-size-------------create---"
+	.ascii	"--------user---------------------------\012\000"
 .LC12:
 	.ascii	"%s_%d(%d) \000"
 .LC13:
@@ -1842,7 +1856,7 @@ __UNIQUE_ID_rk_dma_heap_sizetype228:
 .LC15:
 	.ascii	"\012\000"
 .LC16:
-	.ascii	"%-#4d %-#5d %-#4d %-#3d %-#16d %-#16s \000"
+	.ascii	"%-#4d %-#4d %-#5d %-#4d %-#3d %-#16d %-#16s \000"
 .LC17:
 	.ascii	"%s_%d\000"
 .LC18:

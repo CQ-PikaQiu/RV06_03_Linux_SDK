@@ -675,15 +675,15 @@ h265e_slice_init:
 	ldr	r0, .L143+12
 	bl	printk
 .L123:
-	ldr	r3, [r8, #780]
-	clz	r3, r3
-	lsrs	r3, r3, #5
-	strb	r3, [r4]
 	ldr	r3, [r8, #784]
 	clz	r3, r3
 	lsrs	r3, r3, #5
+	strb	r3, [r4]
+	ldr	r3, [r8, #788]
+	clz	r3, r3
+	lsrs	r3, r3, #5
 	strb	r3, [r4, #1]
-	ldr	r3, [r8, #808]
+	ldr	r3, [r8, #812]
 	str	r3, [r4, #336]
 	ldr	r3, [r8, #756]
 	strb	r3, [r4, #13]
@@ -966,29 +966,29 @@ get_num_rps_cur_templist:
 	.size	get_num_rps_cur_templist, .-get_num_rps_cur_templist
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__func__.9544, %object
-	.size	__func__.9544, 12
-__func__.9544:
+	.type	__func__.9557, %object
+	.size	__func__.9557, 12
+__func__.9557:
 	.ascii	"get_ref_pic\000"
-	.type	__func__.9558, %object
-	.size	__func__.9558, 15
-__func__.9558:
+	.type	__func__.9571, %object
+	.size	__func__.9571, 15
+__func__.9571:
 	.ascii	"get_lt_ref_pic\000"
-	.type	__func__.9581, %object
-	.size	__func__.9581, 25
-__func__.9581:
+	.type	__func__.9594, %object
+	.size	__func__.9594, 25
+__func__.9594:
 	.ascii	"h265e_slice_set_ref_list\000"
-	.type	__FUNCTION__.9600, %object
-	.size	__FUNCTION__.9600, 25
-__FUNCTION__.9600:
+	.type	__FUNCTION__.9613, %object
+	.size	__FUNCTION__.9613, 25
+__FUNCTION__.9613:
 	.ascii	"h265e_slice_set_ref_list\000"
-	.type	__func__.9629, %object
-	.size	__func__.9629, 29
-__func__.9629:
+	.type	__func__.9642, %object
+	.size	__func__.9642, 29
+__func__.9642:
 	.ascii	"h265e_slice_set_ref_poc_list\000"
-	.type	__func__.9647, %object
-	.size	__func__.9647, 17
-__func__.9647:
+	.type	__func__.9660, %object
+	.size	__func__.9660, 17
+__func__.9660:
 	.ascii	"h265e_slice_init\000"
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:

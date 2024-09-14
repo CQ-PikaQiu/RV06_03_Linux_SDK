@@ -76,7 +76,15 @@ typedef enum {
     ROCKIVA_IMAGE_FORMAT_YUV420P_YV12,    /* YUV420P YV12 */
     ROCKIVA_IMAGE_FORMAT_YUV420SP_NV12,   /* YUV420SP NV12 */
     ROCKIVA_IMAGE_FORMAT_YUV420SP_NV21,   /* YUV420SP NV21 */
+    ROCKIVA_IMAGE_FORMAT_YUV422P_YU16,   ///< YUV422P YU16: YYYYYYYYUUUUVVVV
+    ROCKIVA_IMAGE_FORMAT_YUV422P_YV16,   ///< YUV422P YV16: YYYYYYYYVVVVUUUU
+    ROCKIVA_IMAGE_FORMAT_YUV422SP_NV16,  ///< YUV422SP NV16: YYYYYYYYUVUVUVUV
+    ROCKIVA_IMAGE_FORMAT_YUV422SP_NV61,  ///< YUV422SP NV61: YYYYYYYYVUVUVUVU
+    ROCKIVA_IMAGE_FORMAT_YUV422_YUYV,    ///< YUV422 YUYV: YUYVYUYV
+    ROCKIVA_IMAGE_FORMAT_YUV422_YVYU,    ///< YUV422 YVYU: YVYUYVYU
+    ROCKIVA_IMAGE_FORMAT_GRAY16,         ///< Gray16
     ROCKIVA_IMAGE_FORMAT_JPEG,            /* JPEG(输入图像不支持该格式) */
+    ROCKIVA_IMAGE_FORMAT_MAX,
 } RockIvaImageFormat;
 
 /**
@@ -128,18 +136,34 @@ typedef enum {
     ROCKIVA_OBJECT_TYPE_BICYCLE = 8,        /* 自行车 */
     ROCKIVA_OBJECT_TYPE_PLATE = 9,          /* 车牌 */
     ROCKIVA_OBJECT_TYPE_BABY = 10,          /* 婴幼儿 */
+    ROCKIVA_OBJECT_TYPE_PACKAGE = 11,       /* 快递包裹 */
     ROCKIVA_OBJECT_TYPE_MAX
 } RockIvaObjectType;
+
+/* 目标状态 */
+typedef enum {
+    ROCKIVA_OBJECT_STATE_NONE,                /* 目标状态未知 */
+    ROCKIVA_OBJECT_STATE_FIRST,               /* 目标第一次出现 */
+    ROCKIVA_OBJECT_STATE_TRACKING,            /* 目标检测跟踪过程中 */
+    ROCKIVA_OBJECT_STATE_LOST,                /* 目标检测丢失 */
+    ROCKIVA_OBJECT_STATE_DISPEAR,             /* 目标消失 */
+} RockIvaObjectState;
 
 /* 前级目标检测算法模型 */
 typedef enum {
     ROCKIVA_DET_MODEL_NONE = 0,           /* 未设置，不需要前级目标检测 */
-    ROCKIVA_DET_MODEL_CLS7 = 1,           /* 检测类别：人形、人脸、车辆车牌、非机动车、宠物 */
-    ROCKIVA_DET_MODEL_PFCP = 2,           /* 检测类别：人形、人脸、机动车、宠物 */
-    ROCKIVA_DET_MODEL_PFP = 3,            /* 检测类别：人形、人脸、宠物 */
-    ROCKIVA_DET_MODEL_PHS = 4,            /* 检测类别：人形、头肩 */
-    ROCKIVA_DET_MODEL_PHCP = 5,           /* 检测类别：人形、头肩、机动车、宠物 */
-    ROCKIVA_DET_MODEL_PERSON = 6,         /* 检测类别：人形 */
+    ROCKIVA_DET_MODEL_CLS7,           /* 检测类别：人形、人脸、机动车、车牌、非机动车、宠物 */
+    ROCKIVA_DET_MODEL_PFCP,           /* 检测类别：人形、人脸、机动车、宠物 */
+    ROCKIVA_DET_MODEL_PFP,            /* 检测类别：人形、人脸、宠物 */
+    ROCKIVA_DET_MODEL_PHS,            /* 检测类别：人形、头肩 */
+    ROCKIVA_DET_MODEL_PHCP,           /* 检测类别：人形、头肩、机动车、宠物 */
+    ROCKIVA_DET_MODEL_PERSON,         /* 检测类别：人形 */
+    ROCKIVA_DET_MODEL_NONVEHICLE,     /* 检测类别：电动车 */
+    ROCKIVA_DET_MODEL_FHS,            /* 检测类别：人脸、头肩 */
+    ROCKIVA_DET_MODEL_PHCN,           /* 检测类别：人形、头肩、机动车、非机动车 */
+    ROCKIVA_DET_MODEL_CLS8,           /* 检测类别：人形、人脸、机动车、车牌、非机动车、宠物、人头 */
+    ROCKIVA_DET_MODEL_PFP_V3,         /* 检测类别：人形、人脸、宠物 */
+    ROCKIVA_DET_MODEL_PFCPP           /* 检测类别：人形、人脸、车辆、宠物、快递包裹 */
 } RockIvaDetModel;
 
 /* 工作模式 */
@@ -262,6 +286,7 @@ typedef struct {
     uint32_t objId;            /* 目标ID[0,2^32) */
     uint32_t frameId;          /* 所在帧序号 */
     uint32_t score;            /* 目标检测分数 [1-100] */
+    uint32_t clsScore;         /* 目标分类分数，仅开启分类模型有效 [1-100] */
     RockIvaRectangle rect;     /* 目标区域框 (万分比) */
     RockIvaObjectType type;    /* 目标类别 */
 } RockIvaObjectInfo;
@@ -309,6 +334,7 @@ typedef struct {
     RockIvaMemInfo detModelData;         /* 指定检测模型数据（用于快启直接配置模型内存数据直接用于加载） */
     uint8_t trackerVersion;              /* 指定跟踪算法版本 0:默认v2; 1:v1; 2:v2 */
     RockIvaMediaOps mediaOps;            /* 设置媒体操作 */
+    uint8_t newModelInstance;            /* 每个持有的模型重新创建实例，NVR产品需要跑多路时候开启（设为1），内存占用会增加 */
 } RockIvaInitParam;
 
 /* 推帧提供的额外信息 */
@@ -352,6 +378,16 @@ RockIvaRetCode ROCKIVA_Init(RockIvaHandle* handle, RockIvaWorkMode mode, const R
  * @return RockIvaRetCode
  */
 RockIvaRetCode ROCKIVA_Release(RockIvaHandle handle);
+
+/**
+ * @brief 等待算法帧处理完成
+ * 
+ * @param handle [IN] handle
+ * @param frameId [IN] 要等待的帧ID，如果设为小于0表示等待所有帧处理完
+ * @param timeoutMS [IN] 超时时间（毫秒）
+ * @return RockIvaRetCode 
+ */
+RockIvaRetCode ROCKIVA_WaitFinish(RockIvaHandle handle, long frameId, int timeoutMS);
 
 /**
  * @brief 设置帧释放回调
@@ -400,6 +436,15 @@ RockIvaRetCode ROCKIVA_SetParam(RockIvaParams* params, const char* key, const ch
  * @return RockIvaRetCode
  */
 RockIvaRetCode ROCKIVA_GetVersion(const uint32_t maxLen, char* version);
+
+/**
+ * @brief 切换工作状态（使能/关闭跟踪，建议只对目标检测模块使用，如果设置为ROCKIVA_MODE_PICTURE模式，一些依赖跟踪的模块结果会异常）
+ * 
+ * @param handle [in] handle
+ * @param mode [in] 工作模式
+ * @return RockIvaRetCode 
+ */
+RockIvaRetCode ROCKIVA_SetWorkMode(RockIvaHandle handle, RockIvaWorkMode mode);
 
 #ifdef __cplusplus
 }

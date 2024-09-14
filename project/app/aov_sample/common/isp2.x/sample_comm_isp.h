@@ -88,6 +88,7 @@ RK_S32 SAMPLE_COMM_ISP_SetFecEn(RK_S32 CamId, RK_BOOL bFECEnable);
 RK_S32 SAMPLE_COMM_ISP_Run(RK_S32 CamId); // isp stop before vi streamoff
 RK_S32 SAMPLE_COMM_ISP_DumpExpInfo(RK_S32 CamId, rk_aiq_working_mode_t WDRMode);
 RK_S32 SAMPLE_COMM_ISP_SetFrameRate(RK_S32 CamId, RK_U32 uFps);
+RK_S32 SAMPLE_COMM_ISP_GetFrameRate(RK_S32 CamId);
 RK_S32 SAMPLE_COMM_ISP_SetLDCH(RK_S32 CamId, RK_U32 level, RK_BOOL bIfEnable);
 RK_S32 SAMPLE_COMM_ISP_SetWDRModeDyn(RK_S32 CamId, rk_aiq_working_mode_t WDRMode);
 RK_S32 SAMPLE_COMM_ISP_SET_Brightness(RK_S32 CamId, RK_U32 value);
@@ -120,7 +121,7 @@ RK_S32 SAMPLE_COMM_ISP_SET_HDR(RK_S32 CamId, rk_aiq_working_mode_t mode);
 RK_S32 SAMPLE_COMM_ISP_SET_DefogEnable(RK_S32 CamId, RK_U32 u32Mode);
 RK_S32 SAMPLE_COMM_ISP_SET_DefogStrength(RK_S32 CamId, RK_U32 u32Mode, RK_U32 u32Value);
 RK_S32 SAMPLE_COMM_ISP_SET_Correction(RK_S32 CamId, RK_U32 u32Mode, RK_U32 u32Value);
-RK_S32 SAMPLE_COMM_ISP_SET_mirror(RK_S32 CamId, RK_U32 u32Value);
+RK_S32 SAMPLE_COMM_ISP_SetMirrorFlip(int CamId, RK_U32 u32Value);
 RK_S32 SAMPLE_COMM_ISP_SET_BypassStreamRotation(RK_S32 CamId, RK_S32 S32Rotation);
 RK_S32 SAMPLE_COMM_ISP_SET_Crop(RK_S32 CamId, rk_aiq_rect_t rect);
 
@@ -135,6 +136,10 @@ RK_S32 SAMPLE_COMM_ISP_CamGroup_Stop(RK_S32 CamGroupId);
 RK_S32 SAMPLE_COMM_ISP_CamGroup_SetFrameRate(RK_S32 CamId, RK_U32 uFps);
 #endif
 
+RK_S32 SAMPLE_COMM_ISP_SingleFrame(int cam_id);
+RK_S32 SAMPLE_COMM_ISP_MultiFrame(int cam_id);
+RK_BOOL SAMPLE_COMM_ISP_IsExpBigChange(int cam_id);
+RK_BOOL SAMPLE_COMM_ISP_IsExpConverge(int cam_id);
 #ifdef __cplusplus
 #if __cplusplus
 }

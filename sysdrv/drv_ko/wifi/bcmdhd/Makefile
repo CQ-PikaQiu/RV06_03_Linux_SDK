@@ -419,7 +419,7 @@ all: bcmdhd_sdio
 
 bcmdhd_sdio:
 	$(warning "building BCMDHD_SDIO..........")
-	$(MAKE) -C $(KERNEL_DIR) M=$(shell pwd) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) modules CONFIG_BCMDHD=m CONFIG_BCMDHD_SDIO=y
+	$(MAKE) -C $(KERNEL_DIR) M=$(shell pwd) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) modules CONFIG_BCMDHD=m CONFIG_BCMDHD_SDIO=y O=$(WIFI_BUILD_KERNEL_OBJ_DIR)
 	#$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KERNEL_DIR) M=$(shell pwd) modules -j12
 	$(CROSS_COMPILE)strip --strip-debug $(shell pwd)/bcmdhd.ko
 	cp $(shell pwd)/bcmdhd.ko $(M_OUT_DIR)

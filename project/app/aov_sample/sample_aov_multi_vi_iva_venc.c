@@ -157,9 +157,9 @@ static void *venc_get_stream(void *pArgs) {
 					}
 				} else {
 					RK_MPI_VENC_RequestIDR(ctx->s32ChnId, RK_FALSE);
-					SAMPLE_COMM_AOV_CopyStreamToSdcard(ctx->s32ChnId, venc_data,
-					                                   venc_data_size, pData,
-					                                   ctx->stFrame.pstPack->u32Len);
+					SAMPLE_COMM_AOV_CopyRawStreamToSdcard(ctx->s32ChnId, venc_data,
+					                                      venc_data_size, pData,
+					                                      ctx->stFrame.pstPack->u32Len);
 					venc_data_size = 0;
 				}
 			}
@@ -179,8 +179,8 @@ static void *venc_get_stream(void *pArgs) {
 	}
 
 	if (venc_data && venc_data_size > 0) {
-		SAMPLE_COMM_AOV_CopyStreamToSdcard(ctx->s32ChnId, venc_data, venc_data_size, NULL,
-		                                   0);
+		SAMPLE_COMM_AOV_CopyRawStreamToSdcard(ctx->s32ChnId, venc_data, venc_data_size,
+		                                      NULL, 0);
 		venc_data_size = 0;
 	}
 	if (venc_data)
@@ -660,8 +660,8 @@ static RK_S32 iva_init(SAMPLE_MPI_CTX_S *ctx, RkCmdArgs *pArgs) {
 	TRACE_BEGIN();
 	/* Init iva */
 	ctx->iva.pModelDataPath = pArgs->pIvaModelPath;
-	ctx->iva.u32ImageHeight = pArgs->u32IvaWidth;
-	ctx->iva.u32ImageWidth = pArgs->u32IvaHeight;
+	ctx->iva.u32ImageHeight = pArgs->u32IvaHeight;
+	ctx->iva.u32ImageWidth = pArgs->u32IvaWidth;
 	ctx->iva.u32DetectStartX = 0;
 	ctx->iva.u32DetectStartY = 0;
 	ctx->iva.u32DetectWidth = pArgs->u32IvaWidth;

@@ -1150,6 +1150,8 @@ int rkipc_avs_init() {
 	stAvsGrpAttr.stOutAttr.stRotation.s32Roll = rk_param_get_int("avs:rotation_roll", 0);
 	stAvsGrpAttr.stOutAttr.stRotation.s32Pitch = rk_param_get_int("avs:rotation_pitch", 0);
 	stAvsGrpAttr.stOutAttr.stRotation.s32Yaw = rk_param_get_int("avs:rotation_yaw", 0);
+	stAvsGrpAttr.stOutAttr.fDistance = rk_param_get_double("avs:stitch_distance", 2.35);
+
 	stAvsGrpAttr.bSyncPipe = rk_param_get_int("avs:sync", 1);
 	stAvsGrpAttr.stFrameRate.s32SrcFrameRate = -1;
 	stAvsGrpAttr.stFrameRate.s32DstFrameRate = -1;
@@ -1962,12 +1964,19 @@ int rkipc_vo_init() {
 	}
 	LOG_INFO("RK_MPI_VO_EnableChn success\n");
 
+	RK_U32 width  = rk_param_get_int("avs:avs_width", -1);
+	RK_U32 height = rk_param_get_int("avs:avs_height", -1);
+	RK_FLOAT aspect_ratio = height * 1.0 / width;
+
 	VoChnAttr.bDeflicker = RK_FALSE;
 	VoChnAttr.u32Priority = 1;
-	VoChnAttr.stRect.s32X = 0;
-	VoChnAttr.stRect.s32Y = 0;
 	VoChnAttr.stRect.u32Width = stLayerAttr.stDispRect.u32Width;
-	VoChnAttr.stRect.u32Height = stLayerAttr.stDispRect.u32Height;
+	VoChnAttr.stRect.u32Height = aspect_ratio * stLayerAttr.stDispRect.u32Width;
+	VoChnAttr.stRect.s32X = 0;
+	VoChnAttr.stRect.s32Y = (stLayerAttr.stDispRect.u32Height - VoChnAttr.stRect.u32Height) / 2;
+	LOG_INFO("VO layer %d channel 0 attr <x,y,w,h> = <%d, %d, %d, %d>",
+		VoLayer, VoChnAttr.stRect.s32X, VoChnAttr.stRect.s32Y,
+		VoChnAttr.stRect.u32Width, VoChnAttr.stRect.u32Height);
 	if (g_vo_dev_id == RK3588_VO_DEV_MIPI)
 		VoChnAttr.enRotation = ROTATION_90;
 	ret = RK_MPI_VO_SetChnAttr(VoLayer, 0, &VoChnAttr);

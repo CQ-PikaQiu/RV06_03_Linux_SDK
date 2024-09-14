@@ -49,6 +49,16 @@ network_init()
 
 post_chk()
 {
+	g_platform="RV1106"
+
+	str=`cat /sys/firmware/devicetree/base/model | grep RV1126`
+	if [ -n "$str" ]; then
+		g_platform="RV1126"
+		echo "AOV init in RV1126 Platform"
+	else
+		echo "AOV init in RV1106 Platform"
+	fi
+
 	#TODO: ensure /userdata mount done
 	cnt=0
 	while [ $cnt -lt 30 ];
@@ -71,10 +81,19 @@ post_chk()
 
 	network_init &
 
-	cat /sys/devices/system/cpu/cpufreq/policy0/scaling_available_governors
-	echo userspace > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
-	cat /sys/devices/system/cpu/cpufreq/policy0/scaling_available_frequencies
-	echo 1416000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo userspace >/sys/devices/platform/ffbc0000.npu/devfreq/ffbc0000.npu/governor
+		echo 600000000 >/sys/devices/platform/ffbc0000.npu/devfreq/ffbc0000.npu/userspace/set_freq
+		echo 396000000 > /proc/mpp_service/rkvenc/clk_core
+		echo 960 > /sys/devices/platform/rkcif_mipi_lvds/wait_line
+		echo 960 > /sys/module/video_rkisp/parameters/wait_line
+	else
+		cat /sys/devices/system/cpu/cpufreq/policy0/scaling_available_governors
+		echo userspace > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
+		cat /sys/devices/system/cpu/cpufreq/policy0/scaling_available_frequencies
+		echo 1416000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_setspeed
+	fi
+
 	export sensor_name="sc200ai"
 	if [ "$sensor_name"x = "sc200ai"x ]; then
 		export rk_cam_w=1920
@@ -86,7 +105,12 @@ post_chk()
 		export rk_cam_h=1296
 	fi
 
-	io -4 0xff300048 32000
+	if [ "$g_platform"x = "RV1126"x ];then
+		io -4 0xff3e0048 91000
+	else
+		io -4 0xff300048 32000
+	fi
+
 
 	if [ -e "/userdata/auto_userdata_test" ];then
 		/userdata/auto_test.sh &

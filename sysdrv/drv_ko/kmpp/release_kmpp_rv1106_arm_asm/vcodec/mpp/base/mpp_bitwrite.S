@@ -504,13 +504,13 @@ mpp_exp_golomb_signed:
 	.size	mpp_exp_golomb_signed, .-mpp_exp_golomb_signed
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__FUNCTION__.7252, %object
-	.size	__FUNCTION__.7252, 24
-__FUNCTION__.7252:
+	.type	__FUNCTION__.7253, %object
+	.size	__FUNCTION__.7253, 24
+__FUNCTION__.7253:
 	.ascii	"mpp_writer_put_raw_bits\000"
-	.type	__FUNCTION__.7273, %object
-	.size	__FUNCTION__.7273, 20
-__FUNCTION__.7273:
+	.type	__FUNCTION__.7274, %object
+	.size	__FUNCTION__.7274, 20
+__FUNCTION__.7274:
 	.ascii	"mpp_writer_put_bits\000"
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:

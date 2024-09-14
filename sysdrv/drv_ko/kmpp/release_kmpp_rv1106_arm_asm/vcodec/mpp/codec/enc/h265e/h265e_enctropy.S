@@ -787,13 +787,13 @@ h265e_cabac_flush:
 	.global	g_lpsTable
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__func__.9299, %object
-	.size	__func__.9299, 11
-__func__.9299:
+	.type	__func__.9312, %object
+	.size	__func__.9312, 11
+__func__.9312:
 	.ascii	"initBuffer\000"
-	.type	__func__.9310, %object
-	.size	__func__.9310, 21
-__func__.9310:
+	.type	__func__.9323, %object
+	.size	__func__.9323, 21
+__func__.9323:
 	.ascii	"h265e_reset_enctropy\000"
 	.type	INIT_SPLIT_FLAG, %object
 	.size	INIT_SPLIT_FLAG, 9
@@ -831,25 +831,25 @@ INIT_MERGE_IDX_EXT:
 	.byte	-119
 	.byte	122
 	.byte	-102
-	.type	__func__.9314, %object
-	.size	__func__.9314, 22
-__func__.9314:
+	.type	__func__.9327, %object
+	.size	__func__.9327, 22
+__func__.9327:
 	.ascii	"h265e_cabac_resetBits\000"
-	.type	__func__.9318, %object
-	.size	__func__.9318, 18
-__func__.9318:
+	.type	__func__.9331, %object
+	.size	__func__.9331, 18
+__func__.9331:
 	.ascii	"h265e_cabac_start\000"
-	.type	__func__.9323, %object
-	.size	__func__.9323, 17
-__func__.9323:
+	.type	__func__.9336, %object
+	.size	__func__.9336, 17
+__func__.9336:
 	.ascii	"h265e_cabac_init\000"
-	.type	__func__.9330, %object
-	.size	__func__.9330, 21
-__func__.9330:
+	.type	__func__.9343, %object
+	.size	__func__.9343, 21
+__func__.9343:
 	.ascii	"h265e_cabac_writeOut\000"
-	.type	__func__.9348, %object
-	.size	__func__.9348, 22
-__func__.9348:
+	.type	__func__.9361, %object
+	.size	__func__.9361, 22
+__func__.9361:
 	.ascii	"h265e_cabac_encodeBin\000"
 	.type	g_nextState, %object
 	.size	g_nextState, 256
@@ -1369,17 +1369,17 @@ g_lpsTable:
 	.byte	2
 	.byte	2
 	.byte	2
-	.type	__func__.9354, %object
-	.size	__func__.9354, 25
-__func__.9354:
+	.type	__func__.9367, %object
+	.size	__func__.9367, 25
+__func__.9367:
 	.ascii	"h265e_cabac_encodeBinTrm\000"
-	.type	__func__.9359, %object
-	.size	__func__.9359, 19
-__func__.9359:
+	.type	__func__.9372, %object
+	.size	__func__.9372, 19
+__func__.9372:
 	.ascii	"h265e_cabac_finish\000"
-	.type	__func__.9370, %object
-	.size	__func__.9370, 18
-__func__.9370:
+	.type	__func__.9383, %object
+	.size	__func__.9383, 18
+__func__.9383:
 	.ascii	"h265e_cabac_flush\000"
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:

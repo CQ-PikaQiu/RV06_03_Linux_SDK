@@ -63,7 +63,7 @@ endif
 
 SOURCES_C     = $(wildcard *.c)
 ifneq ($(RK_MEDIA_CHIP), rv1106)
-SOURCES_C     = $(filter-out simple_vi_get_frame_send_venc_rockiva.c simple_vi_bind_venc_rtsp_three_camera_rv1106.c , $(wildcard *.c))
+SOURCES_C     = $(filter-out simple_vi_get_frame_send_vo_rv1106.c simple_vi_bind_venc_change_resolution_rv1106.c simple_vi_bind_venc_rtsp_dev_chn_sharebuf_rv1106.c simple_vi_bind_venc_chn_sharebuf_rv1106.c simple_vi_bind_venc_rtsp_three_camera_rv1106.c simple_vi_bind_venc_wrap_rv1106 simple_vi_bind_venc_combo_rv1106, $(wildcard *.c))
 endif
 
 OBJECTS       = $(basename $(SOURCES_C))
@@ -76,6 +76,7 @@ all:
 simple_build: $(OBJECTS)
 	@mkdir -p $(SIMPLE_OUT_DIR)/bin
 	@mv -f $(OBJECTS) $(SIMPLE_OUT_DIR)/bin
+	@cp simple_cmd.txt $(SIMPLE_OUT_DIR)/bin/
 	$(call MAROC_COPY_PKG_TO_MEDIA_OUTPUT, $(RK_MEDIA_OUTPUT)/bin, $(SIMPLE_OUT_DIR)/bin)
 
 simple_adec_bind_ao: simple_adec_bind_ao.c
@@ -111,16 +112,19 @@ simple_vi_get_frame_send_vo_rv1106: simple_vi_get_frame_send_vo_rv1106.c
 simple_vi_bind_ivs: simple_vi_bind_ivs.c
 	@$(SIMPLE_CC) $^ -o $@ $(SIMPLE_CFLAGS) $(SIMPLE_LD_FLAGS)
 
-simple_vi_get_frame_send_venc_rockiva: simple_vi_get_frame_send_venc_rockiva.c
-	$(SIMPLE_CC) $^ -o $@ $(SIMPLE_CFLAGS) $(SIMPLE_LD_FLAGS) -DROCKIVA -lrockiva -lrknnmrt -I$(RK_MEDIA_OUTPUT)/include/rockiva
-
 simple_vi_bind_venc: simple_vi_bind_venc.c
+	@$(SIMPLE_CC) $^ -o $@ $(SIMPLE_CFLAGS) $(SIMPLE_LD_FLAGS)
+
+simple_vi_bind_venc_chn_sharebuf_rv1106: simple_vi_bind_venc_chn_sharebuf_rv1106.c
 	@$(SIMPLE_CC) $^ -o $@ $(SIMPLE_CFLAGS) $(SIMPLE_LD_FLAGS)
 
 simple_vi_bind_venc_change_resolution_rv1106: simple_vi_bind_venc_change_resolution_rv1106.c
 	@$(SIMPLE_CC) $^ -o $@ $(SIMPLE_CFLAGS) $(SIMPLE_LD_FLAGS)
 
 simple_vi_bind_venc_rtsp: simple_vi_bind_venc_rtsp.c
+	@$(SIMPLE_CC) $^ -o $@ $(SIMPLE_CFLAGS) $(SIMPLE_LD_FLAGS) -lrkaiq -lrtsp
+
+simple_vi_bind_venc_rtsp_dev_chn_sharebuf_rv1106: simple_vi_bind_venc_rtsp_dev_chn_sharebuf_rv1106.c
 	@$(SIMPLE_CC) $^ -o $@ $(SIMPLE_CFLAGS) $(SIMPLE_LD_FLAGS) -lrkaiq -lrtsp
 
 simple_vi_bind_venc_rtsp_three_camera_rv1106: simple_vi_bind_venc_rtsp_three_camera_rv1106.c

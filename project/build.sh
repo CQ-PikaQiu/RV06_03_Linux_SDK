@@ -3,6 +3,7 @@ set -eE
 
 export LC_ALL=C
 export LD_LIBRARY_PATH=
+RECORD_IFS="$IFS"
 
 function unset_env_config_rk()
 {
@@ -42,6 +43,7 @@ export RK_PROJECT_TOP_DIR=$PROJECT_TOP_DIR
 export RK_PROJECT_PATH_MEDIA=$SDK_ROOT_DIR/output/out/media_out
 export RK_PROJECT_PATH_SYSDRV=$SDK_ROOT_DIR/output/out/sysdrv_out
 export RK_PROJECT_PATH_APP=$SDK_ROOT_DIR/output/out/app_out
+export RK_PROJECT_PATH_MCU=$SDK_ROOT_DIR/output/out/mcu_out
 export RK_PROJECT_PATH_PC_TOOLS=$SDK_ROOT_DIR/output/out/sysdrv_out/pc
 export RK_PROJECT_OUTPUT_IMAGE=$SDK_ROOT_DIR/output/image
 export RK_PROJECT_PATH_RAMDISK=$SDK_ROOT_DIR/output/out/ramdisk
@@ -54,6 +56,7 @@ export RK_PROJECT_FILE_ROOTFS_SCRIPT=$RK_PROJECT_OUTPUT/S20linkmount
 export RK_PROJECT_FILE_OEM_SCRIPT=$RK_PROJECT_OUTPUT/S21appinit
 export RK_PROJECT_FILE_RECOVERY_SCRIPT=$RK_PROJECT_PATH_RAMDISK_TINY_ROOTFS/etc/init.d/S15linkmount_recovery
 export RK_PROJECT_FILE_RECOVERY_LUNCH_SCRIPT=$RK_PROJECT_PATH_RAMDISK_TINY_ROOTFS/etc/init.d/S99lunch_recovery
+export RK_PROJECT_FILE_SYSDRV_MCU_BIN=$RK_PROJECT_PATH_MCU/rtthread.bin
 export RK_PROJECT_TOOLS_MKFS_SQUASHFS=mkfs_squashfs.sh
 export RK_PROJECT_TOOLS_MKFS_EXT4=mkfs_ext4.sh
 export RK_PROJECT_TOOLS_MKFS_UBIFS=mkfs_ubi.sh
@@ -237,7 +240,9 @@ function usagesysdrv()
 {
 	check_config RK_KERNEL_DTS RK_KERNEL_DEFCONFIG || return 0
 
-	echo -e "make -C ${SDK_SYSDRV_DIR}"
+	usageuboot
+	usagekernel
+	usagerootfs
 
 	finish_build
 }
@@ -340,10 +345,15 @@ function build_info(){
 	local board_dir board_version_notes
 	board_dir=$(realpath $BOARD_CONFIG)
 	board_dir=$(dirname $board_dir)
-	if ls $board_dir/RK-RELEASE-NOTES-V*.txt &>/dev/null;then
-		board_version_notes=$(ls $board_dir/RK-RELEASE-NOTES-V*.txt |sort -r |head -1)
-		rm -f $SDK_ROOT_DIR/RK-RELEASE-NOTES-V*.txt
-		test ! -f $board_version_notes || cp -f $board_version_notes $SDK_ROOT_DIR
+	board_name="${board_dir/#*BoardConfig_/}"
+	if ls $board_dir/RK-RELEASE-NOTES-${board_name}.txt &>/dev/null;then
+		board_version_notes=$(ls $board_dir/RK-RELEASE-NOTES-${board_name}.txt |sort -r |head -1)
+		if ! diff $board_version_notes $SDK_ROOT_DIR/RK-RELEASE-NOTES-${board_name}.txt &>/dev/null;then
+			rm -f $SDK_ROOT_DIR/RK-RELEASE-NOTES-${board_name}.txt
+			test ! -f $board_version_notes || cp -fs $board_version_notes $SDK_ROOT_DIR || \
+				ln -fs $board_version_notes $SDK_ROOT_DIR || \
+				cp -f $board_version_notes $SDK_ROOT_DIR || echo ""
+		fi
 	fi
 
 	echo "Current Building Information:"
@@ -467,6 +477,34 @@ function build_app() {
 	finish_build
 }
 
+function __modify_file() {
+
+	local flag_opt_match_start flag_opt_match_end todo_file replace_str find_str target_file
+
+	todo_file=$1
+	target_file=$2
+	find_str=$3
+	replace_str=$4
+
+	if [ -n "$5" ];then
+		flag_opt_match_start=$5
+	fi
+
+	if [ -n "$6" ];then
+		flag_opt_match_end=$6
+	fi
+
+	rm -f $target_file
+	while read line
+	do
+		if echo "$line" | grep "$flag_opt_match_start$find_str$flag_opt_match_end";then
+			echo "$find_str$replace_str" >> $target_file
+			continue
+		fi
+		echo "$line" >> $target_file
+	done < $todo_file
+}
+
 function build_uboot(){
 	check_config RK_UBOOT_DEFCONFIG || return 0
 
@@ -474,7 +512,43 @@ function build_uboot(){
 	echo "TARGET_UBOOT_CONFIG=$RK_UBOOT_DEFCONFIG $RK_UBOOT_DEFCONFIG_FRAGMENT"
 	echo "========================================="
 
-	make uboot -C ${SDK_SYSDRV_DIR} UBOOT_CFG=${RK_UBOOT_DEFCONFIG} UBOOT_CFG_FRAGMENT=${RK_UBOOT_DEFCONFIG_FRAGMENT}
+	local uboot_rkbin_ini tempfile target_ini_dir
+	tempfile="$SDK_SYSDRV_DIR/source/uboot/rkbin/$RK_UBOOT_RKBIN_INI_OVERLAY"
+	if [ -f "$tempfile" ];then
+		uboot_rkbin_ini=$tempfile
+	fi
+
+	target_ini_dir=$SDK_SYSDRV_DIR/source/uboot/rkbin/RKBOOT/
+	if [ "$RK_ENABLE_FASTBOOT" = "y" -a -n "$RK_UBOOT_RKBIN_MCU_CFG" ];then
+		uboot_rkbin_ini=$RK_PROJECT_PATH_FASTBOOT/rk_uboot_rkbin_rkboot_overlay.ini
+
+		build_mcu $RK_UBOOT_RKBIN_MCU_CFG "__MCU_CONTINUE__"
+		case $RK_BOOT_MEDIUM in
+			emmc)
+				tempfile=$target_ini_dir/RV1106MINIALL_EMMC_TB.ini
+				;;
+			spi_nor)
+				tempfile=$target_ini_dir/RV1106MINIALL_SPI_NOR_TB.ini
+				;;
+			spi_nand|slc_nand)
+				tempfile=$target_ini_dir/RV1106MINIALL_SPI_NAND_TB.ini
+				;;
+			*)
+				echo "build uboot Not support storage medium type: $RK_BOOT_MEDIUM"
+				finish_build
+				exit 1
+				;;
+		esac
+
+		if [ -f "$RK_PROJECT_FILE_SYSDRV_MCU_BIN" ];then
+			__modify_file $tempfile $uboot_rkbin_ini "Hpmcu=" "$RK_PROJECT_FILE_SYSDRV_MCU_BIN" "^"
+		else
+			msg_error "build mcu <$RK_UBOOT_RKBIN_MCU_CFG> failed"
+			exit 1
+		fi
+	fi
+
+	make uboot -C ${SDK_SYSDRV_DIR} UBOOT_CFG=${RK_UBOOT_DEFCONFIG} UBOOT_CFG_FRAGMENT=${RK_UBOOT_DEFCONFIG_FRAGMENT} SYSDRV_UBOOT_RKBIN_OVERLAY_INI=$uboot_rkbin_ini
 
 	finish_build
 }
@@ -491,6 +565,7 @@ function build_meta(){
 				--rootfs_dir $RK_PROJECT_PACKAGE_ROOTFS_DIR  \
 				--media_dir $RK_PROJECT_PATH_MEDIA           \
 				--pc_tools_dir $RK_PROJECT_PATH_PC_TOOLS     \
+				--boot_medium $RK_BOOT_MEDIUM                \
 				--tiny_meta $RK_TINY_META
 		fi
 	fi
@@ -542,7 +617,10 @@ function build_sysdrv(){
 	echo "============Start building sysdrv============"
 
 	mkdir -p ${RK_PROJECT_OUTPUT_IMAGE}
-	make -C ${SDK_SYSDRV_DIR}
+	build_uboot
+	build_kernel
+	build_rootfs
+	build_recovery
 
 	finish_build
 }
@@ -557,9 +635,15 @@ function build_kernel(){
 	echo "TARGET_KERNEL_CONFIG_FRAGMENT =$RK_KERNEL_DEFCONFIG_FRAGMENT"
 	echo "=========================================="
 
+	local kernel_build_options
+	if [ "$RK_ENABLE_FASTBOOT" = "y" ]; then
+		kernel_build_options="OUTPUT_SYSDRV_RAMDISK_DIR=$RK_PROJECT_PATH_FASTBOOT"
+		mkdir -p $RK_PROJECT_PATH_FASTBOOT
+	fi
 	make kernel -C ${SDK_SYSDRV_DIR} \
-		KERNEL_CFG=${RK_KERNEL_DEFCONFIG} \
+		$kernel_build_options \
 		KERNEL_DTS=${RK_KERNEL_DTS} \
+		KERNEL_CFG=${RK_KERNEL_DEFCONFIG} \
 		KERNEL_CFG_FRAGMENT=${RK_KERNEL_DEFCONFIG_FRAGMENT}
 
 	finish_build
@@ -580,14 +664,28 @@ function build_mcu(){
 		exit 1
 	fi
 
-	$SDK_SYSDRV_DIR/source/mcu/build.sh lunch
-	$SDK_SYSDRV_DIR/source/mcu/build.sh clean
-	$SDK_SYSDRV_DIR/source/mcu/build.sh all
+	local build_opt
+	build_opt=""
+	if [ "$1" = "info" ];then
+		$SDK_SYSDRV_DIR/source/mcu/build.sh info
+		finish_build
+		exit 0
+	elif [ -n "$1" ];then
+		if find $SDK_SYSDRV_DIR/source/mcu -type d -name "$1"; then
+			build_opt="$1"
+		fi
+	fi
 
-	RK_PROJECT_MCU_OUTPUT=$SDK_ROOT_DIR/output/out/mcu_out
-	mkdir -p $RK_PROJECT_MCU_OUTPUT
-	cp $SDK_SYSDRV_DIR/source/mcu/output/image/rtthread.bin $RK_PROJECT_MCU_OUTPUT -fv
-	exit 0
+	$SDK_SYSDRV_DIR/source/mcu/build.sh lunch $build_opt
+	$SDK_SYSDRV_DIR/source/mcu/build.sh clean
+	mkdir -p $RK_PROJECT_PATH_MCU
+	$SDK_SYSDRV_DIR/source/mcu/build.sh all $RK_PROJECT_PATH_MCU
+
+	if [ "$2" = "__MCU_CONTINUE__" ];then
+		return
+	else
+		exit 0
+	fi
 }
 
 function build_recovery(){
@@ -601,12 +699,23 @@ function build_recovery(){
 
 	# make busybox and kernel
 	mkdir -p $RK_PROJECT_PATH_RAMDISK_TINY_ROOTFS $RK_PROJECT_PATH_RAMDISK
-	make busybox_clean -C ${SDK_SYSDRV_DIR}
+
+	if [ -z "$RK_RECOVERY_KERNEL_DEFCONFIG_FRAGMENT" ]; then
+		msg_error "Please define RK_RECOVERY_KERNEL_DEFCONFIG_FRAGMENT on BoardConfig"
+		exit 1
+	fi
+	RK_KERNEL_DEFCONFIG_FRAGMENT="${RK_RECOVERY_KERNEL_DEFCONFIG_FRAGMENT}"
+	make kernel -C ${SDK_SYSDRV_DIR} \
+		OUTPUT_SYSDRV_RAMDISK_DIR=$RK_PROJECT_PATH_RAMDISK \
+		SYSDRV_BUILD_RECOVERY=y \
+		KERNEL_DTS=${RK_KERNEL_DTS} \
+		KERNEL_CFG=${RK_KERNEL_DEFCONFIG} \
+		KERNEL_CFG_FRAGMENT=${RK_KERNEL_DEFCONFIG_FRAGMENT}
+
 	make -C ${SDK_SYSDRV_DIR} \
 		OUTPUT_SYSDRV_RAMDISK_TINY_ROOTFS_DIR=$RK_PROJECT_PATH_RAMDISK_TINY_ROOTFS \
-		OUTPUT_SYSDRV_RAMDISK_DIR=$RK_PROJECT_PATH_RAMDISK \
-		busybox kernel
-	make busybox_clean -C ${SDK_SYSDRV_DIR}
+		SYSDRV_BUILD_RECOVERY=y \
+		busybox
 
 	# copy tools
 	mkdir -p $RK_PROJECT_PATH_PC_TOOLS
@@ -695,12 +804,13 @@ EOF
 
 		# package rootfs in erofs for fastboot if necessary
 		$RK_PROJECT_TOOLS_MKFS_EROFS $RK_PROJECT_PATH_RAMDISK/tiny_rootfs $RK_PROJECT_PATH_RAMDISK/$ramdisk_file
-		cat $RK_PROJECT_PATH_RAMDISK/$ramdisk_file | gzip -n -f -9 > $RK_PROJECT_PATH_RAMDISK/${ramdisk_file}.gz
-		ramdisk_file=${ramdisk_file}.gz
 	else
 		# package rootfs in cpio
 		(cd $RK_PROJECT_PATH_RAMDISK/tiny_rootfs; find . | cpio --quiet -o -H newc > $RK_PROJECT_PATH_RAMDISK/$ramdisk_file )
 	fi
+
+	cat $RK_PROJECT_PATH_RAMDISK/$ramdisk_file | gzip -n -f -9 > $RK_PROJECT_PATH_RAMDISK/${ramdisk_file}.gz
+	ramdisk_file=${ramdisk_file}.gz
 
 	# package recovery.img
 	mkdir -p $RK_PROJECT_OUTPUT_IMAGE
@@ -893,7 +1003,6 @@ function build_all(){
 	echo "TARGET_RAMBOOT_CONFIG=$RK_CFG_RAMBOOT"
 	echo "============================================"
 
-	[[ $RK_ENABLE_RECOVERY = "y" ]] && build_recovery
 	build_sysdrv
 	build_media
 	build_app
@@ -933,7 +1042,7 @@ function build_clean(){
 			rm -rf $RK_PROJECT_PATH_APP
 			;;
 		recovery)
-			msg_warn "TODO !!!"
+			make kernel_clean -C ${SDK_SYSDRV_DIR} SYSDRV_BUILD_RECOVERY=y
 			;;
 		all)
 			make distclean -C ${SDK_SYSDRV_DIR}
@@ -1404,10 +1513,18 @@ function parse_partition_file()
 		if [[ ${part_name%_[a]} == "rootfs" || ${part_name%_[a]} == "system" ]];then
 			case $RK_BOOT_MEDIUM in
 				emmc)
-					SYS_BOOTARGS="${SYS_BOOTARGS} root=/dev/mmcblk0p${part_num}"
+					if [ "$RK_ENABLE_FASTBOOT" = "y" -a "$RK_ENABLE_RAMDISK_PARTITION" = "y" ]; then
+						SYS_BOOTARGS="${SYS_BOOTARGS} root=/dev/rd0"
+					else
+						SYS_BOOTARGS="${SYS_BOOTARGS} root=/dev/mmcblk0p${part_num}"
+					fi
 					;;
 				spi_nor)
-					SYS_BOOTARGS="${SYS_BOOTARGS} root=/dev/mtdblock${part_num}"
+					if [ "$RK_ENABLE_FASTBOOT" = "y" -a "$RK_ENABLE_RAMDISK_PARTITION" = "y" ]; then
+						SYS_BOOTARGS="${SYS_BOOTARGS} root=/dev/rd0"
+					else
+						SYS_BOOTARGS="${SYS_BOOTARGS} root=/dev/mtdblock${part_num}"
+					fi
 					;;
 				spi_nand|slc_nand)
 					SYS_BOOTARGS="${SYS_BOOTARGS} ubi.mtd=${part_num}"
@@ -1694,7 +1811,11 @@ function __GET_TARGET_PARTITION_FS_TYPE()
 				spi_nand|slc_nand)
 					case $part_fs_type in
 						erofs)
-							SYS_BOOTARGS="$SYS_BOOTARGS ubi.block=0,$GLOBAL_ROOT_FILESYSTEM_NAME root=/dev/ubiblock0_0 rootfstype=$part_fs_type"
+							if [ "$RK_ENABLE_FASTBOOT" = "y" -a "$RK_ENABLE_RAMDISK_PARTITION" = "y" ]; then
+								SYS_BOOTARGS="$SYS_BOOTARGS ubi.block=0,$GLOBAL_ROOT_FILESYSTEM_NAME root=/dev/rd0 rootfstype=$part_fs_type"
+							else
+								SYS_BOOTARGS="$SYS_BOOTARGS ubi.block=0,$GLOBAL_ROOT_FILESYSTEM_NAME root=/dev/ubiblock0_0 rootfstype=$part_fs_type"
+							fi
 							;;
 						squashfs)
 							SYS_BOOTARGS="$SYS_BOOTARGS ubi.block=0,$GLOBAL_ROOT_FILESYSTEM_NAME root=/dev/ubiblock0_0 rootfstype=$part_fs_type"
@@ -1753,6 +1874,7 @@ function __PREPARE_BOARD_CFG()
 	__GET_TARGET_PARTITION_FS_TYPE
 	if [ "$RK_ENABLE_FASTBOOT" = "y" ]; then
 		SYS_BOOTARGS="$SYS_BOOTARGS $RK_PARTITION_ARGS"
+		mkdir -p $RK_PROJECT_PATH_FASTBOOT
 	fi
 	__GET_BOOTARGS_FROM_BOARD_CFG
 
@@ -1804,7 +1926,7 @@ function build_mkimg()
 			$RK_PROJECT_TOOLS_MKFS_JFFS2 $src $dst $part_size
 			;;
 		erofs)
-			if [ $part_name == "boot" ]; then
+			if [ $part_name == "boot" -o "$RK_ENABLE_RAMDISK_PARTITION" = "y" ]; then
 				local kernel_dtb_file="$RK_PROJECT_PATH_FASTBOOT/${RK_KERNEL_DTS/%.dts/.dtb}"
 
 				if [ "$RK_BOOT_MEDIUM" = "spi_nand" ]; then
@@ -1817,15 +1939,38 @@ function build_mkimg()
 				$RK_PROJECT_TOOLS_MKFS_EROFS $src $RK_PROJECT_PATH_FASTBOOT/rootfs_erofs.img
 				cat $RK_PROJECT_PATH_FASTBOOT/rootfs_erofs.img | gzip -n -f -9 > $RK_PROJECT_PATH_FASTBOOT/rootfs_erofs.img.gz
 
-				$RK_PROJECT_PATH_PC_TOOLS/mk-fitimage.sh \
-					$RK_PROJECT_PATH_FASTBOOT/boot-tb.its \
-					`realpath $RK_PROJECT_PATH_FASTBOOT/rootfs_erofs.img.gz` \
-					`realpath $RK_PROJECT_PATH_FASTBOOT/Image.gz` \
-					`realpath $kernel_dtb_file` \
-					`realpath $RK_PROJECT_PATH_FASTBOOT/resource.img` \
-					$dst \
-					$RK_ARCH \
-					$fit_target_optional_param
+				if [ "$RK_ENABLE_RAMDISK_PARTITION" = "y" ]; then
+					cp -fa $PROJECT_TOP_DIR/scripts/$RK_CHIP-boot-tb-no-ramdisk.its $RK_PROJECT_PATH_FASTBOOT/boot-tb-no-ramdisk.its
+					cp -fa $PROJECT_TOP_DIR/scripts/$RK_CHIP-boot-tb-ramdisk.its $RK_PROJECT_PATH_FASTBOOT/boot-tb-ramdisk.its
+					$RK_PROJECT_PATH_PC_TOOLS/mk-fitimage.sh \
+						$RK_PROJECT_PATH_FASTBOOT/boot-tb-no-ramdisk.its \
+						`realpath $RK_PROJECT_PATH_FASTBOOT/rootfs_erofs.img.gz` \
+						`realpath $RK_PROJECT_PATH_FASTBOOT/Image.gz` \
+						`realpath $kernel_dtb_file` \
+						`realpath $RK_PROJECT_PATH_FASTBOOT/resource.img` \
+						$RK_PROJECT_OUTPUT_IMAGE/boot.img \
+						$RK_ARCH \
+						$fit_target_optional_param
+					$RK_PROJECT_PATH_PC_TOOLS/mk-fitimage.sh \
+						$RK_PROJECT_PATH_FASTBOOT/boot-tb-ramdisk.its \
+						`realpath $RK_PROJECT_PATH_FASTBOOT/rootfs_erofs.img.gz` \
+						`realpath $RK_PROJECT_PATH_FASTBOOT/Image.gz` \
+						`realpath $kernel_dtb_file` \
+						`realpath $RK_PROJECT_PATH_FASTBOOT/resource.img` \
+						$dst \
+						$RK_ARCH \
+						$fit_target_optional_param
+				else
+					$RK_PROJECT_PATH_PC_TOOLS/mk-fitimage.sh \
+						$RK_PROJECT_PATH_FASTBOOT/boot-tb.its \
+						`realpath $RK_PROJECT_PATH_FASTBOOT/rootfs_erofs.img.gz` \
+						`realpath $RK_PROJECT_PATH_FASTBOOT/Image.gz` \
+						`realpath $kernel_dtb_file` \
+						`realpath $RK_PROJECT_PATH_FASTBOOT/resource.img` \
+						$dst \
+						$RK_ARCH \
+						$fit_target_optional_param
+				fi
 			else
 				if [ "$RK_BOOT_MEDIUM" = "emmc" -o "$RK_BOOT_MEDIUM" = "spi_nor" ];then
 					$RK_PROJECT_TOOLS_MKFS_EROFS $src $dst $RK_EROFS_COMP
@@ -1910,6 +2055,82 @@ function build_mkimg()
 	finish_build
 }
 
+function __RUN_POST_CLEAN_FILES() {
+	echo "================================================================================"
+	IFS=$RECORD_IFS
+
+	local dir_find todo_files
+	if [ -d "$RK_PROJECT_PACKAGE_ROOTFS_DIR" ];then
+		dir_find="$RK_PROJECT_PACKAGE_ROOTFS_DIR"
+	fi
+	if [ -d "$RK_PROJECT_PACKAGE_OEM_DIR" ];then
+		dir_find="$dir_find $RK_PROJECT_PACKAGE_OEM_DIR"
+	fi
+
+	if [ -n "$RK_AUDIO_MODEL" ];then
+		if find $dir_find -type f -name "rkaudio*.rknn" |grep -w $RK_AUDIO_MODEL;then
+			echo "Found config RK_AUDIO_MODEL: $RK_AUDIO_MODEL"
+			todo_files=`find $dir_find -name "rkaudio*.rknn" | grep -v $RK_AUDIO_MODEL || echo ""`
+			if [ -n "$todo_files" ];then
+				rm -rfv $todo_files
+			fi
+		fi
+		if [ "$RK_AUDIO_MODEL" = "NONE" ];then
+			todo_files=`find $dir_find -name "rkaudio*.rknn" `
+			if [ -n "$todo_files" ];then
+				rm -rfv $todo_files
+			fi
+		fi
+	fi
+	echo "================================================================================"
+
+	if [ -n "$RK_AIISP_MODEL" ];then
+		if find $dir_find -type f -name $RK_AIISP_MODEL | grep -w $RK_AIISP_MODEL;then
+			echo "Found config RK_AIISP_MODEL: $RK_AIISP_MODEL"
+			todo_files=`find $dir_find -name "*.aiisp" | grep -v $RK_AIISP_MODEL || echo ""`
+			if [ -n "$todo_files" ];then
+				rm -rfv $todo_files
+			fi
+		fi
+		if [ "$RK_AIISP_MODEL" = "NONE" ];then
+			todo_files=`find $dir_find -name "librkpostisp.so" -o -name "*.aiisp" || echo ""`
+			if [ -n "$todo_files" ];then
+				rm -rfv $todo_files
+			fi
+		fi
+	fi
+	echo "================================================================================"
+
+	if [ -n "$RK_NPU_MODEL" ];then
+		if find $dir_find -type f -name $RK_NPU_MODEL | grep -w $RK_NPU_MODEL ;then
+			todo_files=`find $dir_find -type f -name "object*.data" | grep -v $RK_NPU_MODEL`
+			if [ -n "$todo_files" ];then
+				rm -rfv $todo_files
+			fi
+
+			local target_npu_data
+			target_npu_data=`find $dir_find -type f -name $RK_NPU_MODEL`
+			if [ ! "${RK_NPU_MODEL}x" = "object_detection_pfp.datax" ];then
+				if [ "$RK_BUILD_APP_TO_OEM_PARTITION" = "y" ];then
+					mkdir -p $RK_PROJECT_PACKAGE_OEM_DIR/usr/lib
+					mv $target_npu_data $RK_PROJECT_PACKAGE_OEM_DIR/usr/lib/object_detection_pfp.data
+				else
+					mkdir -p $RK_PROJECT_PACKAGE_ROOTFS_DIR/oem/usr/lib
+					mv $target_npu_data $RK_PROJECT_PACKAGE_ROOTFS_DIR/oem/usr/lib/object_detection_pfp.data
+				fi
+			fi
+		fi
+		if [ "$RK_NPU_MODEL" = "NONE" ];then
+			todo_files=`find $dir_find -name "object*.data" || echo ""`
+			if [ -n "$todo_files" ];then
+				rm -rfv $todo_files
+			fi
+		fi
+	fi
+	echo "================================================================================"
+
+}
+
 function __RUN_POST_BUILD_SCRIPT() {
 	local tmp_path
 	tmp_path=$(realpath $BOARD_CONFIG)
@@ -1917,6 +2138,7 @@ function __RUN_POST_BUILD_SCRIPT() {
 	if [ -f "$tmp_path/$RK_POST_BUILD_SCRIPT" ];then
 		$tmp_path/$RK_POST_BUILD_SCRIPT
 	fi
+	__RUN_POST_CLEAN_FILES
 }
 
 function post_overlay() {
@@ -1938,6 +2160,7 @@ function __RUN_PRE_BUILD_OEM_SCRIPT() {
 	if [ -f "$tmp_path/$RK_PRE_BUILD_OEM_SCRIPT" ];then
 		bash -x $tmp_path/$RK_PRE_BUILD_OEM_SCRIPT
 	fi
+	__RUN_POST_CLEAN_FILES
 }
 
 function build_firmware(){
@@ -1960,7 +2183,7 @@ function build_firmware(){
 	__RUN_PRE_BUILD_OEM_SCRIPT
 
 	if [ "$RK_BUILD_APP_TO_OEM_PARTITION" = "y" ];then
-		rm -rf $RK_PROJECT_PACKAGE_ROOTFS_DIR/oem/*
+		rm -rvf $RK_PROJECT_PACKAGE_ROOTFS_DIR/oem/*
 		build_mkimg $GLOBAL_OEM_NAME $RK_PROJECT_PACKAGE_OEM_DIR
 	else
 		mkdir -p $RK_PROJECT_PACKAGE_ROOTFS_DIR/oem
@@ -1976,7 +2199,11 @@ function build_firmware(){
 	fi
 
 	if [ "$RK_ENABLE_FASTBOOT" = "y" ]; then
-		build_mkimg boot $RK_PROJECT_PACKAGE_ROOTFS_DIR
+		if [ "$RK_ENABLE_RAMDISK_PARTITION" = "y" ]; then
+			build_mkimg $GLOBAL_ROOT_FILESYSTEM_NAME $RK_PROJECT_PACKAGE_ROOTFS_DIR
+		else
+			build_mkimg boot $RK_PROJECT_PACKAGE_ROOTFS_DIR
+		fi
 	else
 		build_mkimg $GLOBAL_ROOT_FILESYSTEM_NAME $RK_PROJECT_PACKAGE_ROOTFS_DIR
 	fi
@@ -2043,10 +2270,15 @@ function __GET_REPO_INFO()
 function build_save(){
 	IMAGE_PATH=$RK_PROJECT_OUTPUT_IMAGE
 	DATE=$(date  +%Y%m%d.%H%M)
+	local BOARD_APP_NAME BOARD_HARDWARE POWER_SOLUTION
 	BOARD_APP_NAME=$(realpath "$BOARD_CONFIG")
+	BOARD_HARDWARE=${BOARD_APP_NAME%-*}
+	POWER_SOLUTION=${BOARD_HARDWARE%-*}
+	POWER_SOLUTION=${POWER_SOLUTION##*-}
+	BOARD_HARDWARE=${BOARD_HARDWARE##*-}
 	BOARD_APP_NAME=${BOARD_APP_NAME##*-}
 	BOARD_APP_NAME=${BOARD_APP_NAME%.mk}
-	STUB_PATH="Image/${RK_BOOT_MEDIUM}_${RK_KERNEL_DTS}_${BOARD_APP_NAME}_${DATE}_RELEASE_TEST"
+	STUB_PATH="Image/${BOARD_APP_NAME}_${RK_BOOT_MEDIUM}_${POWER_SOLUTION}_${BOARD_HARDWARE}_${DATE}_RELEASE_TEST"
 	STUB_PATH="$(echo $STUB_PATH | tr '[:lower:]' '[:upper:]')"
 	export STUB_PATH=$SDK_ROOT_DIR/$STUB_PATH
 	export STUB_PATCH_PATH=$STUB_PATH/PATCHES
@@ -2103,7 +2335,7 @@ if [ "$1" = "lunch" ];then
 fi
 
 if [ "$1" = "mcu" ];then
-	build_mcu
+	build_mcu $2
 fi
 
 if [ ! -e "$BOARD_CONFIG" ];then

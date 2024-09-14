@@ -92,7 +92,7 @@ PKG_CONF_OPTS += -DCMAKE_NO_SYSTEM_FROM_IMPORTED=ON
 PKG_CONF_OPTS += -DCMAKE_SYSTEM_NAME=Linux
 
 ifneq ($(RK_RKIPC_CONFIG),)
-PKG_TARGET := rkfsmk-build thirdlibs-build rkipc-build
+PKG_TARGET := rkipc-build
 endif
 
 ifeq ($(PKG_BIN),)
@@ -102,7 +102,7 @@ endif
 all: $(PKG_TARGET)
 	@echo "build $(PKG_NAME) done"
 
-rkipc-build:
+rkipc-build: rkfsmk-build thirdlibs-build
 	@echo "RK_APP_CHIP is $(RK_APP_CHIP)"
 	@echo "RK_APP_TYPE is $(RK_APP_TYPE)"
 	rm -rf $(PKG_BIN) $(PKG_BUILD); \

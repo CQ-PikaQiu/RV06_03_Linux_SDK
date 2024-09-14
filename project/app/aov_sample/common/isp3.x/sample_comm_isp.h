@@ -72,6 +72,7 @@ RK_S32 SAMPLE_COMM_ISP_Stop(RK_S32 CamId);
 RK_S32 SAMPLE_COMM_ISP_Run(RK_S32 CamId); // isp stop before vi streamoff
 RK_S32 SAMPLE_COMM_ISP_CamGroup_Stop(RK_S32 CamGroupId);
 RK_S32 SAMPLE_COMM_ISP_SetFrameRate(RK_S32 CamId, RK_U32 uFps);
+RK_S32 SAMPLE_COMM_ISP_GetFrameRate(RK_S32 CamId);
 RK_S32 SAMPLE_COMM_ISP_SetMirrorFlip(int CamId, RK_U32 u32Value);
 RK_S32 SAMPLE_COMM_ISP_SetLDCH(RK_U32 CamId, RK_U32 u32Level, RK_BOOL bIfEnable);
 XCamReturn SAMPLE_COMM_ISP_CamGroup_setMeshToLdch(int CamGrpId, uint8_t SetLdchMode,
@@ -80,6 +81,8 @@ RK_S32 SAMPLE_COMM_ISP_CamGroup_SetLDCH(RK_U32 CamId, RK_U32 u32Level, RK_BOOL b
 RK_S32 SAMPLE_COMM_ISP_GetAINrParams(RK_S32 CamId, rk_ainr_param *param);
 RK_S32 SAMPLE_COMM_ISP_SingleFrame(int cam_id);
 RK_S32 SAMPLE_COMM_ISP_MultiFrame(int cam_id);
+RK_BOOL SAMPLE_COMM_ISP_IsExpBigChange(int cam_id);
+RK_BOOL SAMPLE_COMM_ISP_IsExpConverge(int cam_id);
 #ifdef __cplusplus
 #if __cplusplus
 }

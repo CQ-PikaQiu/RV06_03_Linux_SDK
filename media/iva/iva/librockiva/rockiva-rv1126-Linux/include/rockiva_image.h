@@ -43,18 +43,21 @@ RockIvaRetCode ROCKIVA_IMAGE_FreeMem(RockIvaImage *img);
  * @param rect [IN] 裁剪区域
  * @param alignSize [IN] 裁剪图像对齐
  * @param cropImg [OUT] 裁剪图像
+ * @param expandSacle [IN] 扩展区域
+ * @param dstFmt [IN] 目标图像像素格式
  * @return RockIvaRetCode 执行结果
  */
-RockIvaRetCode ROCKIVA_IMAGE_Crop(const RockIvaImage *srcImg, const RockIvaRectangle *rect, int alignSize, RockIvaImage *cropImg, RockIvaRectExpandRatio *expand);
+RockIvaRetCode ROCKIVA_IMAGE_Crop(const RockIvaImage *srcImg, const RockIvaRectangle *rect, int alignSize, RockIvaImage *cropImg, RockIvaRectExpandRatio *expand, RockIvaImageFormat dstFmt);
 
 /**
- * @brief 图像缩放/格式转换
+ * @brief 图像缩放/格式转换/旋转
  * 
  * @param srcImg [IN] 原图像
  * @param dstImg [OUT] 目标图像
+ * @param rotateMode [IN] 旋转参数
  * @return RockIvaRetCode 
  */
-RockIvaRetCode ROCKIVA_IMAGE_Convert(const RockIvaImage *srcImg, RockIvaImage *dstImg);
+RockIvaRetCode ROCKIVA_IMAGE_Convert(const RockIvaImage *srcImg, RockIvaImage *dstImg, RockIvaImageTransform rotateMode);
 
 /**
  * @brief 图像拷贝(目前只能拷贝虚拟地址内存的图像数据,目标图像用完后需要释放)

@@ -38,9 +38,9 @@ typedef struct {
   bool bMultiCam;
   int fps;
 
-  void *iqAddr;
-  int iqLen;
-  void *aiqRttShare;
+#ifdef ENABLE_EIS
+  rk_aiq_mems_sensor_intf_t *pEisApi;
+#endif
 } SAMPLE_ISP_PARAM;
 
 int SAMPLE_ISP_Start(RKADK_U32 u32CamId, SAMPLE_ISP_PARAM stIspParam);
@@ -111,9 +111,10 @@ int SAMPLE_ISP_SET_BypassStreamRotation(RKADK_U32 u32CamId, int S32Rotation);
 int SAMPLE_ISP_SET_Crop(RKADK_U32 u32CamId, rk_aiq_rect_t rect);
 
 int SAMPLE_ISP_Get_AiqHandle(RKADK_U32 u32CamId, RKADK_MW_PTR *ppAiqCtx);
-void SAMPLE_ISP_WakeUpPause(RKADK_U32 u32CamId, bool isSingleMode);
-void SAMPLE_ISP_WakeUpResume(RKADK_U32 u32CamId);
+void SAMPLE_ISP_SingleFrame(RKADK_U32 u32CamId);
+void SAMPLE_ISP_MultiFrame(RKADK_U32 u32CamId);
 int SAMPLE_ISP_GetAINrParams(RKADK_U32 u32CamId, rk_ainr_param *param);
+int SAMPLE_ISP_RegMemsSensorIntf(RKADK_U32 u32CamId, rk_aiq_mems_sensor_intf_t *api);
 
 #endif
 

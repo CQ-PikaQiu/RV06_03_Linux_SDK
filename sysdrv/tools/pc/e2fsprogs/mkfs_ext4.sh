@@ -38,17 +38,17 @@ fi
 
 mkdir -p $(dirname $dst)
 
-echo mkfs.ext4 -d $src -r 1 -N 0 -m 5 -L \"\" -O ^64bit,^huge_file $dst \"$dst_size\"
-mkfs.ext4 -d $src -r 1 -N 0 -m 5 -L "" -O ^64bit,^huge_file $dst "$dst_size"
+echo MKE2FS_CONFIG=$cwd/mke2fs.conf mkfs.ext4 -d $src -r 1 -N 0 -m 5 -L \"\" -O ^64bit,^huge_file $dst \"$dst_size\"
+MKE2FS_CONFIG=$cwd/mke2fs.conf mkfs.ext4 -d $src -r 1 -N 0 -m 5 -L "" -O ^64bit,^huge_file $dst "$dst_size"
 if [ $? != 0 ]; then
 	echo "*** Maybe you need to increase the filesystem size "
 	exit 1
 fi
-echo "resize2fs -M $dst"
-resize2fs -M $dst
-echo "e2fsck -fy  $dst"
-e2fsck -fy  $dst
-echo "tune2fs -m 5  $dst"
-tune2fs -m 5  $dst
-echo "resize2fs -M $dst"
-resize2fs -M $dst
+echo "MKE2FS_CONFIG=$cwd/mke2fs.conf resize2fs -M $dst"
+MKE2FS_CONFIG=$cwd/mke2fs.conf resize2fs -M $dst
+echo "MKE2FS_CONFIG=$cwd/mke2fs.conf e2fsck -fy  $dst"
+MKE2FS_CONFIG=$cwd/mke2fs.conf e2fsck -fy  $dst
+echo "MKE2FS_CONFIG=$cwd/mke2fs.conf tune2fs -m 5  $dst"
+MKE2FS_CONFIG=$cwd/mke2fs.conf tune2fs -m 5  $dst
+echo "MKE2FS_CONFIG=$cwd/mke2fs.conf resize2fs -M $dst"
+MKE2FS_CONFIG=$cwd/mke2fs.conf resize2fs -M $dst

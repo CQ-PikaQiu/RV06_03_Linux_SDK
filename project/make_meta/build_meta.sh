@@ -64,7 +64,7 @@ function __chk_param()
 
 function chk_param()
 {
-	BUILD_META_PARAMS="-v --version -h --help -c --clean --main_sensor_iq --second_sensor_iq -e --export --cam_iqfile --meta_param --output --rootfs_dir --media_dir --pc_tools_dir --tiny_meta"
+	BUILD_META_PARAMS="-v --version -h --help -c --clean --main_sensor_iq --second_sensor_iq -e --export --cam_iqfile --meta_param --output --rootfs_dir --media_dir --pc_tools_dir --boot_medium --tiny_meta"
 
 	local cnt
 	cnt=0
@@ -87,6 +87,7 @@ function chk_param()
 				make -C ${cwd}/sensor_init clean
 				make -C ${cwd}/make_meta clean
 				make -C ${cwd}/zlib clean
+				make -C ${cwd}/mtd_updateEngeen clean
 				rm -rf ${cwd}/meta.img
 				exit 0
 				;;
@@ -120,6 +121,15 @@ function chk_param()
 						rk_meta_param="$rk_meta_param $ret"
 					fi
 				done
+				local tmp
+				tmp=${rk_meta_param##*--cmdline=}
+				CMDLINE=${tmp##*--cmdline}
+				CMDLINE=${CMDLINE%% --*}
+				tmp=${rk_meta_param##*--cmdline}
+				tmp=${tmp#*--}
+				rk_meta_param=${rk_meta_param%%--cmdline*}
+				rk_meta_param="${rk_meta_param} --$tmp"
+				echo "rk_meta_param=${rk_meta_param} --cmdline $CMDLINE"
 				;;
 			--output)
 				rk_project_output_image=$2
@@ -132,6 +142,9 @@ function chk_param()
 				;;
 			--pc_tools_dir)
 				rk_project_path_pc_tools=$2
+				;;
+			--boot_medium)
+				rk_boot_medium=$2
 				;;
 			--tiny_meta)
 				rk_tiny_meta=$2
@@ -217,6 +230,7 @@ msg_info "rk_project_output_image=$rk_project_output_image"
 msg_info "rk_project_package_rootfs_dir=$rk_project_package_rootfs_dir"
 msg_info "rk_project_path_media=$rk_project_path_media"
 msg_info "rk_project_path_pc_tools=$rk_project_path_pc_tools"
+msg_info "rk_boot_medium=$rk_boot_medium"
 msg_info "rk_tiny_meta=$rk_tiny_meta"
 msg_info "SENSOR_IQ_BIN=$SENSOR_IQ_BIN"
 msg_info "SECONDARY_SENSOR_IQ_BIN=$SECONDARY_SENSOR_IQ_BIN"
@@ -230,7 +244,7 @@ else
 META_APP_PARAMETER=""
 fi
 
-support_sensors="os02k10 sc301iot sc501ai sc230ai sc200ai sc3338 sc4336 gc2093 gc3003"
+support_sensors="os02k10 sc301iot sc501ai sc230ai sc200ai sc3338 sc4336 gc2093 gc3003 sc231hai sc2336p"
 
 for item in $support_sensors
 do
@@ -263,7 +277,7 @@ fi
 # get secondary camera sensor iq size
 if [ -f "${SECONDARY_SENSOR_IQ_BIN}" ];then
 	SECONDARY_SENSOR_IQ_BIN_SIZE=`wc -c ${SECONDARY_SENSOR_IQ_BIN} | awk '{print $1}'`
-	META_APP_PARAMETER="$META_APP_PARAMETER --secondary_sensor_iq_bin=${SECONDARY_SENSOR_IQ_BIN}" 
+	META_APP_PARAMETER="$META_APP_PARAMETER --secondary_sensor_iq_bin=${SECONDARY_SENSOR_IQ_BIN}"
 fi
 fi # if [ ! "$rk_tiny_meta" = "y" ];
 
@@ -273,7 +287,12 @@ make -C ${cwd}/sensor_init main_sensor=$SENSOR_TARGET secondary_sensor=$SECONDAR
 
 make -C ${cwd}/zlib
 
-make -C ${cwd}/make_meta
+make -C ${cwd}/mtd_updateEngeen
+
+if [ "$rk_boot_medium" = "spi_nand" ]; then
+	RK_META_IS_NAND_FLASH="YES"
+fi
+make -C ${cwd}/make_meta IS_NAND_FLASH=$RK_META_IS_NAND_FLASH
 
 if [ -d "${rk_project_path_pc_tools}" ]; then
 	cp -f ${cwd}/make_meta/make_meta_host  ${rk_project_path_pc_tools}/
@@ -286,14 +305,13 @@ ${cwd}/make_meta/make_meta_host --create \
 else
 META_APP_PARAMETER="--create \
 	--meta_path=${cwd}/${build_target_image} \
-	--cmdline=${CMDLINE} \
 	--sensor_init=${SENSOR_INIT_BIN} \
 	--sensor_iq_bin=${SENSOR_IQ_BIN} \
 	--ae_awb_tab=${SENSOR_AE_AWB_TABLE} \
 	$META_APP_PARAMETER"
 
 echo "command: ${cwd}/make_meta/make_meta_host $META_APP_PARAMETER"
-${cwd}/make_meta/make_meta_host ${META_APP_PARAMETER}
+${cwd}/make_meta/make_meta_host ${META_APP_PARAMETER} --cmdline="${CMDLINE}"
 
 fi
 

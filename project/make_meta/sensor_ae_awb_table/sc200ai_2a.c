@@ -25,6 +25,7 @@ struct ae_awb_init_cfg g_2a_init_info = {
         .isp_dgain = 0,
         .reg_time = 0,
         .reg_gain = 0,
+        .dcg_mode = 0,
         .ae_stats = {0x0}, // only G channel (l6bit)
         .ae_diff_th = 20,
         .nr_diff_th = 25,

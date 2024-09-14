@@ -102,7 +102,7 @@ static int vi_dev_init() {
 			return -1;
 		}
 		// 1-3.bind dev/pipe
-		stBindPipe.u32Num = pipeId;
+		stBindPipe.u32Num = 1;
 		stBindPipe.PipeId[0] = pipeId;
 		ret = RK_MPI_VI_SetDevBindPipe(devId, &stBindPipe);
 		if (ret != RK_SUCCESS) {
@@ -255,7 +255,7 @@ static void *vi_venc_wrap(void *arg) {
 			printf("RK_MPI_VI_GetChnFrame fail %x\n", s32Ret);
 		}
 
-		if ((g_s32FrameCnt >= 0) && (loopCount > g_s32FrameCnt)) {
+		if ((g_s32FrameCnt >= 0) && (loopCount >= g_s32FrameCnt)) {
 			quit = true;
 			break;
 		}
@@ -265,7 +265,7 @@ static void *vi_venc_wrap(void *arg) {
 	return NULL;
 }
 
-static RK_CHAR optstr[] = "?::d:n:w:h:W:H:c:I:o:r:L:";
+static RK_CHAR optstr[] = "?::d:n:w:h:W:H:C:I:o:r:L:l:D:";
 static void print_usage(const RK_CHAR *name) {
 	printf("usage example:\n");
 	printf("\tNOTE: Only RV1106 and RV1103 support this demo.\n");
@@ -274,12 +274,14 @@ static void print_usage(const RK_CHAR *name) {
 	printf("\t-h | --height: VI height, Default:1440\n");
 	printf("\t-W | --maxWidth: sensor output resolution max width, Default:2560\n");
 	printf("\t-H | --maxHeight: sensor output resolution max height, Default:1440\n");
-	printf("\t-c | --frame_cnt: frame number of output, Default:-1\n");
+	printf("\t-l | --frame_cnt: frame number of output, Default:-1\n");
 	printf("\t-I | --camid: camera ctx id, Default 0. "
 	       "0:rkisp_mainpath,1:rkisp_selfpath,2:rkisp_bypasspath\n");
-	printf("\t-o: output path, Default:0  0 or 1 /data/test_0.yuv\n");
+	printf("\t-o: output path, Default:0  0 or 1 /data/venc_wrap_0.bin\n");
 	printf("\t-r: enable wrap mode, Default: 1\n");
 	printf("\t-L: config wrap line, line cnt [128, maxHeight]\n");
+	printf("\t-C | --codec: encode type, Default: 8 (h264), Value: 8 (h264), 12 (h265), 9 (mjpeg)\n");
+	printf("\t-D | --de_breath: destory breath, Default: 0 (disabled), Value: 0 (disabled), 1 (enabled)\n");
 }
 static const struct option long_options[] = {
     {"aiq", optional_argument, NULL, 'a'},
@@ -312,9 +314,12 @@ int main(int argc, char *argv[]) {
 	RK_S32 s32chnlId = 0;
 	RK_U32 u32DeBreath = 0;
 	int c;
+	int ret = -1;
+
 	VI_SAVE_FILE_INFO_S stDebugFile;
 
 	RK_U32 u32DstCodec = RK_VIDEO_ID_HEVC;
+	g_u32WrapLine = u32Height / 4;
 	g_bWrapEn = RK_TRUE;
 
 	while ((c = getopt_long(argc, argv, optstr, long_options, NULL)) != -1) {
@@ -356,7 +361,7 @@ int main(int argc, char *argv[]) {
 		case '?':
 		default:
 			print_usage(argv[0]);
-			return 0;
+			return -1;
 		}
 	}
 
@@ -384,13 +389,13 @@ int main(int argc, char *argv[]) {
 	stDebugFile.bCfg = (RK_BOOL)savefile;
 	g_u8SaveCfg = stDebugFile.bCfg;
 	g_venc_cfgs[0].bOutDebugCfg = g_u8SaveCfg;
-	// memcpy(stDebugFile.aFilePath, "/userdata/", strlen("/data"));
-	strcpy(stDebugFile.aFilePath, "/userdata/");
-
-	snprintf(stDebugFile.aFileName, sizeof(stDebugFile.aFileName), "venc_wrap_%d.bin",
+	snprintf(stDebugFile.aFileName, sizeof(stDebugFile.aFileName), "/data/venc_wrap_%d.bin",
 	         s32chnlId);
-	RK_MPI_VI_ChnSaveFile(0, 0, &stDebugFile);
-
+	g_venc_cfgs[0].fp = fopen(stDebugFile.aFileName, "w");
+	if (!g_venc_cfgs[0].fp) {
+		printf("ERROR: open file: %s fail, exit\n", stDebugFile.aFileName);
+		return -1;
+	}
 	MPP_CHN_S stSrcChn;
 	MPP_CHN_S stDestChn[2];
 	stSrcChn.enModId = RK_ID_VI;
@@ -423,16 +428,18 @@ int main(int argc, char *argv[]) {
 		usleep(50000);
 	}
 	pthread_join(main_thread, NULL);
-
+	if (!g_venc_cfgs[0].fp) {
+		close(g_venc_cfgs[0].fp);
+	}
 	s32Ret = RK_MPI_VI_DisableChn(0, 0);
 	printf("RK_MPI_VI_DisableChn %x\n", s32Ret);
 
 	s32Ret = RK_MPI_VI_DisableDev(0);
 	printf("RK_MPI_VI_DisableDev %x\n", s32Ret);
-
+	ret = 0;
 __FAILED:
 	printf("test running exit:%d\n", s32Ret);
 	RK_MPI_SYS_Exit();
 
-	return 0;
+	return ret;
 }

@@ -419,41 +419,41 @@ hal_bufs_get_buf:
 	.size	hal_bufs_get_buf, .-hal_bufs_get_buf
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__FUNCTION__.7723, %object
-	.size	__FUNCTION__.7723, 15
-__FUNCTION__.7723:
+	.type	__FUNCTION__.7724, %object
+	.size	__FUNCTION__.7724, 15
+__FUNCTION__.7724:
 	.ascii	"hal_bufs_clear\000"
-	.type	__func__.7737, %object
-	.size	__func__.7737, 14
-__func__.7737:
+	.type	__func__.7738, %object
+	.size	__func__.7738, 14
+__func__.7738:
 	.ascii	"hal_bufs_init\000"
-	.type	__FUNCTION__.7738, %object
-	.size	__FUNCTION__.7738, 14
-__FUNCTION__.7738:
+	.type	__FUNCTION__.7739, %object
+	.size	__FUNCTION__.7739, 14
+__FUNCTION__.7739:
 	.ascii	"hal_bufs_init\000"
-	.type	__func__.7744, %object
-	.size	__func__.7744, 16
-__func__.7744:
+	.type	__func__.7745, %object
+	.size	__func__.7745, 16
+__func__.7745:
 	.ascii	"hal_bufs_deinit\000"
-	.type	__FUNCTION__.7745, %object
-	.size	__FUNCTION__.7745, 16
-__FUNCTION__.7745:
+	.type	__FUNCTION__.7746, %object
+	.size	__FUNCTION__.7746, 16
+__FUNCTION__.7746:
 	.ascii	"hal_bufs_deinit\000"
-	.type	__func__.7756, %object
-	.size	__func__.7756, 15
-__func__.7756:
+	.type	__func__.7757, %object
+	.size	__func__.7757, 15
+__func__.7757:
 	.ascii	"hal_bufs_setup\000"
-	.type	__FUNCTION__.7757, %object
-	.size	__FUNCTION__.7757, 15
-__FUNCTION__.7757:
+	.type	__FUNCTION__.7758, %object
+	.size	__FUNCTION__.7758, 15
+__FUNCTION__.7758:
 	.ascii	"hal_bufs_setup\000"
-	.type	__func__.7776, %object
-	.size	__func__.7776, 17
-__func__.7776:
+	.type	__func__.7777, %object
+	.size	__func__.7777, 17
+__func__.7777:
 	.ascii	"hal_bufs_get_buf\000"
-	.type	__FUNCTION__.7779, %object
-	.size	__FUNCTION__.7779, 17
-__FUNCTION__.7779:
+	.type	__FUNCTION__.7780, %object
+	.size	__FUNCTION__.7780, 17
+__FUNCTION__.7780:
 	.ascii	"hal_bufs_get_buf\000"
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:

@@ -297,13 +297,13 @@ hal_jpege_init:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__FUNCTION__.9244, %object
-	.size	__FUNCTION__.9244, 17
-__FUNCTION__.9244:
+	.type	__FUNCTION__.9258, %object
+	.size	__FUNCTION__.9258, 17
+__FUNCTION__.9258:
 	.ascii	"hal_jpege_deinit\000"
-	.type	__FUNCTION__.9234, %object
-	.size	__FUNCTION__.9234, 15
-__FUNCTION__.9234:
+	.type	__FUNCTION__.9248, %object
+	.size	__FUNCTION__.9248, 15
+__FUNCTION__.9248:
 	.ascii	"hal_jpege_init\000"
 	.type	hal_api_jpege_v2, %object
 	.size	hal_api_jpege_v2, 64

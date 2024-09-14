@@ -25,6 +25,7 @@ rk_post_isp-build:
 	@rm -rf $(PKG_BIN);
 	@mkdir -p $(PKG_BIN)/lib;
 	cp -rfa $(RK_MEDIA_CHIP)/*.so  $(PKG_BIN)/lib;
+	cp -rfa $(RK_MEDIA_CHIP)/*.a  $(PKG_BIN)/lib;
 ifeq ($(RK_MEDIA_CHIP), rv1106)
 	cp -rfa $(RK_MEDIA_CHIP)/*.aiisp  $(PKG_BIN)/lib;
 else

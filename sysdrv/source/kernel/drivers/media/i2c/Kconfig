@@ -11,6 +11,13 @@ config VIDEO_CAM_SLEEP_WAKEUP
 	help
 	  Support for sensor sleep and wake up.
 
+config VIDEO_ROCKCHIP_THUNDER_BOOT_SETUP
+	bool "Enable camera Thunderboot setup function"
+	depends on ROCKCHIP_THUNDER_BOOT
+	default y
+	help
+	  Say y if you need camera Thunderboot setup functions.
+
 comment "IR I2C driver auto-selected by 'Autoselect ancillary drivers'"
 	depends on MEDIA_SUBDRV_AUTOSELECT && I2C && RC_CORE
 
@@ -899,6 +906,11 @@ config VIDEO_RK_IRCUT
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called rk_ircut.
+
+config VIDEO_LIGHT_CTL
+	tristate "video light ctrl support"
+	help
+	  This driver supports video light ctrl.
 
 endmenu
 
@@ -2030,6 +2042,16 @@ config VIDEO_SC230AI
 	  This is a Video4Linux2 sensor driver for the SmartSens
 	  SC230AI camera.
 
+config VIDEO_SC231HAI
+	tristate "SmartSens SC231HAI sensor support"
+	depends on I2C && VIDEO_V4L2
+	select MEDIA_CONTROLLER
+	select VIDEO_V4L2_SUBDEV_API
+	select V4L2_FWNODE
+	help
+	  This is a Video4Linux2 sensor driver for the SmartSens
+	  SC231HAI camera.
+
 config VIDEO_SC2310
 	tristate "SmartSens SC2310 sensor support"
 	depends on I2C && VIDEO_V4L2
@@ -2049,6 +2071,16 @@ config VIDEO_SC2336
 	help
 	  This is a Video4Linux2 sensor driver for the SmartSens
 	  SC2336 camera.
+
+config VIDEO_SC2336P
+	tristate "SmartSens SC2336P sensor support"
+	depends on I2C && VIDEO_V4L2
+	select MEDIA_CONTROLLER
+	select VIDEO_V4L2_SUBDEV_API
+	select V4L2_FWNODE
+	help
+	  This is a Video4Linux2 sensor driver for the SmartSens
+	  SC2336P camera.
 
 config VIDEO_SC2355
 	tristate "SmartSens SC2355 sensor support"
@@ -2079,6 +2111,16 @@ config VIDEO_SC3336
 	help
 	  This is a Video4Linux2 sensor driver for the SmartSens
 	  SC3336 camera.
+
+config VIDEO_SC3336P
+       tristate "SmartSens SC3336P sensor support"
+       depends on I2C && VIDEO_V4L2
+       select MEDIA_CONTROLLER
+       select VIDEO_V4L2_SUBDEV_API
+       select V4L2_FWNODE
+       help
+         This is a Video4Linux2 sensor driver for the SmartSens
+         SC3336P camera.
 
 config VIDEO_SC3338
 	tristate "SmartSens SC3338 sensor support"
@@ -2219,6 +2261,16 @@ config VIDEO_SC830AI
 	help
 	  This is a Video4Linux2 sensor driver for the SmartSens
 	  SC830AI camera.
+
+config VIDEO_SC831AI
+	tristate "SmartSens SC831AI sensor support"
+	depends on I2C && VIDEO_V4L2
+	select MEDIA_CONTROLLER
+	select VIDEO_V4L2_SUBDEV_API
+	select V4L2_FWNODE
+	help
+	  This is a Video4Linux2 sensor driver for the SmartSens
+	  SC831AI camera.
 
 config VIDEO_SC850SL
 	tristate "SmartSens SC850SL sensor support"

@@ -141,7 +141,7 @@ int vi_dev_init() {
 			return -1;
 		}
 		// 1-3.bind dev/pipe
-		stBindPipe.u32Num = pipeId;
+		stBindPipe.u32Num = 1;
 		stBindPipe.PipeId[0] = pipeId;
 		ret = RK_MPI_VI_SetDevBindPipe(devId, &stBindPipe);
 		if (ret != RK_SUCCESS) {
@@ -321,6 +321,7 @@ int main(int argc, char *argv[]) {
 	int savefile = 0;
 	RK_S32 s32chnlId = 0;
 	int c;
+	int ret = -1;
 	char *iq_dir = NULL;
 	VI_SAVE_FILE_INFO_S stDebugFile;
 #ifdef RKAIQ
@@ -362,7 +363,7 @@ int main(int argc, char *argv[]) {
 		case '?':
 		default:
 			print_usage(argv[0]);
-			return 0;
+			return -1;
 		}
 	}
 
@@ -416,9 +417,10 @@ int main(int argc, char *argv[]) {
 #ifdef RKAIQ
 	SIMPLE_COMM_ISP_Stop(0);
 #endif
+	ret = 0;
 __FAILED:
 	RK_LOGE("test running exit:%d", s32Ret);
 	RK_MPI_SYS_Exit();
 
-	return 0;
+	return ret;
 }

@@ -1603,97 +1603,97 @@ mpp_packet_set_temporal_id:
 	.size	mpp_packet_set_temporal_id, .-mpp_packet_set_temporal_id
 	.section	.rodata
 	.set	.LANCHOR1,. + 0
-	.type	__FUNCTION__.34712, %object
-	.size	__FUNCTION__.34712, 21
-__FUNCTION__.34712:
+	.type	__FUNCTION__.34634, %object
+	.size	__FUNCTION__.34634, 21
+__FUNCTION__.34634:
 	.ascii	"mpp_packet_pool_init\000"
-	.type	__FUNCTION__.34716, %object
-	.size	__FUNCTION__.34716, 23
-__FUNCTION__.34716:
+	.type	__FUNCTION__.34638, %object
+	.size	__FUNCTION__.34638, 23
+__FUNCTION__.34638:
 	.ascii	"mpp_packet_pool_deinit\000"
-	.type	__func__.34723, %object
-	.size	__func__.34723, 20
-__func__.34723:
+	.type	__func__.34645, %object
+	.size	__func__.34645, 20
+__func__.34645:
 	.ascii	"check_is_mpp_packet\000"
-	.type	__func__.34730, %object
-	.size	__func__.34730, 15
-__func__.34730:
+	.type	__func__.34652, %object
+	.size	__func__.34652, 15
+__func__.34652:
 	.ascii	"mpp_packet_new\000"
-	.type	__FUNCTION__.34731, %object
-	.size	__FUNCTION__.34731, 15
-__FUNCTION__.34731:
+	.type	__FUNCTION__.34653, %object
+	.size	__FUNCTION__.34653, 15
+__FUNCTION__.34653:
 	.ascii	"mpp_packet_new\000"
-	.type	__func__.34765, %object
-	.size	__func__.34765, 24
-__func__.34765:
+	.type	__func__.34687, %object
+	.size	__func__.34687, 24
+__func__.34687:
 	.ascii	"mpp_packet_new_ring_buf\000"
-	.type	__FUNCTION__.34766, %object
-	.size	__FUNCTION__.34766, 24
-__FUNCTION__.34766:
+	.type	__FUNCTION__.34688, %object
+	.size	__FUNCTION__.34688, 24
+__FUNCTION__.34688:
 	.ascii	"mpp_packet_new_ring_buf\000"
-	.type	__FUNCTION__.34744, %object
-	.size	__FUNCTION__.34744, 25
-__FUNCTION__.34744:
+	.type	__FUNCTION__.34666, %object
+	.size	__FUNCTION__.34666, 25
+__FUNCTION__.34666:
 	.ascii	"mpp_packet_vsm_buf_alloc\000"
-	.type	__FUNCTION__.34774, %object
-	.size	__FUNCTION__.34774, 29
-__FUNCTION__.34774:
+	.type	__FUNCTION__.34696, %object
+	.size	__FUNCTION__.34696, 29
+__FUNCTION__.34696:
 	.ascii	"mpp_packet_ring_buf_put_used\000"
-	.type	__func__.34782, %object
-	.size	__func__.34782, 16
-__func__.34782:
+	.type	__func__.34704, %object
+	.size	__func__.34704, 16
+__func__.34704:
 	.ascii	"mpp_packet_init\000"
-	.type	__func__.34789, %object
-	.size	__func__.34789, 28
-__func__.34789:
+	.type	__func__.34711, %object
+	.size	__func__.34711, 28
+__func__.34711:
 	.ascii	"mpp_packet_init_with_buffer\000"
-	.type	__FUNCTION__.34790, %object
-	.size	__FUNCTION__.34790, 28
-__FUNCTION__.34790:
+	.type	__FUNCTION__.34712, %object
+	.size	__FUNCTION__.34712, 28
+__FUNCTION__.34712:
 	.ascii	"mpp_packet_init_with_buffer\000"
-	.type	__func__.34795, %object
-	.size	__func__.34795, 18
-__func__.34795:
+	.type	__func__.34717, %object
+	.size	__func__.34717, 18
+__func__.34717:
 	.ascii	"mpp_packet_deinit\000"
-	.type	__FUNCTION__.34796, %object
-	.size	__FUNCTION__.34796, 18
-__FUNCTION__.34796:
+	.type	__FUNCTION__.34718, %object
+	.size	__FUNCTION__.34718, 18
+__FUNCTION__.34718:
 	.ascii	"mpp_packet_deinit\000"
-	.type	__FUNCTION__.34804, %object
-	.size	__FUNCTION__.34804, 19
-__FUNCTION__.34804:
+	.type	__FUNCTION__.34726, %object
+	.size	__FUNCTION__.34726, 19
+__FUNCTION__.34726:
 	.ascii	"mpp_packet_set_pos\000"
-	.type	__func__.34867, %object
-	.size	__func__.34867, 16
-__func__.34867:
+	.type	__func__.34789, %object
+	.size	__func__.34789, 16
+__func__.34789:
 	.ascii	"mpp_packet_read\000"
-	.type	__FUNCTION__.34868, %object
-	.size	__FUNCTION__.34868, 16
-__FUNCTION__.34868:
+	.type	__FUNCTION__.34790, %object
+	.size	__FUNCTION__.34790, 16
+__FUNCTION__.34790:
 	.ascii	"mpp_packet_read\000"
-	.type	__func__.34878, %object
-	.size	__func__.34878, 17
-__func__.34878:
+	.type	__func__.34800, %object
+	.size	__func__.34800, 17
+__func__.34800:
 	.ascii	"mpp_packet_write\000"
-	.type	__FUNCTION__.34879, %object
-	.size	__FUNCTION__.34879, 17
-__FUNCTION__.34879:
+	.type	__FUNCTION__.34801, %object
+	.size	__FUNCTION__.34801, 17
+__FUNCTION__.34801:
 	.ascii	"mpp_packet_write\000"
-	.type	__func__.34888, %object
-	.size	__func__.34888, 16
-__func__.34888:
+	.type	__func__.34810, %object
+	.size	__func__.34810, 16
+__func__.34810:
 	.ascii	"mpp_packet_copy\000"
-	.type	__func__.34895, %object
-	.size	__func__.34895, 18
-__func__.34895:
+	.type	__func__.34817, %object
+	.size	__func__.34817, 18
+__func__.34817:
 	.ascii	"mpp_packet_append\000"
-	.type	__func__.34901, %object
-	.size	__func__.34901, 20
-__func__.34901:
+	.type	__func__.34823, %object
+	.size	__func__.34823, 20
+__func__.34823:
 	.ascii	"mpp_packet_set_flag\000"
-	.type	__func__.34906, %object
-	.size	__func__.34906, 20
-__func__.34906:
+	.type	__func__.34828, %object
+	.size	__func__.34828, 20
+__func__.34828:
 	.ascii	"mpp_packet_get_flag\000"
 	.bss
 	.align	2

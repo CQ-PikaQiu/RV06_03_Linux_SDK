@@ -34,7 +34,7 @@ RK_S32 UACAmixer::set(AUDIO_DEV AmixDevId, const char *ctrlName,
 }
 
 RK_S32 UACAmixer::get(AUDIO_DEV AmixDevId, const char *ctrlName) {
-  return RK_MPI_AMIX_GetControl(AmixDevId, ctrlName);
+  return RK_MPI_AMIX_GetControl(AmixDevId, ctrlName, NULL);
 }
 
 void UACAmixer::dumpContents(AUDIO_DEV AmixDevId) {

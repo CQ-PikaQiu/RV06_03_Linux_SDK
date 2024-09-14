@@ -64,7 +64,7 @@ vsm_buf_register_fn2vcocdec:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
 	ldr	r3, .L3
-	movw	r1, #554
+	movw	r1, #563
 	str	r0, [r3]
 	ldr	r0, .L3+4
 	b	printk
@@ -95,7 +95,7 @@ _copy_from_user:
 	mov	r4, r2
 	ldr	r3, [r3, #8]
 	.syntax unified
-@ 157 "./include/linux/uaccess.h" 1
+@ 157 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/include/linux/uaccess.h" 1
 	.syntax unified
 adds r5, r1, r2; sbcscc r5, r5, r3; movcc r3, #0
 @ 0 "" 2
@@ -137,7 +137,7 @@ _copy_to_user:
 	bic	r3, r3, #31
 	ldr	r3, [r3, #8]
 	.syntax unified
-@ 177 "./include/linux/uaccess.h" 1
+@ 177 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/include/linux/uaccess.h" 1
 	.syntax unified
 adds r5, r0, r2; sbcscc r5, r5, r3; movcc r3, #0
 @ 0 "" 2
@@ -353,7 +353,7 @@ venc_proc_debug:
 	sub	sp, sp, #44
 	mov	r5, r0
 	bl	mpp_vcodec_get_enc_module_entry
-	movw	r4, #10784
+	movw	r4, #13856
 	ldr	r3, [r0, r4]
 	mov	r6, r0
 	cbz	r3, .L59
@@ -378,10 +378,10 @@ venc_proc_debug:
 	ldr	r1, .L69+20
 	bl	seq_printf
 .L59:
-	ldr	r8, .L69+64
+	ldr	r7, .L69+24
 	movs	r6, #0
-	ldr	r9, .L69+68
-	ldr	r10, .L69+72
+	ldr	r8, .L69+104
+	ldr	r9, .L69+108
 .L61:
 	movs	r1, #1
 	mov	r0, r6
@@ -391,53 +391,86 @@ venc_proc_debug:
 	cmp	r3, #0
 	beq	.L60
 	ldr	fp, [r0, #36]
-	mov	r1, r8
-	ldr	r7, [r0, #24]
+	mov	r1, r7
+	ldr	r10, [r0, #24]
 	mov	r0, r5
 	bl	seq_puts
-	ldr	r3, .L69+24
-	ldr	r2, .L69+28
+	ldr	r3, .L69+28
+	ldr	r2, .L69+32
 	mov	r0, r5
-	ldr	r1, .L69+32
+	ldr	r1, .L69+36
 	str	r3, [sp, #20]
-	ldr	r3, .L69+36
-	strd	r10, r9, [sp, #24]
-	str	r3, [sp, #16]
 	ldr	r3, .L69+40
-	str	r3, [sp, #12]
+	strd	r9, r8, [sp, #24]
+	str	r3, [sp, #16]
 	ldr	r3, .L69+44
-	str	r3, [sp, #8]
+	str	r3, [sp, #12]
 	ldr	r3, .L69+48
-	str	r3, [sp, #4]
+	str	r3, [sp, #8]
 	ldr	r3, .L69+52
-	str	r3, [sp]
+	str	r3, [sp, #4]
 	ldr	r3, .L69+56
+	str	r3, [sp]
+	ldr	r3, .L69+60
 	bl	seq_printf
-	ldrd	r2, [r4, #112]
+	ldrd	r2, [r4, #160]
 	ldr	r1, [r4, #84]
-	cmp	r7, #0
+	cmp	r10, #0
 	ldr	r0, [r4, #88]
-	ite	le
-	movle	r7, #0
-	movgt	r7, #1
-	cmp	fp, #0
 	strd	r2, [sp, #32]
-	ldrd	r2, [r4, #104]
+	ldrd	r2, [r4, #152]
 	strd	r2, [sp, #24]
 	mov	r2, r6
-	ldr	r3, [r4, #124]
+	ldr	r3, [r4, #172]
 	str	r3, [sp, #20]
-	ldr	r3, [r4, #120]
+	ldr	r3, [r4, #168]
 	str	r1, [sp, #8]
-	ldr	r1, .L69+60
+	ldr	r1, .L69+64
 	strd	r0, r3, [sp, #12]
 	mov	r0, r5
-	ldr	r3, [r4, #92]
-	str	r7, [sp]
+	ldr	r3, [r4, #136]
 	str	r3, [sp, #4]
 	ite	le
 	movle	r3, #0
 	movgt	r3, #1
+	cmp	fp, #0
+	str	r3, [sp]
+	ite	le
+	movle	r3, #0
+	movgt	r3, #1
+	bl	seq_printf
+	ldr	r3, .L69+68
+	ldr	r2, .L69+32
+	mov	r0, r5
+	ldr	r1, .L69+72
+	str	r3, [sp, #20]
+	ldr	r3, .L69+76
+	str	r3, [sp, #16]
+	ldr	r3, .L69+80
+	str	r3, [sp, #12]
+	ldr	r3, .L69+84
+	str	r3, [sp, #8]
+	ldr	r3, .L69+88
+	str	r3, [sp, #4]
+	ldr	r3, .L69+92
+	str	r3, [sp]
+	ldr	r3, .L69+96
+	bl	seq_printf
+	ldrd	r10, [r4, #128]
+	ldr	r3, [r4, #92]
+	ldr	r0, [r4, #96]
+	ldr	r2, [r4, #100]
+	ldr	r1, .L69+100
+	strd	r10, [sp, #32]
+	ldrd	r10, [r4, #120]
+	strd	r10, [sp, #24]
+	ldrd	r10, [r4, #112]
+	strd	r10, [sp, #16]
+	ldrd	r10, [r4, #104]
+	strd	r0, r2, [sp]
+	mov	r2, r6
+	mov	r0, r5
+	strd	r10, [sp, #8]
 	bl	seq_printf
 	mov	r2, r6
 	ldr	r1, [r4, #44]
@@ -466,6 +499,7 @@ venc_proc_debug:
 	.word	.LC6
 	.word	.LC4
 	.word	.LC8
+	.word	.LC9
 	.word	.LC15
 	.word	.LC11
 	.word	.LC12
@@ -476,7 +510,15 @@ venc_proc_debug:
 	.word	.LC20
 	.word	.LC10
 	.word	.LC21
-	.word	.LC9
+	.word	.LC24
+	.word	.LC23
+	.word	.LC25
+	.word	.LC26
+	.word	.LC27
+	.word	.LC28
+	.word	.LC29
+	.word	.LC22
+	.word	.LC30
 	.word	.LC13
 	.word	.LC14
 	.fnend
@@ -522,11 +564,11 @@ vcodec_init:
 .L77:
 	.align	2
 .L76:
-	.word	.LC22
+	.word	.LC31
 	.word	mpp_service_driver
-	.word	.LC23
+	.word	.LC32
 	.word	.LANCHOR1
-	.word	.LC24
+	.word	.LC33
 	.fnend
 	.size	vcodec_init, .-vcodec_init
 	.text
@@ -830,13 +872,13 @@ vcodec_ioctl:
 .L141:
 	.align	2
 .L140:
-	.word	.LC25
-	.word	.LC26
+	.word	.LC34
+	.word	.LC35
 	.word	1074025985
-	.word	.LC29
-	.word	.LC27
-	.word	.LC28
-	.word	.LC30
+	.word	.LC38
+	.word	.LC36
+	.word	.LC37
+	.word	.LC39
 	.fnend
 	.size	vcodec_ioctl, .-vcodec_ioctl
 	.align	1
@@ -863,7 +905,7 @@ vcodec_close:
 	add	r3, r4, #16
 	pld	[r3]
 	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
+@ 223 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_add
 1:	ldrex	r2, [r3]
 	add	r2, r2, #1
@@ -893,7 +935,7 @@ vcodec_close:
 .L154:
 	.align	2
 .L153:
-	.word	.LC31
+	.word	.LC40
 	.fnend
 	.size	vcodec_close, .-vcodec_close
 	.align	1
@@ -1023,7 +1065,7 @@ vcodec_probe:
 	bls	.L166
 .L165:
 	ldr	r2, .L185+20
-	movw	r1, #419
+	mov	r1, #428
 	ldr	r0, .L185+24
 	bl	printk
 	movs	r3, #0
@@ -1038,7 +1080,7 @@ vcodec_probe:
 	bls	.L168
 .L167:
 	ldr	r2, .L185+28
-	mov	r1, #426
+	movw	r1, #435
 	ldr	r0, .L185+24
 	bl	printk
 	movs	r3, #0
@@ -1054,7 +1096,7 @@ vcodec_probe:
 	bls	.L170
 .L169:
 	ldr	r2, .L185+32
-	movw	r1, #433
+	mov	r1, #442
 	ldr	r0, .L185+24
 	bl	printk
 	movs	r3, #0
@@ -1081,18 +1123,18 @@ vcodec_probe:
 	.align	2
 .L185:
 	.word	.LANCHOR0+12
-	.word	.LC32
-	.word	.LC34
-	.word	.LC35
-	.word	.LC36
-	.word	.LC33
-	.word	.LC37
-	.word	.LC38
-	.word	.LC39
-	.word	venc_proc_debug
-	.word	.LC40
-	.word	vdec_proc_debug
 	.word	.LC41
+	.word	.LC43
+	.word	.LC44
+	.word	.LC45
+	.word	.LC42
+	.word	.LC46
+	.word	.LC47
+	.word	.LC48
+	.word	venc_proc_debug
+	.word	.LC49
+	.word	vdec_proc_debug
+	.word	.LC50
 	.word	.LANCHOR2
 	.fnend
 	.size	vcodec_probe, .-vcodec_probe
@@ -1112,7 +1154,7 @@ get_mpidev_ops:
 	ldr	r4, .L189
 	ldr	r2, [r4, #4]
 	cbnz	r2, .L188
-	mov	r1, #564
+	movw	r1, #573
 	ldr	r0, .L189+4
 	bl	printk
 .L188:
@@ -1122,7 +1164,7 @@ get_mpidev_ops:
 	.align	2
 .L189:
 	.word	.LANCHOR0
-	.word	.LC42
+	.word	.LC51
 	.fnend
 	.size	get_mpidev_ops, .-get_mpidev_ops
 	.align	1
@@ -1141,7 +1183,7 @@ get_mpibuf_ops:
 	ldr	r4, .L193
 	ldr	r2, [r4, #8]
 	cbnz	r2, .L192
-	mov	r1, #572
+	movw	r1, #581
 	ldr	r0, .L193+4
 	bl	printk
 .L192:
@@ -1151,7 +1193,7 @@ get_mpibuf_ops:
 	.align	2
 .L193:
 	.word	.LANCHOR0
-	.word	.LC42
+	.word	.LC51
 	.fnend
 	.size	get_mpibuf_ops, .-get_mpibuf_ops
 	.align	1
@@ -1207,7 +1249,7 @@ vcodec_driver:
 	.word	vcodec_probe
 	.word	vcodec_remove
 	.space	12
-	.word	.LC33
+	.word	.LC42
 	.space	20
 	.word	vcodec_dt_ids
 	.space	48
@@ -1227,9 +1269,9 @@ mpidev_ops:
 	.size	mpibuf_ops, 4
 mpibuf_ops:
 	.space	4
-	.type	__key.33175, %object
-	.size	__key.33175, 0
-__key.33175:
+	.type	__key.33126, %object
+	.size	__key.33126, 0
+__key.33126:
 	.section	.exitcall.exit,"aw"
 	.align	2
 	.type	__exitcall_vcodec_exit, %object
@@ -1238,18 +1280,18 @@ __exitcall_vcodec_exit:
 	.word	vcodec_exit
 	.section	.initcall6.init,"aw"
 	.align	2
-	.type	__initcall__kmod_mpp_vcodec__209_622_vcodec_init6, %object
-	.size	__initcall__kmod_mpp_vcodec__209_622_vcodec_init6, 4
-__initcall__kmod_mpp_vcodec__209_622_vcodec_init6:
+	.type	__initcall__kmod_mpp_vcodec__212_631_vcodec_init6, %object
+	.size	__initcall__kmod_mpp_vcodec__212_631_vcodec_init6, 4
+__initcall__kmod_mpp_vcodec__212_631_vcodec_init6:
 	.word	vcodec_init
 	.section	.modinfo,"a"
-	.type	__UNIQUE_ID_license208, %object
-	.size	__UNIQUE_ID_license208, 23
-__UNIQUE_ID_license208:
+	.type	__UNIQUE_ID_license211, %object
+	.size	__UNIQUE_ID_license211, 23
+__UNIQUE_ID_license211:
 	.ascii	"mpp_vcodec.license=GPL\000"
-	.type	__UNIQUE_ID_file207, %object
-	.size	__UNIQUE_ID_file207, 40
-__UNIQUE_ID_file207:
+	.type	__UNIQUE_ID_file210, %object
+	.size	__UNIQUE_ID_file210, 40
+__UNIQUE_ID_file210:
 	.ascii	"mpp_vcodec.file=drivers/kmpp/mpp_vcodec\000"
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:
@@ -1303,48 +1345,66 @@ __UNIQUE_ID_file207:
 	.ascii	"%8d|%8u|%10u|%10u|%10u|%10u|%10u|%14u|%15llu|%15llu"
 	.ascii	"\012\000"
 .LC22:
-	.ascii	"\0016mpp_vcodec: init new\012\000"
+	.ascii	"pkt_total_cnt\000"
 .LC23:
+	.ascii	"%8s|%15s|%15s|%15s|%15s|%15s|%15s|%15s\012\000"
+.LC24:
+	.ascii	"seq_encoding\000"
+.LC25:
+	.ascii	"seq_encoded\000"
+.LC26:
+	.ascii	"seq_user_put\000"
+.LC27:
+	.ascii	"seq_user_get\000"
+.LC28:
+	.ascii	"pkt_user_put\000"
+.LC29:
+	.ascii	"pkt_user_get\000"
+.LC30:
+	.ascii	"%8d|%15u|%15u|%15u|%15llu|%15llu|%15llu|%15llu\012\000"
+.LC31:
+	.ascii	"\0016mpp_vcodec: init new\012\000"
+.LC32:
 	.ascii	"\0013mpp_service_driver device register failed (%d)"
 	.ascii	".\012\000"
-.LC24:
+.LC33:
 	.ascii	"\0013Platform device register failed (%d).\012\000"
-.LC25:
+.LC34:
 	.ascii	"\0013mpp_vcodec: %d: ctx %p\012\000"
-.LC26:
+.LC35:
 	.ascii	"\0013mpp_vcodec: %d: chl_id %d release request\000"
-.LC27:
+.LC36:
 	.ascii	"\0013mpp_vcodec: %d: kernel vcodec_attr define is d"
 	.ascii	"iff from user \012\000"
-.LC28:
-	.ascii	"\0013mpp_vcodec: %d: copy_to_user failed.\012\000"
-.LC29:
-	.ascii	"\0013mpp_vcodec: %d: unknown vcode req cmd %x\012\000"
-.LC30:
-	.ascii	"\0013mpp_vcodec: %d: unknown ioctl cmd %x\012\000"
-.LC31:
-	.ascii	"\0013mpp_vcodec: %d: chan id ctx is null\012\000"
-.LC32:
-	.ascii	"vcodec_class\000"
-.LC33:
-	.ascii	"vcodec\000"
-.LC34:
-	.ascii	"alloc dev_t failed\012\000"
-.LC35:
-	.ascii	"add device failed\012\000"
-.LC36:
-	.ascii	"%s\000"
 .LC37:
-	.ascii	"\0013mpp_vcodec: %d: failed on open procfs %s\012\000"
+	.ascii	"\0013mpp_vcodec: %d: copy_to_user failed.\012\000"
 .LC38:
-	.ascii	"enc\000"
+	.ascii	"\0013mpp_vcodec: %d: unknown vcode req cmd %x\012\000"
 .LC39:
-	.ascii	"dec\000"
+	.ascii	"\0013mpp_vcodec: %d: unknown ioctl cmd %x\012\000"
 .LC40:
-	.ascii	"venc_info\000"
+	.ascii	"\0013mpp_vcodec: %d: chan id ctx is null\012\000"
 .LC41:
-	.ascii	"vdec_info\000"
+	.ascii	"vcodec_class\000"
 .LC42:
+	.ascii	"vcodec\000"
+.LC43:
+	.ascii	"alloc dev_t failed\012\000"
+.LC44:
+	.ascii	"add device failed\012\000"
+.LC45:
+	.ascii	"%s\000"
+.LC46:
+	.ascii	"\0013mpp_vcodec: %d: failed on open procfs %s\012\000"
+.LC47:
+	.ascii	"enc\000"
+.LC48:
+	.ascii	"dec\000"
+.LC49:
+	.ascii	"venc_info\000"
+.LC50:
+	.ascii	"vdec_info\000"
+.LC51:
 	.ascii	"\0013mpp_vcodec: %d: should call vmpi_register_fn2v"
 	.ascii	"cocdec \012\000"
 	.section	___ksymtab+vmpi_register_fn2vcocdec,"a"

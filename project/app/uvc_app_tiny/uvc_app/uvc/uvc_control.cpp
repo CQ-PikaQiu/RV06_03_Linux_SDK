@@ -77,10 +77,10 @@ struct uvc_ctrl {
   struct uvc_function_config *fc;
 };
 
-static struct uvc_ctrl uvc_ctrl[3] = {
-    {-1, false, false, -1, -1, -1, 1, 0, 0, NULL},
-    {-1, false, false, -1, -1, -1, 1, 0, 0, NULL},
-    {-1, false, false, -1, -1, -1, 1, 0, 0, NULL}, // isp
+static struct uvc_ctrl uvc_ctrl[CAM_MAX_NUM] = {
+ {.id = -1, .start = false, .stop = false, .width = -1, .height = -1, .fps = -1, .format = 1, .eptz = 0, .suspend = 0, .fc = NULL},
+ {.id = -1, .start = false, .stop = false, .width = -1, .height = -1, .fps = -1, .format = 1, .eptz = 0, .suspend = 0, .fc = NULL},
+ {.id = -1, .start = false, .stop = false, .width = -1, .height = -1, .fps = -1, .format = 1, .eptz = 0, .suspend = 0, .fc = NULL},
 };
 
 static std::map<int, UVC_CTRL_INFO> gUVCIdCtlInfoMap;
@@ -99,6 +99,8 @@ static uint32_t uvc_flags = UVC_CONTROL_CAMERA;
 static pthread_mutex_t run_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t run_cond = PTHREAD_COND_INITIALIZER;
 static pthread_cond_t video_added = PTHREAD_COND_INITIALIZER;
+
+static int32_t g_suspend;
 
 static void query_uvc_streaming_maxpacket(void) {
   int fd;
@@ -160,37 +162,34 @@ static void get_uvc_index_to_name(unsigned int index, char *name) {
 }
 
 int check_uvc_video_id(void) {
-  struct uvc_function_config *fc[CAM_MAX_NUM];
-  unsigned int i;
-  for (i = 0; i < CAM_MAX_NUM; i++) {
+  bool find_dev = false;
+  struct uvc_function_config *fc[CAM_MAX_NUM] = {};
+  for (uint32_t i = 0; i < CAM_MAX_NUM; i++) {
     fc[i] = configfs_parse_uvc_function(i);
     if (fc[i]) {
       get_uvc_index_to_name(fc[i]->index, fc[i]->dev_name);
       uvc_ctrl[i].id = fc[i]->video;
       uvc_ctrl[i].fc = fc[i];
+      find_dev = true;
       LOG_DEBUG("uvc_function_config fc->video:%d,fc->streaming.num_formats:%d",
                 fc[i]->video, uvc_ctrl[i].fc->streaming.num_formats);
     }
   }
 
-  if (uvc_ctrl[0].id < 0 && uvc_ctrl[1].id < 0) {
-    LOG_WARN("Please configure uvc...\n");
-    return -1;
+  if (false == find_dev) {
+      LOG_WARN("Please configure uvc...\n");
+      return -1;
   }
-  // query_uvc_streaming_intf();
-  // query_uvc_streaming_maxpacket();
+
   return 0;
 }
 
 void add_uvc_video() {
-  if (uvc_ctrl[0].id >= 0) {
-    uvc_video_id_add(uvc_ctrl[0].fc);
-    LOG_INFO("uvc_ctrl[0].id:%d, uvc_ctrl[0].fc->video:%d\n", uvc_ctrl[0].id,
-             uvc_ctrl[0].fc->video);
-  }
-
-  if (uvc_ctrl[1].id >= 0) {
-    uvc_video_id_add(uvc_ctrl[1].fc);
+  for (uint32_t i = 0; i < CAM_MAX_NUM; i++) {
+    if (uvc_ctrl[i].id >= 0) {
+      uvc_video_id_add(uvc_ctrl[i].fc);
+      LOG_INFO("uvc_ctrl:%u, id:%d, fc->video:%d\n",i , uvc_ctrl[i].id, uvc_ctrl[i].fc->video);
+    }
   }
 }
 
@@ -202,7 +201,7 @@ int uvc_control_loop(void) {
     return 0;
   }
   unsigned int i;
-  for (i = 0; i < 2; i++) {
+  for (i = 0; i < CAM_MAX_NUM; i++) {
     if (uvc_ctrl[i].stop) {
       if (camera_stop_callback)
         camera_stop_callback(i);
@@ -210,8 +209,7 @@ int uvc_control_loop(void) {
     }
 
     if (uvc_ctrl[i].start) {
-      LOG_INFO(
-          "%s: video_id:%d, width:%d,height:%d,fps:%d,format:%d,eptz:%d !\n",
+      LOG_INFO("%s: video_id:%d, width:%d,height:%d,fps:%d,format:%d,eptz:%d !\n",
           __func__, uvc_ctrl[i].id, uvc_ctrl[i].width, uvc_ctrl[i].height,
           uvc_ctrl[i].fps, uvc_ctrl[i].format, uvc_ctrl[i].eptz);
       if (camera_start_callback) {
@@ -220,20 +218,16 @@ int uvc_control_loop(void) {
                               uvc_ctrl[i].fps, uvc_ctrl[i].format,
                               uvc_ctrl[i].eptz);
       }
-      // camera_control_start(uvc_ctrl[2].id, uvc_ctrl[2].width,
-      // uvc_ctrl[2].height, uvc_ctrl[2].fps);
       uvc_ctrl[i].start = false;
     }
   }
-  if (uvc_ctrl[2].suspend) {
+  if (g_suspend) {
     if (access("/tmp/uvc_no_suspend", 0)) {
       sleep(5);
-      if (uvc_ctrl[2].suspend) {
-        if (!uvc_video_get_uvc_process(uvc_ctrl[2].id)) {
+      if (g_suspend) {
           LOG_INFO("uvc ready to suspend...\n");
-          uvc_ctrl[2].suspend = 0;
+          g_suspend = 0;
           system("touch /tmp/uvc_goto_suspend");
-        }
       }
     }
   }
@@ -255,7 +249,7 @@ int uvc_control_run(uint32_t flags) {
 
 void set_uvc_control_suspend(int suspend) {
   LOG_INFO("suspend is %d\n", suspend);
-  uvc_ctrl[2].suspend = suspend;
+  g_suspend = suspend;
   if ((suspend == 0) && !access("/tmp/uvc_goto_suspend", 0))
     system("rm /tmp/uvc_goto_suspend");
 }
@@ -264,11 +258,10 @@ void set_uvc_control_suspend(int suspend) {
 void set_uvc_control_start(int video_id, int width, int height, int fps,
                            int format, int eptz) {
   LOG_DEBUG("%s: video_id:%d\n", __func__, video_id);
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < CAM_MAX_NUM; i++) {
     if (uvc_ctrl[i].id == video_id) {
-      LOG_DEBUG(
-          "%s: camera:%d, video_id:%d, width:%d,height:%d,fps:%d,eptz:%d!\n",
-          __func__, i, video_id, width, height, fps, eptz);
+      LOG_DEBUG("%s: camera:%d, video_id:%d, width:%d,height:%d,fps:%d,eptz:%d!\n",
+                __func__, i, video_id, width, height, fps, eptz);
       uvc_ctrl[i].id = video_id;
       uvc_ctrl[i].width = width;
       uvc_ctrl[i].height = height;
@@ -283,7 +276,7 @@ void set_uvc_control_start(int video_id, int width, int height, int fps,
 // TODO: use video id stop uvc_ctrl
 void set_uvc_control_stop(int video_id) {
   LOG_INFO("%s:video_id:%d\n", __func__, video_id);
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < CAM_MAX_NUM; i++) {
     if (uvc_ctrl[i].id == video_id)
       uvc_ctrl[i].stop = true;
   }
@@ -308,13 +301,13 @@ UVC_CTRL_INFO uvc_find_uvc_ctrl_info_by_id(int id) {
     }
   }
   UVC_CTRL_INFO uvc_ctrl_info;
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < CAM_MAX_NUM; i++) {
     if (uvc_ctrl[i].id == id)
       uvc_ctrl_info.index = i;
   }
   // uvc_ctrl_info.index = gUVCIdCtlInfoMap.size();
-  gUVCIdCtlInfoMap.insert(
-      std::map<int, UVC_CTRL_INFO>::value_type(id, uvc_ctrl_info));
+  gUVCIdCtlInfoMap.insert(std::map<int, UVC_CTRL_INFO>::value_type(id, uvc_ctrl_info));
+
   LOG_INFO("index:%d new uvc_ctrl_info:%p by id:%d\n", uvc_ctrl_info.index,
            &uvc_ctrl_info, id);
 

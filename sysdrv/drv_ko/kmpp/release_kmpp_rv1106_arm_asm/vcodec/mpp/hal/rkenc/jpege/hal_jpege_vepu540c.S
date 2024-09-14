@@ -36,7 +36,7 @@ hal_jpege_v540c_start:
 	ldr	r3, [r7]
 	lsls	r3, r3, #31
 	bpl	.L2
-	movw	r3, #503
+	movw	r3, #495
 	ldr	r1, .L24+4
 	mov	r2, r3
 	ldr	r0, .L24+8
@@ -44,7 +44,7 @@ hal_jpege_v540c_start:
 .L2:
 	ldr	r3, [r4, #80]
 	cbz	r3, .L3
-	movw	r2, #507
+	movw	r2, #499
 	ldr	r1, .L24+4
 	ldr	r0, .L24+12
 	mov	r4, #-1
@@ -65,7 +65,7 @@ hal_jpege_v540c_start:
 	mov	r4, r0
 	cbz	r0, .L5
 	mov	r3, r0
-	movw	r2, #517
+	movw	r2, #509
 .L22:
 	ldr	r1, .L24+4
 	ldr	r0, .L24+16
@@ -85,7 +85,7 @@ hal_jpege_v540c_start:
 	mov	r4, r0
 	cbz	r0, .L6
 	mov	r3, r0
-	movw	r2, #527
+	movw	r2, #519
 	b	.L22
 .L6:
 	mov	r1, r0
@@ -100,7 +100,7 @@ hal_jpege_v540c_start:
 	mov	r4, r0
 	cbz	r0, .L7
 	mov	r3, r0
-	movw	r2, #537
+	movw	r2, #529
 	b	.L22
 .L7:
 	mov	r1, r0
@@ -114,7 +114,7 @@ hal_jpege_v540c_start:
 	mov	r4, r0
 	cbz	r0, .L8
 	mov	r3, r0
-	movw	r2, #547
+	movw	r2, #539
 	b	.L22
 .L8:
 	movs	r1, #4
@@ -128,7 +128,7 @@ hal_jpege_v540c_start:
 	mov	r4, r0
 	cbz	r0, .L9
 	mov	r3, r0
-	movw	r2, #557
+	movw	r2, #549
 .L23:
 	ldr	r1, .L24+4
 	ldr	r0, .L24+20
@@ -146,7 +146,7 @@ hal_jpege_v540c_start:
 	mov	r4, r0
 	cbz	r0, .L10
 	mov	r3, r0
-	movw	r2, #567
+	movw	r2, #559
 	b	.L23
 .L10:
 	mov	r2, r0
@@ -156,7 +156,7 @@ hal_jpege_v540c_start:
 	mov	r4, r0
 	cbz	r0, .L11
 	mov	r3, r0
-	movw	r2, #573
+	movw	r2, #565
 	ldr	r1, .L24+4
 	ldr	r0, .L24+24
 	bl	printk
@@ -166,7 +166,7 @@ hal_jpege_v540c_start:
 	ldr	r3, [r7]
 	lsls	r3, r3, #31
 	bpl	.L1
-	movw	r3, #575
+	movw	r3, #567
 	ldr	r1, .L24+4
 	mov	r2, r3
 	ldr	r0, .L24+28
@@ -204,7 +204,7 @@ hal_jpege_v540c_wait:
 	ldr	r3, [r4]
 	lsls	r1, r3, #31
 	bpl	.L27
-	movw	r3, #631
+	movw	r3, #623
 	ldr	r1, .L103+4
 	mov	r2, r3
 	ldr	r0, .L103+8
@@ -212,7 +212,7 @@ hal_jpege_v540c_wait:
 .L27:
 	ldr	r3, [r7, #80]
 	cbz	r3, .L28
-	movw	r2, #635
+	movw	r2, #627
 	ldr	r1, .L103+4
 	ldr	r0, .L103+12
 	mov	r6, #-1
@@ -228,7 +228,7 @@ hal_jpege_v540c_wait:
 	mov	r6, r0
 	cbz	r0, .L30
 	mov	r3, r0
-	movw	r2, #641
+	movw	r2, #633
 	ldr	r1, .L103+4
 	mvn	r6, #1008
 	ldr	r0, .L103+16
@@ -237,7 +237,7 @@ hal_jpege_v540c_wait:
 	ldr	r3, [r4]
 	lsls	r3, r3, #31
 	bpl	.L26
-	movw	r3, #650
+	movw	r3, #642
 	ldr	r1, .L103+4
 	mov	r2, r3
 	ldr	r0, .L103+20
@@ -251,7 +251,7 @@ hal_jpege_v540c_wait:
 	ldr	r3, [r4]
 	lsls	r3, r3, #29
 	bpl	.L32
-	mov	r2, #588
+	mov	r2, #580
 	ldr	r1, .L103+24
 	ldr	r0, .L103+28
 	bl	printk
@@ -261,7 +261,7 @@ hal_jpege_v540c_wait:
 	ldr	r3, [r4]
 	lsls	r1, r3, #29
 	bpl	.L33
-	movw	r2, #591
+	movw	r2, #583
 	ldr	r1, .L103+24
 	ldr	r0, .L103+32
 	bl	printk
@@ -271,7 +271,7 @@ hal_jpege_v540c_wait:
 	ldr	r3, [r4]
 	lsls	r3, r3, #29
 	bpl	.L34
-	movw	r2, #594
+	movw	r2, #586
 	ldr	r1, .L103+24
 	ldr	r0, .L103+36
 	bl	printk
@@ -281,7 +281,7 @@ hal_jpege_v540c_wait:
 	ldr	r3, [r4]
 	lsls	r1, r3, #29
 	bpl	.L35
-	movw	r2, #597
+	movw	r2, #589
 	ldr	r1, .L103+24
 	ldr	r0, .L103+40
 	bl	printk
@@ -296,7 +296,7 @@ hal_jpege_v540c_wait:
 	b	.L26
 .L37:
 	ldr	r1, .L103+24
-	mov	r2, #600
+	mov	r2, #592
 	ldr	r0, .L103+44
 .L102:
 	bl	printk
@@ -306,7 +306,7 @@ hal_jpege_v540c_wait:
 	bpl	.L38
 	lsls	r2, r3, #22
 	bpl	.L38
-	movw	r2, #605
+	movw	r2, #597
 	ldr	r1, .L103+24
 	ldr	r0, .L103+48
 	bl	printk
@@ -316,7 +316,7 @@ hal_jpege_v540c_wait:
 	ldr	r3, [r4]
 	lsls	r0, r3, #22
 	bpl	.L39
-	mov	r2, #608
+	mov	r2, #600
 	ldr	r1, .L103+24
 	ldr	r0, .L103+52
 	bl	printk
@@ -326,7 +326,7 @@ hal_jpege_v540c_wait:
 	ldr	r3, [r4]
 	lsls	r2, r3, #22
 	bpl	.L40
-	movw	r2, #611
+	movw	r2, #603
 	ldr	r1, .L103+24
 	ldr	r0, .L103+56
 	bl	printk
@@ -336,7 +336,7 @@ hal_jpege_v540c_wait:
 	ldr	r3, [r4]
 	lsls	r0, r3, #22
 	bpl	.L41
-	movw	r2, #614
+	movw	r2, #606
 	ldr	r1, .L103+24
 	ldr	r0, .L103+60
 	bl	printk
@@ -346,7 +346,7 @@ hal_jpege_v540c_wait:
 	ldr	r3, [r4]
 	lsls	r2, r3, #22
 	bpl	.L101
-	movw	r2, #617
+	movw	r2, #609
 	ldr	r1, .L103+24
 	ldr	r0, .L103+64
 	b	.L102
@@ -398,7 +398,7 @@ hal_jpege_v540c_get_task:
 	ldr	r3, [r7]
 	lsls	r2, r3, #31
 	bpl	.L106
-	mov	r3, #660
+	mov	r3, #652
 	ldr	r1, .L121+4
 	mov	r2, r3
 	ldr	r0, .L121+8
@@ -441,7 +441,7 @@ hal_jpege_v540c_get_task:
 	ldr	r3, [r7]
 	lsls	r3, r3, #31
 	bpl	.L110
-	mov	r3, #680
+	mov	r3, #672
 	ldr	r1, .L121+4
 	mov	r2, r3
 	ldr	r0, .L121+12
@@ -493,7 +493,7 @@ hal_jpege_v540c_ret_task:
 	ldr	r3, [r5]
 	lsls	r3, r3, #31
 	bpl	.L124
-	mov	r3, #692
+	mov	r3, #684
 	ldr	r1, .L131+4
 	mov	r2, r3
 	ldr	r0, .L131+8
@@ -511,7 +511,7 @@ hal_jpege_v540c_ret_task:
 	str	r3, [r6, #188]
 	ldr	r4, [r4, #96]
 	cbz	r4, .L125
-	movw	r1, #701
+	movw	r1, #693
 	ldr	r0, .L131+12
 	bl	printk
 	mov	r0, #-1
@@ -522,7 +522,7 @@ hal_jpege_v540c_ret_task:
 	str	r4, [r7, #304]
 	ands	r0, r0, #1
 	beq	.L123
-	movw	r3, #706
+	movw	r3, #698
 	ldr	r1, .L131+4
 	mov	r2, r3
 	ldr	r0, .L131+16
@@ -995,14 +995,14 @@ hal_jpege_vepu540c_set_osd:
 	cmp	fp, #8
 	bls	.L224
 	mov	r3, fp
-	movw	r2, #299
+	movw	r2, #291
 	ldr	r1, .L252
 	ldr	r0, .L252+4
 	bl	printk
 	ldr	r3, [r4, #4]
 	cmp	r3, #8
 	bls	.L236
-	mov	r1, #300
+	mov	r1, #292
 	ldr	r3, .L252+8
 	str	r1, [sp]
 	ldr	r2, .L252+12
@@ -1246,19 +1246,19 @@ hal_jpege_vepu540c_set_osd:
 	.type	hal_jpege_v540c_gen_regs, %function
 hal_jpege_v540c_gen_regs:
 	.fnstart
-	@ args = 0, pretend = 0, frame = 56
+	@ args = 0, pretend = 0, frame = 16
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	.pad #60
-	sub	sp, sp, #60
+	.pad #20
+	sub	sp, sp, #20
 	mov	r5, r0
 	ldr	r4, [r0, #68]
 	ldr	r7, [r0, #156]
 	mov	r6, r1
 	ldr	r0, [r1, #28]
 	movs	r3, #0
-	strd	r3, r3, [sp, #12]
+	strd	r3, r3, [sp, #8]
 	bl	mpp_packet_get_length
 	ldr	r3, [r6, #32]
 	add	r9, r5, #160
@@ -1277,7 +1277,7 @@ hal_jpege_v540c_gen_regs:
 	str	r3, [sp, #4]
 	tst	r2, #1
 	beq	.L255
-	movw	r3, #415
+	movw	r3, #407
 	ldr	r1, .L284+8
 	mov	r2, r3
 	ldr	r0, .L284+12
@@ -1311,13 +1311,13 @@ hal_jpege_v540c_gen_regs:
 	mov	r0, r5
 	bl	hal_jpege_vepu_rc
 	ldr	r3, [r5, #312]
-	str	r3, [sp, #12]
+	str	r3, [sp, #8]
 	ldr	r3, [r5, #316]
 .L283:
-	add	r2, sp, #12
+	add	r2, sp, #8
 	mov	r1, r9
 	mov	r0, r7
-	str	r3, [sp, #16]
+	str	r3, [sp, #12]
 	bl	write_jpeg_header
 	mov	r0, r7
 	bl	jpege_bits_get_bitpos
@@ -1336,14 +1336,14 @@ hal_jpege_v540c_gen_regs:
 	ldr	r0, [r6, #32]
 	bl	mpp_buffer_flush_for_device_with_caller
 .L259:
-	movs	r0, #0
+	movs	r2, #0
 	ldrb	r3, [r4, #17]	@ zero_extendqisi2
-	strb	r0, [r4, #16]
-	ldr	r2, [r5, #112]
-	bfi	r3, r2, #0, #3
+	strb	r2, [r4, #16]
+	ldr	r1, [r5, #112]
+	bfi	r3, r1, #0, #3
 	strb	r3, [r4, #17]
 	ldrb	r3, [r4, #20]	@ zero_extendqisi2
-	movs	r2, #2
+	movs	r1, #2
 	bic	r3, r3, #3
 	strb	r3, [r4, #20]
 	ldrh	r3, [r4, #32]
@@ -1352,41 +1352,30 @@ hal_jpege_v540c_gen_regs:
 	orr	r3, r3, #63
 	strh	r3, [r4, #32]	@ movhi
 	ldrb	r3, [r4, #436]	@ zero_extendqisi2
-	bfi	r3, r2, #0, #2
+	bfi	r3, r1, #0, #2
 	strb	r3, [r4, #436]
 	movs	r3, #7
 	str	r3, [r4, #48]
 	ldrh	r3, [r4, #54]
-	bfi	r3, r0, #0, #10
+	bfi	r3, r2, #0, #10
 	strh	r3, [r4, #54]	@ movhi
 	mvn	r3, #14680064
 	str	r3, [r4, #56]
 	ldr	r3, [r5, #300]
 	cbz	r3, .L260
-	add	r2, sp, #20
-	movs	r1, #19
-	bl	rk_dvbm_ctrl
 	ldrb	r3, [r4, #96]	@ zero_extendqisi2
 	and	r3, r3, #8
-	orn	r3, r3, #120
+	orn	r3, r3, #124
 	strb	r3, [r4, #96]
-	ldrh	r3, [r4, #24]
-	ldr	r2, [sp, #48]
-	bfi	r3, r2, #0, #14
-	strh	r3, [r4, #24]	@ movhi
-	ldrb	r2, [sp, #44]	@ zero_extendqisi2
-	ldr	r3, [r4, #24]
-	bfi	r3, r2, #14, #8
-	str	r3, [r4, #24]
-	strb	r2, [r4, #444]
-	lsrs	r3, r3, #24
+	ldrb	r3, [r4, #27]	@ zero_extendqisi2
 	bic	r3, r3, #7
 	orr	r3, r3, #7
 	strb	r3, [r4, #27]
-	ldrb	r3, [r4, #446]	@ zero_extendqisi2
-	bic	r3, r3, #7
-	orr	r3, r3, #5
-	strb	r3, [r4, #446]
+	ldr	r3, [r4, #444]
+	bic	r3, r3, #458752
+	bic	r3, r3, #255
+	orr	r3, r3, #327680
+	str	r3, [r4, #444]
 .L260:
 	mov	r0, r5
 	addw	r10, r4, #3542
@@ -1401,7 +1390,7 @@ hal_jpege_v540c_gen_regs:
 	mov	fp, r10
 	mov	r9, r7
 .L262:
-	ldr	r2, [sp, #12]
+	ldr	r2, [sp, #8]
 	mov	r0, #32768
 	ldrb	r1, [r2, r9]	@ zero_extendqisi2
 	add	r9, r9, #8
@@ -1420,7 +1409,7 @@ hal_jpege_v540c_gen_regs:
 	mov	fp, r10
 	mov	r9, r7
 .L265:
-	ldr	r2, [sp, #16]
+	ldr	r2, [sp, #12]
 	mov	r0, #32768
 	ldrb	r1, [r2, r9]	@ zero_extendqisi2
 	add	r9, r9, #8
@@ -1439,7 +1428,7 @@ hal_jpege_v540c_gen_regs:
 	mov	fp, r10
 	mov	r9, r7
 .L268:
-	ldr	r2, [sp, #16]
+	ldr	r2, [sp, #12]
 	mov	r0, #32768
 	ldrb	r1, [r2, r9]	@ zero_extendqisi2
 	add	r9, r9, #8
@@ -1463,19 +1452,19 @@ hal_jpege_v540c_gen_regs:
 	ldr	r3, [r3]
 	lsls	r3, r3, #31
 	bpl	.L270
-	movw	r3, #489
+	movw	r3, #481
 	ldr	r1, .L284+8
 	mov	r2, r3
 	ldr	r0, .L284+16
 	bl	printk
 .L270:
 	movs	r0, #0
-	add	sp, sp, #60
+	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
 .L256:
 	movs	r3, #0
-	str	r3, [sp, #12]
+	str	r3, [sp, #8]
 	b	.L283
 .L258:
 	ldr	r0, [r5, #64]
@@ -1500,77 +1489,77 @@ hal_jpege_v540c_gen_regs:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__func__.36660, %object
-	.size	__func__.36660, 22
-__func__.36660:
+	.type	__func__.36591, %object
+	.size	__func__.36591, 22
+__func__.36591:
 	.ascii	"hal_jpege_v540c_start\000"
-	.type	__func__.36676, %object
-	.size	__func__.36676, 21
-__func__.36676:
+	.type	__func__.36607, %object
+	.size	__func__.36607, 21
+__func__.36607:
 	.ascii	"hal_jpege_v540c_wait\000"
-	.type	__func__.36667, %object
-	.size	__func__.36667, 32
-__func__.36667:
+	.type	__func__.36598, %object
+	.size	__func__.36598, 32
+__func__.36598:
 	.ascii	"hal_jpege_vepu540c_status_check\000"
-	.type	__func__.36683, %object
-	.size	__func__.36683, 25
-__func__.36683:
+	.type	__func__.36614, %object
+	.size	__func__.36614, 25
+__func__.36614:
 	.ascii	"hal_jpege_v540c_get_task\000"
-	.type	__func__.36690, %object
-	.size	__func__.36690, 25
-__func__.36690:
+	.type	__func__.36621, %object
+	.size	__func__.36621, 25
+__func__.36621:
 	.ascii	"hal_jpege_v540c_ret_task\000"
-	.type	__func__.36562, %object
-	.size	__func__.36562, 27
-__func__.36562:
+	.type	__func__.36494, %object
+	.size	__func__.36494, 27
+__func__.36494:
 	.ascii	"hal_jpege_vepu540c_prepare\000"
-	.type	__func__.36525, %object
-	.size	__func__.36525, 18
-__func__.36525:
+	.type	__func__.36457, %object
+	.size	__func__.36457, 18
+__func__.36457:
 	.ascii	"hal_jpege_vepu_rc\000"
-	.type	__FUNCTION__.36534, %object
-	.size	__FUNCTION__.36534, 23
-__FUNCTION__.36534:
+	.type	__FUNCTION__.36466, %object
+	.size	__FUNCTION__.36466, 23
+__FUNCTION__.36466:
 	.ascii	"hal_jpege_vepu_init_rc\000"
-	.type	__func__.36535, %object
-	.size	__func__.36535, 23
-__func__.36535:
+	.type	__func__.36467, %object
+	.size	__func__.36467, 23
+__func__.36467:
 	.ascii	"hal_jpege_vepu_init_rc\000"
-	.type	__func__.36547, %object
-	.size	__func__.36547, 21
-__func__.36547:
+	.type	__func__.36479, %object
+	.size	__func__.36479, 21
+__func__.36479:
 	.ascii	"hal_jpege_v540c_init\000"
-	.type	__FUNCTION__.36548, %object
-	.size	__FUNCTION__.36548, 21
-__FUNCTION__.36548:
+	.type	__FUNCTION__.36480, %object
+	.size	__FUNCTION__.36480, 21
+__FUNCTION__.36480:
 	.ascii	"hal_jpege_v540c_init\000"
-	.type	__FUNCTION__.36539, %object
-	.size	__FUNCTION__.36539, 25
-__FUNCTION__.36539:
+	.type	__FUNCTION__.36471, %object
+	.size	__FUNCTION__.36471, 25
+__FUNCTION__.36471:
 	.ascii	"hal_jpege_vepu_deinit_rc\000"
-	.type	__func__.36555, %object
-	.size	__func__.36555, 23
-__func__.36555:
+	.type	__func__.36487, %object
+	.size	__func__.36487, 23
+__func__.36487:
 	.ascii	"hal_jpege_v540c_deinit\000"
-	.type	__FUNCTION__.36556, %object
-	.size	__FUNCTION__.36556, 23
-__FUNCTION__.36556:
+	.type	__FUNCTION__.36488, %object
+	.size	__FUNCTION__.36488, 23
+__FUNCTION__.36488:
 	.ascii	"hal_jpege_v540c_deinit\000"
-	.type	__func__.36613, %object
-	.size	__func__.36613, 27
-__func__.36613:
+	.type	__func__.36544, %object
+	.size	__func__.36544, 27
+__func__.36544:
 	.ascii	"hal_jpege_vepu540c_set_osd\000"
-	.type	__FUNCTION__.36614, %object
-	.size	__FUNCTION__.36614, 27
-__FUNCTION__.36614:
+	.type	__FUNCTION__.36545, %object
+	.size	__FUNCTION__.36545, 27
+__FUNCTION__.36545:
 	.ascii	"hal_jpege_vepu540c_set_osd\000"
-	.type	__FUNCTION__.36643, %object
-	.size	__FUNCTION__.36643, 25
-__FUNCTION__.36643:
+	.type	__FUNCTION__.36574, %object
+	.size	__FUNCTION__.36574, 25
+__FUNCTION__.36574:
 	.ascii	"hal_jpege_v540c_gen_regs\000"
-	.type	__func__.36648, %object
-	.size	__func__.36648, 25
-__func__.36648:
+	.type	__func__.36579, %object
+	.size	__func__.36579, 25
+__func__.36579:
 	.ascii	"hal_jpege_v540c_gen_regs\000"
 	.space	3
 	.type	hal_jpege_vepu540c, %object

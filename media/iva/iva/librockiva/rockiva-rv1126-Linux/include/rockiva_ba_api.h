@@ -27,9 +27,9 @@ typedef enum {
     ROCKIVA_BA_TRIP_EVENT_BOTH = 0,                  /* 拌线:双向触发 */
     ROCKIVA_BA_TRIP_EVENT_DEASIL = 1,                /* 拌线:顺时针触发 */
     ROCKIVA_BA_TRIP_EVENT_WIDDERSHINES = 2,          /* 拌线:逆时针触发 */
-    ROCKIVA_BA_TRIP_EVENT_IN = 3,                    /* 进入区域 */
-    ROCKIVA_BA_TRIP_EVENT_OUT = 4,                   /* 离开区域 */
-    ROCKIVA_BA_TRIP_EVENT_STAY = 5,                  /* 区域入侵 */
+    ROCKIVA_BA_TRIP_EVENT_IN = 3,                    /* 进入区域[废弃] */
+    ROCKIVA_BA_TRIP_EVENT_OUT = 4,                   /* 离开区域[废弃] */
+    ROCKIVA_BA_TRIP_EVENT_STAY = 5,                  /* 区域入侵[废弃] */
 } RockIvaBaTripEvent;
 
 /* 目标规则触发类型 */
@@ -46,10 +46,11 @@ typedef struct {
     uint8_t ruleEnable;                         /* 规则是否启用，1->启用，0->不启用 */
     uint32_t ruleID;                            /* 规则ID */
     RockIvaLine line;                           /* 越界线配置 */
-    RockIvaLine directLine;                     /* 方向线配置 */
+    RockIvaLine directLine;                     /* 方向线配置[废弃] */
     RockIvaBaTripEvent event;                   /* 越界方向 */
     RockIvaSize minObjSize[ROCKIVA_OBJECT_TYPE_MAX];                  /* 万分比表示 最小目标 */
     RockIvaSize maxObjSize[ROCKIVA_OBJECT_TYPE_MAX];                  /* 万分比表示 最大目标 */
+    uint8_t scores[ROCKIVA_OBJECT_TYPE_MAX];    /* 各类别过滤分数阈值，0为内部自动 */
     uint32_t objType;                           /* 配置触发目标类型 */  
     uint8_t rulePriority;                       /* 规则优先级： 0 高， 1 中， 2 低 */
     uint8_t sense;                              /* 灵敏度,1~100 */
@@ -61,9 +62,10 @@ typedef struct {
     uint8_t ruleEnable;                         /* 规则是否启用，1->启用，0->不启用 */
     uint32_t ruleID;                            /* 规则ID */
     RockIvaArea area;                           /* 区域配置 */
-    RockIvaBaTripEvent event;                   /* 区域事件 */
+    RockIvaBaTripEvent event;                   /* 区域事件[废弃] */
     RockIvaSize minObjSize[ROCKIVA_OBJECT_TYPE_MAX];                  /* 万分比表示 最小目标 */
     RockIvaSize maxObjSize[ROCKIVA_OBJECT_TYPE_MAX];                  /* 万分比表示 最大目标 */
+    uint8_t scores[ROCKIVA_OBJECT_TYPE_MAX];    /* 各类别过滤分数阈值，0为内部自动 */
     uint32_t objType;                           /* 配置触发目标类型 */
     uint32_t alertTime;                         /* 告警时间设置 */
     uint8_t sense;                              /* 灵敏度,1~100 */

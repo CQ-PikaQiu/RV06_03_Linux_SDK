@@ -1,3 +1,30 @@
+2024/05/17  v1.94:
+1.add rv1103B support
+
+2024/04/30  v1.93:
+1.fix read flash by com device bug
+2.set uac_admin as False
+
+2024/04/02  v1.92:
+1.using thread to refresh devices
+2.support to show device type on searching com devices
+3.support to read rkmcu partitions
+
+2024/02/29  v1.91:
+1.fix set log off bug
+2.add millisecond for serial print 
+3.delete time sleep for waiting ack for serial download
+
+2024/01/30  v1.9:
+1.add rk2118 rk3576 support 
+
+2023/10/24  v1.89:
+1.fix get env binary fail when creating sd boot 
+
+2023/09/26  v1.88:
+1.update rkimagemaker and afptool 
+2.fix check all box bug on packing page
+
 2023/05/12  v1.87:
 1.support read flash info by serial
 

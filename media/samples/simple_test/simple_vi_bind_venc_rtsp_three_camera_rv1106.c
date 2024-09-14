@@ -131,13 +131,23 @@ static RK_S32 test_venc_init(int chnId, int width, int height, RK_CODEC_ID_E enT
 	memset(&stAttr, 0, sizeof(VENC_CHN_ATTR_S));
 	memset(&stVencChnRefBufShare, 0, sizeof(VENC_CHN_REF_BUF_SHARE_S));
 
-	stAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
-	stAttr.stRcAttr.stH264Cbr.u32BitRate = g_u32Bitrate;
-	stAttr.stRcAttr.stH264Cbr.u32Gop = 60;
+	if (enType == RK_VIDEO_ID_AVC) {
+		stAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+		stAttr.stRcAttr.stH264Cbr.u32BitRate = g_u32Bitrate;
+		stAttr.stRcAttr.stH264Cbr.u32Gop = 60;
+	} else if (enType == RK_VIDEO_ID_HEVC) {
+		stAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265CBR;
+		stAttr.stRcAttr.stH265Cbr.u32BitRate = g_u32Bitrate;
+		stAttr.stRcAttr.stH265Cbr.u32Gop = 60;
+	} else if (enType == RK_VIDEO_ID_MJPEG) {
+		stAttr.stRcAttr.enRcMode = VENC_RC_MODE_MJPEGCBR;
+		stAttr.stRcAttr.stMjpegCbr.u32BitRate = g_u32Bitrate;
+	}
 
 	stAttr.stVencAttr.enType = enType;
 	stAttr.stVencAttr.enPixelFormat = RK_FMT_YUV420SP;
-	stAttr.stVencAttr.u32Profile = H264E_PROFILE_HIGH;
+	if (enType == RK_VIDEO_ID_AVC)
+		stAttr.stVencAttr.u32Profile = H264E_PROFILE_HIGH;
 	stAttr.stVencAttr.u32PicWidth = width;
 	stAttr.stVencAttr.u32PicHeight = height;
 	stAttr.stVencAttr.u32VirWidth = width;
@@ -205,7 +215,7 @@ int vi_dev_init(int devId) {
 			return -1;
 		}
 		// 1-3.bind dev/pipe
-		stBindPipe.u32Num = pipeId;
+		stBindPipe.u32Num = 1;
 		stBindPipe.PipeId[0] = pipeId;
 		ret = RK_MPI_VI_SetDevBindPipe(devId, &stBindPipe);
 		if (ret != RK_SUCCESS) {
@@ -423,6 +433,7 @@ int main(int argc, char *argv[]) {
 	RK_S32 encode = 0;
 	char *iq_dir = "/etc/iqfiles";
 	int c;
+	int ret = -1;
 
 	while ((c = getopt_long(argc, argv, optstr, long_options, NULL)) != -1) {
 		switch (c) {
@@ -462,7 +473,7 @@ int main(int argc, char *argv[]) {
 			break;
 		default:
 			print_usage(argv[0]);
-			return 0;
+			return -1;
 		}
 	}
 
@@ -593,7 +604,7 @@ int main(int argc, char *argv[]) {
 	vi_deinit(0, 1);
 	vi_deinit(1, 1);
 	vi_deinit(2, 1);
-
+	ret = 0;
 __FAILED:
 	RK_MPI_SYS_Exit();
 
@@ -601,5 +612,5 @@ __FAILED:
 	SIMPLE_COMM_ISP_Stop(1);
 	SIMPLE_COMM_ISP_Stop(2);
 
-	return 0;
+	return ret;
 }

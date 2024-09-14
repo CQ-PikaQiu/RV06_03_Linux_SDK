@@ -686,49 +686,49 @@ mpp_trie_get_info_count:
 	.global	mpp_trie_debug
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__FUNCTION__.7524, %object
-	.size	__FUNCTION__.7524, 14
-__FUNCTION__.7524:
+	.type	__FUNCTION__.7525, %object
+	.size	__FUNCTION__.7525, 14
+__FUNCTION__.7525:
 	.ascii	"trie_get_node\000"
-	.type	__func__.7525, %object
-	.size	__func__.7525, 14
-__func__.7525:
+	.type	__func__.7526, %object
+	.size	__func__.7526, 14
+__func__.7526:
 	.ascii	"trie_get_node\000"
-	.type	__FUNCTION__.7533, %object
-	.size	__FUNCTION__.7533, 14
-__FUNCTION__.7533:
+	.type	__FUNCTION__.7534, %object
+	.size	__FUNCTION__.7534, 14
+__FUNCTION__.7534:
 	.ascii	"mpp_trie_init\000"
-	.type	__func__.7534, %object
-	.size	__func__.7534, 14
-__func__.7534:
+	.type	__func__.7535, %object
+	.size	__func__.7535, 14
+__func__.7535:
 	.ascii	"mpp_trie_init\000"
-	.type	__func__.7540, %object
-	.size	__func__.7540, 16
-__func__.7540:
+	.type	__func__.7541, %object
+	.size	__func__.7541, 16
+__func__.7541:
 	.ascii	"mpp_trie_deinit\000"
-	.type	__FUNCTION__.7541, %object
-	.size	__FUNCTION__.7541, 16
-__FUNCTION__.7541:
+	.type	__FUNCTION__.7542, %object
+	.size	__FUNCTION__.7542, 16
+__FUNCTION__.7542:
 	.ascii	"mpp_trie_deinit\000"
-	.type	__func__.7554, %object
-	.size	__func__.7554, 18
-__func__.7554:
+	.type	__func__.7555, %object
+	.size	__func__.7555, 18
+__func__.7555:
 	.ascii	"mpp_trie_add_info\000"
-	.type	__FUNCTION__.7557, %object
-	.size	__FUNCTION__.7557, 18
-__FUNCTION__.7557:
+	.type	__FUNCTION__.7558, %object
+	.size	__FUNCTION__.7558, 18
+__FUNCTION__.7558:
 	.ascii	"mpp_trie_add_info\000"
-	.type	__func__.7575, %object
-	.size	__func__.7575, 18
-__func__.7575:
+	.type	__func__.7576, %object
+	.size	__func__.7576, 18
+__func__.7576:
 	.ascii	"mpp_trie_get_info\000"
-	.type	__func__.7583, %object
-	.size	__func__.7583, 24
-__func__.7583:
+	.type	__func__.7584, %object
+	.size	__func__.7584, 24
+__func__.7584:
 	.ascii	"mpp_trie_get_node_count\000"
-	.type	__func__.7588, %object
-	.size	__func__.7588, 24
-__func__.7588:
+	.type	__func__.7589, %object
+	.size	__func__.7589, 24
+__func__.7589:
 	.ascii	"mpp_trie_get_info_count\000"
 	.bss
 	.align	2

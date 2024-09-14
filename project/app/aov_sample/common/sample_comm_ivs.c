@@ -44,9 +44,14 @@ RK_S32 SAMPLE_COMM_IVS_Create(SAMPLE_IVS_CTX_S *ctx) {
 		RK_LOGE("ivs get mdattr failed:%x", s32Ret);
 		return -1;
 	}
-	stMdAttr.s32ThreshSad = 40;
+	stMdAttr.s32ThreshSad = 64;
 	stMdAttr.s32ThreshMove = 2;
-	// stMdAttr.s32SwitchSad = 0;
+	stMdAttr.s32SwitchSad = 2;
+	stMdAttr.bFlycatkinFlt = RK_TRUE;
+	stMdAttr.s32ThresDustMove = 3;
+	stMdAttr.s32ThresDustBlk = 3;
+	stMdAttr.s32ThresDustChng = 50;
+
 	s32Ret = RK_MPI_IVS_SetMdAttr(0, &stMdAttr);
 	if (s32Ret) {
 		RK_LOGE("ivs set mdattr failed:%x", s32Ret);
@@ -54,6 +59,38 @@ RK_S32 SAMPLE_COMM_IVS_Create(SAMPLE_IVS_CTX_S *ctx) {
 	}
 #endif
 	return 0;
+}
+
+RK_S32 SAMPLE_COMM_IVS_bMove(SAMPLE_IVS_CTX_S *ctx, VIDEO_FRAME_INFO_S *stVFrame) {
+	RK_S32 s32Ret = RK_FAILURE;
+	RK_BOOL bMove = RK_FALSE;
+	s32Ret = RK_MPI_IVS_SendFrame(ctx->s32ChnId, stVFrame, -1);
+	if (s32Ret != RK_SUCCESS) {
+		RK_LOGE("RK_MPI_IVS_SendFrame chnd	%d failed %#X", ctx->s32ChnId, s32Ret);
+		return s32Ret;
+	}
+
+	IVS_RESULT_INFO_S stIVSResults;
+	s32Ret = RK_MPI_IVS_GetResultsRaw(ctx->s32ChnId, &stIVSResults, -1);
+	if (s32Ret != RK_SUCCESS) {
+		RK_LOGE("RK_MPI_IVS_GetResults chnd  %d failed %#X", ctx->s32ChnId, s32Ret);
+		return s32Ret;
+	}
+
+	if (stIVSResults.s32ResultNum == 1) {
+		if (1000 * stIVSResults.pstResults->stMdInfo.u32Square /
+		        ctx->stIvsAttr.u32PicWidth / ctx->stIvsAttr.u32PicHeight >
+		    10) {
+			bMove = RK_TRUE;
+		}
+	}
+
+	s32Ret = RK_MPI_IVS_ReleaseResults(ctx->s32ChnId, &stIVSResults);
+	if (s32Ret != RK_SUCCESS) {
+		RK_LOGE("RK_MPI_IVS_ReleaseResults chnd  %d failed %#X", ctx->s32ChnId, s32Ret);
+		return s32Ret;
+	}
+	return bMove;
 }
 
 RK_S32 SAMPLE_COMM_IVS_Destroy(RK_S32 s32IvsChnid) {

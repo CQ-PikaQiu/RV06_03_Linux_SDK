@@ -74,7 +74,7 @@ static atomic_bool g_should_quit = false;
 #define RK_ALIGN_2(x) RK_ALIGN(x, 2)
 
 static RK_BOOL g_quit = RK_FALSE;
-static RK_S32 g_exit_result = RK_SUCCESS;
+static RK_S32 g_exit_result = 0;
 static RK_BOOL g_bIfVencThreadQuit[VENC_CHN_MAX] = {RK_FALSE};
 static RK_U32 g_u32MainVencWidth = 1920;
 static RK_U32 g_u32MainVencHeight = 1080;
@@ -85,7 +85,7 @@ static RK_S32 g_s32JpegCaptureNum = 1;
 
 static void program_handle_error(const char *func, RK_U32 line) {
 	RK_LOGE("func: <%s> line: <%d> error exit!", func, line);
-	g_exit_result = RK_FAILURE;
+	g_exit_result = -1;
 	g_quit = RK_TRUE;
 }
 
@@ -413,7 +413,6 @@ static RK_S32 venc_init(RK_S32 s32ChnId, RK_U32 u32Width, RK_U32 u32Height,
 		stAttr.stRcAttr.stH264Cbr.u32Gop = 50;
 		stAttr.stRcAttr.stH264Cbr.u32BitRate = 2 * 1024;
 	} else if (enCodecType == RK_VIDEO_ID_JPEG) {
-		stAttr.stRcAttr.enRcMode = VENC_RC_MODE_MJPEGCBR;
 		stAttr.stVencAttr.stAttrJpege.bSupportDCF = RK_FALSE;
 		stAttr.stVencAttr.stAttrJpege.stMPFCfg.u8LargeThumbNailNum = 0;
 		stAttr.stVencAttr.stAttrJpege.enReceiveMode = VENC_PIC_RECEIVE_SINGLE;
@@ -619,7 +618,7 @@ int main(int argc, char *argv[]) {
 
 	if (argc < 2) {
 		print_usage(argv[0]);
-		return 0;
+		return -1;
 	}
 
 	signal(SIGINT, sigterm_handler);
@@ -663,7 +662,7 @@ int main(int argc, char *argv[]) {
 			} else {
 				RK_LOGE("input wrap mode is no support(invalid)");
 				print_usage(argv[0]);
-				return RK_FALSE;
+				return -1;
 			}
 			break;
 		case 'j':
@@ -672,7 +671,7 @@ int main(int argc, char *argv[]) {
 		case '?':
 		default:
 			print_usage(argv[0]);
-			return 0;
+			return -1;
 		}
 	}
 
@@ -688,14 +687,14 @@ int main(int argc, char *argv[]) {
 		s32Ret |= SIMPLE_COMM_ISP_Run(s32CamId);
 		if (s32Ret != RK_SUCCESS) {
 			RK_LOGE("ISP init failure:%X", s32Ret);
-			g_exit_result = RK_FALSE;
+			g_exit_result = -1;
 			goto __FAILED2;
 		}
 #endif
 	}
 	RK_LOGE("ISP init success");
 	if (RK_MPI_SYS_Init() != RK_SUCCESS) {
-		g_exit_result = RK_FALSE;
+		g_exit_result = -1;
 		goto __FAILED;
 	}
 
@@ -740,7 +739,7 @@ int main(int argc, char *argv[]) {
 	s32Ret |= RK_MPI_VENC_DestroyChn(s32ComboVencChnId);
 	if (s32Ret != RK_SUCCESS) {
 		RK_LOGE("Venc 0 destroy failure");
-		g_exit_result = RK_FALSE;
+		g_exit_result = -1;
 	}
 	RK_LOGE("Venc 1 destroy success");
 
@@ -758,14 +757,14 @@ int main(int argc, char *argv[]) {
 	s32Ret = RK_MPI_SYS_UnBind(&stSrcChn, &stDestChn);
 	if (s32Ret != RK_SUCCESS) {
 		RK_LOGE("VI and VENC bind failure:%X", s32Ret);
-		g_exit_result = RK_FAILURE;
+		g_exit_result = -1;
 	}
 
 	s32Ret = RK_MPI_VENC_StopRecvFrame(s32MainVencChnId);
 	s32Ret |= RK_MPI_VENC_DestroyChn(s32MainVencChnId);
 	if (s32Ret != RK_SUCCESS) {
 		RK_LOGE("Venc 0 destroy failure");
-		g_exit_result = RK_FALSE;
+		g_exit_result = -1;
 	}
 
 	RK_LOGE("Venc 0 destroy success");
@@ -775,7 +774,7 @@ int main(int argc, char *argv[]) {
 	s32Ret |= RK_MPI_VI_DisableDev(s32ViDevId);
 	if (s32Ret != RK_SUCCESS) {
 		RK_LOGE("RK_MPI_VI_Close failed with %X!", s32Ret);
-		g_exit_result = RK_FALSE;
+		g_exit_result = -1;
 	}
 
 __FAILED:

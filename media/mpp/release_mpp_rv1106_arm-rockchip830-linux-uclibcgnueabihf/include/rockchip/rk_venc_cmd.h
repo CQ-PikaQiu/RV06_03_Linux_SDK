@@ -913,6 +913,7 @@ typedef struct MppEncH265TransCfg_t {
     RK_U32  scaling_list_mode;             /* default: 0 */
     RK_S32  cb_qp_offset;
     RK_S32  cr_qp_offset;
+    RK_S32  diff_cu_qp_delta_depth;
 } MppEncH265TransCfg;
 
 typedef struct MppEncH265MergeCfg_t {
@@ -1316,13 +1317,18 @@ typedef struct VepuPpInfo_t {
 typedef enum MppEncSceneMode_e {
     MPP_ENC_SCENE_MODE_DEFAULT,
     MPP_ENC_SCENE_MODE_IPC,
+    MPP_ENC_SCENE_MODE_IPC_PTZ,
     MPP_ENC_SCENE_MODE_BUTT,
 } MppEncSceneMode;
 
 typedef enum MppEncFineTuneCfgChange_e {
     /* change on scene mode */
-    MPP_ENC_TUNE_CFG_CHANGE_SCENE_MODE      = (1 << 0),
-    MPP_ENC_TUNE_CFG_CHANGE_MOTION_STATIC_SWITCH_ENABLE      = (1 << 1),
+    MPP_ENC_TUNE_CFG_CHANGE_SCENE_MODE                  = (1 << 0),
+    MPP_ENC_TUNE_CFG_CHANGE_MOTION_STATIC_SWITCH_ENABLE = (1 << 1),
+    MPP_ENC_TUNE_CFG_CHANGE_DEBLUR_STR                  = (1 << 2),
+    MPP_ENC_TUNE_CFG_CHANGE_ATR_STR                     = (1 << 3),
+    MPP_ENC_TUNE_CFG_CHANGE_ATL_STR                     = (1 << 4),
+    MPP_ENC_TUNE_CFG_CHANGE_LAMBDA_IDX                  = (1 << 5),
 } MppEncFineTuneCfgChange;
 
 typedef struct MppEncFineTuneCfg_t {
@@ -1330,5 +1336,9 @@ typedef struct MppEncFineTuneCfg_t {
 
     MppEncSceneMode     scene_mode;
     RK_S32              motion_static_switch_enable;
+    RK_S32              deblur_str;
+    RK_S32              atr_str;
+    RK_S32              atl_str;
+    RK_S32              lambda_idx;
 } MppEncFineTuneCfg;
 #endif /*__RK_VENC_CMD_H__*/

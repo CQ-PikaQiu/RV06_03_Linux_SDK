@@ -66,9 +66,9 @@ post_chk()
 	export rk_mpi_uvc_log_level=2
 	export uac_app_log_level=2
 
-        touch /tmp/uvc_no_timeout
-        /oem/usr/bin/usb_config.sh uac1
-        ifconfig lo 127.0.0.1
+	touch /tmp/uvc_no_timeout
+	/oem/usr/bin/usb_config.sh uac1
+	ifconfig lo 127.0.0.1
 
 	if [ -d "/oem/usr/share/iqfiles" ];then
 		rk_mpi_uvc -c /tmp/rkuvc.ini -a /oem/usr/share/iqfiles &

@@ -299,7 +299,7 @@ mpi_sysfs_dev_add:
 	orr	r1, r3, r1, lsl #20
 	bl	cdev_add
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r8, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -333,7 +333,7 @@ mpi_sysfs_dev_add:
 	bl	osal_device_add_driver
 .L36:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r8	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -450,7 +450,7 @@ mpi_fs_buf_read:
 	bic	r3, r3, #31
 	ldr	r3, [r3, #8]
 	.syntax unified
-@ 177 "./include/linux/uaccess.h" 1
+@ 177 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/include/linux/uaccess.h" 1
 	.syntax unified
 adds r6, r0, r4; sbcscc r6, r6, r3; movcc r3, #0
 @ 0 "" 2
@@ -672,25 +672,25 @@ mpi_fs_buf_add:
 	.global	mpi_global_mutex
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__func__.37475, %object
-	.size	__func__.37475, 24
-__func__.37475:
+	.type	__func__.35746, %object
+	.size	__func__.35746, 24
+__func__.35746:
 	.ascii	"mpi_sysfs_hotplug_event\000"
-	.type	__func__.37451, %object
-	.size	__func__.37451, 18
-__func__.37451:
+	.type	__func__.35722, %object
+	.size	__func__.35722, 18
+__func__.35722:
 	.ascii	"mpi_sysfs_dev_add\000"
-	.type	__func__.37462, %object
-	.size	__func__.37462, 21
-__func__.37462:
+	.type	__func__.35733, %object
+	.size	__func__.35733, 21
+__func__.35733:
 	.ascii	"mpi_sysfs_dev_remove\000"
-	.type	__func__.37471, %object
-	.size	__func__.37471, 22
-__func__.37471:
+	.type	__func__.35742, %object
+	.size	__func__.35742, 22
+__func__.35742:
 	.ascii	"mpi_sysfs_lease_event\000"
-	.type	__func__.37486, %object
-	.size	__func__.37486, 12
-__func__.37486:
+	.type	__func__.35757, %object
+	.size	__func__.35757, 12
+__func__.35757:
 	.ascii	"mpi_fs_init\000"
 	.data
 	.align	2
@@ -721,9 +721,9 @@ mpi_global_mutex:
 	.size	mpi_class, 4
 mpi_class:
 	.space	4
-	.type	__key.37434, %object
-	.size	__key.37434, 0
-__key.37434:
+	.type	__key.35705, %object
+	.size	__key.35705, 0
+__key.35705:
 	.type	cat_buf, %object
 	.size	cat_buf, 10240
 cat_buf:

@@ -54,7 +54,7 @@ static RK_RESOLUTION_ST test_res[] = {
     {{512, 288}, "512 x 288"},   //
     {{480, 320}, "480 x 320"},   // 320p
     {{320, 240}, "320 x 240"},   // 240p
-    {{2304, 1296}, "2304x1296"}, // 300w
+                                 //{{2304, 1296}, "2304x1296"}, // 300w
                                  // {{2560, 1440}, "2560x1440"},	// 400w
                                  // {{2880, 1616}, "2880x1616"},	// 500w
 };
@@ -103,10 +103,11 @@ static void *GetMediaBuffer0(void *arg) {
 				RK_LOGE("RK_MPI_VENC_ReleaseStream fail %x", s32Ret);
 			}
 			loopCount++;
-		}
+		} else
+		   continue;
 
 		// change resolution
-		if (loopCount % 100 == 0) {
+		if ((loopCount % 100) == 0) {
 			printf("===change resolution===\n");
 			if (idx >= resCnt)
 				idx = 0;
@@ -118,9 +119,18 @@ static void *GetMediaBuffer0(void *arg) {
 			}
 
 			// 2, set venc
-			stAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
-			stAttr.stRcAttr.stH264Cbr.u32BitRate = 10 * 1024;
-			stAttr.stRcAttr.stH264Cbr.u32Gop = 60;
+			if (enCodecType == RK_VIDEO_ID_AVC) {
+				stAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+				stAttr.stRcAttr.stH264Cbr.u32BitRate = 10 * 1024;
+				stAttr.stRcAttr.stH264Cbr.u32Gop = 60;
+			} else if (enCodecType == RK_VIDEO_ID_HEVC) {
+				stAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265CBR;
+				stAttr.stRcAttr.stH265Cbr.u32BitRate = 10 * 1024;
+				stAttr.stRcAttr.stH265Cbr.u32Gop = 60;
+			} else if (enCodecType == RK_VIDEO_ID_MJPEG) {
+				stAttr.stRcAttr.enRcMode = VENC_RC_MODE_MJPEGCBR;
+				stAttr.stRcAttr.stMjpegCbr.u32BitRate = 10 * 1024;
+			}
 			stAttr.stVencAttr.enType = enCodecType;
 			stAttr.stVencAttr.u32PicWidth = test_res[idx].size.u32Width;
 			stAttr.stVencAttr.u32PicHeight = test_res[idx].size.u32Height;
@@ -156,7 +166,7 @@ static void *GetMediaBuffer0(void *arg) {
 		}
 		usleep(10 * 1000);
 
-		if ((g_s32FrameCnt >= 0) && (loopCount > g_s32FrameCnt)) {
+		if ((g_s32FrameCnt >= 0) && (loopCount >= g_s32FrameCnt)) {
 			quit = true;
 			break;
 		}
@@ -174,13 +184,23 @@ static RK_S32 test_venc_init(int chnId, int width, int height, RK_CODEC_ID_E enT
 	VENC_CHN_ATTR_S stAttr;
 	memset(&stAttr, 0, sizeof(VENC_CHN_ATTR_S));
 
-	stAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
-	stAttr.stRcAttr.stH264Cbr.u32BitRate = 10 * 1024;
-	stAttr.stRcAttr.stH264Cbr.u32Gop = 60;
+	if (enType == RK_VIDEO_ID_AVC) {
+		stAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+		stAttr.stRcAttr.stH264Cbr.u32BitRate = 10 * 1024;
+		stAttr.stRcAttr.stH264Cbr.u32Gop = 60;
+	} else if (enType == RK_VIDEO_ID_HEVC) {
+		stAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265CBR;
+		stAttr.stRcAttr.stH265Cbr.u32BitRate = 10 * 1024;
+		stAttr.stRcAttr.stH265Cbr.u32Gop = 60;
+	} else if (enType == RK_VIDEO_ID_MJPEG) {
+		stAttr.stRcAttr.enRcMode = VENC_RC_MODE_MJPEGCBR;
+		stAttr.stRcAttr.stMjpegCbr.u32BitRate = 10 * 1024;
+	}
 
 	stAttr.stVencAttr.enType = enType;
 	stAttr.stVencAttr.enPixelFormat = RK_FMT_YUV420SP;
-	stAttr.stVencAttr.u32Profile = H264E_PROFILE_HIGH;
+	if (enType == RK_VIDEO_ID_AVC)
+		stAttr.stVencAttr.u32Profile = H264E_PROFILE_HIGH;
 	stAttr.stVencAttr.u32MaxPicWidth = MAXWIDTH;
 	stAttr.stVencAttr.u32MaxPicHeight = MAXHEIGHT;
 	stAttr.stVencAttr.u32PicWidth = width;
@@ -234,7 +254,7 @@ int vi_dev_init() {
 			return -1;
 		}
 		// 1-3.bind dev/pipe
-		stBindPipe.u32Num = pipeId;
+		stBindPipe.u32Num = 1;
 		stBindPipe.PipeId[0] = pipeId;
 		ret = RK_MPI_VI_SetDevBindPipe(devId, &stBindPipe);
 		if (ret != RK_SUCCESS) {
@@ -283,7 +303,7 @@ static void print_usage(const RK_CHAR *name) {
 	printf("\t%s -I 0 -w 1920 -h 1080 -o /tmp/venc.h264\n", name);
 	printf("\t-w | --width: VI width, Default:1920\n");
 	printf("\t-h | --heght: VI height, Default:1080\n");
-	printf("\t-c | --frame_cnt: frame number of output, Default:150\n");
+	printf("\t-c | --frame_cnt: frame number of output, Default:-1\n");
 	printf("\t-I | --camid: camera ctx id, Default 0. "
 	       "0:rkisp_mainpath,1:rkisp_selfpath,2:rkisp_bypasspath\n");
 	printf("\t-e | --encode: encode type, Default:h264, Value:h264, h265, mjpeg\n");
@@ -297,6 +317,7 @@ int main(int argc, char *argv[]) {
 	RK_CHAR *pCodecName = "H264";
 	RK_S32 s32chnlId = 0;
 	int c;
+	int ret = -1;
 
 	while ((c = getopt(argc, argv, optstr)) != -1) {
 		switch (c) {
@@ -330,7 +351,7 @@ int main(int argc, char *argv[]) {
 		case '?':
 		default:
 			print_usage(argv[0]);
-			return 0;
+			return -1;
 		}
 	}
 
@@ -397,10 +418,10 @@ int main(int argc, char *argv[]) {
 
 	s32Ret = RK_MPI_VI_DisableDev(0);
 	RK_LOGE("RK_MPI_VI_DisableDev %x", s32Ret);
-
+	ret = 0;
 __FAILED:
 	RK_LOGE("test running exit:%d", s32Ret);
 	RK_MPI_SYS_Exit();
 
-	return 0;
+	return ret;
 }

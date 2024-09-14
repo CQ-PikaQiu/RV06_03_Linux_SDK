@@ -1136,7 +1136,7 @@ mpp_buffer_get_mpi_buf_id_with_caller:
 	movs	r1, #0
 	mov	r0, sp
 	bl	memset
-	ldr	r3, [r5, #48]
+	ldr	r3, [r5, #52]
 	cbz	r3, .L194
 	mov	r2, #-1
 	mov	r1, sp
@@ -1638,101 +1638,101 @@ mpp_buffer_get_ptr_with_caller:
 	.size	mpp_buffer_get_ptr_with_caller, .-mpp_buffer_get_ptr_with_caller
 	.section	.rodata
 	.set	.LANCHOR1,. + 0
-	.type	__FUNCTION__.34807, %object
-	.size	__FUNCTION__.34807, 21
-__FUNCTION__.34807:
+	.type	__FUNCTION__.34728, %object
+	.size	__FUNCTION__.34728, 21
+__FUNCTION__.34728:
 	.ascii	"mpp_buffer_pool_init\000"
-	.type	__FUNCTION__.34811, %object
-	.size	__FUNCTION__.34811, 23
-__FUNCTION__.34811:
+	.type	__FUNCTION__.34732, %object
+	.size	__FUNCTION__.34732, 23
+__FUNCTION__.34732:
 	.ascii	"mpp_buffer_pool_deinit\000"
-	.type	__func__.34824, %object
-	.size	__func__.34824, 27
-__func__.34824:
+	.type	__func__.34745, %object
+	.size	__func__.34745, 27
+__func__.34745:
 	.ascii	"mpp_buffer_import_with_tag\000"
-	.type	__FUNCTION__.34826, %object
-	.size	__FUNCTION__.34826, 27
-__FUNCTION__.34826:
+	.type	__FUNCTION__.34747, %object
+	.size	__FUNCTION__.34747, 27
+__FUNCTION__.34747:
 	.ascii	"mpp_buffer_import_with_tag\000"
-	.type	__func__.34834, %object
-	.size	__func__.34834, 23
-__func__.34834:
+	.type	__func__.34755, %object
+	.size	__func__.34755, 23
+__func__.34755:
 	.ascii	"mpi_buf_alloc_with_tag\000"
-	.type	__func__.34841, %object
-	.size	__func__.34841, 21
-__func__.34841:
+	.type	__func__.34762, %object
+	.size	__func__.34762, 21
+__func__.34762:
 	.ascii	"mpi_buf_ref_with_tag\000"
-	.type	__func__.34848, %object
-	.size	__func__.34848, 23
-__func__.34848:
+	.type	__func__.34769, %object
+	.size	__func__.34769, 23
+__func__.34769:
 	.ascii	"mpi_buf_unref_with_tag\000"
-	.type	__func__.34855, %object
-	.size	__func__.34855, 28
-__func__.34855:
+	.type	__func__.34776, %object
+	.size	__func__.34776, 28
+__func__.34776:
 	.ascii	"mpi_buf_get_dma_with_caller\000"
-	.type	__func__.34866, %object
-	.size	__func__.34866, 24
-__func__.34866:
+	.type	__func__.34787, %object
+	.size	__func__.34787, 24
+__func__.34787:
 	.ascii	"mpp_buffer_get_with_tag\000"
-	.type	__FUNCTION__.34867, %object
-	.size	__FUNCTION__.34867, 24
-__FUNCTION__.34867:
+	.type	__FUNCTION__.34788, %object
+	.size	__FUNCTION__.34788, 24
+__FUNCTION__.34788:
 	.ascii	"mpp_buffer_get_with_tag\000"
-	.type	__func__.34878, %object
-	.size	__func__.34878, 29
-__func__.34878:
+	.type	__func__.34799, %object
+	.size	__func__.34799, 29
+__func__.34799:
 	.ascii	"mpp_ring_buffer_get_with_tag\000"
+	.type	__FUNCTION__.34800, %object
+	.size	__FUNCTION__.34800, 29
+__FUNCTION__.34800:
+	.ascii	"mpp_ring_buffer_get_with_tag\000"
+	.type	__func__.34807, %object
+	.size	__func__.34807, 27
+__func__.34807:
+	.ascii	"mpp_buffer_put_with_caller\000"
+	.type	__FUNCTION__.34808, %object
+	.size	__FUNCTION__.34808, 27
+__FUNCTION__.34808:
+	.ascii	"mpp_buffer_put_with_caller\000"
 	.type	__FUNCTION__.34879, %object
-	.size	__FUNCTION__.34879, 29
+	.size	__FUNCTION__.34879, 30
 __FUNCTION__.34879:
-	.ascii	"mpp_ring_buffer_get_with_tag\000"
-	.type	__func__.34886, %object
-	.size	__func__.34886, 27
-__func__.34886:
-	.ascii	"mpp_buffer_put_with_caller\000"
-	.type	__FUNCTION__.34887, %object
-	.size	__FUNCTION__.34887, 27
-__FUNCTION__.34887:
-	.ascii	"mpp_buffer_put_with_caller\000"
-	.type	__FUNCTION__.34958, %object
-	.size	__FUNCTION__.34958, 30
-__FUNCTION__.34958:
 	.ascii	"mpp_buffer_get_fd_with_caller\000"
-	.type	__func__.35000, %object
-	.size	__func__.35000, 32
-__func__.35000:
+	.type	__func__.34921, %object
+	.size	__func__.34921, 32
+__func__.34921:
 	.ascii	"mpp_buffer_info_get_with_caller\000"
-	.type	__func__.35018, %object
-	.size	__func__.35018, 38
-__func__.35018:
+	.type	__func__.34939, %object
+	.size	__func__.34939, 38
+__func__.34939:
 	.ascii	"mpp_buffer_get_mpi_buf_id_with_caller\000"
-	.type	__func__.35032, %object
-	.size	__func__.35032, 26
-__func__.35032:
+	.type	__func__.34953, %object
+	.size	__func__.34953, 26
+__func__.34953:
 	.ascii	"mpp_buffer_get_phy_caller\000"
-	.type	__FUNCTION__.34897, %object
-	.size	__FUNCTION__.34897, 24
-__FUNCTION__.34897:
+	.type	__FUNCTION__.34818, %object
+	.size	__FUNCTION__.34818, 24
+__FUNCTION__.34818:
 	.ascii	"mpp_buffer_map_ring_ptr\000"
-	.type	__func__.34912, %object
-	.size	__func__.34912, 15
-__func__.34912:
+	.type	__func__.34833, %object
+	.size	__func__.34833, 15
+__func__.34833:
 	.ascii	"mpp_buffer_map\000"
-	.type	__FUNCTION__.34927, %object
-	.size	__FUNCTION__.34927, 28
-__FUNCTION__.34927:
+	.type	__FUNCTION__.34848, %object
+	.size	__FUNCTION__.34848, 28
+__FUNCTION__.34848:
 	.ascii	"mpp_buffer_read_with_caller\000"
-	.type	__FUNCTION__.34939, %object
-	.size	__FUNCTION__.34939, 29
-__FUNCTION__.34939:
+	.type	__FUNCTION__.34860, %object
+	.size	__FUNCTION__.34860, 29
+__FUNCTION__.34860:
 	.ascii	"mpp_buffer_write_with_caller\000"
-	.type	__func__.34948, %object
-	.size	__func__.34948, 31
-__func__.34948:
+	.type	__func__.34869, %object
+	.size	__func__.34869, 31
+__func__.34869:
 	.ascii	"mpp_buffer_get_ptr_with_caller\000"
-	.type	__FUNCTION__.34949, %object
-	.size	__FUNCTION__.34949, 31
-__FUNCTION__.34949:
+	.type	__FUNCTION__.34870, %object
+	.size	__FUNCTION__.34870, 31
+__FUNCTION__.34870:
 	.ascii	"mpp_buffer_get_ptr_with_caller\000"
 	.bss
 	.align	2

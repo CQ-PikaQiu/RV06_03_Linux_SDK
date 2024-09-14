@@ -74,7 +74,7 @@ vmcu_version:
 	cmp	r3, #76
 	beq	.L6
 	movs	r1, #2
-	movs	r3, #220
+	movs	r3, #234
 	ldr	r2, .L12
 	mov	r0, r1
 	str	r3, [sp]
@@ -151,7 +151,7 @@ vmcu_release:
 	movs	r0, #2
 	ldr	r3, [r3]
 	str	r3, [sp, #4]
-	movw	r3, #299
+	movw	r3, #313
 	str	r3, [sp]
 	ldr	r3, .L15+4
 	bl	vlog
@@ -247,7 +247,7 @@ vmcu_ioctl:
 	ldr	r8, [r3, #160]
 	movs	r0, #2
 	strd	r4, r3, [sp, #8]
-	movs	r3, #252
+	mov	r3, #266
 	str	r4, [sp, #4]
 	str	r3, [sp]
 	ldr	r2, .L33+4
@@ -256,7 +256,7 @@ vmcu_ioctl:
 	ldr	r1, [r8, #212]
 	cmp	r1, r4
 	bhi	.L29
-	movs	r3, #255
+	movw	r3, #269
 	ldr	r2, .L33+12
 	str	r3, [sp]
 	ldr	r3, .L33+8
@@ -271,7 +271,7 @@ vmcu_ioctl:
 .L30:
 .L29:
 	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
+@ 87 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
 	cmp	r4, r1
 	sbc	r1, r4, r4
 .inst.w 0xf3af8014
@@ -283,7 +283,7 @@ vmcu_ioctl:
 	movs	r3, #20
 	mla	r1, r3, r4, r1
 	cbnz	r1, .L31
-	mov	r3, #262
+	mov	r3, #276
 	ldr	r2, .L33+16
 	str	r3, [sp]
 	ldr	r3, .L33+8
@@ -405,7 +405,7 @@ vmcu_open:
 	mov	r5, r0
 	cbnz	r0, .L52
 	movs	r1, #2
-	mov	r3, #286
+	mov	r3, #300
 	ldr	r2, .L54+4
 	mov	r0, r1
 	str	r3, [sp]
@@ -427,7 +427,7 @@ vmcu_open:
 	movs	r0, #2
 	ldr	r2, .L54+16
 	str	r3, [sp, #4]
-	movw	r3, #291
+	movw	r3, #305
 	str	r3, [sp]
 	ldr	r3, .L54+8
 	bl	vlog
@@ -488,7 +488,7 @@ mcu_wrap_config:
 	mul	r0, r0, r9
 	ldr	r6, [r3, #604]
 	bl	__aeabi_idiv
-	movs	r3, #111
+	movs	r3, #113
 	ldr	r2, .L68+8
 	movs	r1, #4
 	subs	r7, r6, #4
@@ -516,7 +516,7 @@ mcu_wrap_config:
 	bne	.L61
 	strd	r8, r3, [sp, #4]
 	movs	r1, #4
-	movs	r3, #120
+	movs	r3, #122
 	ldr	r2, .L68+20
 	str	r3, [sp]
 	movs	r0, #2
@@ -554,7 +554,7 @@ mcu_wrap_config:
 	ldr	r3, [r4, #220]
 	ldr	r3, [r3, #608]
 	str	r3, [sp, #4]
-	movs	r3, #132
+	movs	r3, #134
 	str	r3, [sp]
 	ldr	r3, .L68+12
 	bl	vlog
@@ -591,18 +591,19 @@ mcu_wrap_resume:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r3, r4, r5, lr}
-	.save {r3, r4, r5, lr}
+	push	{r4, r5, r6, lr}
+	.save {r4, r5, r6, lr}
 	ldr	r4, .L72
-	ldr	r5, [r4, #264]
-	cmp	r5, #3
+	ldr	r6, [r4, #264]
+	cmp	r6, #3
 	bne	.L71
-	mov	r2, #4096
+	mov	r5, #8192
 	movs	r1, #0
+	mov	r2, r5
 	ldr	r0, [r4, #252]
 	bl	memset
-	mov	r2, #4096
-	add	r1, r4, #268
+	mov	r2, r5
+	add	r1, r4, #272
 	ldr	r0, [r4, #252]
 	bl	memcpy
 	ldr	r2, .L72+4
@@ -625,15 +626,13 @@ mcu_wrap_resume:
 	movs	r1, #1
 	ldrd	r2, r3, [r3, #604]
 	add	r3, r3, #2048
-	str	r3, [r2]
-	mov	r3, #8192
-	str	r3, [r2, #4]
+	strd	r3, r5, [r2]
 	ldr	r3, [r4, #220]
+	ldr	r5, .L72+12
 	ldr	r0, [r3, #448]
 	bl	dma_buf_end_cpu_access
 	ldr	r3, [r4, #220]
-	mov	r0, r5
-	ldr	r5, .L72+12
+	mov	r0, r6
 	ldr	r1, [r3, #608]
 	bl	mcu_send_message
 	ldr	r3, [r5, #4]
@@ -648,7 +647,7 @@ mcu_wrap_resume:
 	str	r3, [r4, #264]
 .L71:
 	movs	r0, #0
-	pop	{r3, r4, r5, pc}
+	pop	{r4, r5, r6, pc}
 .L73:
 	.align	2
 .L72:
@@ -692,12 +691,15 @@ mcu_get_wrap_status:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
-	ldr	r3, .L78
+	ldr	r3, .L79
 	ldr	r0, [r3, #264]
+	cmp	r0, #0
+	it	eq
+	moveq	r0, #2
 	bx	lr
-.L79:
+.L80:
 	.align	2
-.L78:
+.L79:
 	.word	g_vmcu_dev
 	.fnend
 	.size	mcu_get_wrap_status, .-mcu_get_wrap_status
@@ -715,43 +717,43 @@ mcu_wrap_start:
 	push	{r0, r1, r2, r3, r4, lr}
 	.save {r4, lr}
 	.pad #16
-	ldr	r4, .L84
+	ldr	r4, .L85
 	ldr	r3, [r4, #264]
 	cmp	r3, #1
-	bne	.L80
-	ldr	r2, .L84+4
-	movs	r3, #149
+	bne	.L81
+	ldr	r2, .L85+4
+	movs	r3, #153
 	movs	r1, #4
 	str	r3, [sp]
 	movs	r0, #2
-	ldr	r3, .L84+8
+	ldr	r3, .L85+8
 	bl	vlog
 	movs	r1, #0
 	movs	r0, #5
 	bl	mcu_send_message
 	ldr	r3, [r4, #248]
-	ldr	r2, .L84+12
+	ldr	r2, .L85+12
 	movs	r1, #2
 	str	r1, [r4, #264]
 	ldr	r3, [r3]
 	ldr	r2, [r2]
 	ubfx	r3, r3, #0, #14
 	cmp	r3, r2
-	beq	.L80
+	beq	.L81
 	strd	r2, r3, [sp, #4]
 	mov	r0, r1
-	movs	r3, #154
-	ldr	r2, .L84+16
+	movs	r3, #158
+	ldr	r2, .L85+16
 	str	r3, [sp]
-	ldr	r3, .L84+8
+	ldr	r3, .L85+8
 	bl	vlog
-.L80:
+.L81:
 	add	sp, sp, #16
 	@ sp needed
 	pop	{r4, pc}
-.L85:
+.L86:
 	.align	2
-.L84:
+.L85:
 	.word	g_vmcu_dev
 	.word	.LC12
 	.word	.LANCHOR0+63
@@ -772,9 +774,9 @@ mcu_reset:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, lr}
 	.save {r4, lr}
-	ldr	r4, .L88
+	ldr	r4, .L89
 	ldr	r3, [r4, #264]
-	cbz	r3, .L86
+	cbz	r3, .L87
 	movs	r1, #0
 	movs	r0, #9
 	bl	mcu_send_message
@@ -786,11 +788,11 @@ mcu_reset:
 	str	r2, [r3]
 	pop	{r4, lr}
 	b	msleep
-.L86:
+.L87:
 	pop	{r4, pc}
-.L89:
+.L90:
 	.align	2
-.L88:
+.L89:
 	.word	g_vmcu_dev
 	.fnend
 	.size	mcu_reset, .-mcu_reset
@@ -808,15 +810,15 @@ mcu_wrap_end:
 	push	{r0, r1, r4, lr}
 	.save {r4, lr}
 	.pad #8
-	ldr	r4, .L92
+	ldr	r4, .L93
 	ldr	r0, [r4, #264]
 	cmp	r0, #2
-	bne	.L90
-	movs	r3, #172
-	ldr	r2, .L92+4
+	bne	.L91
+	movs	r3, #176
+	ldr	r2, .L93+4
 	str	r3, [sp]
 	movs	r1, #4
-	ldr	r3, .L92+8
+	ldr	r3, .L93+8
 	bl	vlog
 	movs	r3, #1
 	movs	r1, #0
@@ -826,18 +828,52 @@ mcu_wrap_end:
 	@ sp needed
 	pop	{r4, lr}
 	b	mcu_send_message
-.L90:
+.L91:
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, pc}
-.L93:
+.L94:
 	.align	2
-.L92:
+.L93:
 	.word	g_vmcu_dev
 	.word	.LC14
 	.word	.LANCHOR0+78
 	.fnend
 	.size	mcu_wrap_end, .-mcu_wrap_end
+	.align	1
+	.global	mcu_wrap_set_id
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	mcu_wrap_set_id, %function
+mcu_wrap_set_id:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r4, lr}
+	.save {r4, lr}
+	ldr	r4, .L101
+	ldr	r3, [r4, #264]
+	cmp	r3, #2
+	bne	.L95
+	orr	r1, r0, r1, lsl #2
+	ldr	r0, [r4, #268]
+	bl	mcu_send_message
+	ldr	r3, [r4, #268]
+	adds	r3, r3, #1
+	cmp	r3, #12
+	it	gt
+	movgt	r3, #10
+	str	r3, [r4, #268]
+.L95:
+	pop	{r4, pc}
+.L102:
+	.align	2
+.L101:
+	.word	g_vmcu_dev
+	.fnend
+	.size	mcu_wrap_set_id, .-mcu_wrap_set_id
 	.align	1
 	.global	vmcu_probe
 	.syntax unified
@@ -853,89 +889,89 @@ vmcu_probe:
 	.save {r4, r5, r6, r7, r8, lr}
 	.pad #24
 	sub	sp, sp, #24
-	ldr	r5, .L115
+	ldr	r5, .L124
 	movs	r3, #0
 	movs	r2, #0
 	movs	r1, #0
 	strd	r2, [sp, #16]
 	mov	r6, r0
-	movw	r2, #4364
+	movw	r2, #8464
 	mov	r0, r5
 	bl	memset
 	movs	r1, #4
-	ldr	r0, .L115+4
+	ldr	r0, .L124+4
 	mov	r4, r5
 	bl	ioremap
-	ldr	r7, .L115+8
-	mov	r1, #4096
+	ldr	r7, .L124+8
+	mov	r1, #8192
 	str	r0, [r5, #260]
 	ldr	r0, [r7]
 	bl	ioremap
 	movs	r1, #4
 	str	r0, [r5, #252]
-	ldr	r0, .L115+12
+	ldr	r0, .L124+12
 	bl	ioremap
 	ldr	r3, [r5, #260]
 	str	r0, [r5, #256]
 	ldr	r3, [r3]
 	and	r2, r3, #30
 	cmp	r2, #30
-	beq	.L95
+	beq	.L104
 	str	r3, [sp, #4]
-	mov	r3, #384
-	ldr	r2, .L115+16
+	mov	r3, #398
+	ldr	r2, .L124+16
 	movs	r1, #4
 	str	r3, [sp]
-	ldr	r3, .L115+20
-.L114:
+	ldr	r3, .L124+20
+.L123:
 	movs	r0, #2
 	bl	vlog
-.L94:
+.L103:
 	add	sp, sp, #24
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, pc}
-.L95:
-	ldr	r0, .L115+24
+.L104:
+	ldr	r0, .L124+24
 	bl	mpi_allocator_find_by_name
 	str	r0, [r5, #216]
-	cbnz	r0, .L97
-	mov	r3, #390
+	cbnz	r0, .L106
+	mov	r3, #404
 	str	r0, [sp, #4]
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L115+20
-	ldr	r2, .L115+28
-	b	.L114
-.L97:
-	ldr	r3, .L115+32
+	ldr	r3, .L124+20
+	ldr	r2, .L124+28
+	b	.L123
+.L106:
+	ldr	r3, .L124+32
 	ldr	r0, [r3, #4]
 	cmp	r0, #0
-	beq	.L98
+	beq	.L107
 	mov	r2, #416
 	movs	r1, #0
 	bl	filp_open
-	movw	r3, #395
-	ldr	r2, .L115+36
+	movw	r3, #409
+	ldr	r2, .L124+36
 	movs	r1, #4
 	mov	r5, r0
 	str	r0, [sp, #4]
 	str	r3, [sp]
 	movs	r0, #2
-	ldr	r3, .L115+20
+	ldr	r3, .L124+20
 	bl	vlog
 	cmp	r5, #0
-	beq	.L98
-	mov	r2, #4096
+	beq	.L107
+	mov	r2, #8192
 	movs	r1, #0
 	ldr	r0, [r4, #252]
 	bl	memset
-	mov	r2, #4096
-	add	r1, r4, #268
+	mov	r2, #8192
+	add	r1, r4, #272
 	mov	r0, r5
 	add	r3, sp, #16
 	bl	kernel_read
-	mov	r2, #4096
-	add	r1, r4, #268
+	mov	r2, #8192
+	add	r1, r4, #272
 	mov	r8, r0
 	ldr	r0, [r4, #252]
 	bl	memcpy
@@ -944,10 +980,10 @@ vmcu_probe:
 	ldrd	r2, [sp, #16]
 	str	r8, [sp, #4]
 	strd	r2, [sp, #8]
-	movw	r3, #405
-	ldr	r2, .L115+40
+	movw	r3, #419
+	ldr	r2, .L124+40
 	str	r3, [sp]
-	ldr	r3, .L115+20
+	ldr	r3, .L124+20
 	bl	vlog
 	ldr	r3, [r4, #256]
 	ldr	r2, [r7]
@@ -955,28 +991,28 @@ vmcu_probe:
 	mov	r0, r5
 	str	r2, [r3]
 	bl	filp_close
-.L99:
+.L108:
 	ldr	r3, [r4, #260]
 	mov	r2, #1966080
 	movs	r1, #4
-	ldr	r0, .L115+44
+	ldr	r0, .L124+44
 	str	r2, [r3]
 	bl	ioremap
 	movs	r1, #4
 	str	r0, [r4, #232]
-	ldr	r0, .L115+48
+	ldr	r0, .L124+48
 	bl	ioremap
 	movs	r1, #4
 	str	r0, [r4, #236]
-	ldr	r0, .L115+52
+	ldr	r0, .L124+52
 	bl	ioremap
 	movs	r1, #4
 	str	r0, [r4, #240]
-	ldr	r0, .L115+56
+	ldr	r0, .L124+56
 	bl	ioremap
 	movs	r1, #4
 	str	r0, [r4, #244]
-	ldr	r0, .L115+60
+	ldr	r0, .L124+60
 	bl	ioremap
 	mov	r2, #10240
 	movs	r1, #1
@@ -984,12 +1020,12 @@ vmcu_probe:
 	ldr	r0, [r4, #216]
 	bl	mpi_allocator_alloc
 	mov	r5, r0
-	cbz	r0, .L101
+	cbz	r0, .L110
 	movs	r1, #0
 	bl	mpi_buf_create
 	str	r0, [r4, #220]
-	cbz	r0, .L101
-	ldr	r3, .L115+64
+	cbz	r0, .L110
+	ldr	r3, .L124+64
 	str	r3, [r0, #4]
 	mov	r0, r5
 	bl	dma_buf_put
@@ -1020,12 +1056,12 @@ vmcu_probe:
 	movs	r0, #3
 	ldr	r1, [r3, #608]
 	bl	mcu_send_message
-.L101:
+.L110:
 	mov	r1, #3264
 	mov	r0, r6
 	bl	kstrdup
-	ldr	r5, .L115+68
-	ldr	r7, .L115+72
+	ldr	r5, .L124+68
+	ldr	r7, .L124+72
 	mov	r2, r6
 	movs	r1, #8
 	str	r4, [r4, #164]
@@ -1033,7 +1069,7 @@ vmcu_probe:
 	str	r3, [r4, #212]
 	str	r7, [r4, #208]
 	str	r0, [r4]
-	ldr	r0, .L115+76
+	ldr	r0, .L124+76
 	bl	mpi_dev_register
 	movs	r3, #0
 	strd	r5, r5, [r4, #192]
@@ -1042,20 +1078,20 @@ vmcu_probe:
 	sub	r0, r5, #188
 	strd	r3, r3, [r4, #80]
 	str	r3, [r4, #188]
-	ldr	r2, .L115+80
+	ldr	r2, .L124+80
 	bl	mpi_sysfs_dev_add
 	sub	r1, r5, #192
 	mov	r3, r6
 	mov	r2, #-1
-	ldr	r0, .L115+84
+	ldr	r0, .L124+84
 	bl	kthread_create_on_node
 	cmn	r0, #4096
 	mov	r5, r0
-	bhi	.L103
+	bhi	.L112
 	bl	wake_up_process
-.L103:
+.L112:
 	mov	r1, #8192
-	ldr	r0, .L115+88
+	ldr	r0, .L124+88
 	str	r5, [r4, #200]
 	bl	mpi_fs_buf_init
 	ldr	r3, [r4, #220]
@@ -1069,23 +1105,24 @@ vmcu_probe:
 	str	r2, [r4, #180]
 	str	r2, [sp, #8]
 	str	r3, [sp, #4]
-	movw	r3, #447
-	ldr	r2, .L115+92
+	movw	r3, #461
+	ldr	r2, .L124+92
 	str	r3, [sp]
-	ldr	r3, .L115+20
+	ldr	r3, .L124+20
 	bl	vlog
-	movs	r3, #1
-	str	r3, [r4, #264]
-	b	.L94
-.L98:
-	mov	r2, #4096
+	movs	r2, #1
+	movs	r3, #10
+	strd	r2, r3, [r4, #264]
+	b	.L103
+.L107:
+	mov	r2, #8192
 	ldr	r1, [r4, #252]
-	ldr	r0, .L115+96
+	ldr	r0, .L124+96
 	bl	memcpy
-	b	.L99
-.L116:
+	b	.L108
+.L125:
 	.align	2
-.L115:
+.L124:
 	.word	g_vmcu_dev
 	.word	-12875260
 	.word	.LANCHOR2
@@ -1110,7 +1147,7 @@ vmcu_probe:
 	.word	vmcu_thread_fn
 	.word	g_vmcu_dev+168
 	.word	.LC21
-	.word	g_vmcu_dev+268
+	.word	g_vmcu_dev+272
 	.fnend
 	.size	vmcu_probe, .-vmcu_probe
 	.align	1
@@ -1127,46 +1164,46 @@ vmcu_shutdown:
 	push	{r4, lr}
 	.save {r4, lr}
 	movs	r3, #1
-	ldr	r4, .L148
+	ldr	r4, .L157
 	ldr	r0, [r4, #260]
 	str	r3, [r4, #204]
-	cbz	r0, .L118
+	cbz	r0, .L127
 	bl	iounmap
-.L118:
+.L127:
 	ldr	r0, [r4, #252]
-	cbz	r0, .L119
+	cbz	r0, .L128
 	bl	iounmap
-.L119:
+.L128:
 	ldr	r0, [r4, #256]
-	cbz	r0, .L120
+	cbz	r0, .L129
 	bl	iounmap
-.L120:
+.L129:
 	ldr	r0, [r4, #232]
-	cbz	r0, .L121
+	cbz	r0, .L130
 	bl	iounmap
-.L121:
+.L130:
 	ldr	r0, [r4, #236]
-	cbz	r0, .L123
+	cbz	r0, .L132
 	bl	iounmap
 	ldr	r3, [r4, #236]
-	cbz	r3, .L123
+	cbz	r3, .L132
 	ldr	r0, [r4, #240]
 	bl	iounmap
-.L123:
+.L132:
 	ldr	r0, [r4, #244]
-	cbz	r0, .L125
+	cbz	r0, .L134
 	bl	iounmap
-.L125:
+.L134:
 	ldr	r0, [r4, #248]
-	cbz	r0, .L126
+	cbz	r0, .L135
 	bl	iounmap
-.L126:
-	ldr	r0, .L148+4
+.L135:
+	ldr	r0, .L157+4
 	pop	{r4, lr}
 	b	mpi_dev_unregister
-.L149:
+.L158:
 	.align	2
-.L148:
+.L157:
 	.word	g_vmcu_dev
 	.word	g_vmcu_dev+4
 	.fnend
@@ -1184,13 +1221,13 @@ vmcu_load:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r3, lr}
 	.save {r3, lr}
-	ldr	r0, .L151
+	ldr	r0, .L160
 	bl	vmcu_probe
 	movs	r0, #0
 	pop	{r3, pc}
-.L152:
+.L161:
 	.align	2
-.L151:
+.L160:
 	.word	.LC22
 	.fnend
 	.size	vmcu_load, .-vmcu_load
@@ -1217,37 +1254,37 @@ vmcu_exit:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__func__.39040, %object
-	.size	__func__.39040, 13
-__func__.39040:
+	.type	__func__.37330, %object
+	.size	__func__.37330, 13
+__func__.37330:
 	.ascii	"vmcu_version\000"
-	.type	__func__.39082, %object
-	.size	__func__.39082, 13
-__func__.39082:
+	.type	__func__.37372, %object
+	.size	__func__.37372, 13
+__func__.37372:
 	.ascii	"vmcu_release\000"
-	.type	__func__.39053, %object
-	.size	__func__.39053, 11
-__func__.39053:
+	.type	__func__.37343, %object
+	.size	__func__.37343, 11
+__func__.37343:
 	.ascii	"vmcu_ioctl\000"
-	.type	__func__.39075, %object
-	.size	__func__.39075, 10
-__func__.39075:
+	.type	__func__.37365, %object
+	.size	__func__.37365, 10
+__func__.37365:
 	.ascii	"vmcu_open\000"
-	.type	__func__.38998, %object
-	.size	__func__.38998, 16
-__func__.38998:
+	.type	__func__.37284, %object
+	.size	__func__.37284, 16
+__func__.37284:
 	.ascii	"mcu_wrap_config\000"
-	.type	__func__.39012, %object
-	.size	__func__.39012, 15
-__func__.39012:
+	.type	__func__.37298, %object
+	.size	__func__.37298, 15
+__func__.37298:
 	.ascii	"mcu_wrap_start\000"
-	.type	__func__.39019, %object
-	.size	__func__.39019, 13
-__func__.39019:
+	.type	__func__.37305, %object
+	.size	__func__.37305, 13
+__func__.37305:
 	.ascii	"mcu_wrap_end\000"
-	.type	__func__.39118, %object
-	.size	__func__.39118, 11
-__func__.39118:
+	.type	__func__.37408, %object
+	.size	__func__.37408, 11
+__func__.37408:
 	.ascii	"vmcu_probe\000"
 	.space	2
 	.type	vmcu_ioctls, %object
@@ -1307,7 +1344,7 @@ __param_str_mcu_fw_path:
 	.type	mcu_fw_addr, %object
 	.size	mcu_fw_addr, 4
 mcu_fw_addr:
-	.word	-9441280
+	.word	-9445376
 	.type	mcu_driver, %object
 	.size	mcu_driver, 104
 mcu_driver:
@@ -1328,9 +1365,9 @@ isp_max_h:
 mcu_fw_path:
 	.space	4
 	.type	g_vmcu_dev, %object
-	.size	g_vmcu_dev, 4364
+	.size	g_vmcu_dev, 8464
 g_vmcu_dev:
-	.space	4364
+	.space	8464
 	.type	isp_max_w, %object
 	.size	isp_max_w, 4
 isp_max_w:

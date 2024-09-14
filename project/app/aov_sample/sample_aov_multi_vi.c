@@ -63,6 +63,8 @@ typedef struct _rkCmdArgs {
 	RK_S32 s32SuspendTime;
 	RK_S32 s32ViFrameMode;
 	RK_U32 u32BootFrame;
+	RK_BOOL bEnableDummyFrame;
+	RK_U32 u32DummyFrameCnt;
 } RkCmdArgs;
 
 typedef struct _rkMpiCtx {
@@ -109,6 +111,7 @@ static void *vi_get_stream_multi_mode(void *pArgs) {
 	SAMPLE_VI_CTX_S *sub_ctx = &g_mpi_ctx->vi[1];
 	FILE *main_output_fp, *sub_output_fp = RK_NULL;
 	void *main_output_ptr, *sub_output_ptr = RK_NULL;
+	RK_U32 main_size, sub_size;
 	RK_S32 loopCount = 0;
 	enum ISP_MODE eCurISPMode = MULTI_FRAME_MODE;
 	char name[256];
@@ -133,18 +136,20 @@ static void *vi_get_stream_multi_mode(void *pArgs) {
 	for (int i = 0; i < g_cmd_args->u32BootFrame; i++) {
 		SAMPLE_COMM_VI_GetChnFrame(main_ctx, &main_output_ptr);
 		SAMPLE_COMM_VI_GetChnFrame(sub_ctx, &sub_output_ptr);
+		main_size = main_ctx->stViFrame.stVFrame.u32VirWidth *
+		            main_ctx->stViFrame.stVFrame.u32VirHeight * 3 / 2;
 		if (main_output_fp) {
-			fwrite(main_output_ptr, 1, main_ctx->stViFrame.stVFrame.u64PrivateData,
-			       main_output_fp);
+			fwrite(main_output_ptr, 1, main_size, main_output_fp);
 			fflush(main_output_fp);
 			RK_LOGD("main sensor write frame %d to sdcard", loopCount);
 		} else {
 			RK_LOGI("main sensor get frame %d", loopCount);
 		}
 
+		sub_size = sub_ctx->stViFrame.stVFrame.u32VirWidth *
+		           sub_ctx->stViFrame.stVFrame.u32VirHeight * 3 / 2;
 		if (sub_output_fp) {
-			fwrite(sub_output_ptr, 1, sub_ctx->stViFrame.stVFrame.u64PrivateData,
-			       sub_output_fp);
+			fwrite(sub_output_ptr, 1, sub_size, sub_output_fp);
 			fflush(sub_output_fp);
 			RK_LOGD("sub sensor write frame %d to sdcard", loopCount);
 		} else {
@@ -175,9 +180,12 @@ static void *vi_get_stream_multi_mode(void *pArgs) {
 	while (!g_thread_status->bIfViThreadQuit) {
 		SAMPLE_COMM_VI_GetChnFrame(main_ctx, &main_output_ptr);
 		SAMPLE_COMM_VI_GetChnFrame(sub_ctx, &sub_output_ptr);
+		main_size = main_ctx->stViFrame.stVFrame.u32VirWidth *
+		            main_ctx->stViFrame.stVFrame.u32VirHeight * 3 / 2;
+		sub_size = sub_ctx->stViFrame.stVFrame.u32VirWidth *
+		           sub_ctx->stViFrame.stVFrame.u32VirHeight * 3 / 2;
 		if (main_output_fp) {
-			fwrite(main_output_ptr, 1, main_ctx->stViFrame.stVFrame.u64PrivateData,
-			       main_output_fp);
+			fwrite(main_output_ptr, 1, main_size, main_output_fp);
 			fflush(main_output_fp);
 			RK_LOGD("main sensor write frame %d to sdcard", loopCount);
 		} else {
@@ -185,8 +193,7 @@ static void *vi_get_stream_multi_mode(void *pArgs) {
 		}
 
 		if (sub_output_fp) {
-			fwrite(sub_output_ptr, 1, sub_ctx->stViFrame.stVFrame.u64PrivateData,
-			       sub_output_fp);
+			fwrite(sub_output_ptr, 1, sub_size, sub_output_fp);
 			fflush(sub_output_fp);
 			RK_LOGD("sub sensor write frame %d to sdcard", loopCount);
 		} else {
@@ -195,6 +202,41 @@ static void *vi_get_stream_multi_mode(void *pArgs) {
 
 		SAMPLE_COMM_VI_ReleaseChnFrame(main_ctx);
 		SAMPLE_COMM_VI_ReleaseChnFrame(sub_ctx);
+
+#if defined(RV1106)
+		if (g_cmd_args->bEnableDummyFrame && eCurISPMode == SINGLE_FRAME_MODE) {
+			for (int i = 0; i != g_cmd_args->u32DummyFrameCnt; ++i) {
+				RK_MPI_VI_DevEnableSinglelFrame(MAIN_CAM_INDEX, 1);
+				RK_MPI_VI_DevEnableSinglelFrame(SUB_CAM_INDEX, 1);
+				s32Ret = RK_MPI_VI_GetChnFrame(main_ctx->u32PipeId, main_ctx->s32ChnId,
+				                               &main_ctx->stViFrame, 1000);
+				if (s32Ret == RK_SUCCESS) {
+					RK_LOGD("get dummy frame DevId %d seq:%d pts:%lld ms\n",
+					        main_ctx->s32DevId, main_ctx->stViFrame.stVFrame.u32TimeRef,
+					        main_ctx->stViFrame.stVFrame.u64PTS / 1000);
+					RK_MPI_VI_ReleaseChnFrame(main_ctx->u32PipeId, main_ctx->s32ChnId,
+					                          &main_ctx->stViFrame);
+				} else {
+					RK_LOGE("RK_MPI_VI_GetChnFrame failed %#X", s32Ret);
+					program_handle_error(__FUNCTION__, __LINE__);
+					break;
+				}
+				s32Ret = RK_MPI_VI_GetChnFrame(sub_ctx->u32PipeId, sub_ctx->s32ChnId,
+				                               &sub_ctx->stViFrame, 1000);
+				if (s32Ret == RK_SUCCESS) {
+					RK_LOGD("get dummy frame DevId %d seq:%d pts:%lld ms\n",
+					        sub_ctx->s32DevId, sub_ctx->stViFrame.stVFrame.u32TimeRef,
+					        sub_ctx->stViFrame.stVFrame.u64PTS / 1000);
+					RK_MPI_VI_ReleaseChnFrame(sub_ctx->u32PipeId, sub_ctx->s32ChnId,
+					                          &sub_ctx->stViFrame);
+				} else {
+					RK_LOGE("RK_MPI_VI_GetChnFrame failed %#X", s32Ret);
+					program_handle_error(__FUNCTION__, __LINE__);
+					break;
+				}
+			}
+		}
+#endif
 
 		if (eCurISPMode == MULTI_FRAME_MODE) {
 			RK_LOGI("#Pause isp, Enter single frame\n");
@@ -282,6 +324,7 @@ static void *vi_get_stream_single_mode(void *pArgs) {
 	SAMPLE_VI_CTX_S *sub_ctx = &g_mpi_ctx->vi[1];
 	FILE *main_output_fp, *sub_output_fp = RK_NULL;
 	void *main_output_ptr, *sub_output_ptr = RK_NULL;
+	RK_U32 main_size, sub_size;
 	RK_S32 loopCount = 0;
 	enum ISP_MODE eCurISPMode = MULTI_FRAME_MODE;
 	char name[256];
@@ -306,9 +349,12 @@ static void *vi_get_stream_single_mode(void *pArgs) {
 	for (int i = 0; i < g_cmd_args->u32BootFrame; i++) {
 		SAMPLE_COMM_VI_GetChnFrame(main_ctx, &main_output_ptr);
 		SAMPLE_COMM_VI_GetChnFrame(sub_ctx, &sub_output_ptr);
+		main_size = main_ctx->stViFrame.stVFrame.u32VirWidth *
+		            main_ctx->stViFrame.stVFrame.u32VirHeight * 3 / 2;
+		sub_size = sub_ctx->stViFrame.stVFrame.u32VirWidth *
+		           sub_ctx->stViFrame.stVFrame.u32VirHeight * 3 / 2;
 		if (main_output_fp) {
-			fwrite(main_output_ptr, 1, main_ctx->stViFrame.stVFrame.u64PrivateData,
-			       main_output_fp);
+			fwrite(main_output_ptr, 1, main_size, main_output_fp);
 			fflush(main_output_fp);
 			RK_LOGD("main sensor write frame %d to sdcard", loopCount);
 		} else {
@@ -316,23 +362,20 @@ static void *vi_get_stream_single_mode(void *pArgs) {
 		}
 
 		if (sub_output_fp) {
-			fwrite(sub_output_ptr, 1, sub_ctx->stViFrame.stVFrame.u64PrivateData,
-			       sub_output_fp);
+			fwrite(sub_output_ptr, 1, sub_size, sub_output_fp);
 			fflush(sub_output_fp);
 			RK_LOGD("sub sensor write frame %d to sdcard", loopCount);
 		} else {
 			RK_LOGI("sub sensor get frame %d", loopCount);
 		}
-		RK_LOGD("SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%llu "
+		RK_LOGD("SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%u "
 		        "loop:%d seq:%d pts:%lld ms\n",
-		        main_ctx->s32DevId, main_output_ptr,
-		        main_ctx->stViFrame.stVFrame.u64PrivateData, loopCount,
+		        main_ctx->s32DevId, main_output_ptr, main_size, loopCount,
 		        main_ctx->stViFrame.stVFrame.u32TimeRef,
 		        main_ctx->stViFrame.stVFrame.u64PTS / 1000);
-		RK_LOGD("SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%llu "
+		RK_LOGD("SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%u "
 		        "loop:%d seq:%d pts:%lld ms\n",
-		        sub_ctx->s32DevId, main_output_ptr,
-		        sub_ctx->stViFrame.stVFrame.u64PrivateData, loopCount,
+		        sub_ctx->s32DevId, main_output_ptr, sub_size, loopCount,
 		        sub_ctx->stViFrame.stVFrame.u32TimeRef,
 		        sub_ctx->stViFrame.stVFrame.u64PTS / 1000);
 
@@ -360,9 +403,12 @@ static void *vi_get_stream_single_mode(void *pArgs) {
 	while (!g_thread_status->bIfViThreadQuit) {
 		SAMPLE_COMM_VI_GetChnFrame(main_ctx, &main_output_ptr);
 		SAMPLE_COMM_VI_GetChnFrame(sub_ctx, &sub_output_ptr);
+		main_size = main_ctx->stViFrame.stVFrame.u32VirWidth *
+		            main_ctx->stViFrame.stVFrame.u32VirHeight * 3 / 2;
+		sub_size = sub_ctx->stViFrame.stVFrame.u32VirWidth *
+		           sub_ctx->stViFrame.stVFrame.u32VirHeight * 3 / 2;
 		if (main_output_fp) {
-			fwrite(main_output_ptr, 1, main_ctx->stViFrame.stVFrame.u64PrivateData,
-			       main_output_fp);
+			fwrite(main_output_ptr, 1, main_size, main_output_fp);
 			fflush(main_output_fp);
 			RK_LOGD("main sensor write frame %d to sdcard", loopCount);
 		} else {
@@ -370,29 +416,60 @@ static void *vi_get_stream_single_mode(void *pArgs) {
 		}
 
 		if (sub_output_fp) {
-			fwrite(sub_output_ptr, 1, sub_ctx->stViFrame.stVFrame.u64PrivateData,
-			       sub_output_fp);
+			fwrite(sub_output_ptr, 1, sub_size, sub_output_fp);
 			fflush(sub_output_fp);
 			RK_LOGD("sub sensor write frame %d to sdcard", loopCount);
 		} else {
 			RK_LOGI("sub sensor get frame %d", loopCount);
 		}
 
-		RK_LOGD("SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%llu "
+		RK_LOGD("SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%u "
 		        "loop:%d seq:%d pts:%lld ms\n",
-		        main_ctx->s32DevId, main_output_ptr,
-		        main_ctx->stViFrame.stVFrame.u64PrivateData, loopCount,
+		        main_ctx->s32DevId, main_output_ptr, main_size, loopCount,
 		        main_ctx->stViFrame.stVFrame.u32TimeRef,
 		        main_ctx->stViFrame.stVFrame.u64PTS / 1000);
-		RK_LOGD("SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%llu "
+		RK_LOGD("SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%u "
 		        "loop:%d seq:%d pts:%lld ms\n",
-		        sub_ctx->s32DevId, main_output_ptr,
-		        sub_ctx->stViFrame.stVFrame.u64PrivateData, loopCount,
+		        sub_ctx->s32DevId, main_output_ptr, sub_size, loopCount,
 		        sub_ctx->stViFrame.stVFrame.u32TimeRef,
 		        sub_ctx->stViFrame.stVFrame.u64PTS / 1000);
 		SAMPLE_COMM_VI_ReleaseChnFrame(main_ctx);
 		SAMPLE_COMM_VI_ReleaseChnFrame(sub_ctx);
 
+#if defined(RV1106)
+		if (g_cmd_args->bEnableDummyFrame && eCurISPMode == SINGLE_FRAME_MODE) {
+			for (int i = 0; i != g_cmd_args->u32DummyFrameCnt; ++i) {
+				RK_MPI_VI_DevEnableSinglelFrame(MAIN_CAM_INDEX, 1);
+				RK_MPI_VI_DevEnableSinglelFrame(SUB_CAM_INDEX, 1);
+				s32Ret = RK_MPI_VI_GetChnFrame(main_ctx->u32PipeId, main_ctx->s32ChnId,
+				                               &main_ctx->stViFrame, 1000);
+				if (s32Ret == RK_SUCCESS) {
+					RK_LOGD("get dummy frame DevId %d seq:%d pts:%lld ms\n",
+					        main_ctx->s32DevId, main_ctx->stViFrame.stVFrame.u32TimeRef,
+					        main_ctx->stViFrame.stVFrame.u64PTS / 1000);
+					RK_MPI_VI_ReleaseChnFrame(main_ctx->u32PipeId, main_ctx->s32ChnId,
+					                          &main_ctx->stViFrame);
+				} else {
+					RK_LOGE("RK_MPI_VI_GetChnFrame failed %#X", s32Ret);
+					program_handle_error(__FUNCTION__, __LINE__);
+					break;
+				}
+				s32Ret = RK_MPI_VI_GetChnFrame(sub_ctx->u32PipeId, sub_ctx->s32ChnId,
+				                               &sub_ctx->stViFrame, 1000);
+				if (s32Ret == RK_SUCCESS) {
+					RK_LOGD("get dummy frame DevId %d seq:%d pts:%lld ms\n",
+					        sub_ctx->s32DevId, sub_ctx->stViFrame.stVFrame.u32TimeRef,
+					        sub_ctx->stViFrame.stVFrame.u64PTS / 1000);
+					RK_MPI_VI_ReleaseChnFrame(sub_ctx->u32PipeId, sub_ctx->s32ChnId,
+					                          &sub_ctx->stViFrame);
+				} else {
+					RK_LOGE("RK_MPI_VI_GetChnFrame failed %#X", s32Ret);
+					program_handle_error(__FUNCTION__, __LINE__);
+					break;
+				}
+			}
+		}
+#endif
 		if (g_cmd_args->s32AovLoopCount != 0) {
 			if (g_cmd_args->s32AovLoopCount > 0)
 				--g_cmd_args->s32AovLoopCount;
@@ -608,6 +685,8 @@ static const struct option long_options[] = {
     {"vi_frame_mode", required_argument, NULL, 'v' + 'f' + 'm'},
     {"help", optional_argument, RK_NULL, '?'},
     {"boot_frame", required_argument, NULL, 'b' + 'f'},
+    {"enable_dummy_frame", required_argument, NULL, 'e' + 'd' + 'f'},
+    {"dummy_frame_cnt", required_argument, NULL, 'd' + 'f' + 'c'},
     {RK_NULL, 0, RK_NULL, 0},
 };
 
@@ -641,6 +720,10 @@ static void print_usage(const RK_CHAR *name) {
 	       "multi, Default: 0\n");
 	printf("\t--boot_frame: How long will it take to enter AOV mode after boot"
 	       ", Default: 60 frames\n");
+	printf("\t--enable_dummy_frame: Enable fetch dummy frame in single frame mode"
+	       ", Default: 1\n");
+	printf("\t--dummy_frame_cnt: Dummy frame count in single frame mode"
+	       ", Default: 3\n");
 }
 
 /******************************************************************************
@@ -664,6 +747,8 @@ static RK_S32 parse_cmd_args(int argc, char **argv, RkCmdArgs *pArgs) {
 	pArgs->bEnableSaveToSdcard = RK_TRUE;
 	pArgs->s32ViFrameMode = 0;
 	pArgs->u32BootFrame = 60;
+	pArgs->bEnableDummyFrame = RK_TRUE;
+	pArgs->u32DummyFrameCnt = 3;
 	int sensor_index = 0;
 
 	RK_S32 c = 0;
@@ -718,6 +803,12 @@ static RK_S32 parse_cmd_args(int argc, char **argv, RkCmdArgs *pArgs) {
 			break;
 		case 'b' + 'f':
 			pArgs->u32BootFrame = atoi(optarg);
+			break;
+		case 'e' + 'd' + 'f':
+			pArgs->bEnableDummyFrame = atoi(optarg) ? RK_TRUE : RK_FALSE;
+			break;
+		case 'd' + 'f' + 'c':
+			pArgs->u32DummyFrameCnt = atoi(optarg);
 			break;
 		case '?':
 			print_usage(argv[0]);

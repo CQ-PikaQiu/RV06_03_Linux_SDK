@@ -25,13 +25,28 @@ sensor_height=$rk_cam_h
 sensor2_width=$rk_cam2_w
 sensor2_height=$rk_cam2_h
 
+g_platform="RV1106"
+
+str=`cat /sys/firmware/devicetree/base/model | grep RV1126`
+if [ -n "$str" ]; then
+	g_platform="RV1126"
+	echo "resume suspend test in RV1126 Platform"
+else
+	echo "resume suspend test in RV1106 Platform"
+fi
+
+
 ## 休眠唤醒10万次后，reboot重启机器
 test_arm_aov_system(){
 	if [ ! -e "$file_flag_test_arm_aov_system" ]; then
 		return;
 	fi
 
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 
 	test_count=$((g_test_count * 10))
 	while [ $test_count -gt 0 ]
@@ -52,7 +67,12 @@ test_arm_reboot_after_aov(){
 		return;
 	fi
 
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
+
 	if [ ! -e "$file_flag_test_arm_reboot_after_aov" ]; then
 		echo "$file_flag_test_arm_reboot_after_aov not found, example: echo 10000 $file_flag_test_arm_reboot_after_aov"
 		return;
@@ -83,7 +103,11 @@ test_arm_dd_tmp(){
 		return;
 	fi
 
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 	
 	dd if=/dev/zero of=/tmp/test.bin bs=1M count=10
 	test_md5_result=`md5sum /tmp/test.bin | awk '{print $1}'`
@@ -115,7 +139,11 @@ test_arm_venc(){
 		return;
 	fi
 
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 	
 	rk_mpi_venc_test -w 2304 -h 1296 -C 8 -s 200 -o /tmp/
 	if [ ! -f /tmp/test_0.bin ]; then
@@ -169,7 +197,11 @@ test_arm_vi(){
 	if [ ! -e "$file_flag_test_arm_vi" ]; then
 		return;
 	fi
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 	sample_aov_vi -w $sensor_width -h $sensor_height -a /etc/iqfiles/ --aov_loop_count $g_test_count --suspend_time 100
 	if [ $? -eq 0 ]; then
 		echo "Process exited successfully."
@@ -187,7 +219,11 @@ test_arm_vi_restart_app(){
 	if [ ! -e "$file_flag_test_arm_vi_restart_app" ]; then
 		return;
 	fi
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 
 	counter=0
 	while [ $counter -lt "$g_test_count" ]
@@ -214,7 +250,11 @@ test_arm_vi_multi_frame(){
 	if [ ! -e "$file_flag_test_arm_vi_multi_frame" ]; then
 		return;
 	fi
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 	sample_aov_vi -w $sensor_width -h $sensor_height -a /etc/iqfiles/ --aov_loop_count $g_test_count --suspend_time 100 --vi_frame_mode 1
 	if [ $? -eq 0 ]; then
 		echo "Process exited successfully."
@@ -232,7 +272,11 @@ test_arm_vi_venc(){
 	if [ ! -e "$file_flag_test_arm_vi_venc" ]; then
 		return;
 	fi
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 
 	sample_aov_vi_venc -w $sensor_width -h $sensor_height -a /etc/iqfiles/ --aov_loop_count $g_test_count --suspend_time 100
 	if [ $? -eq 0 ]; then
@@ -252,7 +296,11 @@ test_arm_vi_iva_venc(){
 	if [ ! -e "$file_flag_test_arm_vi_iva_venc" ]; then
 		return;
 	fi
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 
 	sample_aov_vi_iva_venc -w $sensor_width -h $sensor_height -a /etc/iqfiles/ --aov_loop_count $g_test_count --suspend_time 100
 	if [ $? -eq 0 ]; then
@@ -272,7 +320,11 @@ test_arm_aiisp_iva_venc(){
 	if [ ! -e "$file_flag_test_arm_aiisp_iva_venc" ]; then
 		return;
 	fi
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 
 	sample_aov_aiisp_iva_venc -w $sensor_width -h $sensor_height -a /etc/iqfiles/ --aov_loop_count $g_test_count --suspend_time 100
 	if [ $? -eq 0 ]; then
@@ -293,8 +345,12 @@ test_arm_multi_vi(){
 	if [ ! -e "$file_flag_test_arm_multi_vi" ]; then
 		return;
 	fi
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
-	sample_aov_multi_vi -s 0 -w $sensor_width -h $sensor_height -s 1 -w $sensor2_width -h $sensor2_height -a /etc/iqfiles/ --aov_loop_count $g_test_count --suspend_time 100
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
+	sample_aov_multi_vi -s 0 -w $sensor_width -h $sensor_height -s 1 -w $sensor2_width -h $sensor2_height -a /etc/iqfiles/ --aov_loop_count $g_test_count --suspend_time 100 --enable_dummy_frame 1
 	if [ $? -eq 0 ]; then
 		echo "Process exited successfully."
 	else
@@ -312,7 +368,11 @@ test_arm_multi_vi_restart_app(){
 	if [ ! -e "$file_flag_test_arm_multi_vi_restart_app" ]; then
 		return;
 	fi
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 
 	counter=0
 	while [ $counter -lt "$g_test_count" ]
@@ -346,7 +406,11 @@ test_arm_multi_vi_reboot_after_aov(){
 		return;
 	fi
 
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 	sample_aov_multi_vi -s 0 -w $sensor_width -h $sensor_height -s 1 -w $sensor2_width -h $sensor2_height -a /etc/iqfiles/ --aov_loop_count 10 --suspend_time 100
 
 	if [ $? -eq 0 ]; then
@@ -375,9 +439,13 @@ test_arm_multi_vi_multi_frame(){
 	if [ ! -e "$file_flag_test_arm_multi_vi_multi_frame" ]; then
 		return;
 	fi
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 
-	sample_aov_multi_vi -w -s 0 -w $sensor_width -h $sensor_height -s 1 -w $sensor2_width -h $sensor2_height -a /etc/iqfiles/ --aov_loop_count $g_test_count --suspend_time 100 --vi_frame_mode 1
+	sample_aov_multi_vi -w -s 0 -w $sensor_width -h $sensor_height -s 1 -w $sensor2_width -h $sensor2_height -a /etc/iqfiles/ --aov_loop_count $g_test_count --suspend_time 100 --vi_frame_mode 1 --enable_dummy_frame 1
 	if [ $? -eq 0 ]; then
 		echo "Process exited successfully."
 	else
@@ -395,7 +463,11 @@ test_arm_multi_vi_venc(){
 	if [ ! -e "$file_flag_test_arm_multi_vi_venc" ]; then
 		return;
 	fi
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 
 	sample_aov_multi_vi_venc -s 0 -w $sensor_width -h $sensor_height -s 1 -w $sensor2_width -h $sensor2_height -a /etc/iqfiles/ --aov_loop_count $g_test_count --suspend_time 100
 	if [ $? -eq 0 ]; then
@@ -415,7 +487,11 @@ test_arm_multi_vi_iva_venc(){
 	if [ ! -e "$file_flag_test_arm_multi_vi_iva_venc" ]; then
 		return;
 	fi
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 
 	sample_aov_multi_vi_iva_venc -s 0 -w $sensor_width -h $sensor_height -s 1 -w $sensor2_width -h $sensor2_height -a /etc/iqfiles/ --aov_loop_count $g_test_count --suspend_time 100
 	if [ $? -eq 0 ]; then
@@ -435,7 +511,11 @@ test_arm_multi_vi_iva_venc_restart_app(){
 	if [ ! -e "$file_flag_test_arm_multi_vi_iva_venc_restart_app" ]; then
 		return;
 	fi
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 
 	counter=0
 	while [ $counter -lt "$g_test_count" ]
@@ -462,7 +542,11 @@ test_arm_npu(){
 	if [ ! -e "$file_flag_test_npu" ]; then
 		return;
 	fi
-	echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	if [ "$g_platform"x = "RV1126"x ];then
+		echo "ffc60000.dwmmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	else
+		echo "ffaa0000.mmc" > /sys/bus/platform/drivers/dwmmc_rockchip/unbind
+	fi
 	sample_aov_npu_test -w 720 -h 480 -l $g_test_count --suspend_time 100
 	if [ $? -eq 0 ]; then
 		echo "Process exited successfully."
@@ -537,7 +621,12 @@ fi
 
 
 sleep 5
-io -4 0xff300048 3200
+if [ "$g_platform"x = "RV1126"x ];then
+	io -4 0xff3e0048 9100
+else
+	io -4 0xff300048 3200
+fi
+export debug_rockit=1
 test_arm_aov_system
 test_arm_reboot_after_aov
 test_arm_dd_tmp
@@ -558,6 +647,9 @@ test_arm_multi_vi_iva_venc
 test_arm_multi_vi_iva_venc_restart_app
 
 rm -rf /userdata/auto_userdata_test
-echo " ===== AOV Testing completed, failed: ====="
-ls /userdata/failed*
-echo " ===== AOV Testing completed, failed: ====="
+if ls /userdata/failed*; then
+	echo " ===== AOV Testing completed, failed: ====="
+else
+	echo " ===== AOV Testing completed, ok ====="
+fi
+

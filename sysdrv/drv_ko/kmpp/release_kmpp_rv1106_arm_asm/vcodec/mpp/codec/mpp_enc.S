@@ -33,10 +33,10 @@ mpp_enc_deinit_frame:
 	cbz	r3, .L1
 	ldr	r0, [r0, #372]
 	cbz	r0, .L1
-	movw	r3, #5352
+	movw	r3, #5372
 	movs	r2, #0
 	str	r2, [r4, r3]
-	movw	r3, #10808
+	movw	r3, #10828
 	ldr	r2, [r4, #12]
 	ldr	r1, [r4, r3]
 	bl	mpp_packet_ring_buf_put_used
@@ -64,13 +64,13 @@ mpp_enc_deinit:
 	.save {r4, r5, r6, r7, r8, lr}
 	mov	r4, r0
 	bl	get_mpibuf_ops
-	add	r6, r4, #5344
-	adds	r6, r6, #28
+	add	r6, r4, #5376
+	adds	r6, r6, #16
 	mov	r7, r0
 	mov	r0, r6
 	bl	down
 	cbnz	r4, .L13
-	movs	r2, #180
+	movs	r2, #181
 	ldr	r1, .L81
 	ldr	r0, .L81+4
 	bl	printk
@@ -78,7 +78,7 @@ mpp_enc_deinit:
 .L12:
 	pop	{r4, r5, r6, r7, r8, pc}
 .L13:
-	movw	r3, #5360
+	movw	r3, #5380
 	ldr	r3, [r4, r3]
 	cbz	r3, .L15
 	mov	r0, r4
@@ -108,7 +108,7 @@ mpp_enc_deinit:
 	ldr	r0, .L81+8
 	bl	mpp_osal_free
 .L19:
-	movw	r5, #5324
+	movw	r5, #5328
 	mov	r8, #0
 	str	r8, [r4, #408]
 	adds	r0, r4, r5
@@ -130,10 +130,10 @@ mpp_enc_deinit:
 	movs	r3, #0
 	str	r3, [r4, #60]
 .L22:
-	movw	r3, #10756
+	movw	r3, #10776
 	ldr	r3, [r4, r3]
 	cbz	r3, .L23
-	movw	r2, #10788
+	movw	r2, #10808
 	ldr	r2, [r4, r2]
 	ldr	r2, [r2, #12]
 	cbnz	r2, .L24
@@ -142,7 +142,7 @@ mpp_enc_deinit:
 	ldr	r1, .L81+8
 	bl	mpp_buffer_put_with_caller
 .L24:
-	movw	r3, #10756
+	movw	r3, #10776
 	ldr	r1, [r4, r3]
 	mov	r5, r3
 	cbz	r1, .L25
@@ -152,25 +152,25 @@ mpp_enc_deinit:
 	movs	r3, #0
 	str	r3, [r4, r5]
 .L23:
-	add	r0, r4, #5504
-	adds	r0, r0, #20
+	add	r0, r4, #5536
+	adds	r0, r0, #8
 	bl	mpp_enc_unref_osd_buf
-	movw	r3, #5368
+	movw	r3, #5388
 	ldr	r3, [r4, r3]
 	cbz	r3, .L27
-	movw	r3, #10792
+	movw	r3, #10812
 	ldr	r0, [r4, r3]
 	cbz	r0, .L28
 	ldr	r1, .L81+8
 	bl	mpp_buffer_put_with_caller
 .L28:
-	movw	r3, #10796
-	ldr	r0, [r4, r3]
+	add	r3, r4, #10816
+	ldr	r0, [r3]
 	cbz	r0, .L29
 	ldr	r1, .L81+8
 	bl	mpp_buffer_put_with_caller
 .L29:
-	movw	r3, #10800
+	movw	r3, #10820
 	ldr	r1, [r4, r3]
 	cbz	r1, .L27
 	ldr	r0, .L81+8
@@ -184,18 +184,18 @@ mpp_enc_deinit:
 	movs	r5, #0
 	mov	r0, r6
 	str	r5, [r4, #436]
-	movw	r6, #5384
+	movw	r6, #5404
 	strd	r5, r5, [r4, #444]
 	bl	up
 	ldr	r3, [r4, r6]
 	cbz	r3, .L32
-	movs	r1, #244
+	movs	r1, #245
 	ldr	r0, .L81+12
 	bl	printk
-	ldr	r3, [r7, #56]
+	ldr	r3, [r7, #60]
 	ldr	r0, [r4, r6]
 	blx	r3
-	movs	r1, #246
+	movs	r1, #247
 	ldr	r0, .L81+16
 	bl	printk
 	str	r5, [r4, r6]
@@ -238,7 +238,7 @@ mpp_enc_init:
 	mov	r8, r0
 	str	r2, [sp, #8]
 	cbnz	r0, .L84
-	movs	r2, #43
+	movs	r2, #44
 	ldr	r1, .L95+4
 	ldr	r0, .L95+8
 	mvn	r5, #2
@@ -250,12 +250,12 @@ mpp_enc_init:
 	pop	{r4, r5, r6, r7, r8, pc}
 .L84:
 	str	r3, [r0]
-	mov	r1, #10816
+	movw	r1, #10840
 	ldr	r0, .L95+12
 	bl	mpp_osal_calloc
 	mov	r4, r0
 	cbnz	r0, .L86
-	movs	r2, #51
+	movs	r2, #52
 	ldr	r1, .L95+4
 	ldr	r0, .L95+8
 	mvn	r5, #3
@@ -267,7 +267,7 @@ mpp_enc_init:
 	mov	r5, r0
 	cbz	r0, .L87
 	ldr	r1, .L95+4
-	movs	r2, #57
+	movs	r2, #58
 	ldr	r0, .L95+16
 .L94:
 	bl	printk
@@ -296,9 +296,9 @@ mpp_enc_init:
 	str	r1, [sp, #52]
 	ldr	r1, [r6, #36]
 	str	r1, [sp, #56]
-	movw	r1, #10760
+	movw	r1, #10780
 	str	r0, [r4, r1]
-	movw	r1, #10764
+	movw	r1, #10784
 	ldr	r0, [r6, #12]
 	str	r0, [r4, r1]
 	add	r1, sp, #32
@@ -310,7 +310,7 @@ mpp_enc_init:
 	bl	mpp_enc_hal_init
 	mov	r5, r0
 	cbz	r0, .L89
-	movs	r2, #82
+	movs	r2, #83
 	ldr	r1, .L95+4
 	ldr	r0, .L95+20
 	b	.L94
@@ -324,7 +324,7 @@ mpp_enc_init:
 	bl	enc_impl_init
 	mov	r5, r0
 	cbz	r0, .L90
-	movs	r2, #91
+	movs	r2, #92
 	ldr	r1, .L95+4
 	ldr	r0, .L95+24
 	b	.L94
@@ -340,6 +340,7 @@ mpp_enc_init:
 	mov	r5, #1024
 	bl	rc_init
 	str	r7, [r4]
+	ldr	r2, .L95+28
 	mov	r1, r5
 	str	r5, [r4, #448]
 	ldr	r0, .L95+12
@@ -350,11 +351,8 @@ mpp_enc_init:
 	ldr	r3, [sp, #64]
 	str	r3, [r4, #12]
 	movs	r3, #0
+	strd	r2, r3, [r4, #428]
 	str	r3, [r4, #424]
-	ldr	r3, .L95+28
-	str	r3, [r4, #428]
-	movs	r3, #83
-	str	r3, [r4, #432]
 	bl	mpp_osal_calloc
 	mov	r1, r5
 	str	r0, [r4, #436]
@@ -372,7 +370,7 @@ mpp_enc_init:
 	ldr	r0, [r4, #404]
 	bl	mpp_packet_set_length
 	str	r7, [r4, #1192]
-	movw	r7, #5324
+	movw	r7, #5328
 	adds	r0, r4, r7
 	bl	mpp_enc_ref_cfg_init
 	mov	r5, r0
@@ -400,17 +398,17 @@ mpp_enc_init:
 	mov	r5, r0
 	cmp	r0, #0
 	bne	.L88
-	movw	r0, #5372
-	adds	r1, r4, r0
+	movw	r0, #5392
+	adds	r3, r4, r0
 	movs	r2, #1
-	add	r3, r4, #5376
+	adds	r1, r3, #4
 	str	r2, [r4, r0]
-	strd	r3, r3, [r1, #4]
-	movw	r3, #5348
+	strd	r1, r1, [r3, #4]
+	movw	r3, #5368
 	str	r2, [r4, r3]
-	movw	r3, #5352
+	movw	r3, #5372
 	str	r5, [r4, r3]
-	movw	r3, #6654
+	movw	r3, #6674
 	movs	r2, #4
 	strb	r2, [r4, r3]
 	bl	get_vsm_ops
@@ -418,22 +416,22 @@ mpp_enc_init:
 	movs	r1, #44
 	ldr	r0, .L95+12
 	bl	mpp_osal_calloc
-	movw	r3, #10756
+	movw	r3, #10776
 	str	r0, [r4, r3]
 .L92:
 	ldr	r2, [r6, #4]
-	movw	r3, #5360
-	str	r2, [r4, r3]
-	movw	r3, #10788
-	ldr	r2, [r6, #24]
-	str	r2, [r4, r3]
-	movw	r3, #5368
-	ldr	r2, [r6, #28]
+	movw	r3, #5380
 	str	r2, [r4, r3]
 	movw	r3, #10808
+	ldr	r2, [r6, #24]
+	str	r2, [r4, r3]
+	movw	r3, #5388
+	ldr	r2, [r6, #28]
+	str	r2, [r4, r3]
+	movw	r3, #10828
 	ldr	r2, [r6, #32]
 	str	r2, [r4, r3]
-	movw	r3, #5364
+	movw	r3, #5384
 	ldr	r2, [r6, #16]
 	str	r2, [r4, r3]
 	str	r4, [r8]
@@ -470,16 +468,16 @@ mpp_enc_start:
 	lsls	r2, r2, #31
 	bpl	.L98
 	mov	r3, r0
-	mov	r2, #258
+	movw	r2, #259
 	ldr	r1, .L106+4
 	ldr	r0, .L106+8
 	bl	printk
 .L98:
-	add	r6, r4, #5344
-	adds	r6, r6, #28
+	add	r6, r4, #5376
+	adds	r6, r6, #16
 	mov	r0, r6
 	bl	down
-	movw	r3, #5348
+	movw	r3, #5368
 	movs	r2, #0
 	mov	r0, r6
 	str	r2, [r4, r3]
@@ -488,7 +486,7 @@ mpp_enc_start:
 	lsls	r3, r3, #31
 	bpl	.L99
 	mov	r3, r4
-	movw	r2, #265
+	mov	r2, #266
 	ldr	r1, .L106+4
 	ldr	r0, .L106+12
 	bl	printk
@@ -517,8 +515,8 @@ mpp_enc_stop:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r3, r4, r5, r6, r7, lr}
 	.save {r3, r4, r5, r6, r7, lr}
-	add	r5, r0, #5344
-	adds	r5, r5, #28
+	add	r5, r0, #5376
+	adds	r5, r5, #16
 	ldr	r6, .L117
 	mov	r4, r0
 	mov	r0, r5
@@ -527,21 +525,21 @@ mpp_enc_stop:
 	lsls	r2, r2, #31
 	bpl	.L109
 	mov	r3, r4
-	mov	r2, #276
+	movw	r2, #277
 	ldr	r1, .L117+4
 	ldr	r0, .L117+8
 	bl	printk
 .L109:
-	movw	r3, #5348
+	movw	r3, #5368
 	movs	r2, #1
 	str	r2, [r4, r3]
-	movw	r3, #5352
+	movw	r3, #5372
 	ldr	r7, [r4, r3]
 	ldr	r3, [r6]
 	lsls	r3, r3, #31
 	bpl	.L110
 	mov	r3, r4
-	movw	r2, #279
+	mov	r2, #280
 	ldr	r1, .L117+4
 	ldr	r0, .L117+12
 	bl	printk
@@ -575,9 +573,9 @@ mpp_enc_check_pkt_pool:
 	mov	r4, r0
 	bl	get_mpibuf_ops
 	cbz	r0, .L119
-	ldr	r3, [r0, #64]
+	ldr	r3, [r0, #68]
 	cbz	r3, .L119
-	movw	r2, #5384
+	movw	r2, #5404
 	ldr	r0, [r4, r2]
 	pop	{r4, lr}
 	bx	r3
@@ -605,13 +603,13 @@ mpp_enc_reset:
 	lsls	r3, r3, #31
 	bpl	.L126
 	mov	r3, r0
-	movw	r2, #303
+	mov	r2, #304
 	ldr	r1, .L132+4
 	ldr	r0, .L132+8
 	bl	printk
 .L126:
 	cbnz	r4, .L128
-	movw	r2, #305
+	mov	r2, #306
 	ldr	r1, .L132+4
 	ldr	r0, .L132+12
 	bl	printk
@@ -645,7 +643,7 @@ mpp_enc_oneframe:
 	.save {r3, r4, r5, lr}
 	mov	r4, r0
 	cbnz	r0, .L135
-	mov	r2, #318
+	movw	r2, #319
 	ldr	r1, .L143
 	ldr	r0, .L143+4
 	bl	printk
@@ -662,7 +660,7 @@ mpp_enc_oneframe:
 	b	.L134
 .L137:
 	mov	r3, r0
-	mov	r2, #322
+	movw	r2, #323
 	ldr	r1, .L143
 	ldr	r0, .L143+12
 	bl	printk
@@ -670,7 +668,7 @@ mpp_enc_oneframe:
 	lsls	r3, r3, #31
 	bpl	.L142
 	mov	r3, r4
-	mov	r2, #324
+	movw	r2, #325
 	ldr	r1, .L143
 	ldr	r0, .L143+16
 	bl	printk
@@ -696,55 +694,55 @@ mpp_enc_cfg_reg:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r4, r5, r6, r7, r8, r9, r10, lr}
-	.save {r4, r5, r6, r7, r8, r9, r10, lr}
-	.pad #8
-	mov	r7, r1
+	push	{r0, r1, r2, r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	.pad #12
+	mov	r8, r1
 	mov	r4, r0
 	cbnz	r0, .L146
-	mov	r2, #336
+	movw	r2, #337
 	ldr	r1, .L168
 	ldr	r0, .L168+4
-	mvn	r7, #2
+	mvn	r8, #2
 	bl	printk
 .L145:
-	mov	r0, r7
-	add	sp, sp, #8
+	mov	r0, r8
+	add	sp, sp, #12
 	@ sp needed
-	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
+	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
 .L146:
 	ldr	r6, .L168+8
 	ldr	r3, [r6]
 	lsls	r2, r3, #31
 	bpl	.L148
 	mov	r3, r0
-	mov	r2, #340
+	movw	r2, #341
 	ldr	r1, .L168
 	ldr	r0, .L168+12
 	bl	printk
 .L148:
-	add	r5, r4, #5344
-	adds	r5, r5, #28
+	add	r5, r4, #5376
+	adds	r5, r5, #16
 	mov	r0, r5
 	bl	down
-	movw	r3, #5348
-	ldr	r8, [r4, r3]
-	cmp	r8, #0
+	movw	r3, #5368
+	ldr	r9, [r4, r3]
+	cmp	r9, #0
 	beq	.L149
 	mov	r0, r5
-	mov	r7, #-1
+	mov	r8, #-1
 	bl	up
 	b	.L145
 .L149:
 	mov	r0, r4
+	add	r7, r4, #5376
 	bl	mpp_enc_proc_rc_update
-	movw	r3, #5356
-	str	r8, [r4, r3]
-	movw	r3, #5368
+	movw	r3, #5388
+	str	r9, [r7]
 	ldr	r3, [r4, r3]
 	cmp	r3, #0
 	beq	.L151
-	movw	r3, #10792
+	movw	r3, #10812
 	ldr	r3, [r4, r3]
 	cmp	r3, #0
 	bne	.L151
@@ -762,50 +760,48 @@ mpp_enc_cfg_reg:
 .L167:
 	it	mi
 	addmi	r3, r3, #15
-	ldr	r10, .L168+20
+	ldr	fp, .L168+20
 	movs	r0, #0
 	asrs	r3, r3, #4
-	str	r10, [sp]
-	mul	r8, r3, r1
+	str	fp, [sp]
+	mul	r9, r3, r1
 	add	r1, r4, #10752
+	adds	r1, r1, #60
 	ldr	r3, .L168+16
-	adds	r1, r1, #40
-	lsl	r9, r8, #2
-	mov	r2, r9
+	lsl	r10, r9, #2
+	mov	r2, r10
 	bl	mpp_buffer_get_with_tag
-	movw	r3, #10796
-	ldr	r0, [r4, r3]
-	adds	r1, r4, r3
+	add	r1, r4, #10816
+	ldr	r0, [r1]
 	cbnz	r0, .L159
-	str	r10, [sp]
-	mov	r2, r9
+	str	fp, [sp]
+	mov	r2, r10
 	ldr	r3, .L168+16
 	bl	mpp_buffer_get_with_tag
 .L159:
-	mov	r1, r8
+	mov	r1, r9
 	ldr	r0, .L168+20
 	bl	mpp_osal_calloc
-	movw	r3, #10800
+	movw	r3, #10820
 	str	r0, [r4, r3]
 	cbnz	r0, .L151
-	movw	r1, #365
+	mov	r1, #366
 	ldr	r0, .L168+24
 	bl	printk
 .L151:
-	mov	r1, r7
+	mov	r1, r8
 	mov	r0, r4
 	bl	mpp_enc_impl_reg_cfg
-	movw	r3, #5356
-	movs	r2, #1
-	str	r2, [r4, r3]
-	mov	r7, r0
+	movs	r3, #1
+	str	r3, [r7]
+	mov	r8, r0
 	mov	r0, r5
 	bl	up
 	ldr	r3, [r6]
 	lsls	r3, r3, #31
 	bpl	.L145
 	mov	r3, r4
-	mov	r2, #370
+	movw	r2, #371
 	ldr	r1, .L168
 	ldr	r0, .L168+28
 	bl	printk
@@ -841,72 +837,102 @@ mpp_enc_cfg_reg:
 	.type	mpp_enc_hw_start, %function
 mpp_enc_hw_start:
 	.fnstart
-	@ args = 0, pretend = 0, frame = 0
+	@ args = 0, pretend = 0, frame = 8
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, r7, r8, lr}
-	.save {r4, r5, r6, r7, r8, lr}
-	mov	r8, r1
+	push	{r0, r1, r2, r4, r5, r6, r7, r8, r9, lr}
+	.save {r4, r5, r6, r7, r8, r9, lr}
+	.pad #12
+	mov	r5, r1
 	mov	r4, r0
 	cbnz	r0, .L171
-	movw	r2, #381
-	ldr	r1, .L182
-	ldr	r0, .L182+4
+	movw	r2, #383
+	ldr	r1, .L201
+	ldr	r0, .L201+4
 	mvn	r6, #2
 	bl	printk
 .L170:
 	mov	r0, r6
-	pop	{r4, r5, r6, r7, r8, pc}
+	add	sp, sp, #12
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, pc}
 .L171:
-	ldr	r7, .L182+8
-	ldr	r2, [r7]
-	lsls	r2, r2, #31
-	bpl	.L173
+	ldr	r3, .L201+8
+	ldr	r2, [r3]
+	mov	r8, r3
+	tst	r2, #1
+	beq	.L173
 	mov	r3, r0
-	movw	r2, #385
-	ldr	r1, .L182
-	ldr	r0, .L182+12
+	movw	r2, #387
+	ldr	r1, .L201
+	ldr	r0, .L201+12
 	bl	printk
 .L173:
-	add	r5, r4, #5344
-	adds	r5, r5, #28
-	mov	r0, r5
+	add	r7, r4, #5376
+	adds	r7, r7, #16
+	mov	r0, r7
 	bl	down
-	movw	r3, #5348
+	movw	r3, #5368
 	ldr	r3, [r4, r3]
 	cbz	r3, .L174
-	mov	r0, r5
+	mov	r0, r7
 	mov	r6, #-1
 	bl	up
 	b	.L170
 .L174:
-	movw	r6, #5356
+	add	r9, r4, #5376
 	movs	r3, #2
-	mov	r1, r8
-	str	r3, [r4, r6]
+	str	r3, [r9]
+	cbz	r5, .L175
+	add	r2, r5, #5376
+	str	r3, [r2]
+.L175:
+	mov	r1, r5
 	mov	r0, r4
 	bl	mpp_enc_impl_hw_start
 	movs	r3, #3
-	str	r3, [r4, r6]
+	str	r3, [r9]
 	mov	r6, r0
-	cbnz	r0, .L175
-	movw	r3, #5352
+	cbz	r5, .L176
+	add	r5, r5, #5376
+	str	r3, [r5]
+.L176:
+	cbnz	r6, .L177
+	bl	get_mpidev_ops
+	mov	r5, r0
+	cbz	r0, .L178
+	ldr	r3, [r0, #32]
+	cbz	r3, .L178
+	ldr	r0, [r4, #368]
+	bl	mpp_frame_get_dts
+	movw	r3, #5380
+	ldr	r3, [r4, r3]
+	strd	r0, [sp]
+	cbz	r3, .L178
+	movw	r0, #10828
+	ldr	r3, [r5, #32]
+	mov	r2, sp
+	mov	r1, r6
+	ldr	r0, [r4, r0]
+	blx	r3
+.L178:
+	movw	r3, #5372
 	movs	r2, #1
 	str	r2, [r4, r3]
-.L175:
-	mov	r0, r5
+.L177:
+	mov	r0, r7
 	bl	up
-	ldr	r3, [r7]
+	ldr	r3, [r8]
 	lsls	r3, r3, #31
 	bpl	.L170
 	mov	r3, r4
-	mov	r2, #398
-	ldr	r1, .L182
-	ldr	r0, .L182+16
+	movw	r2, #413
+	ldr	r1, .L201
+	ldr	r0, .L201+16
 	bl	printk
 	b	.L170
-.L183:
+.L202:
 	.align	2
-.L182:
+.L201:
 	.word	.LANCHOR0+146
 	.word	.LC11
 	.word	.LANCHOR1
@@ -923,60 +949,116 @@ mpp_enc_hw_start:
 	.type	mpp_enc_run_task, %function
 mpp_enc_run_task:
 	.fnstart
-	@ args = 8, pretend = 0, frame = 0
+	@ args = 8, pretend = 0, frame = 16
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, r7, r8, lr}
-	.save {r4, r5, r6, r7, r8, lr}
-	mov	r6, r2
-	mov	r7, r3
+	push	{r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, lr}
+	.save {r4, r5, r6, r7, r8, r9, r10, lr}
+	.pad #16
+	mov	r9, r3
+	ldr	r3, [r0]
 	mov	r4, r0
-	cbnz	r0, .L185
-	movw	r2, #409
-	ldr	r1, .L198
-	ldr	r0, .L198+4
+	mov	r8, r2
+	cmp	r3, #7
+	ite	eq
+	moveq	r10, #16
+	movne	r10, #8
+	cbnz	r0, .L205
+	mov	r2, #426
+	ldr	r1, .L232
+	ldr	r0, .L232+4
 	mvn	r8, #2
 	bl	printk
-.L184:
+.L203:
 	mov	r0, r8
-	pop	{r4, r5, r6, r7, r8, pc}
-.L185:
-	ldr	r5, .L198+8
-	ldr	r2, [r5]
-	lsls	r2, r2, #31
-	bpl	.L187
+	add	sp, sp, #16
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
+.L205:
+	ldr	r5, .L232+8
+	ldr	r3, [r5]
+	lsls	r2, r3, #31
+	bpl	.L207
 	mov	r3, r0
-	movw	r2, #413
-	ldr	r1, .L198
-	ldr	r0, .L198+12
+	mov	r2, #430
+	ldr	r1, .L232
+	ldr	r0, .L232+12
 	bl	printk
-.L187:
-	movs	r2, #0
-	movs	r1, #7
-	ldr	r0, [r4, #12]
-	bl	mpp_dev_ioctl
-	mov	r8, r0
-	cbnz	r0, .L188
+.L207:
+	add	r7, r4, #5376
+	ldr	r6, [r7]
+	cmp	r6, #3
+	bne	.L213
+	movs	r3, #4
+	str	r3, [r7]
 	ldr	r0, [r4, #372]
-	cbz	r0, .L188
-	mov	r2, r6
-	mov	r3, r7
+	cbz	r0, .L208
+	mov	r2, r8
+	mov	r3, r9
 	bl	mpp_packet_set_pts
 	ldr	r0, [r4, #372]
-	ldrd	r2, [sp, #24]
+	ldrd	r2, [sp, #48]
 	bl	mpp_packet_set_dts
-.L188:
+.L208:
+	ldr	r0, [r4, #368]
+	cbz	r0, .L209
+	mov	r2, r8
+	mov	r3, r9
+	bl	mpp_frame_set_pts
+	ldr	r0, [r4, #368]
+	ldrd	r2, [sp, #48]
+	bl	mpp_frame_set_dts
+.L209:
+	bl	get_mpidev_ops
+	mov	r8, r0
+	cbz	r0, .L210
+	ldr	r3, [r0, #32]
+	cbz	r3, .L210
+	movw	r2, #10828
+	movs	r1, #1
+	ldr	r9, [r4, r2]
+	mov	r2, sp
+	mov	r0, r9
+	blx	r3
+	ldr	r3, [r8, #32]
+	movs	r1, #2
+	mov	r0, r9
+	add	r2, sp, #4
+	blx	r3
+.L210:
+	ldr	r2, [r4, #612]
+	rsb	r1, r10, #0
+	ldr	r3, [r4, #616]
+	subs	r2, r2, #1
+	ldr	r0, [r4, #12]
+	subs	r3, r3, #1
+	add	r2, r2, r10
+	add	r3, r3, r10
+	ands	r2, r2, r1
+	ands	r3, r3, r1
+	str	r2, [sp, #8]
+	movs	r1, #7
+	mov	r2, sp
+	str	r3, [sp, #12]
+	bl	mpp_dev_ioctl
 	ldr	r3, [r5]
+	subs	r8, r0, #0
+	it	eq
+	moveq	r6, #5
 	lsls	r3, r3, #31
-	bpl	.L184
+	str	r6, [r7]
+	bpl	.L203
 	mov	r3, r4
-	movw	r2, #427
-	ldr	r1, .L198
-	ldr	r0, .L198+16
+	movw	r2, #467
+	ldr	r1, .L232
+	ldr	r0, .L232+16
 	bl	printk
-	b	.L184
-.L199:
+	b	.L203
+.L213:
+	mov	r8, #-1
+	b	.L203
+.L233:
 	.align	2
-.L198:
+.L232:
 	.word	.LANCHOR0+163
 	.word	.LC11
 	.word	.LANCHOR1
@@ -997,20 +1079,20 @@ mpp_enc_check_hw_running:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r3, lr}
 	.save {r3, lr}
-	cbz	r0, .L204
+	cbz	r0, .L238
 	ldr	r0, [r0, #12]
 	pop	{r3, lr}
 	b	mpp_dev_chnl_check_running
-.L204:
-	movw	r2, #437
-	ldr	r1, .L205
-	ldr	r0, .L205+4
+.L238:
+	movw	r2, #477
+	ldr	r1, .L239
+	ldr	r0, .L239+4
 	bl	printk
 	mvn	r0, #2
 	pop	{r3, pc}
-.L206:
+.L240:
 	.align	2
-.L205:
+.L239:
 	.word	.LANCHOR0+180
 	.word	.LC11
 	.fnend
@@ -1028,20 +1110,20 @@ mpp_enc_unbind_jpeg_task:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r3, lr}
 	.save {r3, lr}
-	cbz	r0, .L211
+	cbz	r0, .L245
 	ldr	r0, [r0, #12]
 	pop	{r3, lr}
 	b	mpp_dev_chnl_unbind_jpeg_task
-.L211:
-	movw	r2, #449
-	ldr	r1, .L212
-	ldr	r0, .L212+4
+.L245:
+	movw	r2, #489
+	ldr	r1, .L246
+	ldr	r0, .L246+4
 	bl	printk
 	mvn	r0, #2
 	pop	{r3, pc}
-.L213:
+.L247:
 	.align	2
-.L212:
+.L246:
 	.word	.LANCHOR0+205
 	.word	.LC11
 	.fnend
@@ -1060,30 +1142,30 @@ mpp_enc_check_is_int_process:
 	push	{r3, r4, r5, lr}
 	.save {r3, r4, r5, lr}
 	mov	r4, r0
-	cbnz	r0, .L215
-	mov	r2, #462
-	ldr	r1, .L217
-	ldr	r0, .L217+4
+	cbnz	r0, .L249
+	mov	r2, #502
+	ldr	r1, .L251
+	ldr	r0, .L251+4
 	bl	printk
-.L216:
+.L250:
 	mov	r0, r4
 	pop	{r3, r4, r5, pc}
-.L215:
-	add	r5, r0, #5344
-	adds	r5, r5, #28
+.L249:
+	add	r5, r0, #5376
+	add	r4, r4, #5376
+	adds	r5, r5, #16
 	mov	r0, r5
 	bl	down
-	movw	r3, #5356
-	ldr	r4, [r4, r3]
+	ldr	r4, [r4]
 	mov	r0, r5
-	subs	r3, r4, #4
+	subs	r3, r4, #6
 	rsbs	r4, r3, #0
 	adcs	r4, r4, r3
 	bl	up
-	b	.L216
-.L218:
+	b	.L250
+.L252:
 	.align	2
-.L217:
+.L251:
 	.word	.LANCHOR0+230
 	.word	.LC11
 	.fnend
@@ -1101,56 +1183,65 @@ mpp_enc_int_process:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r3, r4, r5, r6, r7, r8, r9, lr}
 	.save {r3, r4, r5, r6, r7, r8, r9, lr}
-	mov	r5, r1
-	mov	r8, r2
+	mov	r4, r1
+	mov	r6, r2
 	mov	r9, r3
-	mov	r4, r0
-	cbnz	r0, .L220
-	movw	r2, #481
-	ldr	r1, .L229
-	ldr	r0, .L229+4
-	mvn	r5, #2
-	bl	printk
-.L219:
-	mov	r0, r5
-	pop	{r3, r4, r5, r6, r7, r8, r9, pc}
-.L220:
-	ldr	r7, .L229+8
-	ldr	r2, [r7]
-	lsls	r2, r2, #31
-	bpl	.L222
-	mov	r3, r0
-	movw	r2, #485
-	ldr	r1, .L229
-	ldr	r0, .L229+12
-	bl	printk
-.L222:
-	movw	r6, #5356
-	movs	r3, #4
-	mov	r2, r8
-	str	r3, [r4, r6]
-	mov	r1, r5
-	mov	r3, r9
-	mov	r0, r4
-	bl	mpp_enc_impl_int
-	movs	r3, #5
-	str	r3, [r4, r6]
-	movw	r3, #5352
-	movs	r2, #0
-	str	r2, [r4, r3]
-	ldr	r3, [r7]
-	lsls	r3, r3, #31
 	mov	r5, r0
-	bpl	.L219
-	mov	r3, r4
-	mov	r2, #490
-	ldr	r1, .L229
-	ldr	r0, .L229+16
+	cbnz	r0, .L254
+	movw	r2, #522
+	ldr	r1, .L271
+	ldr	r0, .L271+4
+	mvn	r6, #2
 	bl	printk
-	b	.L219
-.L230:
+.L253:
+	mov	r0, r6
+	pop	{r3, r4, r5, r6, r7, r8, r9, pc}
+.L254:
+	ldr	r3, .L271+8
+	ldr	r2, [r3]
+	mov	r8, r3
+	tst	r2, #1
+	beq	.L256
+	mov	r3, r0
+	movw	r2, #526
+	ldr	r1, .L271
+	ldr	r0, .L271+12
+	bl	printk
+.L256:
+	add	r7, r5, #5376
+	movs	r3, #6
+	str	r3, [r7]
+	cbz	r4, .L257
+	add	r2, r4, #5376
+	str	r3, [r2]
+.L257:
+	mov	r3, r9
+	mov	r2, r6
+	mov	r1, r4
+	mov	r0, r5
+	bl	mpp_enc_impl_int
+	movs	r3, #7
+	str	r3, [r7]
+	mov	r6, r0
+	cbz	r4, .L258
+	add	r4, r4, #5376
+	str	r3, [r4]
+.L258:
+	movw	r3, #5372
+	movs	r2, #0
+	str	r2, [r5, r3]
+	ldr	r3, [r8]
+	lsls	r3, r3, #31
+	bpl	.L253
+	mov	r3, r5
+	movw	r2, #535
+	ldr	r1, .L271
+	ldr	r0, .L271+16
+	bl	printk
+	b	.L253
+.L272:
 	.align	2
-.L229:
+.L271:
 	.word	.LANCHOR0+259
 	.word	.LC11
 	.word	.LANCHOR1
@@ -1174,41 +1265,41 @@ mpp_enc_proc_debug:
 	mov	r6, r0
 	mov	r7, r2
 	mov	r4, r1
-	cbnz	r1, .L232
-	movw	r2, #499
-	ldr	r1, .L238
-	ldr	r0, .L238+4
+	cbnz	r1, .L274
+	mov	r2, #544
+	ldr	r1, .L280
+	ldr	r0, .L280+4
 	pop	{r4, r5, r6, r7, r8, lr}
 	b	printk
-.L232:
-	ldr	r5, .L238+8
+.L274:
+	ldr	r5, .L280+8
 	ldr	r2, [r5]
 	lsls	r2, r2, #31
-	bpl	.L233
+	bpl	.L275
 	mov	r3, r1
-	movw	r2, #503
-	ldr	r1, .L238
-	ldr	r0, .L238+12
+	mov	r2, #548
+	ldr	r1, .L280
+	ldr	r0, .L280+12
 	bl	printk
-.L233:
+.L275:
 	mov	r2, r7
 	mov	r1, r4
 	mov	r0, r6
 	bl	mpp_enc_impl_poc_debug_info
 	ldr	r3, [r5]
 	lsls	r3, r3, #31
-	bpl	.L231
+	bpl	.L273
 	mov	r3, r4
-	movw	r2, #507
-	ldr	r1, .L238
-	ldr	r0, .L238+16
+	mov	r2, #552
+	ldr	r1, .L280
+	ldr	r0, .L280+16
 	pop	{r4, r5, r6, r7, r8, lr}
 	b	printk
-.L231:
+.L273:
 	pop	{r4, r5, r6, r7, r8, pc}
-.L239:
+.L281:
 	.align	2
-.L238:
+.L280:
 	.word	.LANCHOR0+279
 	.word	.LC11
 	.word	.LANCHOR1
@@ -1229,25 +1320,25 @@ mpp_enc_register_chl:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r3, lr}
 	.save {r3, lr}
-	cbnz	r0, .L241
-	movw	r2, #519
-	ldr	r1, .L243
-	ldr	r0, .L243+4
+	cbnz	r0, .L283
+	mov	r2, #564
+	ldr	r1, .L285
+	ldr	r0, .L285+4
 	bl	printk
 	mvn	r0, #2
-.L240:
+.L282:
 	pop	{r3, pc}
-.L241:
-	movw	r3, #5360
+.L283:
+	movw	r3, #5380
 	ldr	r3, [r0, r3]
 	ldr	r0, [r0, #12]
 	orr	r2, r2, r3, lsl #16
 	bl	mpp_dev_chnl_register
 	movs	r0, #0
-	b	.L240
-.L244:
+	b	.L282
+.L286:
 	.align	2
-.L243:
+.L285:
 	.word	.LANCHOR0+298
 	.word	.LC11
 	.fnend
@@ -1267,32 +1358,32 @@ mpp_enc_notify:
 	.save {r4, r5, lr}
 	.pad #12
 	mov	r4, r0
-	ldr	r5, .L252
+	ldr	r5, .L294
 	ldr	r3, [r5]
 	lsls	r2, r3, #31
-	bpl	.L247
+	bpl	.L289
 	mov	r3, r0
 	str	r1, [sp]
-	movw	r2, #534
-	ldr	r1, .L252+4
-	ldr	r0, .L252+8
+	movw	r2, #579
+	ldr	r1, .L294+4
+	ldr	r0, .L294+8
 	bl	printk
 	ldr	r3, [r5]
 	lsls	r3, r3, #31
-	bpl	.L247
+	bpl	.L289
 	mov	r3, r4
-	mov	r2, #536
-	ldr	r1, .L252+4
-	ldr	r0, .L252+12
+	movw	r2, #581
+	ldr	r1, .L294+4
+	ldr	r0, .L294+12
 	bl	printk
-.L247:
+.L289:
 	movs	r0, #0
 	add	sp, sp, #12
 	@ sp needed
 	pop	{r4, r5, pc}
-.L253:
+.L295:
 	.align	2
-.L252:
+.L294:
 	.word	.LANCHOR1
 	.word	.LANCHOR0+319
 	.word	.LC14
@@ -1316,55 +1407,55 @@ mpp_enc_control:
 	mov	r6, r1
 	mov	r4, r2
 	mov	r5, r0
-	cbnz	r0, .L255
-	mov	r2, #552
-	ldr	r1, .L322
-	ldr	r0, .L322+4
+	cbnz	r0, .L297
+	movw	r2, #597
+	ldr	r1, .L364
+	ldr	r0, .L364+4
 	bl	printk
-.L319:
+.L361:
 	mvn	r0, #2
-.L254:
+.L296:
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, pc}
-.L255:
-	cbnz	r2, .L257
-	ldr	r3, .L322+8
+.L297:
+	cbnz	r2, .L299
+	ldr	r3, .L364+8
 	cmp	r1, r3
-	beq	.L257
+	beq	.L299
 	mov	r3, r0
 	str	r1, [sp]
-	movw	r2, #557
-	ldr	r1, .L322
-	ldr	r0, .L322+12
+	movw	r2, #602
+	ldr	r1, .L364
+	ldr	r0, .L364+12
 	bl	printk
-	b	.L319
-.L257:
-	ldr	r7, .L322+16
+	b	.L361
+.L299:
+	ldr	r7, .L364+16
 	ldr	r3, [r7]
 	lsls	r3, r3, #30
-	bpl	.L258
+	bpl	.L300
 	str	r4, [sp]
 	mov	r3, r6
-	movw	r2, #561
-	ldr	r1, .L322
-	ldr	r0, .L322+20
+	movw	r2, #606
+	ldr	r1, .L364
+	ldr	r0, .L364+20
 	bl	printk
-.L258:
-	ldr	r3, .L322+24
+.L300:
+	ldr	r3, .L364+24
 	cmp	r6, r3
-	beq	.L259
-	bhi	.L260
+	beq	.L301
+	bhi	.L302
 	subs	r3, r3, #4
 	cmp	r6, r3
-	beq	.L261
-	bhi	.L262
+	beq	.L303
+	bhi	.L304
 	subs	r3, r3, #1
 	cmp	r6, r3
-	beq	.L263
-.L264:
-	add	r8, r5, #5344
-	add	r8, r8, #28
+	beq	.L305
+.L306:
+	add	r8, r5, #5376
+	add	r8, r8, #16
 	mov	r0, r8
 	bl	down
 	mov	r2, r4
@@ -1377,84 +1468,84 @@ mpp_enc_control:
 	bl	up
 	ldr	r3, [r7]
 	lsls	r3, r3, #30
-	bpl	.L318
+	bpl	.L360
 	mov	r3, r6
-	mov	r2, #620
-	ldr	r1, .L322
-	ldr	r0, .L322+28
+	movw	r2, #665
+	ldr	r1, .L364
+	ldr	r0, .L364+28
 	bl	printk
-	b	.L318
-.L262:
-	ldr	r3, .L322+32
+	b	.L360
+.L304:
+	ldr	r3, .L364+32
 	cmp	r6, r3
-	beq	.L265
+	beq	.L307
 	adds	r3, r3, #2
 	cmp	r6, r3
-	bne	.L264
+	bne	.L306
 	ldr	r3, [r7]
 	lsls	r7, r3, #30
-	bpl	.L277
-	mov	r2, #592
-	ldr	r1, .L322
-	ldr	r0, .L322+36
+	bpl	.L319
+	movw	r2, #637
+	ldr	r1, .L364
+	ldr	r0, .L364+36
 	bl	printk
-.L277:
+.L319:
 	movs	r2, #200
 	add	r1, r5, #704
-	b	.L320
-.L260:
-	ldr	r3, .L322+40
+	b	.L362
+.L302:
+	ldr	r3, .L364+40
 	cmp	r6, r3
-	beq	.L267
-	bhi	.L268
+	beq	.L309
+	bhi	.L310
 	subs	r3, r3, #12
 	cmp	r6, r3
-	bne	.L264
+	bne	.L306
 	ldr	r3, [r7]
 	lsls	r6, r3, #30
-	bpl	.L278
-	movw	r2, #597
-	ldr	r1, .L322
-	ldr	r0, .L322+44
+	bpl	.L320
+	movw	r2, #642
+	ldr	r1, .L364
+	ldr	r0, .L364+44
 	bl	printk
-.L278:
-	mov	r2, #2832
+.L320:
+	movw	r2, #2836
 	add	r1, r5, #1192
-	b	.L320
-.L268:
-	ldr	r3, .L322+48
+	b	.L362
+.L310:
+	ldr	r3, .L364+48
 	cmp	r6, r3
-	beq	.L270
+	beq	.L312
 	add	r3, r3, #512
 	cmp	r6, r3
-	bne	.L264
+	bne	.L306
 	ldr	r3, [r7]
 	lsls	r1, r3, #30
-	bpl	.L280
-	movw	r2, #607
-	ldr	r1, .L322
-	ldr	r0, .L322+52
+	bpl	.L322
+	mov	r2, #652
+	ldr	r1, .L364
+	ldr	r0, .L364+52
 	bl	printk
-.L280:
+.L322:
 	add	r5, r5, #5280
-	adds	r5, r5, #20
+	adds	r5, r5, #24
 	add	r3, r5, #24
-.L281:
+.L323:
 	ldr	r2, [r5], #4	@ unaligned
 	cmp	r5, r3
 	str	r2, [r4], #4	@ unaligned
-	bne	.L281
-	b	.L318
-.L263:
+	bne	.L323
+	b	.L360
+.L305:
 	ldr	r3, [r7]
 	lsls	r0, r3, #30
-	bpl	.L272
-	movw	r2, #567
-	ldr	r1, .L322
-	ldr	r0, .L322+56
+	bpl	.L314
+	mov	r2, #612
+	ldr	r1, .L364
+	ldr	r0, .L364+56
 	bl	printk
-.L272:
-	movw	r2, #4740
+.L314:
+	movw	r2, #4760
 	add	r1, r5, #600
 	mov	r0, r4
 	bl	memcpy
@@ -1466,78 +1557,78 @@ mpp_enc_control:
 	strdeq	r3, r2, [r4, #12]
 	ldrdeq	r2, r3, [r4, #28]
 	strdeq	r3, r2, [r4, #28]
-.L318:
+.L360:
 	movs	r0, #0
-	b	.L254
-.L261:
+	b	.L296
+.L303:
 	ldr	r3, [r7]
 	lsls	r1, r3, #30
-	bpl	.L274
-	movw	r2, #577
-	ldr	r1, .L322
-	ldr	r0, .L322+60
+	bpl	.L316
+	movw	r2, #622
+	ldr	r1, .L364
+	ldr	r0, .L364+60
 	bl	printk
-.L274:
+.L316:
 	add	r0, r5, #608
 	movs	r2, #96
 	mov	r1, r4
-.L321:
+.L363:
 	bl	memcpy
-	b	.L318
-.L259:
+	b	.L360
+.L301:
 	ldr	r3, [r7]
 	lsls	r2, r3, #30
-	bpl	.L275
-	movw	r2, #582
-	ldr	r1, .L322
-	ldr	r0, .L322+64
+	bpl	.L317
+	movw	r2, #627
+	ldr	r1, .L364
+	ldr	r0, .L364+64
 	bl	printk
-.L275:
-	mov	r2, #2832
+.L317:
+	movw	r2, #2836
 	mov	r1, r4
 	add	r0, r5, #1192
-	b	.L321
-.L265:
+	b	.L363
+.L307:
 	ldr	r3, [r7]
 	lsls	r3, r3, #30
-	bpl	.L276
-	movw	r2, #587
-	ldr	r1, .L322
-	ldr	r0, .L322+68
+	bpl	.L318
+	mov	r2, #632
+	ldr	r1, .L364
+	ldr	r0, .L364+68
 	bl	printk
-.L276:
+.L318:
 	add	r1, r5, #608
 	movs	r2, #96
-.L320:
+.L362:
 	mov	r0, r4
-	b	.L321
-.L270:
+	b	.L363
+.L312:
 	ldr	r3, [r7]
 	lsls	r0, r3, #30
-	bpl	.L279
-	movw	r2, #602
-	ldr	r1, .L322
-	ldr	r0, .L322+72
+	bpl	.L321
+	movw	r2, #647
+	ldr	r1, .L364
+	ldr	r0, .L364+72
 	bl	printk
-.L279:
+.L321:
 	ldr	r3, [r5, #420]	@ unaligned
 	str	r3, [r4]	@ unaligned
-	b	.L318
-.L267:
+	b	.L360
+.L309:
 	ldr	r3, [r7]
 	lsls	r2, r3, #30
-	bpl	.L282
-	mov	r2, #612
-	ldr	r1, .L322
-	ldr	r0, .L322+76
+	bpl	.L324
+	movw	r2, #657
+	ldr	r1, .L364
+	ldr	r0, .L364+76
 	bl	printk
-.L282:
+.L324:
 	movs	r2, #136
-	addw	r1, r5, #4036
-	b	.L320
-.L323:
+	addw	r1, r5, #4040
+	b	.L362
+.L365:
 	.align	2
-.L322:
+.L364:
 	.word	.LANCHOR0+334
 	.word	.LC15
 	.word	3276809
@@ -1578,85 +1669,85 @@ mpp_enc_pkt_full_inc:
 	.global	mpp_enc_debug
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__func__.22499, %object
-	.size	__func__.22499, 15
-__func__.22499:
+	.type	__func__.22584, %object
+	.size	__func__.22584, 15
+__func__.22584:
 	.ascii	"mpp_enc_deinit\000"
-	.type	__FUNCTION__.22500, %object
-	.size	__FUNCTION__.22500, 15
-__FUNCTION__.22500:
+	.type	__FUNCTION__.22585, %object
+	.size	__FUNCTION__.22585, 15
+__FUNCTION__.22585:
 	.ascii	"mpp_enc_deinit\000"
-	.type	__func__.22479, %object
-	.size	__func__.22479, 13
-__func__.22479:
+	.type	__func__.22564, %object
+	.size	__func__.22564, 13
+__func__.22564:
 	.ascii	"mpp_enc_init\000"
-	.type	__FUNCTION__.22480, %object
-	.size	__FUNCTION__.22480, 13
-__FUNCTION__.22480:
+	.type	__FUNCTION__.22565, %object
+	.size	__FUNCTION__.22565, 13
+__FUNCTION__.22565:
 	.ascii	"mpp_enc_init\000"
-	.type	__func__.22505, %object
-	.size	__func__.22505, 14
-__func__.22505:
+	.type	__func__.22590, %object
+	.size	__func__.22590, 14
+__func__.22590:
 	.ascii	"mpp_enc_start\000"
-	.type	__func__.22511, %object
-	.size	__func__.22511, 13
-__func__.22511:
+	.type	__func__.22596, %object
+	.size	__func__.22596, 13
+__func__.22596:
 	.ascii	"mpp_enc_stop\000"
-	.type	__func__.22526, %object
-	.size	__func__.22526, 14
-__func__.22526:
+	.type	__func__.22611, %object
+	.size	__func__.22611, 14
+__func__.22611:
 	.ascii	"mpp_enc_reset\000"
-	.type	__func__.22534, %object
-	.size	__func__.22534, 17
-__func__.22534:
+	.type	__func__.22619, %object
+	.size	__func__.22619, 17
+__func__.22619:
 	.ascii	"mpp_enc_oneframe\000"
-	.type	__func__.22542, %object
-	.size	__func__.22542, 16
-__func__.22542:
+	.type	__func__.22627, %object
+	.size	__func__.22627, 16
+__func__.22627:
 	.ascii	"mpp_enc_cfg_reg\000"
-	.type	__FUNCTION__.22545, %object
-	.size	__FUNCTION__.22545, 16
-__FUNCTION__.22545:
+	.type	__FUNCTION__.22630, %object
+	.size	__FUNCTION__.22630, 16
+__FUNCTION__.22630:
 	.ascii	"mpp_enc_cfg_reg\000"
-	.type	__func__.22552, %object
-	.size	__func__.22552, 17
-__func__.22552:
+	.type	__func__.22638, %object
+	.size	__func__.22638, 17
+__func__.22638:
 	.ascii	"mpp_enc_hw_start\000"
-	.type	__func__.22563, %object
-	.size	__func__.22563, 17
-__func__.22563:
+	.type	__func__.22653, %object
+	.size	__func__.22653, 17
+__func__.22653:
 	.ascii	"mpp_enc_run_task\000"
-	.type	__func__.22568, %object
-	.size	__func__.22568, 25
-__func__.22568:
+	.type	__func__.22660, %object
+	.size	__func__.22660, 25
+__func__.22660:
 	.ascii	"mpp_enc_check_hw_running\000"
-	.type	__func__.22573, %object
-	.size	__func__.22573, 25
-__func__.22573:
+	.type	__func__.22665, %object
+	.size	__func__.22665, 25
+__func__.22665:
 	.ascii	"mpp_enc_unbind_jpeg_task\000"
-	.type	__func__.22579, %object
-	.size	__func__.22579, 29
-__func__.22579:
+	.type	__func__.22671, %object
+	.size	__func__.22671, 29
+__func__.22671:
 	.ascii	"mpp_enc_check_is_int_process\000"
-	.type	__func__.22588, %object
-	.size	__func__.22588, 20
-__func__.22588:
+	.type	__func__.22681, %object
+	.size	__func__.22681, 20
+__func__.22681:
 	.ascii	"mpp_enc_int_process\000"
-	.type	__func__.22598, %object
-	.size	__func__.22598, 19
-__func__.22598:
+	.type	__func__.22691, %object
+	.size	__func__.22691, 19
+__func__.22691:
 	.ascii	"mpp_enc_proc_debug\000"
-	.type	__func__.22606, %object
-	.size	__func__.22606, 21
-__func__.22606:
+	.type	__func__.22699, %object
+	.size	__func__.22699, 21
+__func__.22699:
 	.ascii	"mpp_enc_register_chl\000"
-	.type	__func__.22612, %object
-	.size	__func__.22612, 15
-__func__.22612:
+	.type	__func__.22705, %object
+	.size	__func__.22705, 15
+__func__.22705:
 	.ascii	"mpp_enc_notify\000"
-	.type	__func__.22620, %object
-	.size	__func__.22620, 16
-__func__.22620:
+	.type	__func__.22713, %object
+	.size	__func__.22713, 16
+__func__.22713:
 	.ascii	"mpp_enc_control\000"
 	.type	__param_str_mpp_enc_debug, %object
 	.size	__param_str_mpp_enc_debug, 25
@@ -1697,8 +1788,7 @@ __UNIQUE_ID_mpp_enc_debugtype162:
 .LC7:
 	.ascii	"\0013%s:%d: could not init impl\012\000"
 .LC8:
-	.ascii	"67a7527e author: Yandong Lin 2024-01-17 [h264e_sps]"
-	.ascii	": fix constraint_set value issue\000"
+	.ascii	"\000"
 .LC9:
 	.ascii	"\0016%s:%d: %p in\012\000"
 .LC10:

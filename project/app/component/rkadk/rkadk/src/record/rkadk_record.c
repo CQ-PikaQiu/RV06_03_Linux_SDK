@@ -21,14 +21,11 @@
 #include "rkadk_param.h"
 #include "rkadk_audio_encoder.h"
 #include "linux_list.h"
+#include "file_cache.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifdef FILE_CACHE
-#include "file_cache.h"
-#endif
 
 typedef struct {
   struct list_head mark;
@@ -481,8 +478,9 @@ static int RKADK_RECORD_CreateVideoChn(RKADK_RECORD_ATTR_S *pstRecAttr) {
     }
     RKADK_BUFINFO("create venc[%d]", pstRecCfg->attribute[i].venc_chn);
 
-    RK_MPI_VENC_SetSceneMode(pstRecCfg->attribute[i].venc_chn, RKADK_ENCODE_SENSE_CVR);
     RKADK_PARAM_SetVAdvancedParam(pstRecCfg->attribute[i]);
+    if (pstRecCfg->record_type != RKADK_REC_TYPE_AOV_LAPSE)
+      RK_MPI_VENC_SetSceneMode(pstRecCfg->attribute[i].venc_chn, RKADK_ENCODE_SENSE_CVR);
 
     if (i == 0) {
       enThumbModule = RKADK_THUMB_MODULE_MAIN_RECORD;
@@ -1217,6 +1215,11 @@ static RKADK_S32 RKADK_RECORD_ResetVideo(RKADK_U32 u32CamId,
     memset(&stViAttr, 0, sizeof(VI_CHN_ATTR_S));
     memset(&stVpssAttr, 0, sizeof(VPSS_CHN_ATTR_S));
 
+    if (pstRecCfg->record_type == RKADK_REC_TYPE_AOV_LAPSE)
+      RK_MPI_VENC_SetSceneMode(pstRecCfg->attribute[index].venc_chn, RKADK_ENCODE_SENSE_IPC);
+    else
+      RK_MPI_VENC_SetSceneMode(pstRecCfg->attribute[index].venc_chn, RKADK_ENCODE_SENSE_CVR);
+
     u32VpssGrp = pstRecCfg->attribute[index].vpss_grp;
     u32VpssChn = pstRecCfg->attribute[index].vpss_chn;
     if (bUseVpss) {
@@ -1754,20 +1757,16 @@ RKADK_S32 RKADK_RECORD_SetRotation(RKADK_MW_PTR pRecorder,
   return -1;
 }
 
-RKADK_S32 RKADK_RECORD_FileCacheInit(FILE_CACHE_ATTR_S *pstFileCacheAttr) {
+RKADK_S32 RKADK_RECORD_FileCacheInit(FILE_CACHE_ARG *pstFileCacheAttr) {
 #ifdef FILE_CACHE
-  int ret;
-  FILE_CACHE_ARG stCacheArg;
+  int ret = 0;
 
   RKADK_CHECK_POINTER(pstFileCacheAttr, RKADK_FAILURE);
-
-  stCacheArg.sdcard_path = pstFileCacheAttr->pSdcardPath;
-  stCacheArg.write_cache = pstFileCacheAttr->u32WriteCache;
-  stCacheArg.total_cache = pstFileCacheAttr->u32TotalCache;
-  ret = file_cache_init(&stCacheArg);
+  ret = file_cache_init(pstFileCacheAttr);
   RKADK_MUXER_FsCacheNotify();
   return ret;
 #else
+  RKADK_LOGE("Not define FILE_CACHE");
   return -1;
 #endif
 }
@@ -1776,6 +1775,21 @@ RKADK_S32 RKADK_RECORD_FileCacheDeInit() {
 #ifdef FILE_CACHE
   return file_cache_deinit();
 #else
+  RKADK_LOGE("Not define FILE_CACHE");
   return -1;
+#endif
+}
+
+void RKADK_RECORD_FileCacheSetMode(RKADK_REC_TYPE_E enRecType) {
+#ifdef FILE_CACHE
+  FILE_WRITE_MODE enWriteMode;
+
+  if (enRecType == RKADK_REC_TYPE_AOV_LAPSE)
+    enWriteMode = AOV_MODE;
+  else
+    enWriteMode = NORMAL_MODE;
+  file_cache_set_mode(enWriteMode);
+#else
+  RKADK_LOGE("Not define FILE_CACHE");
 #endif
 }

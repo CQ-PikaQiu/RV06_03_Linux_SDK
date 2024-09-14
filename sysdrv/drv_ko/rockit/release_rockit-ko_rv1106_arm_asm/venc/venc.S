@@ -113,6 +113,28 @@ mpi_buf_get_dmabuf:
 	.fnend
 	.size	mpi_buf_get_dmabuf, .-mpi_buf_get_dmabuf
 	.align	1
+	.global	mpi_buffer_queue_size
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	mpi_buffer_queue_size, %function
+mpi_buffer_queue_size:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	@ link register save eliminated.
+	ldr	r3, .L12
+	add	r0, r3, r0, lsl #2
+	ldr	r0, [r0, #340]
+	bx	lr
+.L13:
+	.align	2
+.L12:
+	.word	g_venc_dev
+	.fnend
+	.size	mpi_buffer_queue_size, .-mpi_buffer_queue_size
+	.align	1
 	.global	mpi_buffer_pool_get_free_num
 	.syntax unified
 	.thumb
@@ -124,15 +146,15 @@ mpi_buffer_pool_get_free_num:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
-	cbz	r0, .L12
+	cbz	r0, .L15
 	ldr	r3, [r0, #12]
 	and	r3, r3, #6
 	cmp	r3, #2
-	beq	.L13
-.L12:
+	beq	.L16
+.L15:
 	movs	r0, #1
 	bx	lr
-.L13:
+.L16:
 	ldr	r0, [r0, #68]
 	bx	lr
 	.fnend
@@ -162,25 +184,39 @@ venc_poll:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r3, r4, r5, lr}
-	.save {r3, r4, r5, lr}
+	push	{r4, r5, r6, lr}
+	.save {r4, r5, r6, lr}
 	mov	r2, r1
-	ldr	r4, [r0, #128]
-	cbz	r1, .L20
-	ldr	r5, [r1]
-	cbz	r5, .L20
-	add	r1, r4, #36864
-	adds	r1, r1, #224
-	cbz	r1, .L20
-	blx	r5
-.L20:
-	movw	r3, #37160
-	ldr	r3, [r4, r3]
+	ldr	r3, [r0, #128]
+	ldr	r1, [r3]
+	cmp	r1, #20
+	beq	.L23
+.L26:
+	movs	r0, #0
+.L22:
+	pop	{r4, r5, r6, pc}
+.L23:
+	ldr	r4, [r3, #8]
+	ldr	r5, .L36
+	cbz	r2, .L25
+	ldr	r6, [r2]
+	cbz	r6, .L25
+	mov	r3, #988
+	mla	r3, r3, r4, r5
+	addw	r1, r3, #3380
+	blx	r6
+.L25:
+	mov	r3, #988
+	mla	r4, r3, r4, r5
+	ldr	r3, [r4, #2464]
 	cmp	r3, #0
-	ite	ne
-	movne	r0, #65
-	moveq	r0, #0
-	pop	{r3, r4, r5, pc}
+	beq	.L26
+	movs	r0, #65
+	b	.L22
+.L37:
+	.align	2
+.L36:
+	.word	g_venc_dev
 	.fnend
 	.size	venc_poll, .-venc_poll
 	.align	1
@@ -194,111 +230,111 @@ venc_node_pp_get_md_attr:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r2, r3, r4, lr}
-	.save {r4, lr}
-	.pad #16
+	push	{r4, r5, lr}
+	.save {r4, r5, lr}
+	.pad #20
+	sub	sp, sp, #20
 	ldr	r3, [r1, #4]	@ unaligned
-	ldr	r2, [r0, #128]
 	cmp	r3, #36
-	beq	.L33
-	mov	r3, #1992
-	ldr	r2, .L42
+	beq	.L39
+	movw	r3, #2091
+	ldr	r2, .L48
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L42+4
+	ldr	r3, .L48+4
 	movs	r0, #4
 	bl	vlog
-.L41:
+.L47:
 	mov	r0, #-1
-.L32:
-	add	sp, sp, #16
+.L38:
+	add	sp, sp, #20
 	@ sp needed
-	pop	{r4, pc}
-.L33:
-	ldr	r3, [r1]	@ unaligned
-	cmp	r3, #0
-	ble	.L35
-	movs	r2, #1
+	pop	{r4, r5, pc}
+.L39:
+	ldr	r2, [r1]	@ unaligned
+	cmp	r2, #7
+	ble	.L41
+	movs	r3, #8
 	movs	r1, #2
-	strd	r3, r2, [sp, #4]
+	strd	r2, r3, [sp, #4]
 	movs	r0, #4
-	movw	r3, #1997
-	ldr	r2, .L42+8
+	mov	r3, #2096
+	ldr	r2, .L48+8
 	str	r3, [sp]
-	ldr	r3, .L42+4
+	ldr	r3, .L48+4
 	bl	vlog
-	b	.L41
-.L35:
-	movw	r3, #64680
-	ldr	r0, [r2, r3]
-	cmp	r0, #0
-	ble	.L36
-	movw	r0, #64676
-	ldr	r0, [r2, r0]
-	cmp	r0, #0
-	ble	.L36
-	str	r0, [r1, #8]	@ unaligned
-	ldr	r3, [r2, r3]
+	b	.L47
+.L41:
+	ldr	r0, .L48+12
+	mov	r4, #988
+	mla	r4, r4, r2, r0
+	ldr	r3, [r4, #3272]
+	cmp	r3, #0
+	ble	.L42
+	ldr	r3, [r4, #3268]
+	cmp	r3, #0
+	ble	.L42
+	str	r3, [r1, #8]	@ unaligned
+	ldr	r3, [r4, #3272]
 	str	r3, [r1, #12]	@ unaligned
-.L37:
-	movw	r3, #64684
+.L43:
+	mov	r3, #988
+	mla	r3, r3, r2, r0
 	movs	r0, #0
-	ldr	r3, [r2, r3]
-	str	r3, [r1, #16]	@ unaligned
-	movw	r3, #64688
-	ldr	r3, [r2, r3]
-	str	r3, [r1, #20]	@ unaligned
-	movw	r3, #64692
-	ldr	r3, [r2, r3]
-	str	r3, [r1, #24]	@ unaligned
-	movw	r3, #64696
-	ldr	r3, [r2, r3]
-	str	r3, [r1, #28]	@ unaligned
-	movw	r3, #64700
-	ldr	r3, [r2, r3]
+	ldr	r2, [r3, #3276]
+	str	r2, [r1, #16]	@ unaligned
+	ldr	r2, [r3, #3280]
+	str	r2, [r1, #20]	@ unaligned
+	ldr	r2, [r3, #3284]
+	str	r2, [r1, #24]	@ unaligned
+	ldr	r2, [r3, #3288]
+	str	r2, [r1, #28]	@ unaligned
+	ldr	r3, [r3, #3292]
 	str	r3, [r1, #32]	@ unaligned
-	b	.L32
-.L36:
-	movw	r3, #37264
-	ldr	r0, [r2, r3]
+	b	.L38
+.L42:
+	mov	r3, #988
+	mla	r3, r3, r2, r0
+	ldr	r4, [r3, #2576]
 	movs	r3, #0
-	cmp	r0, #1
-	bne	.L38
-	movs	r0, #70
-	strb	r0, [r1, #8]
-	movs	r0, #3
+	cmp	r4, #1
+	bne	.L44
+	movs	r4, #70
+	strb	r4, [r1, #8]
+	movs	r4, #3
 	strb	r3, [r1, #9]
 	strb	r3, [r1, #10]
 	strb	r3, [r1, #11]
-.L40:
-	strb	r0, [r1, #12]
+.L46:
+	strb	r4, [r1, #12]
 	strb	r3, [r1, #13]
 	strb	r3, [r1, #14]
 	strb	r3, [r1, #15]
-	b	.L37
-.L38:
-	cmp	r0, #2
-	bne	.L39
-	movs	r4, #50
+	b	.L43
+.L44:
+	cmp	r4, #2
+	bne	.L45
+	movs	r5, #50
+	strb	r3, [r1, #9]
+	strb	r5, [r1, #8]
+	strb	r3, [r1, #10]
+	strb	r3, [r1, #11]
+	b	.L46
+.L45:
+	movs	r4, #30
 	strb	r3, [r1, #9]
 	strb	r4, [r1, #8]
+	movs	r4, #1
 	strb	r3, [r1, #10]
 	strb	r3, [r1, #11]
-	b	.L40
-.L39:
-	movs	r0, #30
-	strb	r3, [r1, #9]
-	strb	r0, [r1, #8]
-	movs	r0, #1
-	strb	r3, [r1, #10]
-	strb	r3, [r1, #11]
-	b	.L40
-.L43:
+	b	.L46
+.L49:
 	.align	2
-.L42:
+.L48:
 	.word	.LC0
 	.word	.LANCHOR0
 	.word	.LC1
+	.word	g_venc_dev
 	.fnend
 	.size	venc_node_pp_get_md_attr, .-venc_node_pp_get_md_attr
 	.align	1
@@ -315,36 +351,35 @@ venc_node_enable_tb:
 	push	{r0, r1, r2, r3, r4, lr}
 	.save {lr}
 	.pad #20
-	ldr	r2, [r1]
-	ldr	r3, [r0, #128]
-	cmp	r2, #15
-	ble	.L45
-	movs	r3, #16
+	ldr	r3, [r1]
+	cmp	r3, #15
+	ble	.L51
+	movs	r2, #16
 	movs	r1, #2
-	strd	r2, r3, [sp, #4]
+	strd	r3, r2, [sp, #4]
 	movs	r0, #4
-	movw	r3, #2030
-	ldr	r2, .L47
+	movw	r3, #2129
+	ldr	r2, .L53
 	str	r3, [sp]
-	ldr	r3, .L47+4
+	ldr	r3, .L53+4
 	bl	vlog
 	mov	r0, #-1
-.L44:
+.L50:
 	add	sp, sp, #20
 	@ sp needed
 	ldr	pc, [sp], #4
-.L45:
-	add	r3, r3, r2
-	movw	r2, #37948
+.L51:
+	ldr	r2, .L53+8
 	movs	r1, #1
 	movs	r0, #0
 	strb	r1, [r3, r2]
-	b	.L44
-.L48:
+	b	.L50
+.L54:
 	.align	2
-.L47:
+.L53:
 	.word	.LC1
 	.word	.LANCHOR0+25
+	.word	g_venc_dev+10304
 	.fnend
 	.size	venc_node_enable_tb, .-venc_node_enable_tb
 	.align	1
@@ -361,40 +396,41 @@ venc_node_tb_bind:
 	push	{r0, r1, r2, r3, r4, lr}
 	.save {lr}
 	.pad #20
-	ldr	r3, [r0, #128]
 	ldr	r0, [r1]	@ unaligned
 	ldr	r2, [r1, #4]	@ unaligned
 	cmp	r0, #15
-	bgt	.L50
+	bgt	.L56
 	cmp	r2, #15
-	ble	.L51
-.L50:
+	ble	.L57
+.L56:
 	movs	r3, #16
 	str	r0, [sp, #4]
 	strd	r2, r3, [sp, #8]
 	movs	r1, #2
-	movw	r3, #2046
-	ldr	r2, .L53
+	mov	r3, #2144
+	ldr	r2, .L59
 	str	r3, [sp]
 	movs	r0, #4
-	ldr	r3, .L53+4
+	ldr	r3, .L59+4
 	bl	vlog
 	mov	r0, #-1
-.L49:
+.L55:
 	add	sp, sp, #20
 	@ sp needed
 	ldr	pc, [sp], #4
-.L51:
+.L57:
+	ldr	r3, .L59+8
+	movw	r1, #10320
 	add	r3, r3, r0
-	movw	r1, #37964
 	movs	r0, #0
 	strb	r2, [r3, r1]
-	b	.L49
-.L54:
+	b	.L55
+.L60:
 	.align	2
-.L53:
+.L59:
 	.word	.LC2
 	.word	.LANCHOR0+45
+	.word	g_venc_dev
 	.fnend
 	.size	venc_node_tb_bind, .-venc_node_tb_bind
 	.align	1
@@ -412,49 +448,48 @@ venc_node_tb_request:
 	.save {lr}
 	.pad #20
 	ldr	r3, [r1]
-	ldr	r2, [r0, #128]
 	cmp	r3, #15
-	ble	.L56
+	ble	.L62
 	movs	r2, #16
 	movs	r1, #2
 	strd	r3, r2, [sp, #4]
 	movs	r0, #4
-	movw	r3, #2061
-	ldr	r2, .L58
+	movw	r3, #2158
+	ldr	r2, .L64
 	str	r3, [sp]
-	ldr	r3, .L58+4
+	ldr	r3, .L64+4
 	bl	vlog
 	mov	r0, #-1
-.L55:
+.L61:
 	add	sp, sp, #20
 	@ sp needed
 	ldr	pc, [sp], #4
-.L56:
+.L62:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	r1, cpsr	@ arch_local_irq_save
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	add	r3, r3, #9472
-	adds	r3, r3, #24
-	add	r3, r2, r3, lsl #2
-	movs	r2, #1
-	str	r2, [r3, #-4]
+	ldr	r1, .L64+8
+	addw	r3, r3, #2584
+	movs	r0, #1
+	str	r0, [r1, r3, lsl #2]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, r1	@ local_irq_restore
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	movs	r0, #0
-	b	.L55
-.L59:
+	b	.L61
+.L65:
 	.align	2
-.L58:
+.L64:
 	.word	.LC1
 	.word	.LANCHOR0+63
+	.word	g_venc_dev
 	.fnend
 	.size	venc_node_tb_request, .-venc_node_tb_request
 	.align	1
@@ -471,75 +506,52 @@ mpi_buf_ref:
 	@ link register save eliminated.
 	push	{r4, r5, r6}
 	.save {r4, r5, r6}
-	cbz	r0, .L60
+	cbz	r0, .L66
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r4, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r5, .L66
+	ldr	r5, .L72
 	movs	r3, #0
 	movs	r1, #12
-.L64:
+.L70:
 	mul	r2, r1, r3
 	ldr	r6, [r2, r5]
 	cmp	r6, r0
-	bne	.L62
-	ldr	r3, .L66+4
-	movw	r1, #64712
+	bne	.L68
+	ldr	r3, .L72+4
+	movw	r1, #37028
 	add	r3, r3, r2
 	ldr	r2, [r3, r1]
 	adds	r2, r2, #1
 	str	r2, [r3, r1]
-.L63:
+.L69:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r4	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	pop	{r4, r5, r6}
 	b	mpi_obj_ref
-.L62:
+.L68:
 	adds	r3, r3, #1
 	cmp	r3, #512
-	bne	.L64
-	b	.L63
-.L60:
+	bne	.L70
+	b	.L69
+.L66:
 	pop	{r4, r5, r6}
 	bx	lr
-.L67:
+.L73:
 	.align	2
-.L66:
-	.word	g_venc_dev+64708
+.L72:
+	.word	g_venc_dev+37024
 	.word	g_venc_dev
 	.fnend
 	.size	mpi_buf_ref, .-mpi_buf_ref
-	.align	1
-	.syntax unified
-	.thumb
-	.thumb_func
-	.fpu softvfp
-	.type	venc_open, %function
-venc_open:
-	.fnstart
-	@ args = 0, pretend = 0, frame = 0
-	@ frame_needed = 0, uses_anonymous_args = 0
-	ldr	r0, .L69
-	push	{r3, lr}
-	.save {r3, lr}
-	str	r0, [r1, #128]
-	bl	mpi_obj_ref
-	movs	r0, #0
-	pop	{r3, pc}
-.L70:
-	.align	2
-.L69:
-	.word	g_venc_dev+4
-	.fnend
-	.size	venc_open, .-venc_open
 	.align	1
 	.global	mpi_buffer_queue_push
 	.syntax unified
@@ -557,77 +569,6 @@ mpi_buffer_queue_push:
 	pop	{r3, pc}
 	.fnend
 	.size	mpi_buffer_queue_push, .-mpi_buffer_queue_push
-	.align	1
-	.global	vcodec_notify
-	.syntax unified
-	.thumb
-	.thumb_func
-	.fpu softvfp
-	.type	vcodec_notify, %function
-vcodec_notify:
-	.fnstart
-	@ args = 0, pretend = 0, frame = 0
-	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, r7, lr}
-	.save {r4, r5, r6, r7, lr}
-	mov	r4, r1
-	.pad #20
-	sub	sp, sp, #20
-	cmp	r1, #0
-	bne	.L75
-	ldr	r5, .L76
-	ldr	r3, [r5, #328]
-	orrs	r3, r0, r3
-	bne	.L73
-	ldrd	r6, [r2]
-	movw	r3, #979
-	ldr	r2, .L76+4
-	movs	r1, #5
-	str	r3, [sp]
-	movs	r0, #4
-	ldr	r3, .L76+8
-	strd	r6, [sp, #8]
-	bl	vlog
-	ldrd	r2, [r5, #344]
-	mov	r0, r4
-	strd	r2, [sp]
-	ldrd	r2, [r5, #336]
-	bl	mpp_vcodec_run_task
-	mov	r4, r0
-	cbnz	r0, .L74
-	bl	mcu_get_wrap_status
-	cmp	r0, #2
-	bne	.L74
-	movs	r3, #1
-	str	r3, [r5, #328]
-.L73:
-	mov	r0, r4
-	add	sp, sp, #20
-	@ sp needed
-	pop	{r4, r5, r6, r7, pc}
-.L74:
-	movw	r3, #983
-	strd	r6, [sp, #8]
-	str	r3, [sp]
-	movs	r1, #5
-	ldr	r3, .L76+8
-	movs	r0, #4
-	ldr	r2, .L76+12
-	movs	r4, #0
-	bl	vlog
-	b	.L73
-.L75:
-	mov	r4, #-1
-	b	.L73
-.L77:
-	.align	2
-.L76:
-	.word	g_venc_dev
-	.word	.LC3
-	.word	.LANCHOR0+84
-	.word	.LC4
-	.fnend
-	.size	vcodec_notify, .-vcodec_notify
 	.align	1
 	.syntax unified
 	.thumb
@@ -654,183 +595,301 @@ get_venc_node:
 	.type	vcodec_set_intra_info, %function
 vcodec_set_intra_info:
 	.fnstart
-	@ args = 12, pretend = 0, frame = 0
+	@ args = 12, pretend = 0, frame = 8
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	cmp	r0, #15
-	.pad #20
-	sub	sp, sp, #20
-	mov	r5, r0
-	mov	r8, r2
-	mov	r9, r3
-	ldrd	r6, [sp, #56]
-	ldr	r10, [sp, #64]
-	bls	.L80
+	.pad #28
+	sub	sp, sp, #28
+	mov	r4, r0
+	strd	r2, [sp, #16]
+	bls	.L77
 	movs	r3, #16
-	ldr	r2, .L113
+	ldr	r2, .L114
 	strd	r0, r3, [sp, #4]
 	movs	r1, #2
-	movw	r3, #907
+	movw	r3, #942
 	movs	r0, #4
 	str	r3, [sp]
-	ldr	r3, .L113+4
+	ldr	r3, .L114+4
 	bl	vlog
 	mov	r0, #-1
-.L79:
-	add	sp, sp, #20
+.L76:
+	add	sp, sp, #28
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L80:
+.L77:
 	bl	get_venc_node
-	cbz	r0, .L82
+	cbz	r0, .L79
 	ldr	r3, [r0, #116]
-	cbz	r3, .L82
+	cbz	r3, .L79
 	blx	r3
-.L82:
-	ldr	r4, .L113+8
-	ldr	r3, [r4, #220]
-	cbz	r3, .L84
-	cbz	r5, .L84
-	ldr	r3, [r4, #328]
-	cbnz	r3, .L84
-	addw	r3, r5, #2302
-	add	r3, r4, r3, lsl #4
-	ldr	fp, [r3, #4]
-	cmp	fp, #0
-	bne	.L84
+.L79:
+	ldr	r5, .L114+8
+	add	r3, r5, r4, lsl #2
+	ldr	r3, [r3, #404]
+	cmp	r3, #0
+	bne	.L81
+	add	r3, r5, r4, lsl #4
+	ldr	r3, [r3, #2144]
+	cmp	r3, #0
+	bne	.L81
 	bl	mcu_get_wrap_status
 	cmp	r0, #2
-	bne	.L84
-	movw	r3, #917
-	ldr	r2, .L113+12
-	str	r3, [sp]
-	movs	r1, #5
-	ldr	r3, .L113+4
-	movs	r0, #4
-	str	r5, [sp, #4]
-	bl	vlog
-	ldrd	r2, [r4, #344]
-	mov	r0, fp
-	strd	r2, [sp]
-	ldrd	r2, [r4, #336]
-	bl	mpp_vcodec_run_task
-	cmp	r0, #0
-	bne	.L86
-	movs	r3, #1
-	str	r3, [r4, #328]
-.L84:
-	cmp	r10, #0
-	beq	.L112
-	add	r3, r5, #15872
-	adds	r3, r3, #40
-	ldr	r3, [r4, r3, lsl #2]
-	cmp	r3, #9
-	beq	.L87
-	cmp	r3, #15
-	bne	.L88
-.L87:
-	add	r2, r4, r5, lsl #4
-	movw	r1, #36844
-	ldr	r3, [r2, r1]
-	cmp	r3, #0
-	ble	.L88
-	subs	r3, r3, #1
-	str	r3, [r2, r1]
-	movw	r3, #36848
-	movs	r1, #0
-	str	r1, [r2, r3]
-.L88:
+	bne	.L81
+	movw	r3, #43232
+	ldr	r6, [r5, r3]
+	cbnz	r6, .L81
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	fp, cpsr	@ arch_local_irq_save
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r9, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	adds	r2, r4, r5
-	movw	r3, #37968
-	ldrb	r3, [r2, r3]	@ zero_extendqisi2
-	movw	r2, #37952
-	add	r3, r3, r4
-	ldrb	r3, [r3, r2]	@ zero_extendqisi2
-	cbz	r3, .L89
-	add	r10, r5, #9472
-	add	r10, r10, #24
-	ldr	r3, [r4, r10, lsl #2]
-	cmp	r3, #0
-	ble	.L89
-	mov	r3, #800
-	movs	r2, #0
-	mla	r3, r3, r5, r4
-	add	r3, r3, #50688
-	adds	r3, r3, #160
-.L92:
-	ldrd	r0, [r3], #8
-	cmp	r1, r7
-	it	eq
-	cmpeq	r0, r6
-	beq	.L90
-	orrs	r1, r0, r1
-	bne	.L91
-	movs	r3, #100
-	mla	r5, r3, r5, r2
-	add	r3, r5, #4736
-	add	r5, r5, #6336
-	adds	r3, r3, #20
-	adds	r5, r5, #20
-	add	r3, r4, r3, lsl #3
-	add	r5, r4, r5, lsl #3
-	strd	r8, [r3]
-	strd	r6, [r5]
-.L90:
-	ldr	r3, [r4, r10, lsl #2]
-	subs	r3, r3, #1
-	str	r3, [r4, r10, lsl #2]
-.L89:
+	ldr	r10, .L114+4
+	add	r7, r5, #404
+	ldr	fp, .L114+16
+	mov	r8, r5
+.L85:
+	ldr	r3, [r7], #4
+	cbz	r3, .L83
+	ldr	r3, [r7, #764]
+	adds	r3, r3, #1
+	bne	.L83
+	movs	r1, #4
+	movw	r3, #958
+	mov	r2, fp
+	str	r3, [sp]
+	mov	r0, r1
+	mov	r3, r10
+	str	r6, [sp, #4]
+	bl	vlog
+	add	r3, r8, #1440
+	add	r1, r8, #1312
+	mov	r0, r6
+	ldrd	r2, [r3]
+	strd	r2, [sp]
+	ldrd	r2, [r1]
+	bl	mpp_vcodec_run_task
+	cmp	r0, #0
+	bne	.L84
+	movs	r3, #1
+.L112:
+	str	r3, [r7, #764]
+.L83:
+	adds	r6, r6, #1
+	add	r8, r8, #8
+	cmp	r6, #16
+	bne	.L85
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, fp	@ local_irq_restore
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r9	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-.L112:
-	movs	r0, #0
-	b	.L79
+.L81:
+	ldr	r3, [sp, #72]
+	cmp	r3, #0
+	beq	.L113
+	ldr	r6, .L114+8
+	add	r3, r4, #8960
+	adds	r3, r3, #40
+	ldr	r3, [r6, r3, lsl #2]
+	cmp	r3, #9
+	beq	.L86
+	cmp	r3, #15
+	bne	.L87
 .L86:
-	movw	r3, #921
-	str	r5, [sp, #4]
-	str	r3, [sp]
-	movs	r1, #5
-	ldr	r3, .L113+4
-	movs	r0, #4
-	ldr	r2, .L113+16
-	bl	vlog
-	b	.L84
+	add	r2, r6, r4, lsl #4
+	ldr	r3, [r2, #2152]
+	cmp	r3, #0
+	itttt	gt
+	addgt	r3, r3, #-1
+	strgt	r3, [r2, #2152]
+	movgt	r3, #0
+	strgt	r3, [r2, #2156]
+.L87:
+	.syntax unified
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r8, cpsr	@ arch_local_irq_save
+	cpsid	i
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	adds	r2, r6, r4
+	movw	r3, #10320
+	ldrb	r3, [r2, r3]	@ zero_extendqisi2
+	add	r3, r3, r6
+	add	r3, r3, #10304
+	ldrb	r3, [r3]	@ zero_extendqisi2
+	cbz	r3, .L88
+	addw	r7, r4, #2584
+	ldr	r3, [r6, r7, lsl #2]
+	cmp	r3, #0
+	ble	.L88
+	mov	r3, #800
+	movs	r2, #0
+	mla	r3, r3, r4, r6
+	add	r3, r3, #23168
+	adds	r3, r3, #32
 .L91:
+	ldrd	r0, [r3], #8
+	ldrd	r9, [sp, #64]
+	cmp	r1, r10
+	it	eq
+	cmpeq	r0, r9
+	beq	.L89
+	orrs	r1, r0, r1
+	bne	.L90
+	movs	r3, #100
+	mla	r4, r3, r4, r2
+	ldrd	r1, [sp, #16]
+	addw	r3, r4, #1300
+	addw	r4, r4, #2900
+	add	r3, r5, r3, lsl #3
+	add	r5, r5, r4, lsl #3
+	mov	r4, r10
+	strd	r1, [r3]
+	mov	r3, r9
+	strd	r3, [r5]
+.L89:
+	ldr	r3, [r6, r7, lsl #2]
+	subs	r3, r3, #1
+	str	r3, [r6, r7, lsl #2]
+.L88:
+	.syntax unified
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r8	@ local_irq_restore
+@ 0 "" 2
+	.thumb
+	.syntax unified
+.L113:
+	movs	r0, #0
+	b	.L76
+.L84:
+	movs	r3, #0
+	b	.L112
+.L90:
 	adds	r2, r2, #1
 	cmp	r2, #100
-	bne	.L92
-	mov	r3, #948
+	bne	.L91
+	mov	r3, #992
 	str	r2, [sp, #4]
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L113+4
+	ldr	r3, .L114+4
 	movs	r0, #4
-	ldr	r2, .L113+20
+	ldr	r2, .L114+12
 	bl	vlog
-	b	.L90
-.L114:
+	b	.L89
+.L115:
 	.align	2
-.L113:
+.L114:
 	.word	.LC1
-	.word	.LANCHOR0+98
+	.word	.LANCHOR0+84
 	.word	g_venc_dev
-	.word	.LC5
-	.word	.LC6
-	.word	.LC7
+	.word	.LC4
+	.word	.LC3
 	.fnend
 	.size	vcodec_set_intra_info, .-vcodec_set_intra_info
+	.align	1
+	.global	venc_node_set_framerate
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	venc_node_set_framerate, %function
+venc_node_set_framerate:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r0, r1, r2, r3, r4, r5, r6, lr}
+	.save {r4, r5, r6, lr}
+	.pad #16
+	mov	r4, r1
+	ldr	r3, [r1, #4]	@ unaligned
+	cmp	r3, #16
+	beq	.L117
+	movw	r3, #1837
+	ldr	r2, .L123
+	str	r3, [sp]
+	movs	r1, #2
+	ldr	r3, .L123+4
+	movs	r0, #4
+	bl	vlog
+.L122:
+	mov	r0, #-1
+.L116:
+	add	sp, sp, #16
+	@ sp needed
+	pop	{r4, r5, r6, pc}
+.L117:
+	ldr	r6, [r1]	@ unaligned
+	cmp	r6, #15
+	ble	.L119
+	strd	r6, r3, [sp, #4]
+	movs	r1, #2
+	movw	r3, #1842
+	ldr	r2, .L123+8
+	str	r3, [sp]
+	movs	r0, #4
+	ldr	r3, .L123+4
+	bl	vlog
+	b	.L122
+.L119:
+	ldr	r5, .L123+12
+	ldr	r3, [r1, #8]	@ unaligned
+	add	r2, r5, r6, lsl #2
+	ldr	r2, [r2, #404]
+	cbnz	r2, .L120
+	ldr	r2, [r1, #12]	@ unaligned
+	cmp	r2, r3
+	bgt	.L120
+.L121:
+	movs	r0, #0
+	b	.L116
+.L120:
+	add	r2, r5, r6, lsl #2
+	add	r1, r5, r6, lsl #2
+	str	r3, [r2, #212]
+	ldr	r2, [r4, #12]	@ unaligned
+	str	r2, [r1, #276]
+	movs	r1, #4
+	strd	r3, r2, [sp, #8]
+	mov	r0, r1
+	mov	r3, #1848
+	ldr	r2, .L123+16
+	str	r3, [sp]
+	str	r6, [sp, #4]
+	ldr	r3, .L123+4
+	bl	vlog
+	ldr	r2, [r4, #8]	@ unaligned
+	ldr	r3, [r4, #12]	@ unaligned
+	cmp	r2, r3
+	bge	.L121
+	mov	r0, r6
+	bl	get_venc_node
+	cmp	r0, #0
+	bne	.L121
+	ldr	r3, [r4, #12]	@ unaligned
+	add	r5, r5, r6, lsl #2
+	ldr	r2, [r4, #8]	@ unaligned
+	adds	r3, r3, #1
+	subs	r3, r3, r2
+	str	r3, [r5, #340]
+	b	.L116
+.L124:
+	.align	2
+.L123:
+	.word	.LC5
+	.word	.LANCHOR0+106
+	.word	.LC1
+	.word	g_venc_dev
+	.word	.LC6
+	.fnend
+	.size	venc_node_set_framerate, .-venc_node_set_framerate
 	.align	1
 	.syntax unified
 	.thumb
@@ -862,16 +921,16 @@ vcodec_destory_dev:
 	push	{r4, lr}
 	.save {r4, lr}
 	mov	r4, r0
-	cbz	r0, .L118
+	cbz	r0, .L128
 	bl	mpi_dev_unregister
 	mov	r0, r4
 	bl	kfree
 	movs	r0, #0
-.L116:
+.L126:
 	pop	{r4, pc}
-.L118:
+.L128:
 	mov	r0, #-1
-	b	.L116
+	b	.L126
 	.fnend
 	.size	vcodec_destory_dev, .-vcodec_destory_dev
 	.align	1
@@ -888,32 +947,32 @@ mpi_buf_alloc:
 	push	{r3, r4, r5, lr}
 	.save {r3, r4, r5, lr}
 	mov	r4, r0
-	ldr	r0, .L125
+	ldr	r0, .L135
 	bl	mpi_allocator_find_by_name
 	mov	r2, r4
 	movs	r1, #1
 	bl	mpi_allocator_alloc
 	mov	r5, r0
-	cbz	r0, .L121
+	cbz	r0, .L131
 	movs	r1, #0
 	bl	mpi_buf_create
 	mov	r4, r0
-	cbz	r0, .L119
-	ldr	r3, .L125+4
+	cbz	r0, .L129
+	ldr	r3, .L135+4
 	str	r3, [r0, #4]
 	mov	r0, r5
 	bl	dma_buf_put
-.L119:
+.L129:
 	mov	r0, r4
 	pop	{r3, r4, r5, pc}
-.L121:
+.L131:
 	mov	r4, r0
-	b	.L119
-.L126:
+	b	.L129
+.L136:
 	.align	2
-.L125:
+.L135:
+	.word	.LC7
 	.word	.LC8
-	.word	.LC9
 	.fnend
 	.size	mpi_buf_alloc, .-mpi_buf_alloc
 	.align	1
@@ -932,83 +991,83 @@ mpi_buf_unref:
 	.pad #8
 	mov	r4, r0
 	cmp	r0, #0
-	beq	.L127
+	beq	.L137
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r5, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r0, .L139
+	ldr	r0, .L149
 	movs	r2, #0
 	movs	r3, #12
-.L132:
+.L142:
 	mul	r1, r3, r2
 	ldr	r6, [r1, r0]
 	cmp	r6, r4
-	bne	.L129
-	ldr	r3, .L139+4
+	bne	.L139
+	ldr	r3, .L149+4
 	add	r3, r3, r1
-	movw	r1, #64712
+	movw	r1, #37028
 	ldr	r2, [r3, r1]
 	subs	r2, r2, #1
 	str	r2, [r3, r1]
-	cbnz	r2, .L130
-	movw	r1, #64716
-	movw	r6, #64708
+	cbnz	r2, .L140
+	movw	r1, #37032
+	movw	r6, #37024
 	ldr	r0, [r3, r1]
 	str	r2, [r3, r6]
 	mov	r2, #-1
 	str	r2, [r3, r1]
-.L131:
+.L141:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r5	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	cmp	r0, #0
-	blt	.L133
+	blt	.L143
 	movs	r2, #0
 	mov	r1, r4
 	bl	remove_user_from_buf
-.L133:
+.L143:
 	ldr	r3, [r4, #444]
-	cbz	r3, .L134
+	cbz	r3, .L144
 	ldr	r3, [r4]
 	movs	r1, #5
-	ldr	r2, .L139+8
+	ldr	r2, .L149+8
 	movs	r0, #4
 	str	r3, [sp, #4]
-	movw	r3, #1097
+	movw	r3, #1167
 	str	r3, [sp]
-	ldr	r3, .L139+12
+	ldr	r3, .L149+12
 	bl	vlog
-.L134:
+.L144:
 	mov	r0, r4
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, lr}
 	b	mpi_obj_unref
-.L129:
+.L139:
 	adds	r2, r2, #1
 	cmp	r2, #512
-	bne	.L132
-.L130:
+	bne	.L142
+.L140:
 	mov	r0, #-1
-	b	.L131
-.L127:
+	b	.L141
+.L137:
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, pc}
-.L140:
+.L150:
 	.align	2
-.L139:
-	.word	g_venc_dev+64708
+.L149:
+	.word	g_venc_dev+37024
 	.word	g_venc_dev
-	.word	.LC10
-	.word	.LANCHOR0+120
+	.word	.LC9
+	.word	.LANCHOR0+130
 	.fnend
 	.size	mpi_buf_unref, .-mpi_buf_unref
 	.align	1
@@ -1023,12 +1082,12 @@ mpi_buffer_queue_create:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
-	ldr	r2, .L142
+	ldr	r2, .L152
 	movs	r1, #4
 	b	mpi_queue_create
-.L143:
+.L153:
 	.align	2
-.L142:
+.L152:
 	.word	mpi_obj_unref
 	.fnend
 	.size	mpi_buffer_queue_create, .-mpi_buffer_queue_create
@@ -1065,10 +1124,10 @@ venc_destroy_ctx:
 	.save {r4, lr}
 	mov	r4, r0
 	ldr	r0, [r0]
-	cbz	r0, .L146
+	cbz	r0, .L156
 	movs	r1, #0
 	bl	mpi_queue_destroy
-.L146:
+.L156:
 	mov	r0, r4
 	bl	kfree
 	movs	r0, #0
@@ -1090,28 +1149,28 @@ mpi_buffer_pool_create:
 	.save {r4, r5, r6, lr}
 	.pad #8
 	mov	r5, r0
-	ldr	r0, .L155
+	ldr	r0, .L165
 	mov	r6, r1
 	bl	mpi_allocator_find_by_name
 	mov	r4, r0
-	cbz	r0, .L150
-	ldr	r3, .L155+4
+	cbz	r0, .L160
+	ldr	r3, .L165+4
 	mov	r2, r5
 	movs	r1, #1
 	str	r3, [sp]
 	mov	r3, r6
 	bl	mpi_buf_pool_create
 	mov	r4, r0
-.L150:
+.L160:
 	mov	r0, r4
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, pc}
-.L156:
+.L166:
 	.align	2
-.L155:
+.L165:
+	.word	.LC7
 	.word	.LC8
-	.word	.LC9
 	.fnend
 	.size	mpi_buffer_pool_create, .-mpi_buffer_pool_create
 	.align	1
@@ -1172,100 +1231,111 @@ venc_node_create:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r2, r3, r4, r5, r6, lr}
-	.save {r4, r5, r6, lr}
+	push	{r0, r1, r2, r3, r4, r5, r6, r7, r8, lr}
+	.save {r4, r5, r6, r7, r8, lr}
 	.pad #16
-	mov	r5, r0
-	ldr	r0, .L168
-	mov	r4, r1
+	mov	r4, r0
+	ldr	r0, .L179
+	mov	r5, r1
 	bl	mpi_dev_find_by_name
-	ldr	r2, [r4, #8]	@ unaligned
-	ldr	r5, [r5, #128]
+	ldr	r2, [r5, #8]	@ unaligned
+	ldr	r6, [r4, #128]
 	cmp	r2, #16
-	mov	r6, r0
-	beq	.L161
-	movw	r3, #1483
-	ldr	r2, .L168+4
+	mov	r8, r0
+	beq	.L171
+	movw	r3, #1561
+	ldr	r2, .L179+4
 	str	r3, [sp]
-	ldr	r3, .L168+8
-.L167:
+	ldr	r3, .L179+8
+.L178:
 	movs	r1, #2
 	movs	r0, #4
 	bl	vlog
-	b	.L166
-.L161:
-	ldr	r3, [r4, #4]	@ unaligned
-	cmp	r3, #15
-	ble	.L163
-	strd	r3, r2, [sp, #4]
-	movs	r1, #2
-	movw	r3, #1487
-	ldr	r2, .L168+12
-	str	r3, [sp]
-	movs	r0, #4
-	ldr	r3, .L168+8
-	bl	vlog
-.L166:
+.L177:
 	mov	r0, #-1
-.L160:
+.L170:
 	add	sp, sp, #16
 	@ sp needed
-	pop	{r4, r5, r6, pc}
-.L163:
-	ldr	r0, .L168+16
+	pop	{r4, r5, r6, r7, r8, pc}
+.L171:
+	ldr	r3, [r5, #4]	@ unaligned
+	cmp	r3, #15
+	ble	.L173
+	strd	r3, r2, [sp, #4]
+	movs	r1, #2
+	movw	r3, #1565
+	ldr	r2, .L179+12
+	str	r3, [sp]
+	movs	r0, #4
+	ldr	r3, .L179+8
+	bl	vlog
+	b	.L177
+.L173:
+	ldr	r7, .L179+16
+	add	r3, r3, #10752
+	adds	r3, r3, #40
+	ldr	r0, .L179+20
+	mov	r4, #-1
+	str	r4, [r7, r3, lsl #2]
 	bl	mpi_allocator_find_by_name
-	cbnz	r0, .L164
-	movw	r3, #1493
+	cbnz	r0, .L174
+	movw	r3, #1572
 	str	r0, [sp, #4]
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L168+8
+	ldr	r3, .L179+8
 	movs	r0, #4
-	ldr	r2, .L168+20
+	ldr	r2, .L179+24
 	bl	vlog
-	b	.L166
-.L164:
-	mov	r0, r6
+	b	.L177
+.L174:
+	mov	r0, r8
 	movs	r3, #0
 	movs	r2, #1
-	ldr	r1, [r4, #4]	@ unaligned
+	ldr	r1, [r5, #4]	@ unaligned
 	bl	mpi_dev_create_node_with_params
-	mov	r6, r0
-	cbnz	r0, .L165
-	movw	r3, #1499
-	ldr	r2, .L168+24
+	mov	r8, r0
+	cbnz	r0, .L175
+	movw	r3, #1578
+	ldr	r2, .L179+28
 	str	r3, [sp]
-	ldr	r3, .L168+8
-	b	.L167
-.L165:
-	ldr	r3, .L168+28
+	ldr	r3, .L179+8
+	b	.L178
+.L175:
+	ldr	r3, .L179+32
 	movs	r1, #1
 	str	r3, [r0, #4]
 	bl	mpi_node_enable_auto_streamon
-	mov	r3, r6
-	ldr	r2, [r4, #4]	@ unaligned
+	mov	r3, r8
+	ldr	r2, [r5, #4]	@ unaligned
 	movs	r0, #4
-	ldr	r1, [r4]	@ unaligned
+	ldr	r1, [r5]	@ unaligned
 	bl	vsys_add_node_to_map
-	ldr	r3, [r4, #4]	@ unaligned
-	ldr	r2, [r4, #12]	@ unaligned
+	ldr	r3, [r5, #4]	@ unaligned
+	ldr	r2, [r5, #12]	@ unaligned
 	movs	r0, #0
-	add	r3, r3, #15872
+	add	r3, r3, #8960
 	adds	r3, r3, #40
-	add	r3, r5, r3, lsl #2
-	str	r2, [r3, #-4]
-	b	.L160
-.L169:
+	str	r2, [r7, r3, lsl #2]
+	movs	r3, #4
+	str	r3, [r6]
+	ldr	r3, [r5]	@ unaligned
+	str	r3, [r6, #4]
+	ldr	r3, [r5, #4]	@ unaligned
+	str	r3, [r6, #8]
+	b	.L170
+.L180:
 	.align	2
-.L168:
+.L179:
+	.word	.LC10
 	.word	.LC11
-	.word	.LC12
-	.word	.LANCHOR0+134
+	.word	.LANCHOR0+144
 	.word	.LC1
-	.word	.LC8
+	.word	g_venc_dev
+	.word	.LC7
+	.word	.LC12
 	.word	.LC13
-	.word	.LC14
-	.word	.LC9
+	.word	.LC8
 	.fnend
 	.size	venc_node_create, .-venc_node_create
 	.align	1
@@ -1279,325 +1349,131 @@ venc_node_delete:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	.pad #20
-	sub	sp, sp, #20
-	ldr	r4, [r1]
-	ldr	r7, [r0, #128]
-	cmp	r4, #15
-	ble	.L171
+	push	{r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, lr}
+	.save {r4, r5, r6, r7, r8, r9, r10, lr}
+	.pad #16
+	ldr	r5, [r1]
+	cmp	r5, #15
+	ble	.L182
 	movs	r3, #16
-	ldr	r2, .L197
-	strd	r4, r3, [sp, #4]
+	ldr	r2, .L208
+	strd	r5, r3, [sp, #4]
 	movs	r1, #2
-	movw	r3, #1519
+	mov	r3, #1600
 	movs	r0, #4
 	str	r3, [sp]
-	ldr	r3, .L197+4
+	ldr	r3, .L208+4
 	bl	vlog
 	mov	r0, #-1
-.L170:
-	add	sp, sp, #20
+.L181:
+	add	sp, sp, #16
 	@ sp needed
-	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L171:
+	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
+.L182:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	r6, cpsr	@ arch_local_irq_save
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r8, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r5, .L197+8
-	add	r3, r5, r4, lsl #2
-	ldr	r3, [r3, #220]
-	cbz	r3, .L173
-	ldr	r0, [r5, #352]
-	cbz	r0, .L173
+	ldr	r4, .L208+8
+	add	r7, r5, #100
+	add	r3, r4, r7, lsl #2
+	ldr	r3, [r3, #4]
+	cbz	r3, .L184
+	add	r6, r5, #392
+	ldr	r0, [r4, r6, lsl #2]
+	cbz	r0, .L184
 	bl	mpi_buf_unref
+	add	r2, r5, #312
 	movs	r3, #0
-	str	r3, [r5, #352]
-	str	r3, [r5, #332]
-.L173:
+	str	r3, [r4, r6, lsl #2]
+	str	r3, [r4, r2, lsl #2]
+.L184:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, r6	@ local_irq_restore
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r8	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	mov	r0, r4
+	mov	r0, r5
 	bl	get_venc_node
 	mov	r6, r0
-	cbz	r0, .L174
-	mov	r2, r4
+	cbz	r0, .L185
+	mov	r2, r5
 	movs	r1, #0
 	movs	r0, #4
 	bl	vsys_remove_node_from_map
 	mov	r0, r6
 	bl	mpi_node_destroy
-.L174:
-	add	r8, r7, r4
-	movw	r9, #37948
-	ldrb	r3, [r8, r9]	@ zero_extendqisi2
-	cbz	r3, .L175
-	mov	fp, #800
-	movw	r3, #37964
-	mul	r6, fp, r4
-	movs	r2, #255
-	strb	r2, [r8, r3]
-	add	r3, r4, #9472
-	adds	r3, r3, #24
-	mov	r10, #0
-	add	r0, r6, #37888
-	mov	r2, fp
-	add	r3, r7, r3, lsl #2
-	adds	r0, r0, #160
-	subs	r7, r7, #4
-	mov	r1, r10
-	str	r10, [r3, #-4]
-	add	r0, r0, r7
+.L185:
+	adds	r3, r4, r5
+	add	r10, r3, #10304
+	ldrb	r2, [r10]	@ zero_extendqisi2
+	cbz	r2, .L186
+	mov	r9, #800
+	movw	r2, #10320
+	mul	r6, r9, r5
+	mov	r8, #0
+	movs	r1, #255
+	strb	r1, [r3, r2]
+	addw	r3, r5, #2584
+	mov	r2, r9
+	add	r0, r6, #10368
+	mov	r1, r8
+	adds	r0, r0, #32
+	str	r8, [r4, r3, lsl #2]
+	add	r0, r0, r4
 	bl	memset
-	add	r0, r6, #50688
-	adds	r0, r0, #160
-	mov	r2, fp
-	mov	r1, r10
-	add	r0, r0, r7
+	add	r0, r6, #23168
+	adds	r0, r0, #32
+	mov	r2, r9
+	mov	r1, r8
+	add	r0, r0, r4
 	bl	memset
-	strb	r10, [r8, r9]
-.L175:
-	cbnz	r4, .L176
-	ldr	r3, [r5, #220]
-	cbz	r3, .L176
+	strb	r8, [r10]
+.L186:
+	add	r7, r4, r7, lsl #2
+	ldr	r3, [r7, #4]
+	cbz	r3, .L187
 	bl	mcu_wrap_end
-	str	r4, [r5, #220]
-	strd	r4, r4, [r5, #212]
-.L176:
-	movs	r5, #0
-.L177:
-	mov	r0, r5
-	bl	get_venc_node
-	mov	r4, r0
-	cbnz	r0, .L179
-	adds	r5, r5, #1
-	cmp	r5, #16
-	bne	.L177
-	bl	mpp_vcodec_clear_buf_resource
+	movs	r3, #0
+	str	r3, [r7, #4]
+.L187:
+	add	r2, r5, #52
+	movs	r3, #0
+	add	r2, r4, r2, lsl #2
+	str	r3, [r2, #4]
+	add	r2, r5, #68
+	adds	r5, r5, #84
+	add	r2, r4, r2, lsl #2
+	add	r5, r4, r5, lsl #2
+	mov	r4, r3
+	str	r3, [r2, #4]
+	str	r3, [r5, #4]
+.L188:
 	mov	r0, r4
-	b	.L170
-.L179:
+	bl	get_venc_node
+	mov	r5, r0
+	cbnz	r0, .L190
+	adds	r4, r4, #1
+	cmp	r4, #16
+	bne	.L188
+	bl	mpp_vcodec_clear_buf_resource
+	mov	r0, r5
+	b	.L181
+.L190:
 	movs	r0, #0
-	b	.L170
-.L198:
+	b	.L181
+.L209:
 	.align	2
-.L197:
+.L208:
 	.word	.LC1
-	.word	.LANCHOR0+151
+	.word	.LANCHOR0+161
 	.word	g_venc_dev
 	.fnend
 	.size	venc_node_delete, .-venc_node_delete
-	.align	1
-	.global	venc_node_start
-	.syntax unified
-	.thumb
-	.thumb_func
-	.fpu softvfp
-	.type	venc_node_start, %function
-venc_node_start:
-	.fnstart
-	@ args = 0, pretend = 0, frame = 0
-	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, r7, r8, r9, lr}
-	.save {r4, r5, r6, r7, r8, r9, lr}
-	mov	r5, r1
-	ldr	r3, [r1, #20]	@ unaligned
-	.pad #28
-	sub	sp, sp, #28
-	ldr	r4, [r1]	@ unaligned
-	cmp	r3, #36
-	beq	.L200
-	movw	r2, #1563
-	ldr	r1, .L239
-	ldr	r0, .L239+4
-	bl	printk
-.L238:
-	mov	r4, #-1
-.L199:
-	mov	r0, r4
-	add	sp, sp, #28
-	@ sp needed
-	pop	{r4, r5, r6, r7, r8, r9, pc}
-.L200:
-	cmp	r4, #15
-	ble	.L202
-	movs	r3, #16
-	ldr	r2, .L239+8
-	strd	r4, r3, [sp, #4]
-	movs	r1, #2
-	mov	r3, #1568
-	movs	r0, #4
-	str	r3, [sp]
-	ldr	r3, .L239
-	bl	vlog
-	b	.L238
-.L202:
-	ldr	r3, [r1, #8]	@ unaligned
-	movs	r0, #4
-	ldr	r6, .L239+12
-	ldr	r2, .L239+16
-	str	r3, [sp, #12]
-	ldr	r3, [r1, #4]	@ unaligned
-	movs	r1, #5
-	strd	r4, r3, [sp, #4]
-	movw	r3, #1571
-	str	r3, [sp]
-	ldr	r3, .L239
-	bl	vlog
-	add	r3, r6, r4, lsl #2
-	ldr	r3, [r3, #220]
-	cbnz	r3, .L203
-	ldr	r3, [r5, #4]	@ unaligned
-	cbz	r3, .L204
-.L203:
-	cbnz	r4, .L206
-	strd	r4, r4, [r6, #320]
-	str	r4, [r6, #332]
-.L207:
-	ldr	r3, [r5, #4]	@ unaligned
-	cbz	r3, .L206
-	str	r3, [r6, #220]
-	b	.L206
-.L204:
-	cmp	r4, #0
-	beq	.L207
-.L206:
-	mov	r0, r4
-	bl	get_venc_node
-	cbz	r0, .L209
-	mov	r0, r4
-	bl	get_venc_node
-	bl	mpi_node_streamon
-.L209:
-	cbz	r4, .L210
-.L212:
-	movs	r4, #0
-	b	.L199
-.L210:
-	ldr	r3, .L239+20
-	add	r7, r5, #32
-.L211:
-	ldr	r0, [r5]	@ unaligned
-	adds	r5, r5, #8
-	ldr	r1, [r5, #-4]	@ unaligned
-	cmp	r5, r7
-	mov	r2, r3
-	stmia	r2!, {r0, r1}
-	mov	r3, r2
-	bne	.L211
-	ldr	r0, [r5]	@ unaligned
-	str	r0, [r2]
-	ldr	r3, [r6, #220]
-	cmp	r3, #0
-	beq	.L212
-	ldr	r0, .L239+24
-	bl	mpi_dev_find_by_name
-	mov	r9, r0
-	movs	r0, #0
-	bl	get_venc_node
-	movs	r1, #0
-	mov	r7, r0
-	mov	r0, r1
-	bl	mpi_buf_create
-	mov	r5, r0
-	cmp	r0, #0
-	beq	.L212
-	cmp	r9, #0
-	beq	.L212
-	cmp	r7, #0
-	beq	.L212
-	ldr	r3, .L239+28
-	str	r3, [r0, #4]
-	ldr	r3, [r6, #296]
-	ldr	r2, [r6, #300]
-	ldr	ip, [r6, #308]
-	ldr	lr, [r6, #312]
-	ldr	r1, [r6, #316]
-	str	r3, [r0, #620]
-	str	r2, [r0, #624]
-	str	r1, [r0, #640]
-	movs	r1, #0
-	str	ip, [r0, #628]
-	str	lr, [r0, #632]
-	movs	r0, #0
-	strd	r0, [r5, #672]
-	movs	r1, #0
-	str	r1, [r5, #668]
-	movs	r1, #4
-	strd	r3, r2, [sp, #4]
-	mov	r0, r1
-	movw	r3, #670
-	strd	ip, lr, [sp, #12]
-	str	r3, [sp]
-	ldr	r2, .L239+32
-	ldr	r3, .L239+36
-	bl	vlog
-	ldr	r3, [r7, #288]
-	ldr	r8, [r3]
-	cmp	r8, #0
-	bne	.L213
-	movw	r3, #673
-	ldr	r2, .L239+40
-	str	r3, [sp]
-	movs	r1, #2
-	ldr	r3, .L239+36
-	movs	r0, #4
-	bl	vlog
-	b	.L199
-.L213:
-	mov	r0, r8
-	bl	mpi_queue_pop_obj
-	cbz	r0, .L214
-	bl	mpi_buf_unref
-.L214:
-	mov	r1, r5
-	mov	r0, r8
-	movs	r3, #1
-	str	r3, [r6, #328]
-	bl	mpi_queue_push_obj
-	cbnz	r0, .L215
-	movw	r3, #681
-	ldr	r2, .L239+44
-	str	r3, [sp]
-	movs	r1, #2
-	ldr	r3, .L239+36
-	movs	r0, #4
-	bl	vlog
-	mov	r0, r5
-	bl	mpi_obj_unref
-.L215:
-	ldr	r3, [r9, #80]
-	movs	r2, #0
-	movs	r1, #7
-	mov	r0, r7
-	blx	r3
-	b	.L199
-.L240:
-	.align	2
-.L239:
-	.word	.LANCHOR0+168
-	.word	.LC15
-	.word	.LC1
-	.word	g_venc_dev
-	.word	.LC16
-	.word	g_venc_dev+284
-	.word	.LC11
-	.word	.LC9
-	.word	.LC17
-	.word	.LANCHOR0+184
-	.word	.LC18
-	.word	.LC19
-	.fnend
-	.size	venc_node_start, .-venc_node_start
 	.align	1
 	.global	venc_node_pp_start
 	.syntax unified
@@ -1613,39 +1489,254 @@ venc_node_pp_start:
 	.save {r4, lr}
 	.pad #16
 	ldr	r4, [r1]
-	cmp	r4, #0
-	ble	.L242
-	movs	r3, #1
-	ldr	r2, .L245
+	cmp	r4, #7
+	ble	.L211
+	movs	r3, #8
+	ldr	r2, .L214
 	strd	r4, r3, [sp, #4]
 	movs	r1, #2
-	movw	r3, #1890
+	movw	r3, #1987
 	movs	r0, #4
 	str	r3, [sp]
-	ldr	r3, .L245+4
+	ldr	r3, .L214+4
 	bl	vlog
 	mov	r0, #-1
-.L241:
+.L210:
 	add	sp, sp, #16
 	@ sp needed
 	pop	{r4, pc}
-.L242:
+.L211:
 	mov	r0, r4
 	bl	get_pp_node
 	cmp	r0, #0
-	beq	.L241
+	beq	.L210
 	mov	r0, r4
 	bl	get_pp_node
 	bl	mpi_node_streamon
 	movs	r0, #0
-	b	.L241
-.L246:
+	b	.L210
+.L215:
 	.align	2
-.L245:
+.L214:
 	.word	.LC1
-	.word	.LANCHOR0+199
+	.word	.LANCHOR0+178
 	.fnend
 	.size	venc_node_pp_start, .-venc_node_pp_start
+	.align	1
+	.global	venc_node_start
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	venc_node_start, %function
+venc_node_start:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r4, r5, r6, r7, r8, r9, lr}
+	.save {r4, r5, r6, r7, r8, r9, lr}
+	mov	r4, r1
+	ldr	r3, [r1, #20]	@ unaligned
+	.pad #28
+	sub	sp, sp, #28
+	ldr	r7, [r1]	@ unaligned
+	cmp	r3, #36
+	beq	.L217
+	movw	r2, #1646
+	ldr	r1, .L257
+	ldr	r0, .L257+4
+	bl	printk
+.L256:
+	mov	r0, #-1
+.L216:
+	add	sp, sp, #28
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, pc}
+.L217:
+	cmp	r7, #15
+	ble	.L219
+	movs	r3, #16
+	ldr	r2, .L257+8
+	strd	r7, r3, [sp, #4]
+	movs	r1, #2
+	movw	r3, #1651
+	movs	r0, #4
+	str	r3, [sp]
+	ldr	r3, .L257
+	bl	vlog
+	b	.L256
+.L219:
+	ldr	r3, [r1, #8]	@ unaligned
+	add	r6, r7, #100
+	ldr	r5, .L257+12
+	movs	r0, #4
+	ldr	r2, .L257+16
+	str	r3, [sp, #12]
+	ldr	r3, [r1, #4]	@ unaligned
+	movs	r1, #5
+	strd	r7, r3, [sp, #4]
+	movw	r3, #1654
+	str	r3, [sp]
+	ldr	r3, .L257
+	bl	vlog
+	add	r3, r5, r6, lsl #2
+	ldr	r3, [r3, #4]
+	cbnz	r3, .L220
+	ldr	r3, [r4, #4]	@ unaligned
+	cbz	r3, .L221
+.L220:
+	add	r2, r7, #260
+	movs	r3, #0
+	add	r2, r5, r2, lsl #2
+	str	r3, [r2, #4]
+	add	r2, r7, #276
+	add	r2, r5, r2, lsl #2
+	str	r3, [r2, #4]
+	add	r2, r7, #312
+	str	r3, [r5, r2, lsl #2]
+.L221:
+	ldr	r3, [r4, #4]	@ unaligned
+	cbz	r3, .L222
+	add	r2, r5, r6, lsl #2
+	str	r3, [r2, #4]
+.L222:
+	mov	r0, r7
+	bl	get_venc_node
+	cbz	r0, .L223
+	mov	r0, r7
+	bl	get_venc_node
+	bl	mpi_node_streamon
+.L223:
+	ldr	r3, [r4, #4]	@ unaligned
+	cbnz	r3, .L224
+.L255:
+	movs	r0, #0
+	b	.L216
+.L224:
+	add	r3, r7, #8960
+	adds	r3, r3, #40
+	ldr	r3, [r5, r3, lsl #2]
+	bic	r3, r3, #4
+	cmp	r3, #8
+	bne	.L255
+	movs	r3, #36
+	add	lr, r4, #32
+	mla	r3, r3, r7, r5
+	mov	r2, r4
+	add	r3, r3, #468
+.L226:
+	ldr	r0, [r2]	@ unaligned
+	adds	r2, r2, #8
+	ldr	r1, [r2, #-4]	@ unaligned
+	cmp	r2, lr
+	mov	ip, r3
+	stmia	ip!, {r0, r1}
+	mov	r3, ip
+	bne	.L226
+	ldr	r0, [r2]	@ unaligned
+	add	r6, r5, r6, lsl #2
+	str	r0, [ip]
+	ldr	r3, [r6, #4]
+	cmp	r3, #0
+	beq	.L255
+	ldr	r0, .L257+20
+	bl	mpi_dev_find_by_name
+	mov	r9, r0
+	mov	r0, r7
+	bl	get_venc_node
+	movs	r1, #0
+	mov	r8, r0
+	mov	r0, r1
+	bl	mpi_buf_create
+	mov	r6, r0
+	cmp	r0, #0
+	beq	.L255
+	cmp	r9, #0
+	beq	.L255
+	cmp	r8, #0
+	beq	.L255
+	ldr	r3, .L257+24
+	str	r3, [r0, #4]
+	ldr	r3, [r4, #12]	@ unaligned
+	str	r3, [r0, #620]
+	ldr	r2, [r4, #16]	@ unaligned
+	str	r2, [r0, #624]
+	ldr	ip, [r4, #24]	@ unaligned
+	str	ip, [r0, #628]
+	ldr	lr, [r4, #28]	@ unaligned
+	str	lr, [r0, #632]
+	ldr	r1, [r4, #32]	@ unaligned
+	str	r1, [r0, #640]
+	movs	r0, #0
+	movs	r1, #0
+	strd	r0, [r6, #672]
+	movs	r1, #0
+	str	r1, [r6, #668]
+	movs	r1, #4
+	strd	r3, r2, [sp, #4]
+	strd	ip, lr, [sp, #12]
+	movw	r3, #690
+	ldr	r2, .L257+28
+	mov	r0, r1
+	str	r3, [sp]
+	ldr	r3, .L257+32
+	bl	vlog
+	ldr	r3, [r8, #288]
+	ldr	r4, [r3]
+	cbnz	r4, .L227
+	movw	r3, #693
+	ldr	r2, .L257+36
+	str	r3, [sp]
+	movs	r1, #2
+	ldr	r3, .L257+32
+	movs	r0, #4
+	bl	vlog
+	b	.L255
+.L227:
+	mov	r0, r4
+	bl	mpi_queue_pop_obj
+	cbz	r0, .L228
+	bl	mpi_buf_unref
+.L228:
+	add	r5, r5, r7, lsl #2
+	mov	r1, r6
+	mov	r0, r4
+	movs	r3, #1
+	str	r3, [r5, #1172]
+	bl	mpi_queue_push_obj
+	cbnz	r0, .L229
+	movw	r3, #701
+	ldr	r2, .L257+40
+	str	r3, [sp]
+	movs	r1, #2
+	ldr	r3, .L257+32
+	movs	r0, #4
+	bl	vlog
+	mov	r0, r6
+	bl	mpi_obj_unref
+.L229:
+	ldr	r3, [r9, #80]
+	movs	r2, #0
+	movs	r1, #7
+	mov	r0, r8
+	blx	r3
+	b	.L255
+.L258:
+	.align	2
+.L257:
+	.word	.LANCHOR0+197
+	.word	.LC14
+	.word	.LC1
+	.word	g_venc_dev
+	.word	.LC15
+	.word	.LC10
+	.word	.LC8
+	.word	.LC16
+	.word	.LANCHOR0+213
+	.word	.LC17
+	.word	.LC18
+	.fnend
+	.size	venc_node_start, .-venc_node_start
 	.align	1
 	.global	venc_node_set_vcodec_attr
 	.syntax unified
@@ -1657,45 +1748,54 @@ venc_node_set_vcodec_attr:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r2, r3, r4, lr}
-	.save {lr}
+	push	{r4, r5, lr}
+	.save {r4, r5, lr}
 	.pad #20
-	ldr	r3, [r1, #8]
-	ldr	r2, [r0, #128]
-	cmp	r3, #15
-	bls	.L248
-	movs	r2, #16
+	sub	sp, sp, #20
+	ldr	r2, [r1, #8]
+	cmp	r2, #15
+	bls	.L260
+	movs	r3, #16
 	movs	r1, #2
-	strd	r3, r2, [sp, #4]
+	strd	r2, r3, [sp, #4]
 	movs	r0, #4
-	mov	r3, #1672
-	ldr	r2, .L252
+	mov	r3, #1768
+	ldr	r2, .L264
 	str	r3, [sp]
-	ldr	r3, .L252+4
+	ldr	r3, .L264+4
 	bl	vlog
 	mov	r0, #-1
-.L247:
+.L259:
 	add	sp, sp, #20
 	@ sp needed
-	ldr	pc, [sp], #4
-.L248:
-	movs	r0, #60
-	mla	r3, r0, r3, r2
-	adds	r2, r1, r0
-	add	r3, r3, #63488
-	adds	r3, r3, #220
-.L250:
-	ldr	r0, [r1], #4	@ unaligned
-	cmp	r1, r2
-	str	r0, [r3], #4	@ unaligned
-	bne	.L250
+	pop	{r4, r5, pc}
+.L260:
+	movs	r3, #60
+	movw	r0, #36064
+	mla	r0, r3, r2, r0
+	ldr	r2, .L264+8
+	add	r5, r1, #56
+	mov	r3, r1
+	add	r2, r2, r0
+.L262:
+	ldr	r0, [r3]	@ unaligned
+	adds	r3, r3, #8
+	ldr	r1, [r3, #-4]	@ unaligned
+	cmp	r3, r5
+	mov	r4, r2
+	stmia	r4!, {r0, r1}
+	mov	r2, r4
+	bne	.L262
+	ldr	r0, [r3]	@ unaligned
+	str	r0, [r4]
 	movs	r0, #0
-	b	.L247
-.L253:
+	b	.L259
+.L265:
 	.align	2
-.L252:
+.L264:
 	.word	.LC1
-	.word	.LANCHOR0+218
+	.word	.LANCHOR0+228
+	.word	g_venc_dev
 	.fnend
 	.size	venc_node_set_vcodec_attr, .-venc_node_set_vcodec_attr
 	.align	1
@@ -1709,47 +1809,108 @@ venc_node_get_vcodec_attr:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r2, r3, r4, lr}
-	.save {lr}
+	push	{r4, r5, lr}
+	.save {r4, r5, lr}
 	.pad #20
+	sub	sp, sp, #20
 	ldr	r3, [r1, #8]
-	ldr	r2, [r0, #128]
 	cmp	r3, #15
-	bls	.L255
+	bls	.L267
 	movs	r2, #16
 	movs	r1, #2
 	strd	r3, r2, [sp, #4]
 	movs	r0, #4
-	movw	r3, #1685
-	ldr	r2, .L259
+	movw	r3, #1780
+	ldr	r2, .L271
 	str	r3, [sp]
-	ldr	r3, .L259+4
+	ldr	r3, .L271+4
 	bl	vlog
 	mov	r0, #-1
-.L254:
+.L266:
 	add	sp, sp, #20
 	@ sp needed
-	ldr	pc, [sp], #4
-.L255:
+	pop	{r4, r5, pc}
+.L267:
+	movw	r2, #36064
 	movs	r0, #60
 	mla	r3, r0, r3, r2
-	add	r3, r3, #63488
-	adds	r3, r3, #220
-	adds	r2, r3, r0
-.L257:
-	ldr	r0, [r3], #4	@ unaligned
-	cmp	r3, r2
-	str	r0, [r1], #4	@ unaligned
-	bne	.L257
+	ldr	r2, .L271+8
+	add	r3, r3, r2
+	mov	r2, r1
+	add	r5, r3, #56
+.L269:
+	mov	r4, r3
+	adds	r2, r2, #8
+	ldmia	r4!, {r0, r1}
+	cmp	r4, r5
+	str	r0, [r2, #-8]	@ unaligned
+	mov	r3, r4
+	str	r1, [r2, #-4]	@ unaligned
+	bne	.L269
+	ldr	r0, [r4]
+	str	r0, [r2]	@ unaligned
 	movs	r0, #0
-	b	.L254
-.L260:
+	b	.L266
+.L272:
 	.align	2
-.L259:
+.L271:
 	.word	.LC1
-	.word	.LANCHOR0+244
+	.word	.LANCHOR0+254
+	.word	g_venc_dev
 	.fnend
 	.size	venc_node_get_vcodec_attr, .-venc_node_get_vcodec_attr
+	.align	1
+	.global	venc_node_stop
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	venc_node_stop, %function
+venc_node_stop:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r0, r1, r2, r3, r4, lr}
+	.save {r4, lr}
+	.pad #16
+	ldr	r4, [r1]
+	cmp	r4, #15
+	ble	.L274
+	movs	r3, #16
+	ldr	r2, .L280
+	strd	r4, r3, [sp, #4]
+	movs	r1, #2
+	movw	r3, #1679
+	movs	r0, #4
+	str	r3, [sp]
+	ldr	r3, .L280+4
+	bl	vlog
+	mov	r0, #-1
+.L273:
+	add	sp, sp, #16
+	@ sp needed
+	pop	{r4, pc}
+.L274:
+	mov	r0, r4
+	bl	get_venc_node
+	cbz	r0, .L276
+	mov	r0, r4
+	bl	get_venc_node
+	bl	mpi_node_streamoff
+.L276:
+	ldr	r3, .L280+8
+	movs	r0, #0
+	add	r4, r3, r4, lsl #4
+	str	r0, [r4, #2152]
+	b	.L273
+.L281:
+	.align	2
+.L280:
+	.word	.LC1
+	.word	.LANCHOR0+280
+	.word	g_venc_dev
+	.fnend
+	.size	venc_node_stop, .-venc_node_stop
 	.align	1
 	.global	venc_node_send_frame
 	.syntax unified
@@ -1765,67 +1926,67 @@ venc_node_send_frame:
 	.save {r4, r5, r6, r7, r8, lr}
 	.pad #24
 	sub	sp, sp, #24
-	ldr	r0, .L275
+	ldr	r0, .L296
 	mov	r4, r1
 	bl	mpi_dev_find_by_name
 	ldr	r3, [r4, #8]	@ unaligned
 	cmp	r3, #92
 	mov	r8, r0
-	beq	.L262
-	movw	r3, #1599
-	ldr	r2, .L275+4
+	beq	.L283
+	movw	r3, #1698
+	ldr	r2, .L296+4
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L275+8
+	ldr	r3, .L296+8
 	movs	r0, #4
 	bl	vlog
-.L274:
+.L295:
 	mov	r0, #-1
-.L261:
+.L282:
 	add	sp, sp, #24
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, pc}
-.L262:
+.L283:
 	ldr	r6, [r4]	@ unaligned
 	cmp	r6, #15
-	ble	.L264
+	ble	.L285
 	movs	r3, #16
-	ldr	r2, .L275+12
+	ldr	r2, .L296+12
 	strd	r6, r3, [sp, #4]
 	movs	r1, #2
-	movw	r3, #1604
+	movw	r3, #1703
 	movs	r0, #4
 	str	r3, [sp]
-	ldr	r3, .L275+8
+	ldr	r3, .L296+8
 	bl	vlog
-	b	.L274
-.L264:
+	b	.L295
+.L285:
 	mov	r0, r6
 	bl	get_venc_node
 	mov	r7, r0
-	cbnz	r0, .L265
-.L266:
+	cbnz	r0, .L286
+.L287:
 	ldr	r3, [r4, #4]	@ unaligned
 	movs	r1, #2
 	strd	r6, r7, [sp, #4]
 	movs	r0, #4
-	ldr	r2, .L275+16
+	ldr	r2, .L296+16
 	strd	r8, r3, [sp, #12]
-	movw	r3, #1623
+	movw	r3, #1722
 	str	r3, [sp]
-	ldr	r3, .L275+8
+	ldr	r3, .L296+8
 	bl	vlog
-	b	.L274
-.L265:
+	b	.L295
+.L286:
 	ldr	r0, [r4, #4]	@ unaligned
 	cmp	r8, #0
-	beq	.L266
+	beq	.L287
 	cmp	r0, #0
-	blt	.L266
+	blt	.L287
 	bl	get_mpi_buf
 	mov	r5, r0
 	cmp	r0, #0
-	beq	.L266
+	beq	.L287
 	movs	r2, #80
 	add	r1, r4, #12
 	add	r0, r0, #616
@@ -1842,16 +2003,16 @@ venc_node_send_frame:
 	strlt	r3, [r5, #584]
 	bl	mpi_node_buffer_in
 	cmp	r0, #0
-	beq	.L261
-	b	.L266
-.L276:
+	beq	.L282
+	b	.L287
+.L297:
 	.align	2
-.L275:
-	.word	.LC11
-	.word	.LC20
-	.word	.LANCHOR0+270
+.L296:
+	.word	.LC10
+	.word	.LC19
+	.word	.LANCHOR0+295
 	.word	.LC1
-	.word	.LC21
+	.word	.LC20
 	.fnend
 	.size	venc_node_send_frame, .-venc_node_send_frame
 	.align	1
@@ -1869,50 +2030,50 @@ venc_node_pp_send_frame:
 	.save {r4, r5, r6, r7, r8, lr}
 	.pad #24
 	sub	sp, sp, #24
-	ldr	r0, .L292
+	ldr	r0, .L313
 	mov	r4, r1
 	bl	mpi_dev_find_by_name
 	ldr	r3, [r4, #8]	@ unaligned
 	cmp	r3, #92
 	mov	r8, r0
-	beq	.L278
-	movw	r3, #1907
-	ldr	r2, .L292+4
+	beq	.L299
+	movw	r3, #2004
+	ldr	r2, .L313+4
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L292+8
+	ldr	r3, .L313+8
 	movs	r0, #4
 	bl	vlog
-.L291:
+.L312:
 	mov	r0, #-1
-	b	.L277
-.L278:
+	b	.L298
+.L299:
 	ldr	r5, [r4]	@ unaligned
-	cmp	r5, #0
-	ble	.L280
-	movs	r3, #1
-	ldr	r2, .L292+12
+	cmp	r5, #7
+	ble	.L301
+	movs	r3, #8
+	ldr	r2, .L313+12
 	strd	r5, r3, [sp, #4]
 	movs	r1, #2
-	mov	r3, #1912
+	movw	r3, #2009
 	movs	r0, #4
 	str	r3, [sp]
-	ldr	r3, .L292+8
+	ldr	r3, .L313+8
 	bl	vlog
-	b	.L291
-.L280:
+	b	.L312
+.L301:
 	mov	r0, r5
 	bl	get_pp_node
 	mov	r6, r0
-	cbz	r0, .L281
+	cbz	r0, .L302
 	ldr	r0, [r4, #4]	@ unaligned
 	cmp	r8, #0
-	beq	.L281
+	beq	.L302
 	cmp	r0, #0
-	blt	.L281
+	blt	.L302
 	bl	get_mpi_buf
 	mov	r7, r0
-	cbz	r0, .L281
+	cbz	r0, .L302
 	movs	r2, #80
 	add	r1, r4, #12
 	add	r0, r0, #616
@@ -1922,465 +2083,589 @@ venc_node_pp_send_frame:
 	mov	r0, r6
 	bl	mpi_node_buffer_in
 	movs	r0, #0
-.L277:
+.L298:
 	add	sp, sp, #24
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, pc}
-.L281:
+.L302:
 	ldr	r3, [r4, #4]	@ unaligned
 	movs	r1, #2
 	strd	r5, r6, [sp, #4]
 	movs	r0, #4
-	ldr	r2, .L292+16
+	ldr	r2, .L313+16
 	strd	r8, r3, [sp, #12]
-	mov	r3, #1928
+	movw	r3, #2025
 	str	r3, [sp]
-	ldr	r3, .L292+8
+	ldr	r3, .L313+8
 	bl	vlog
-	b	.L291
-.L293:
+	b	.L312
+.L314:
 	.align	2
-.L292:
-	.word	.LC9
-	.word	.LC20
-	.word	.LANCHOR0+291
+.L313:
+	.word	.LC8
+	.word	.LC19
+	.word	.LANCHOR0+316
 	.word	.LC1
-	.word	.LC22
+	.word	.LC21
 	.fnend
 	.size	venc_node_pp_send_frame, .-venc_node_pp_send_frame
+	.align	1
+	.global	venc_node_pp_create
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	venc_node_pp_create, %function
+venc_node_pp_create:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 64
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	mov	r6, r1
+	ldr	r3, [r1, #8]	@ unaligned
+	.pad #84
+	sub	sp, sp, #84
+	ldr	r10, [r0, #128]
+	cmp	r3, #68
+	ldr	r5, [r1, #4]	@ unaligned
+	beq	.L316
+	mov	r3, #1872
+	ldr	r2, .L338
+	str	r3, [sp]
+	ldr	r3, .L338+4
+.L335:
+	movs	r1, #2
+	movs	r0, #4
+	bl	vlog
+	b	.L336
+.L316:
+	cmp	r5, #7
+	ble	.L318
+	movs	r3, #8
+	ldr	r2, .L338+8
+	strd	r5, r3, [sp, #4]
+	movs	r1, #2
+	movw	r3, #1876
+	movs	r0, #4
+	str	r3, [sp]
+	ldr	r3, .L338+4
+	bl	vlog
+.L336:
+	mov	r7, #-1
+.L315:
+	mov	r0, r7
+	add	sp, sp, #84
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
+.L318:
+	mov	r0, r5
+	bl	get_pp_node
+	mov	r4, r0
+	cbz	r0, .L319
+	ldr	r3, [r6, #4]	@ unaligned
+	movs	r1, #2
+	ldr	r2, .L338+12
+	movs	r0, #4
+	str	r3, [sp, #4]
+	mov	r3, #1880
+	str	r3, [sp]
+	ldr	r3, .L338+4
+	bl	vlog
+	b	.L336
+.L319:
+	mov	r8, #988
+	ldr	r7, .L338+16
+	mul	r8, r8, r5
+	ldr	r2, .L338+20
+	ldr	r1, .L338+24
+	mov	r9, r7
+	addw	r0, r8, #3380
+	addw	fp, r8, #2580
+	add	r0, r0, r7
+	add	r5, r7, r8
+	bl	__init_waitqueue_head
+	ldr	r3, [r6, #16]	@ unaligned
+	add	fp, fp, r7
+	sbfx	r3, r3, #1, #29
+	adds	r3, r3, #3
+	asrs	r3, r3, #2
+	lsls	r3, r3, #6
+	str	r3, [r5, #2468]
+.L322:
+	ldr	r0, [r5, #2468]
+	bl	mpi_buf_alloc
+	str	r0, [fp], #4
+	cbnz	r0, .L320
+	movw	r3, #1893
+.L337:
+	str	r3, [sp]
+	ldr	r2, .L338+28
+	ldr	r3, .L338+4
+	b	.L335
+.L320:
+	ldr	r0, [r0, #604]
+	cbnz	r0, .L321
+	movw	r3, #1897
+	b	.L337
+.L321:
+	ldr	r2, [r5, #2468]
+	movs	r1, #0
+	adds	r4, r4, #1
+	bl	memset
+	cmp	r4, #5
+	bne	.L322
+	ldr	r3, [r6, #28]	@ unaligned
+	cbz	r3, .L323
+	ldr	r4, [r6, #12]	@ unaligned
+	sbfx	r4, r4, #1, #29
+	adds	r4, r4, #3
+	asrs	r4, r4, #2
+	adds	r4, r4, #7
+	asrs	r3, r4, #3
+	ldr	r4, [r6, #16]	@ unaligned
+	sbfx	r4, r4, #1, #29
+	adds	r4, r4, #15
+	asrs	r4, r4, #4
+	muls	r4, r3, r4
+	lsls	r4, r4, #6
+	mov	r0, r4
+	bl	mpi_buf_alloc
+	str	r0, [r5, #3124]
+	cbnz	r0, .L324
+.L325:
+	movw	r3, #1909
+	b	.L337
+.L324:
+	mov	r0, r4
+	bl	mpi_buf_alloc
+	str	r0, [r5, #3132]
+	cmp	r0, #0
+	beq	.L325
+.L323:
+	ldr	r3, [r6, #12]	@ unaligned
+	add	r1, sp, #20
+	ldr	r0, [r6, #4]	@ unaligned
+	movs	r4, #1
+	str	r4, [sp, #44]
+	str	r3, [sp, #20]
+	ldr	r3, [r6, #16]	@ unaligned
+	str	r3, [sp, #24]
+	ldr	r3, [r6, #20]	@ unaligned
+	str	r3, [sp, #48]
+	ldr	r3, [r6, #24]	@ unaligned
+	str	r3, [sp, #52]
+	ldr	r3, [r6, #36]	@ unaligned
+	str	r3, [sp, #36]
+	ldr	r3, [r6, #40]	@ unaligned
+	str	r3, [sp, #40]
+	ldr	r3, [r6, #28]	@ unaligned
+	str	r3, [sp, #28]
+	ldr	r3, [r6, #32]	@ unaligned
+	str	r3, [sp, #32]
+	bl	vepu_pp_create_chn
+	mov	r7, r0
+	cbz	r0, .L326
+	movw	r3, #1926
+	b	.L337
+.L326:
+	mov	r3, r0
+	mov	r2, r4
+	ldr	r1, [r6, #4]	@ unaligned
+	ldr	r0, .L338+32
+	bl	mpi_dev_create_node_with_params
+	mov	fp, r0
+	cbnz	r0, .L327
+	movw	r3, #1932
+	ldr	r2, .L338+36
+	str	r3, [sp]
+	ldr	r3, .L338+4
+	b	.L335
+.L327:
+	add	r4, sp, #20
+	ldr	r5, .L338+40
+	ldmia	r4!, {r0, r1, r2, r3}
+	add	r5, r5, r8
+	stmia	r5!, {r0, r1, r2, r3}
+	ldmia	r4!, {r0, r1, r2, r3}
+	stmia	r5!, {r0, r1, r2, r3}
+	ldmia	r4!, {r0, r1, r2, r3}
+	stmia	r5!, {r0, r1, r2, r3}
+	ldm	r4, {r0, r1, r2}
+	stm	r5, {r0, r1, r2}
+	add	r0, r8, #2512
+	movs	r2, #68
+	mov	r1, r6
+	add	r0, r0, r9
+	bl	memcpy
+	mov	r3, fp
+	ldr	r2, [r6, #4]	@ unaligned
+	movs	r0, #20
+	ldr	r1, [r6]	@ unaligned
+	bl	vsys_add_node_to_map
+	movs	r3, #20
+	str	r3, [r10]
+	ldr	r3, [r6]	@ unaligned
+	str	r3, [r10, #4]
+	ldr	r3, [r6, #4]	@ unaligned
+	str	r3, [r10, #8]
+	b	.L315
+.L339:
+	.align	2
+.L338:
+	.word	.LC22
+	.word	.LANCHOR0+340
+	.word	.LC1
+	.word	.LC23
+	.word	g_venc_dev
+	.word	.LANCHOR1
+	.word	.LC24
+	.word	.LC25
+	.word	g_venc_dev+4
+	.word	.LC26
+	.word	g_venc_dev+2400
+	.fnend
+	.size	venc_node_pp_create, .-venc_node_pp_create
+	.align	1
+	.global	venc_node_pp_delete
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	venc_node_pp_delete, %function
+venc_node_pp_delete:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r4, r5, r6, r7, r8, r9, lr}
+	.save {r4, r5, r6, r7, r8, r9, lr}
+	.pad #20
+	sub	sp, sp, #20
+	ldr	r4, [r1]
+	cmp	r4, #7
+	ble	.L341
+	movs	r3, #8
+	ldr	r2, .L361
+	strd	r4, r3, [sp, #4]
+	movs	r1, #2
+	movw	r3, #1955
+	movs	r0, #4
+	str	r3, [sp]
+	ldr	r3, .L361+4
+	bl	vlog
+	mov	r0, #-1
+.L340:
+	add	sp, sp, #20
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, pc}
+.L341:
+	mov	r5, #988
+	ldr	r6, .L361+8
+	muls	r5, r4, r5
+	mov	r8, #0
+	mov	r9, r8
+	addw	r7, r5, #2580
+	add	r7, r7, r6
+.L344:
+	ldr	r0, [r7], #4
+	cbz	r0, .L343
+	bl	mpi_obj_unref
+	str	r9, [r7, #-4]
+.L343:
+	add	r8, r8, #1
+	cmp	r8, #5
+	bne	.L344
+	mov	r7, #988
+	mla	r7, r7, r4, r6
+	ldr	r0, [r7, #3124]
+	cbz	r0, .L345
+	bl	mpi_obj_unref
+	movs	r3, #0
+	str	r3, [r7, #3124]
+.L345:
+	mov	r7, #988
+	mla	r7, r7, r4, r6
+	ldr	r0, [r7, #3132]
+	cbz	r0, .L346
+	bl	mpi_obj_unref
+	movs	r3, #0
+	str	r3, [r7, #3132]
+.L346:
+	mov	r0, r4
+	bl	vepu_pp_destroy_chn
+	mov	r0, r4
+	bl	get_pp_node
+	mov	r7, r0
+	cbz	r0, .L347
+	mov	r2, r4
+	movs	r1, #0
+	movs	r0, #20
+	bl	vsys_remove_node_from_map
+	mov	r0, r7
+	bl	mpi_node_destroy
+.L347:
+	addw	r0, r5, #3260
+	movs	r2, #36
+	movs	r1, #0
+	add	r0, r0, r6
+	bl	memset
+	movs	r0, #0
+	b	.L340
+.L362:
+	.align	2
+.L361:
+	.word	.LC1
+	.word	.LANCHOR0+360
+	.word	g_venc_dev
+	.fnend
+	.size	venc_node_pp_delete, .-venc_node_pp_delete
 	.align	1
 	.syntax unified
 	.thumb
 	.thumb_func
 	.fpu softvfp
-	.type	venc_thread_fn, %function
-venc_thread_fn:
+	.type	venc_release, %function
+venc_release:
 	.fnstart
-	@ args = 0, pretend = 0, frame = 504
+	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	.pad #524
-	sub	sp, sp, #524
-	add	r8, sp, #68
-	mov	r4, r0
-	movs	r2, #40
-	movs	r1, #0
-	mov	r0, r8
+	push	{r3, r4, r5, r6, r7, r8, r9, lr}
+	.save {r3, r4, r5, r6, r7, r8, r9, lr}
+	mov	r7, r1
+	ldr	r5, .L408
+	ldr	r0, .L408+4
+	bl	mpi_obj_unref
+	ldr	r3, [r5, #20]
+	cmp	r3, #1
+	bne	.L364
+	ldr	r2, [r5, #4]
+	add	r5, r5, #404
+	ldr	r1, .L408+8
+	movs	r4, #16
+	ldr	r0, .L408+12
 	movs	r6, #0
-	bl	memset
-	adds	r3, r4, #4
-	ldr	r2, .L364
-	movs	r1, #5
-	movs	r0, #4
-	str	r3, [sp, #8]
-	ldr	r3, [r4, #48]
-	str	r3, [sp, #4]
-	movw	r3, #2289
-	str	r3, [sp]
-	ldr	r3, .L364+4
-	bl	vlog
-	add	r3, r4, #37120
-	adds	r3, r3, #40
-	str	r3, [sp, #16]
-.L295:
-	bl	kthread_should_stop
-	cbz	r0, .L328
-	movs	r1, #4
-	movw	r3, #2431
-	ldr	r2, .L364+8
-	mov	r0, r1
-	str	r3, [sp]
-	ldr	r3, .L364+4
-	bl	vlog
-	movs	r0, #0
-	add	sp, sp, #524
-	@ sp needed
-	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L328:
-	ldr	r3, [r4, #180]
-	cbz	r3, .L296
-	movs	r0, #1
-	bl	msleep
-	b	.L295
-.L365:
-	.align	2
-.L364:
-	.word	.LC23
-	.word	.LANCHOR0+315
-	.word	.LC24
-.L296:
-	add	r0, r4, #196
-	bl	down
-	ldr	r5, [r4, #92]
-.L363:
-	subs	r5, r5, #48
-	add	r2, r4, #92
-	add	r3, r5, #48
-	cmp	r3, r2
-	beq	.L295
-	ldr	r3, [r5, #288]
-	ldr	r0, [r3]
-	bl	mpi_queue_pop_obj
-	mov	r7, r0
-	cmp	r0, #0
-	beq	.L299
-	movs	r3, #6
-	str	r3, [sp, #260]
-	adds	r3, r6, #1
-	str	r3, [sp, #20]
-	movw	r3, #37248
-	str	r0, [sp, #276]
-	ldr	r3, [r4, r3]
-	add	r2, sp, #256
-	movs	r1, #16
-	movs	r0, #0
-	str	r6, [sp, #256]
-	str	r3, [sp, #264]
-	movs	r3, #1
-	strd	r3, r3, [sp, #268]
-	bl	vepu_pp_control
+	bl	printk
+.L367:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	r3, cpsr	@ arch_local_irq_save
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r8, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r2, [sp, #16]
-	ldr	r6, [r2]
-	adds	r6, r6, #1
-	cmp	r6, #5
-	it	ge
-	movge	r6, #0
-	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, r3	@ local_irq_restore
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	movw	r3, #37116
-	ldr	r3, [r4, r3]
-	cmp	r3, #0
-	beq	.L301
-	add	r3, r6, #9280
-	adds	r3, r3, #38
-	ldr	r3, [r4, r3, lsl #2]
-	str	r3, [sp, #200]
-	movw	r3, #64688
-	ldr	r3, [r4, r3]
-	usat	r3, #2, r3
-	str	r3, [sp, #204]
-	movw	r3, #64684
-	ldr	r3, [r4, r3]
-	cmp	r3, #0
-	ble	.L302
-	movw	r2, #64680
-	ldr	r2, [r4, r2]
-	cmp	r2, #0
-	ble	.L302
-	movw	r1, #4095
-	cmp	r2, r1
-	ite	le
-	strle	r2, [sp, #208]
-	strgt	r1, [sp, #208]
-	cmp	r3, #4
-	it	ge
-	movge	r3, #4
-.L360:
-	str	r3, [sp, #212]
-	movw	r3, #37260
-	ldr	r3, [r4, r3]
-	add	r2, sp, #200
-	movs	r1, #32
-	movs	r0, #0
-	str	r3, [sp, #216]
-	movw	r3, #64692
-	ldr	r3, [r4, r3]
-	str	r3, [sp, #220]
-	movw	r3, #64696
-	ldr	r3, [r4, r3]
-	str	r3, [sp, #224]
-	movw	r3, #64700
-	ldr	r3, [r4, r3]
-	str	r3, [sp, #228]
-	movw	r3, #64704
-	ldr	r3, [r4, r3]
-	str	r3, [sp, #232]
-	bl	vepu_pp_control
-.L301:
-	add	r10, r4, #37120
-	ldr	r3, [r10]
-	cbz	r3, .L306
-	movw	r3, #37264
-	ldr	r2, [r4, r3]
-	movw	r3, #37100
-	ldr	r1, [r4, r3]
-	movw	r3, #37104
-	ldr	r3, [r4, r3]
-	muls	r3, r1, r3
-	movw	r1, #37124
-	ldr	r1, [r4, r1]
-	cmp	r1, #0
-	beq	.L307
-	asrs	r3, r3, #8
-.L308:
-	cmp	r2, #6
-	bgt	.L309
-	movs	r1, #230
-	ldr	r0, [sp, #32]
-	muls	r1, r3, r1
-	cmp	r0, r1
-	it	gt
-	addgt	r2, r2, #1
-.L309:
-	muls	r3, r2, r3
-	movs	r0, #1
-	movs	r1, #12
-	add	r2, sp, #108
-	strd	r0, r1, [sp, #108]
-	movs	r1, #48
-	movs	r0, #0
-	asrs	r3, r3, #3
-	str	r3, [sp, #116]
-	bl	vepu_pp_control
-.L306:
-	movw	r9, #37108
-	ldr	r3, [r4, r9]
-	cbz	r3, .L310
-	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	r2, cpsr	@ arch_local_irq_save
-	cpsid	i
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	movw	r3, #37948
-	movw	r1, #37816
-	ldr	r3, [r4, r3]
-	movs	r0, #0
-	add	r3, r4, r3, lsl #3
-	ldr	r1, [r3, r1]
-	str	r1, [sp, #388]
-	movw	r1, #37820
-	str	r0, [r3, r1]
-	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, r2	@ local_irq_restore
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	movs	r1, #64
-	add	r2, sp, #388
-	bl	vepu_pp_control
-.L310:
-	movw	fp, #37112
-	ldr	r2, [r4, fp]
-	cbz	r2, .L311
-	add	r2, sp, #320
-	movs	r1, #80
-	movs	r0, #0
-	bl	vepu_pp_control
-.L311:
-	movw	r3, #37116
-	ldr	r2, [r4, r3]
-	cbnz	r2, .L312
-	ldr	r2, [r10]
-	cbnz	r2, .L312
-	ldr	r2, [r4, r9]
-	cbnz	r2, .L312
-	ldr	r2, [r4, fp]
-	cmp	r2, #0
-	beq	.L313
-.L312:
-	add	r2, sp, #256
-	movs	r1, #96
-	movs	r0, #0
-	bl	vepu_pp_control
-	ldr	r2, [r10]
-	cbz	r2, .L314
-	add	r2, sp, #28
-	movs	r1, #112
-	movs	r0, #0
-	bl	vepu_pp_control
-	add	r2, sp, #104
-.L316:
-	ldr	r1, [r2, #-4]
-	str	r1, [r2], #-4
-	cmp	r2, r8
-	bne	.L316
-	ldr	r2, [sp, #32]
-	ldr	r1, [sp, #28]
-	str	r2, [r8]
-	cbz	r1, .L314
-	movs	r0, #95
-	mov	ip, #105
-	muls	r0, r2, r0
-	mov	lr, #100
-	mul	ip, ip, r2
-	movs	r2, #1
-.L319:
-	ldr	r1, [r8, r2, lsl #2]
-	mul	r1, lr, r1
-	cmp	r0, r1
-	bgt	.L317
-	cmp	r1, ip
-	ble	.L318
-.L317:
-	movs	r2, #0
-	str	r2, [sp, #28]
-.L314:
-	ldr	r3, [r4, fp]
-	cbz	r3, .L313
-	add	r2, sp, #152
-	movs	r1, #128
-	movs	r0, #0
-	bl	vepu_pp_control
-	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	fp, cpsr	@ arch_local_irq_save
-	cpsid	i
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	movw	lr, #37812
-	movs	r2, #52
-	ldr	r3, [r4, lr]
-	add	r10, sp, #200
-	mla	r3, r2, r3, r4
-	add	r2, sp, #152
-	add	r3, r3, #37120
-	adds	r3, r3, #172
-.L320:
-	mov	ip, r2
-	adds	r3, r3, #8
-	ldmia	ip!, {r0, r1}
-	cmp	ip, r10
-	str	r0, [r3, #-8]	@ unaligned
-	mov	r2, ip
-	str	r1, [r3, #-4]	@ unaligned
-	bne	.L320
-	ldr	r3, [r4, lr]
-	movs	r1, #52
-	ldr	r2, [r7, #668]
-	movw	r0, #37340
-	mla	r1, r1, r3, r4
-	adds	r3, r3, #1
-	cmp	r3, #9
-	it	gt
-	movgt	r3, #0
-	str	r2, [r1, r0]
-	str	r3, [r4, lr]
-	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, fp	@ local_irq_restore
-@ 0 "" 2
-	.thumb
-	.syntax unified
-.L313:
-	ldr	r3, [r4, r9]
-	cbz	r3, .L323
-	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	ip, cpsr	@ arch_local_irq_save
-	cpsid	i
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	movw	r0, #37948
-	ldr	r1, [r7, #668]
-	ldr	r3, [r4, r0]
-	add	r2, r3, #4704
-	adds	r3, r3, #1
-	adds	r2, r2, #23
-	cmp	r3, #1
-	add	r2, r4, r2, lsl #3
-	it	gt
-	movgt	r3, #0
-	str	r1, [r2, #4]
-	str	r3, [r4, r0]
-	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, ip	@ local_irq_restore
-@ 0 "" 2
-	.thumb
-	.syntax unified
-.L323:
-	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	ip, cpsr	@ arch_local_irq_save
-	cpsid	i
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	ldr	r3, [sp, #16]
-	movs	r2, #1
-	str	r6, [r3]
-	movw	r3, #37164
-	str	r2, [r4, r3]
-	add	r3, r4, #37120
-	add	r6, sp, #28
-	adds	r3, r3, #52
-.L326:
-	mov	r2, r6
-	adds	r3, r3, #8
-	ldmia	r2!, {r0, r1}
-	cmp	r2, r8
-	str	r0, [r3, #-8]	@ unaligned
-	mov	r6, r2
-	str	r1, [r3, #-4]	@ unaligned
-	bne	.L326
-	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, ip	@ local_irq_restore
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	add	r0, r4, #36864
-	movs	r3, #0
-	movs	r2, #1
-	movs	r1, #3
-	adds	r0, r0, #228
-	bl	__wake_up
-	movs	r2, #0
-	mov	r1, r7
-	ldr	r0, [r5, #76]
-	bl	remove_user_from_buf
-	mov	r0, r7
+	ldr	r3, [r5], #4
+	cbz	r3, .L365
+	ldr	r0, [r5, #1160]
+	cbz	r0, .L365
 	bl	mpi_buf_unref
-	ldr	r6, [sp, #20]
-.L299:
-	ldr	r5, [r5, #48]
-	b	.L363
-.L302:
-	movw	r3, #37268
-	ldr	r3, [r4, r3]
-	cmp	r3, #1
-	bne	.L304
-	movs	r3, #70
-	str	r3, [sp, #208]
-	movs	r3, #3
-	b	.L360
-.L304:
-	cmp	r3, #2
-	itett	ne
-	movne	r3, #30
-	moveq	r2, #50
-	strne	r3, [sp, #208]
-	movne	r3, #1
-	it	eq
-	streq	r2, [sp, #208]
-	b	.L360
-.L307:
-	asrs	r3, r3, #4
-	b	.L308
-.L318:
-	adds	r2, r2, #1
-	cmp	r2, #10
-	bne	.L319
-	b	.L314
+	str	r6, [r5, #1160]
+	str	r6, [r5, #840]
+.L365:
+	.syntax unified
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r8	@ local_irq_restore
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	ldr	r3, [r5, #-4]
+	cbz	r3, .L366
+	bl	mcu_wrap_end
+	str	r6, [r5, #-4]
+.L366:
+	subs	r4, r4, #1
+	bne	.L367
+	ldr	r6, .L408
+	mov	r9, r4
+.L368:
+	addw	r8, r6, #2580
+	movs	r5, #5
+.L370:
+	ldr	r0, [r8], #4
+	cbz	r0, .L369
+	bl	mpi_obj_unref
+	str	r9, [r8, #-4]
+.L369:
+	subs	r5, r5, #1
+	bne	.L370
+	ldr	r0, [r6, #3124]
+	cbz	r0, .L371
+	bl	mpi_obj_unref
+	str	r5, [r6, #3124]
+.L371:
+	ldr	r0, [r6, #3132]
+	cbz	r0, .L372
+	bl	mpi_obj_unref
+	str	r9, [r6, #3132]
+.L372:
+	mov	r0, r4
+	bl	get_pp_node
+	mov	r5, r0
+	cbz	r0, .L373
+	mov	r0, r4
+	bl	vepu_pp_destroy_chn
+	mov	r2, r4
+	movs	r1, #0
+	movs	r0, #20
+	bl	vsys_remove_node_from_map
+	mov	r0, r5
+	bl	mpi_node_destroy
+.L373:
+	adds	r4, r4, #1
+	add	r6, r6, #988
+	cmp	r4, #8
+	bne	.L368
+	movs	r4, #0
+.L374:
+	mov	r0, r4
+	bl	get_venc_node
+	mov	r5, r0
+	cbz	r0, .L375
+	mov	r2, r4
+	movs	r1, #0
+	movs	r0, #4
+	bl	vsys_remove_node_from_map
+	mov	r0, r5
+	bl	mpi_node_destroy
+.L375:
+	adds	r4, r4, #1
+	cmp	r4, #16
+	bne	.L374
+	mov	r2, #384
+	movs	r1, #0
+	ldr	r0, .L408+16
+	bl	memset
+	mov	r2, #256
+	movs	r1, #0
+	ldr	r0, .L408+20
+	bl	memset
+	mov	r2, #7904
+	movs	r1, #0
+	ldr	r0, .L408+24
+	bl	memset
+	mov	r2, r4
+	mov	r1, #-1
+	ldr	r0, .L408+28
+	bl	memset
+	movs	r2, #64
+	movs	r1, #0
+	ldr	r0, .L408+32
+	bl	memset
+	mov	r2, #12800
+	movs	r1, #0
+	ldr	r0, .L408+36
+	bl	memset
+	mov	r2, #12800
+	movs	r1, #0
+	ldr	r0, .L408+40
+	bl	memset
+	mov	r2, r4
+	movs	r1, #0
+	ldr	r0, .L408+44
+	bl	memset
+	bl	mpp_vcodec_clear_buf_resource
+.L364:
+	ldr	r0, [r7, #128]
+	cbz	r0, .L376
+	bl	kvfree
+.L376:
+	movs	r0, #0
+	pop	{r3, r4, r5, r6, r7, r8, r9, pc}
+.L409:
+	.align	2
+.L408:
+	.word	g_venc_dev
+	.word	g_venc_dev+4
+	.word	.LANCHOR0+380
+	.word	.LC27
+	.word	g_venc_dev+1760
+	.word	g_venc_dev+2144
+	.word	g_venc_dev+2400
+	.word	g_venc_dev+10320
+	.word	g_venc_dev+10336
+	.word	g_venc_dev+10400
+	.word	g_venc_dev+23200
+	.word	g_venc_dev+10304
 	.fnend
-	.size	venc_thread_fn, .-venc_thread_fn
+	.size	venc_release, .-venc_release
+	.align	1
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	venc_ioctl, %function
+venc_ioctl:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	mov	r3, r2
+	ldr	r2, .L414
+	push	{r0, r1, r4, r5, r6, lr}
+	.save {r4, r5, r6, lr}
+	.pad #8
+	uxtb	r4, r1
+	ldr	r6, [r2, #164]
+	ldr	r5, [r6, #192]
+	cmp	r5, r4
+	bhi	.L411
+	movw	r3, #2211
+	str	r4, [sp, #4]
+	str	r3, [sp]
+	movs	r1, #5
+	ldr	r3, .L414+4
+	movs	r0, #4
+	ldr	r2, .L414+8
+	bl	vlog
+.L412:
+	movw	r3, #2227
+	ldr	r2, .L414+12
+	str	r3, [sp]
+	movs	r1, #5
+	ldr	r3, .L414+4
+	movs	r0, #4
+	bl	vlog
+	mvn	r0, #21
+	add	sp, sp, #8
+	@ sp needed
+	pop	{r4, r5, r6, pc}
+.L411:
+	.syntax unified
+@ 87 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
+	cmp	r4, r5
+	sbc	r5, r4, r4
+.inst.w 0xf3af8014
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	ldr	r2, [r6, #188]
+	ands	r4, r4, r5
+	movs	r5, #20
+	mla	r4, r5, r4, r2
+	cbnz	r4, .L413
+	movw	r3, #2218
+	ldr	r2, .L414+16
+	str	r3, [sp]
+	movs	r1, #5
+	ldr	r3, .L414+4
+	movs	r0, #4
+	bl	vlog
+	b	.L412
+.L413:
+	mov	r2, r1
+	mov	r1, r4
+	add	sp, sp, #8
+	@ sp needed
+	pop	{r4, r5, r6, lr}
+	b	mpi_ioctl_kernel
+.L415:
+	.align	2
+.L414:
+	.word	g_venc_dev
+	.word	.LANCHOR0+393
+	.word	.LC28
+	.word	.LC30
+	.word	.LC29
+	.fnend
+	.size	venc_ioctl, .-venc_ioctl
 	.global	__aeabi_uidivmod
 	.align	1
 	.syntax unified
@@ -2394,378 +2679,142 @@ venc_handle_message:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	mov	r5, r0
+	mov	r4, r0
 	ldr	r3, [r0, #8]
 	.pad #28
 	sub	sp, sp, #28
-	mov	r4, r2
+	mov	r7, r1
+	mov	r6, r2
 	cmp	r3, #1
-	bne	.L373
-	cmp	r1, #1
-	bne	.L373
-	cmp	r2, #0
-	beq	.L374
-	ldr	r2, .L378
-	movw	r3, #37252
-	ldr	r1, [r2, r3]
-	cmp	r1, #1
-	ble	.L368
-	ldr	r0, [r4, #668]
-	bl	__aeabi_uidivmod
-	cbz	r1, .L368
-	movs	r2, #0
-	mov	r1, r4
-	ldr	r0, [r5, #76]
-	bl	remove_user_from_buf
-.L373:
-	movs	r6, #0
-	b	.L366
-.L368:
-	ldr	r3, [r5, #288]
-	movs	r1, #5
-	ldr	r2, .L378+4
-	movs	r0, #4
-	ldr	r10, .L378+8
-	movs	r6, #0
-	ldr	r7, [r3]
-	movw	r9, #843
-	ldr	fp, .L378+16
-	ldr	r3, [r7, #16]
-	str	r3, [sp, #16]
-	ldr	r3, [r4]
-	str	r3, [sp, #12]
-	ldr	r3, [r5]
-	str	r3, [sp, #8]
-	ldr	r3, [r5, #44]
-	ldr	r3, [r3, #44]
-	str	r3, [sp, #4]
-	movw	r3, #830
-	str	r3, [sp]
-	ldr	r3, .L378+8
-	bl	vlog
-	mov	r0, r4
-	bl	mpi_obj_ref
-.L369:
-	mov	r1, r4
-	mov	r0, r7
-	bl	mpi_queue_push_obj
-	mov	r8, r0
-	cbz	r0, .L371
-	ldr	r0, .L378+12
-	bl	up
-	b	.L366
-.L371:
-	mov	r0, r7
-	bl	mpi_queue_pop_obj
-	mov	r6, r0
-	cbnz	r0, .L370
-	mov	r0, r4
-	bl	mpi_obj_unref
-	mov	r2, r6
-	mov	r1, r4
-	ldr	r0, [r5, #76]
-	bl	remove_user_from_buf
-	mov	r6, #-1
-.L366:
-	mov	r0, r6
+	beq	.L427
+.L435:
+	movs	r5, #0
+.L416:
+	mov	r0, r5
 	add	sp, sp, #28
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L370:
+.L427:
+	movs	r5, #0
+.L417:
+	mov	r0, r5
+	bl	get_pp_node
+	cmp	r4, r0
+	beq	.L419
+	adds	r5, r5, #1
+	cmp	r5, #16
+	bne	.L417
+	mov	r5, #-1
+.L420:
+	movw	r3, #841
+	str	r5, [sp, #4]
+	str	r3, [sp]
+	movs	r1, #2
+	ldr	r3, .L436
+	movs	r0, #4
+	ldr	r2, .L436+4
+	bl	vlog
+	b	.L435
+.L419:
+	cmp	r5, #7
+	bgt	.L420
+	cmp	r7, #1
+	bne	.L435
+	cmp	r6, #0
+	beq	.L435
+	ldr	r3, .L436+8
+	mov	r2, #988
+	mla	r5, r2, r5, r3
+	ldr	r1, [r5, #2560]
+	cmp	r1, #1
+	ble	.L423
+	ldr	r0, [r6, #668]
+	bl	__aeabi_uidivmod
+	cbz	r1, .L423
+	movs	r2, #0
+	mov	r1, r6
+	ldr	r0, [r4, #76]
+	bl	remove_user_from_buf
+	b	.L435
+.L423:
+	ldr	r3, [r4, #288]
+	movs	r1, #5
+	ldr	r2, .L436+12
+	movs	r0, #4
+	ldr	r10, .L436
+	movs	r5, #0
+	ldr	r7, [r3]
+	movw	r9, #878
+	ldr	fp, .L436+20
+	ldr	r3, [r7, #16]
+	str	r3, [sp, #16]
+	ldr	r3, [r6]
+	str	r3, [sp, #12]
+	ldr	r3, [r4]
+	str	r3, [sp, #8]
+	ldr	r3, [r4, #44]
+	ldr	r3, [r3, #44]
+	str	r3, [sp, #4]
+	movw	r3, #865
+	str	r3, [sp]
+	ldr	r3, .L436
+	bl	vlog
+	mov	r0, r6
+	bl	mpi_obj_ref
+.L424:
+	mov	r1, r6
+	mov	r0, r7
+	bl	mpi_queue_push_obj
+	mov	r8, r0
+	cbz	r0, .L426
+	ldr	r0, .L436+16
+	bl	up
+	b	.L416
+.L426:
+	mov	r0, r7
+	bl	mpi_queue_pop_obj
+	mov	r5, r0
+	cbnz	r0, .L425
+	mov	r0, r6
+	bl	mpi_obj_unref
+	mov	r2, r5
+	mov	r1, r6
+	ldr	r0, [r4, #76]
+	bl	remove_user_from_buf
+	mov	r5, #-1
+	b	.L416
+.L425:
 	ldr	r3, [r0]
 	mov	r2, fp
 	movs	r1, #5
 	movs	r0, #4
 	str	r3, [sp, #12]
-	ldr	r3, [r5]
+	ldr	r3, [r4]
 	str	r3, [sp, #8]
-	ldr	r3, [r5, #44]
+	ldr	r3, [r4, #44]
 	ldr	r3, [r3, #44]
 	strd	r9, r3, [sp]
 	mov	r3, r10
 	bl	vlog
-	mov	r0, r6
+	mov	r0, r5
 	bl	mpi_obj_unref
-	mov	r1, r6
+	mov	r1, r5
 	mov	r2, r8
-	ldr	r0, [r5, #76]
+	ldr	r0, [r4, #76]
 	bl	remove_user_from_buf
-	mov	r6, #-1
-	b	.L369
-.L374:
-	mov	r6, r2
-	b	.L366
-.L379:
+	mov	r5, #-1
+	b	.L424
+.L437:
 	.align	2
-.L378:
+.L436:
+	.word	.LANCHOR0+404
+	.word	.LC31
 	.word	g_venc_dev
-	.word	.LC25
-	.word	.LANCHOR0+330
+	.word	.LC32
 	.word	g_venc_dev+196
-	.word	.LC26
+	.word	.LC33
 	.fnend
 	.size	venc_handle_message, .-venc_handle_message
-	.align	1
-	.syntax unified
-	.thumb
-	.thumb_func
-	.fpu softvfp
-	.type	venc_release, %function
-venc_release:
-	.fnstart
-	@ args = 0, pretend = 0, frame = 0
-	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r2, r4, r5, r6, r7, lr}
-	.save {r4, r5, r6, r7, lr}
-	.pad #12
-	ldr	r4, [r1, #128]
-	mov	r0, r4
-	bl	mpi_obj_unref
-	ldr	r3, [r4, #16]
-	cmp	r3, #1
-	bne	.L381
-	ldr	r5, .L412
-	ldr	r2, [r4]
-	ldr	r1, .L412+4
-	ldr	r0, .L412+8
-	bl	printk
-	ldr	r3, [r5, #220]
-	cbz	r3, .L382
-	bl	mcu_wrap_end
-	movs	r3, #0
-	str	r3, [r5, #220]
-.L382:
-	ldr	r3, [r4, #164]
-	cbz	r3, .L383
-	cmn	r3, #4096
-	bhi	.L383
-	movs	r3, #1
-	add	r0, r4, #192
-	str	r3, [r4, #176]
-	bl	up
-	ldr	r3, [r4, #164]
-	movs	r1, #4
-	ldr	r2, .L412+12
-	mov	r0, r1
-	str	r3, [sp, #4]
-	movw	r3, #2204
-	str	r3, [sp]
-	ldr	r3, .L412+4
-	bl	vlog
-	ldr	r0, [r4, #164]
-	bl	kthread_stop
-	ldr	r3, [r4, #164]
-	movs	r1, #4
-	ldr	r2, .L412+16
-	mov	r0, r1
-	str	r3, [sp, #4]
-	movw	r3, #2206
-	str	r3, [sp]
-	ldr	r3, .L412+4
-	bl	vlog
-	movs	r3, #0
-	str	r3, [r4, #164]
-.L383:
-	add	r5, r4, #37120
-	add	r6, r4, #37120
-	adds	r5, r5, #148
-	adds	r6, r6, #168
-	movs	r7, #0
-.L385:
-	ldr	r0, [r5], #4
-	cbz	r0, .L384
-	bl	mpi_obj_unref
-	str	r7, [r5, #-4]
-.L384:
-	cmp	r6, r5
-	bne	.L385
-	movw	r5, #37812
-	ldr	r0, [r4, r5]
-	cbz	r0, .L386
-	bl	mpi_obj_unref
-	movs	r3, #0
-	str	r3, [r4, r5]
-.L386:
-	movw	r5, #37820
-	ldr	r0, [r4, r5]
-	cbz	r0, .L387
-	bl	mpi_obj_unref
-	movs	r3, #0
-	str	r3, [r4, r5]
-.L387:
-	movs	r0, #0
-	bl	get_pp_node
-	mov	r5, r0
-	cbz	r0, .L388
-	movs	r0, #0
-	bl	vepu_pp_destroy_chn
-	movs	r2, #0
-	mov	r1, r2
-	movs	r0, #20
-	bl	vsys_remove_node_from_map
-	mov	r0, r5
-	bl	mpi_node_destroy
-.L388:
-	movs	r6, #0
-.L391:
-	mov	r0, r6
-	bl	get_venc_node
-	mov	r5, r0
-	cbz	r0, .L390
-	mov	r2, r6
-	movs	r1, #0
-	movs	r0, #4
-	bl	vsys_remove_node_from_map
-	mov	r0, r5
-	bl	mpi_node_destroy
-.L390:
-	adds	r6, r6, #1
-	cmp	r6, #16
-	bne	.L391
-	subs	r5, r4, #4
-	mov	r2, #36096
-	movs	r1, #0
-	add	r0, r4, #352
-	bl	memset
-	add	r0, r5, #36352
-	mov	r2, #384
-	movs	r1, #0
-	adds	r0, r0, #100
-	bl	memset
-	add	r0, r5, #36608
-	mov	r2, #256
-	movs	r1, #0
-	adds	r0, r0, #228
-	bl	memset
-	add	r0, r5, #36864
-	movs	r2, #172
-	movs	r1, #0
-	adds	r0, r0, #236
-	bl	memset
-	add	r0, r5, #64512
-	movs	r2, #36
-	movs	r1, #0
-	adds	r0, r0, #160
-	bl	memset
-	add	r0, r5, #37888
-	mov	r2, r6
-	mov	r1, #-1
-	adds	r0, r0, #80
-	bl	memset
-	add	r0, r5, #37888
-	movs	r2, #64
-	movs	r1, #0
-	adds	r0, r0, #96
-	bl	memset
-	add	r0, r5, #37888
-	mov	r2, #12800
-	movs	r1, #0
-	adds	r0, r0, #160
-	bl	memset
-	add	r0, r5, #50688
-	mov	r2, #12800
-	movs	r1, #0
-	adds	r0, r0, #160
-	bl	memset
-	add	r0, r5, #37888
-	mov	r2, r6
-	movs	r1, #0
-	adds	r0, r0, #64
-	bl	memset
-	bl	mpp_vcodec_clear_buf_resource
-.L381:
-	movs	r0, #0
-	add	sp, sp, #12
-	@ sp needed
-	pop	{r4, r5, r6, r7, pc}
-.L413:
-	.align	2
-.L412:
-	.word	g_venc_dev
-	.word	.LANCHOR0+358
-	.word	.LC27
-	.word	.LC28
-	.word	.LC29
-	.fnend
-	.size	venc_release, .-venc_release
-	.align	1
-	.syntax unified
-	.thumb
-	.thumb_func
-	.fpu softvfp
-	.type	venc_ioctl, %function
-venc_ioctl:
-	.fnstart
-	@ args = 0, pretend = 0, frame = 0
-	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r4, r5, r6, lr}
-	.save {r4, r5, r6, lr}
-	.pad #8
-	mov	r3, r2
-	ldr	r2, [r0, #128]
-	uxtb	r4, r1
-	ldr	r6, [r2, #160]
-	ldr	r5, [r6, #192]
-	cmp	r5, r4
-	bhi	.L415
-	movw	r3, #2113
-	str	r4, [sp, #4]
-	str	r3, [sp]
-	movs	r1, #5
-	ldr	r3, .L418
-	movs	r0, #4
-	ldr	r2, .L418+4
-	bl	vlog
-.L416:
-	movw	r3, #2129
-	ldr	r2, .L418+8
-	str	r3, [sp]
-	movs	r1, #5
-	ldr	r3, .L418
-	movs	r0, #4
-	bl	vlog
-	mvn	r0, #21
-	add	sp, sp, #8
-	@ sp needed
-	pop	{r4, r5, r6, pc}
-.L415:
-	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
-	cmp	r4, r5
-	sbc	r5, r4, r4
-.inst.w 0xf3af8014
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	ldr	r2, [r6, #188]
-	ands	r4, r4, r5
-	movs	r5, #20
-	mla	r4, r5, r4, r2
-	cbnz	r4, .L417
-	movw	r3, #2120
-	ldr	r2, .L418+12
-	str	r3, [sp]
-	movs	r1, #5
-	ldr	r3, .L418
-	movs	r0, #4
-	bl	vlog
-	b	.L416
-.L417:
-	mov	r2, r1
-	mov	r1, r4
-	add	sp, sp, #8
-	@ sp needed
-	pop	{r4, r5, r6, lr}
-	b	mpi_ioctl_kernel
-.L419:
-	.align	2
-.L418:
-	.word	.LANCHOR0+371
-	.word	.LC30
-	.word	.LC32
-	.word	.LC31
-	.fnend
-	.size	venc_ioctl, .-venc_ioctl
 	.align	1
 	.global	vcodec_notify_drop_frm
 	.syntax unified
@@ -2781,48 +2830,46 @@ vcodec_notify_drop_frm:
 	push	{r0, r1, r2, r3, r4, lr}
 	.save {lr}
 	.pad #20
-	bls	.L421
+	bls	.L439
 	movs	r3, #16
-	ldr	r2, .L429
+	ldr	r2, .L447
 	strd	r0, r3, [sp, #4]
 	movs	r1, #2
-	movw	r3, #961
+	movw	r3, #1005
 	movs	r0, #4
 	str	r3, [sp]
-	ldr	r3, .L429+4
+	ldr	r3, .L447+4
 	bl	vlog
 	mov	r0, #-1
-.L420:
+.L438:
 	add	sp, sp, #20
 	@ sp needed
 	ldr	pc, [sp], #4
-.L421:
-	ldr	r3, .L429+8
-	add	r2, r0, #15872
+.L439:
+	ldr	r3, .L447+8
+	add	r2, r0, #8960
 	adds	r2, r2, #40
 	ldr	r2, [r3, r2, lsl #2]
 	cmp	r2, #9
-	beq	.L423
+	beq	.L441
 	cmp	r2, #15
-	bne	.L424
-.L423:
+	bne	.L442
+.L441:
 	add	r3, r3, r0, lsl #4
-	movw	r2, #36844
 	movs	r0, #0
-	ldr	r2, [r3, r2]
+	ldr	r2, [r3, #2152]
 	cmp	r2, #0
-	ble	.L420
-	movw	r2, #36848
-	str	r0, [r3, r2]
-	b	.L420
-.L424:
+	ble	.L438
+	str	r0, [r3, #2156]
+	b	.L438
+.L442:
 	movs	r0, #0
-	b	.L420
-.L430:
+	b	.L438
+.L448:
 	.align	2
-.L429:
+.L447:
 	.word	.LC1
-	.word	.LANCHOR0+382
+	.word	.LANCHOR0+432
 	.word	g_venc_dev
 	.fnend
 	.size	vcodec_notify_drop_frm, .-vcodec_notify_drop_frm
@@ -2838,55 +2885,56 @@ venc_node_set_combo:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r0, r1, r2, r3, r4, lr}
-	.save {lr}
-	.pad #20
-	ldr	r2, [r1, #8]	@ unaligned
-	ldr	r3, [r0, #128]
-	cmp	r2, #12
-	beq	.L432
-	movw	r3, #1698
-	ldr	r2, .L436
+	.save {r4, lr}
+	.pad #16
+	ldr	r3, [r1, #8]	@ unaligned
+	cmp	r3, #12
+	beq	.L450
+	mov	r3, #1792
+	ldr	r2, .L454
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L436+4
+	ldr	r3, .L454+4
 	movs	r0, #4
 	bl	vlog
-.L435:
+.L453:
 	mov	r0, #-1
-.L431:
-	add	sp, sp, #20
+.L449:
+	add	sp, sp, #16
 	@ sp needed
-	ldr	pc, [sp], #4
-.L432:
-	ldr	r2, [r1]	@ unaligned
-	cmp	r2, #15
-	ble	.L434
-	movs	r3, #16
+	pop	{r4, pc}
+.L450:
+	ldr	r3, [r1]	@ unaligned
+	cmp	r3, #15
+	ble	.L452
+	movs	r2, #16
 	movs	r1, #2
-	strd	r2, r3, [sp, #4]
+	strd	r3, r2, [sp, #4]
 	movs	r0, #4
-	movw	r3, #1703
-	ldr	r2, .L436+8
+	movw	r3, #1797
+	ldr	r2, .L454+8
 	str	r3, [sp]
-	ldr	r3, .L436+4
+	ldr	r3, .L454+4
 	bl	vlog
-	b	.L435
-.L434:
-	add	r3, r3, r2, lsl #4
-	movw	r2, #36832
-	movs	r0, #1
-	str	r0, [r3, r2]
-	movw	r2, #36836
-	ldr	r1, [r1, #4]	@ unaligned
+	b	.L453
+.L452:
+	adds	r3, r3, #134
+	ldr	r2, .L454+12
+	movs	r4, #1
+	lsls	r3, r3, #4
+	adds	r0, r2, r3
+	str	r4, [r2, r3]
+	ldr	r3, [r1, #4]	@ unaligned
+	str	r3, [r0, #4]
 	movs	r0, #0
-	str	r1, [r3, r2]
-	b	.L431
-.L437:
+	b	.L449
+.L455:
 	.align	2
-.L436:
-	.word	.LC33
-	.word	.LANCHOR0+405
+.L454:
+	.word	.LC34
+	.word	.LANCHOR0+455
 	.word	.LC1
+	.word	g_venc_dev
 	.fnend
 	.size	venc_node_set_combo, .-venc_node_set_combo
 	.align	1
@@ -2900,48 +2948,46 @@ venc_node_set_snap:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, lr}
-	.save {r4, r5, lr}
-	.pad #20
-	sub	sp, sp, #20
+	push	{r0, r1, r2, r3, r4, lr}
+	.save {r4, lr}
+	.pad #16
 	ldr	r3, [r1, #8]	@ unaligned
-	ldr	r2, [r0, #128]
 	cmp	r3, #12
-	beq	.L439
-	mov	r3, #1720
-	ldr	r2, .L444
+	beq	.L457
+	movw	r3, #1813
+	ldr	r2, .L462
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L444+4
+	ldr	r3, .L462+4
 	movs	r0, #4
 	bl	vlog
-.L443:
+.L461:
 	mov	r0, #-1
-.L438:
-	add	sp, sp, #20
+.L456:
+	add	sp, sp, #16
 	@ sp needed
-	pop	{r4, r5, pc}
-.L439:
+	pop	{r4, pc}
+.L457:
 	ldr	r3, [r1]	@ unaligned
 	cmp	r3, #15
-	ble	.L441
+	ble	.L459
 	movs	r2, #16
 	movs	r1, #2
 	strd	r3, r2, [sp, #4]
 	movs	r0, #4
-	movw	r3, #1725
-	ldr	r2, .L444+8
+	movw	r3, #1818
+	ldr	r2, .L462+8
 	str	r3, [sp]
-	ldr	r3, .L444+4
+	ldr	r3, .L462+4
 	bl	vlog
-	b	.L443
-.L441:
-	ldr	r5, [r1, #4]	@ unaligned
+	b	.L461
+.L459:
+	ldr	r2, .L462+12
+	ldr	r4, [r1, #4]	@ unaligned
 	add	r0, r2, r3, lsl #4
-	movw	r4, #36840
-	str	r5, [r0, r4]
+	str	r4, [r0, #2152]
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r0, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -2949,99 +2995,159 @@ venc_node_set_snap:
 	.syntax unified
 	ldr	r1, [r1, #4]	@ unaligned
 	cmp	r1, #0
-	itttt	gt
-	addgt	r3, r3, #9472
-	addgt	r3, r3, #24
-	addgt	r3, r2, r3, lsl #2
-	strgt	r1, [r3, #-4]
+	itt	gt
+	addwgt	r3, r3, #2584
+	strgt	r1, [r2, r3, lsl #2]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r0	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	movs	r0, #0
-	b	.L438
-.L445:
+	b	.L456
+.L463:
 	.align	2
-.L444:
-	.word	.LC34
-	.word	.LANCHOR0+425
+.L462:
+	.word	.LC35
+	.word	.LANCHOR0+475
 	.word	.LC1
+	.word	g_venc_dev
 	.fnend
 	.size	venc_node_set_snap, .-venc_node_set_snap
 	.align	1
-	.global	venc_node_set_framerate
+	.global	vcodec_notify
 	.syntax unified
 	.thumb
 	.thumb_func
 	.fpu softvfp
-	.type	venc_node_set_framerate, %function
-venc_node_set_framerate:
+	.type	vcodec_notify, %function
+vcodec_notify:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r2, r3, r4, lr}
-	.save {r4, lr}
-	.pad #16
-	ldr	r3, [r1, #4]	@ unaligned
-	cmp	r3, #16
-	beq	.L447
-	movw	r3, #1745
-	ldr	r2, .L452
-	str	r3, [sp]
-	movs	r1, #2
-	ldr	r3, .L452+4
+	cmp	r0, #15
+	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	.pad #20
+	sub	sp, sp, #20
+	bhi	.L475
+	cmp	r1, #3
+	bhi	.L475
+	tbb	[pc, r1]
+.L467:
+	.byte	(.L470-.L467)/2
+	.byte	(.L469-.L467)/2
+	.byte	(.L481-.L467)/2
+	.byte	(.L466-.L467)/2
+	.p2align 1
+.L470:
+	ldr	r5, .L483
+	movw	r3, #43232
+	ldr	r4, [r5, r3]
+	cmp	r4, #0
+	bne	.L465
+	ldrd	r10, [r2]
+	.syntax unified
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r7, cpsr	@ arch_local_irq_save
+	cpsid	i
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	ldr	r9, .L483+8
+	add	r6, r5, #404
+	movw	r8, #1031
+.L473:
+	ldr	r3, [r6], #4
+	cbz	r3, .L471
+	ldr	r3, [r6, #764]
+	adds	r3, r3, #1
+	bne	.L471
+	mov	r3, r9
+	ldr	r2, .L483+4
+	movs	r1, #5
+	strd	r10, [sp, #8]
+	strd	r8, r4, [sp]
 	movs	r0, #4
 	bl	vlog
-.L451:
-	mov	r4, #-1
-.L446:
+	add	r3, r5, #1440
+	add	r1, r5, #1312
 	mov	r0, r4
-	add	sp, sp, #16
-	@ sp needed
-	pop	{r4, pc}
-.L447:
-	ldr	r4, [r1]	@ unaligned
-	cmp	r4, #15
-	ble	.L449
-	strd	r4, r3, [sp, #4]
-	movs	r1, #2
-	movw	r3, #1750
-	ldr	r2, .L452+8
-	str	r3, [sp]
-	movs	r0, #4
-	ldr	r3, .L452+4
-	bl	vlog
-	b	.L451
-.L449:
-	cbnz	r4, .L450
-	ldr	r3, [r1, #8]	@ unaligned
-	ldr	r0, [r0, #128]
-	str	r3, [r0, #208]
-	ldr	r2, [r1, #12]	@ unaligned
-	movs	r1, #4
-	str	r2, [r0, #212]
+	ldrd	r2, [r3]
+	strd	r2, [sp]
+	ldrd	r2, [r1]
+	bl	mpp_vcodec_run_task
+	cbnz	r0, .L472
+	bl	mcu_get_wrap_status
+	cmp	r0, #2
+	bne	.L472
+	movs	r3, #1
+.L480:
+	str	r3, [r6, #764]
+.L471:
+	adds	r4, r4, #1
+	adds	r5, r5, #8
+	cmp	r4, #16
+	bne	.L473
+	.syntax unified
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r7	@ local_irq_restore
+@ 0 "" 2
+	.thumb
+	.syntax unified
+.L482:
+	b	.L481
+.L472:
+	movs	r3, #0
+	b	.L480
+.L469:
+	add	r0, r0, #10752
+	ldr	r3, .L483
+	adds	r0, r0, #40
+	ldr	r3, [r3, r0, lsl #2]
+	str	r3, [r2]
+.L481:
+	movs	r1, #0
+.L465:
 	mov	r0, r1
-	strd	r3, r2, [sp, #4]
-	movw	r3, #1756
-	ldr	r2, .L452+12
-	str	r3, [sp]
-	ldr	r3, .L452+4
-	bl	vlog
-	b	.L446
-.L450:
-	movs	r4, #0
-	b	.L446
-.L453:
+	add	sp, sp, #20
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
+.L466:
+	ldr	r0, .L483
+	movw	r3, #43232
+	movs	r2, #1
+	str	r2, [r0, r3]
+	.syntax unified
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r4, cpsr	@ arch_local_irq_save
+	cpsid	i
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	movs	r2, #64
+	movs	r1, #0
+	addw	r0, r0, #1172
+	bl	memset
+	.syntax unified
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r4	@ local_irq_restore
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	b	.L482
+.L475:
+	mov	r1, #-1
+	b	.L465
+.L484:
 	.align	2
-.L452:
-	.word	.LC35
-	.word	.LANCHOR0+444
-	.word	.LC1
+.L483:
+	.word	g_venc_dev
 	.word	.LC36
+	.word	.LANCHOR0+494
 	.fnend
-	.size	venc_node_set_framerate, .-venc_node_set_framerate
+	.size	vcodec_notify, .-vcodec_notify
 	.align	1
 	.global	venc_node_check
 	.syntax unified
@@ -3058,44 +3164,44 @@ venc_node_check:
 	.pad #20
 	ldr	r3, [r1, #8]	@ unaligned
 	cmp	r3, #16
-	beq	.L455
-	movw	r3, #1459
-	ldr	r2, .L459
+	beq	.L486
+	movw	r3, #1537
+	ldr	r2, .L490
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L459+4
+	ldr	r3, .L490+4
 	movs	r0, #4
 	bl	vlog
-.L458:
+.L489:
 	mov	r0, #-1
-.L454:
+.L485:
 	add	sp, sp, #20
 	@ sp needed
 	ldr	pc, [sp], #4
-.L455:
+.L486:
 	ldr	r0, [r1, #4]	@ unaligned
 	cmp	r0, #15
-	ble	.L457
+	ble	.L488
 	strd	r0, r3, [sp, #4]
 	movs	r1, #2
-	movw	r3, #1463
-	ldr	r2, .L459+8
+	movw	r3, #1541
+	ldr	r2, .L490+8
 	str	r3, [sp]
 	movs	r0, #4
-	ldr	r3, .L459+4
+	ldr	r3, .L490+4
 	bl	vlog
-	b	.L458
-.L457:
+	b	.L489
+.L488:
 	bl	get_venc_node
 	clz	r0, r0
 	lsrs	r0, r0, #5
 	rsbs	r0, r0, #0
-	b	.L454
-.L460:
+	b	.L485
+.L491:
 	.align	2
-.L459:
-	.word	.LC12
-	.word	.LANCHOR0+468
+.L490:
+	.word	.LC11
+	.word	.LANCHOR0+508
 	.word	.LC1
 	.fnend
 	.size	venc_node_check, .-venc_node_check
@@ -3113,18 +3219,18 @@ mpi_buf_get_paddr:
 	push	{r4, lr}
 	.save {r4, lr}
 	mov	r4, r0
-	cbz	r0, .L463
+	cbz	r0, .L494
 	ldr	r0, [r0, #608]
 	cmp	r0, #0
-	bgt	.L461
+	bgt	.L492
 	ldr	r0, [r4, #448]
 	bl	get_dma_buf_phy_addr
 	str	r0, [r4, #608]
-.L461:
+.L492:
 	pop	{r4, pc}
-.L463:
+.L494:
 	mov	r0, #-1
-	b	.L461
+	b	.L492
 	.fnend
 	.size	mpi_buf_get_paddr, .-mpi_buf_get_paddr
 	.align	1
@@ -3138,28 +3244,28 @@ venc_get_version:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
+	ldr	r3, .L500
 	push	{r0, r1, r4, r5, r6, lr}
 	.save {r4, r5, r6, lr}
 	.pad #8
 	mov	r4, r1
-	ldr	r3, [r0, #128]
-	ldr	r6, [r3, #160]
+	ldr	r6, [r3, #164]
 	ldr	r3, [r1, #32]	@ unaligned
 	cmp	r3, #76
-	beq	.L465
-	movw	r3, #1438
-	ldr	r2, .L469
+	beq	.L496
+	movw	r3, #1516
+	ldr	r2, .L500+4
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L469+4
+	ldr	r3, .L500+8
 	movs	r0, #4
 	bl	vlog
 	mov	r0, #-1
-.L464:
+.L495:
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, pc}
-.L465:
+.L496:
 	movs	r5, #0
 	movs	r3, #1
 	strb	r5, [r1, #1]
@@ -3198,12 +3304,13 @@ venc_get_version:
 	ldr	r1, [r6]
 	bl	strncpy
 	movs	r0, #0
-	b	.L464
-.L470:
+	b	.L495
+.L501:
 	.align	2
-.L469:
+.L500:
+	.word	g_venc_dev
 	.word	.LC37
-	.word	.LANCHOR0+484
+	.word	.LANCHOR0+524
 	.fnend
 	.size	venc_get_version, .-venc_get_version
 	.align	1
@@ -3217,58 +3324,63 @@ venc_node_set_crop:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r2, r3, r4, lr}
-	.save {lr}
+	push	{r4, r5, lr}
+	.save {r4, r5, lr}
 	.pad #20
-	ldr	r2, [r1, #12]	@ unaligned
-	ldr	r0, [r0, #128]
-	cmp	r2, #24
-	beq	.L472
-	movw	r3, #1634
-	ldr	r2, .L478
+	sub	sp, sp, #20
+	ldr	r0, [r1, #12]	@ unaligned
+	cmp	r0, #24
+	beq	.L503
+	movw	r3, #1732
+	ldr	r2, .L509
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L478+4
+	ldr	r3, .L509+4
 	movs	r0, #4
 	bl	vlog
-.L477:
+.L508:
 	mov	r0, #-1
-.L471:
+.L502:
 	add	sp, sp, #20
 	@ sp needed
-	ldr	pc, [sp], #4
-.L472:
-	ldr	r3, [r1]	@ unaligned
-	cmp	r3, #15
-	ble	.L474
-	movs	r2, #16
+	pop	{r4, r5, pc}
+.L503:
+	ldr	r2, [r1]	@ unaligned
+	cmp	r2, #15
+	ble	.L505
+	movs	r3, #16
 	movs	r1, #2
-	strd	r3, r2, [sp, #4]
+	strd	r2, r3, [sp, #4]
 	movs	r0, #4
-	movw	r3, #1639
-	ldr	r2, .L478+8
+	movw	r3, #1737
+	ldr	r2, .L509+8
 	str	r3, [sp]
-	ldr	r3, .L478+4
+	ldr	r3, .L509+4
 	bl	vlog
-	b	.L477
-.L474:
-	mla	r3, r2, r3, r0
-	add	r2, r1, #24
-	add	r3, r3, #36352
-	adds	r3, r3, #96
-.L475:
-	ldr	r0, [r1], #4	@ unaligned
-	cmp	r1, r2
-	str	r0, [r3], #4	@ unaligned
-	bne	.L475
+	b	.L508
+.L505:
+	mov	r3, r1
+	ldr	r1, .L509+12
+	add	r5, r3, #24
+	mla	r2, r0, r2, r1
+.L506:
+	ldr	r0, [r3]	@ unaligned
+	ldr	r1, [r3, #4]	@ unaligned
+	adds	r3, r3, #8
+	cmp	r3, r5
+	mov	r4, r2
+	stmia	r4!, {r0, r1}
+	mov	r2, r4
+	bne	.L506
 	movs	r0, #0
-	b	.L471
-.L479:
+	b	.L502
+.L510:
 	.align	2
-.L478:
+.L509:
 	.word	.LC38
-	.word	.LANCHOR0+501
+	.word	.LANCHOR0+541
 	.word	.LC1
+	.word	g_venc_dev+1760
 	.fnend
 	.size	venc_node_set_crop, .-venc_node_set_crop
 	.align	1
@@ -3282,58 +3394,63 @@ venc_node_get_crop:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r2, r3, r4, lr}
-	.save {lr}
+	push	{r4, r5, lr}
+	.save {r4, r5, lr}
 	.pad #20
-	ldr	r2, [r1, #12]	@ unaligned
-	ldr	r0, [r0, #128]
-	cmp	r2, #24
-	beq	.L481
-	movw	r3, #1653
-	ldr	r2, .L487
+	sub	sp, sp, #20
+	ldr	r3, [r1, #12]	@ unaligned
+	cmp	r3, #24
+	beq	.L512
+	movw	r3, #1750
+	ldr	r2, .L518
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L487+4
+	ldr	r3, .L518+4
 	movs	r0, #4
 	bl	vlog
-.L486:
+.L517:
 	mov	r0, #-1
-.L480:
+.L511:
 	add	sp, sp, #20
 	@ sp needed
-	ldr	pc, [sp], #4
-.L481:
-	ldr	r3, [r1]	@ unaligned
-	cmp	r3, #15
-	ble	.L483
-	movs	r2, #16
+	pop	{r4, r5, pc}
+.L512:
+	ldr	r2, [r1]	@ unaligned
+	cmp	r2, #15
+	ble	.L514
+	movs	r3, #16
 	movs	r1, #2
-	strd	r3, r2, [sp, #4]
+	strd	r2, r3, [sp, #4]
 	movs	r0, #4
-	movw	r3, #1658
-	ldr	r2, .L487+8
+	movw	r3, #1755
+	ldr	r2, .L518+8
 	str	r3, [sp]
-	ldr	r3, .L487+4
+	ldr	r3, .L518+4
 	bl	vlog
-	b	.L486
-.L483:
-	mla	r3, r2, r3, r0
-	add	r3, r3, #36352
-	adds	r3, r3, #96
-	add	r2, r3, #24
-.L484:
-	ldr	r0, [r3], #4	@ unaligned
-	cmp	r3, r2
-	str	r0, [r1], #4	@ unaligned
-	bne	.L484
+	b	.L517
+.L514:
+	ldr	r0, .L518+12
+	mla	r2, r3, r2, r0
+	mov	r3, r1
+	add	r5, r2, #24
+.L515:
+	mov	r4, r2
+	adds	r3, r3, #8
+	ldmia	r4!, {r0, r1}
+	cmp	r4, r5
+	str	r0, [r3, #-8]	@ unaligned
+	mov	r2, r4
+	str	r1, [r3, #-4]	@ unaligned
+	bne	.L515
 	movs	r0, #0
-	b	.L480
-.L488:
+	b	.L511
+.L519:
 	.align	2
-.L487:
+.L518:
 	.word	.LC38
-	.word	.LANCHOR0+520
+	.word	.LANCHOR0+560
 	.word	.LC1
+	.word	g_venc_dev+1760
 	.fnend
 	.size	venc_node_get_crop, .-venc_node_get_crop
 	.align	1
@@ -3347,276 +3464,113 @@ venc_node_pp_set_md_attr:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r2, r3, r4, lr}
-	.save {lr}
+	push	{r4, r5, lr}
+	.save {r4, r5, lr}
 	.pad #20
-	ldr	r2, [r1, #4]	@ unaligned
-	ldr	r3, [r0, #128]
-	cmp	r2, #36
-	beq	.L490
-	movw	r3, #1973
-	ldr	r2, .L496
+	sub	sp, sp, #20
+	ldr	r3, [r1, #4]	@ unaligned
+	cmp	r3, #36
+	beq	.L521
+	movw	r3, #2071
+	ldr	r2, .L527
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L496+4
+	ldr	r3, .L527+4
 	movs	r0, #4
 	bl	vlog
-.L495:
+.L526:
 	mov	r0, #-1
-.L489:
+.L520:
 	add	sp, sp, #20
 	@ sp needed
-	ldr	pc, [sp], #4
-.L490:
+	pop	{r4, r5, pc}
+.L521:
 	ldr	r2, [r1]	@ unaligned
-	cmp	r2, #0
-	ble	.L492
-	movs	r3, #1
+	cmp	r2, #7
+	ble	.L523
+	movs	r3, #8
 	movs	r1, #2
 	strd	r2, r3, [sp, #4]
 	movs	r0, #4
-	movw	r3, #1978
-	ldr	r2, .L496+8
+	movw	r3, #2076
+	ldr	r2, .L527+8
 	str	r3, [sp]
-	ldr	r3, .L496+4
+	ldr	r3, .L527+4
 	bl	vlog
-	b	.L495
-.L492:
-	add	r3, r3, #64512
-	add	r2, r1, #36
-	adds	r3, r3, #156
-.L493:
-	ldr	r0, [r1], #4	@ unaligned
-	cmp	r1, r2
-	str	r0, [r3], #4	@ unaligned
-	bne	.L493
-	movs	r0, #0
-	b	.L489
-.L497:
-	.align	2
-.L496:
-	.word	.LC0
-	.word	.LANCHOR0+539
-	.word	.LC1
-	.fnend
-	.size	venc_node_pp_set_md_attr, .-venc_node_pp_set_md_attr
-	.align	1
-	.global	venc_node_pp_create
-	.syntax unified
-	.thumb
-	.thumb_func
-	.fpu softvfp
-	.type	venc_node_pp_create, %function
-venc_node_pp_create:
-	.fnstart
-	@ args = 0, pretend = 0, frame = 64
-	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, r7, r8, lr}
-	.save {r4, r5, r6, r7, r8, lr}
-	mov	r6, r1
-	ldr	r3, [r1, #8]	@ unaligned
-	.pad #80
-	sub	sp, sp, #80
-	cmp	r3, #60
-	beq	.L499
-	movw	r3, #1774
-	ldr	r2, .L524
-	str	r3, [sp]
-	ldr	r3, .L524+4
-.L521:
-	movs	r1, #2
-	movs	r0, #4
-	bl	vlog
-	b	.L522
-.L499:
-	ldr	r3, [r1, #4]	@ unaligned
-	cmp	r3, #0
-	ble	.L501
-	movs	r2, #1
-	movs	r1, #2
-	strd	r3, r2, [sp, #4]
-	movs	r0, #4
-	movw	r3, #1778
-	ldr	r2, .L524+8
-	str	r3, [sp]
-	ldr	r3, .L524+4
-	bl	vlog
-.L522:
-	mov	r8, #-1
-.L498:
-	mov	r0, r8
-	add	sp, sp, #80
-	@ sp needed
-	pop	{r4, r5, r6, r7, r8, pc}
-.L501:
-	ldr	r3, [r1, #16]	@ unaligned
-	movw	r2, #37168
-	ldr	r8, .L524+44
-	movs	r4, #0
-	sbfx	r3, r3, #1, #29
-	ldr	r7, .L524+12
-	adds	r3, r3, #3
-	sub	r5, r8, #104
-	asrs	r3, r3, #2
-	lsls	r3, r3, #6
-	str	r3, [r7, r2]
-.L505:
-	ldr	r0, [r5]
-	bl	mpi_buf_alloc
-	str	r0, [r8], #4
-	cbnz	r0, .L502
-	movw	r3, #1788
+	b	.L526
 .L523:
-	str	r3, [sp]
-	ldr	r2, .L524+16
-	ldr	r3, .L524+4
-	b	.L521
-.L502:
-	ldr	r0, [r0, #604]
-	cbnz	r0, .L504
-	mov	r3, #1792
-	b	.L523
-.L504:
-	ldr	r2, [r5]
-	movs	r1, #0
-	adds	r4, r4, #1
-	bl	memset
-	cmp	r4, #5
-	bne	.L505
-	ldr	r3, [r6, #20]	@ unaligned
-	cbz	r3, .L506
-	ldr	r4, [r6, #12]	@ unaligned
-	sbfx	r4, r4, #1, #29
-	adds	r4, r4, #3
-	asrs	r4, r4, #2
-	adds	r4, r4, #7
-	asrs	r3, r4, #3
-	ldr	r4, [r6, #16]	@ unaligned
-	sbfx	r4, r4, #1, #29
-	adds	r4, r4, #15
-	asrs	r4, r4, #4
-	muls	r4, r3, r4
-	lsls	r4, r4, #6
-	mov	r0, r4
-	bl	mpi_buf_alloc
-	movw	r3, #37816
-	str	r0, [r7, r3]
-	cbnz	r0, .L507
-.L508:
-	movw	r3, #1804
-	b	.L523
-.L507:
-	mov	r0, r4
-	bl	mpi_buf_alloc
-	movw	r3, #37824
-	str	r0, [r7, r3]
-	cmp	r0, #0
-	beq	.L508
-.L506:
-	ldr	r3, [r6, #12]	@ unaligned
-	add	r1, sp, #20
-	ldr	r0, [r6, #4]	@ unaligned
-	movs	r4, #1
-	str	r4, [sp, #44]
-	str	r3, [sp, #20]
-	ldr	r3, [r6, #16]	@ unaligned
-	str	r3, [sp, #24]
-	ldr	r3, [r6, #28]	@ unaligned
-	str	r3, [sp, #36]
-	ldr	r3, [r6, #32]	@ unaligned
-	str	r3, [sp, #40]
-	ldr	r3, [r6, #20]	@ unaligned
-	str	r3, [sp, #28]
-	ldr	r3, [r6, #24]	@ unaligned
-	str	r3, [sp, #32]
-	bl	vepu_pp_create_chn
-	mov	r8, r0
-	cbz	r0, .L509
-	movw	r3, #1819
-	b	.L523
-.L509:
-	mov	r3, r0
-	mov	r2, r4
-	ldr	r1, [r6, #4]	@ unaligned
-	ldr	r0, .L524+20
-	bl	mpi_dev_create_node_with_params
-	mov	ip, r0
-	cbnz	r0, .L510
-	movw	r3, #1825
-	ldr	r2, .L524+24
-	str	r3, [sp]
-	ldr	r3, .L524+4
-	b	.L521
-.L510:
-	add	r4, sp, #20
-	add	r5, r7, #36864
-	adds	r5, r5, #236
-	ldmia	r4!, {r0, r1, r2, r3}
-	stmia	r5!, {r0, r1, r2, r3}
-	ldmia	r4!, {r0, r1, r2, r3}
-	stmia	r5!, {r0, r1, r2, r3}
-	ldmia	r4!, {r0, r1, r2, r3}
-	stmia	r5!, {r0, r1, r2, r3}
-	mov	r3, r6
-	ldm	r4, {r0, r1, r2}
-	stm	r5, {r0, r1, r2}
-	add	r5, r6, #56
-	ldr	r2, .L524+28
-.L511:
+	mov	r3, r1
+	ldr	r1, .L527+12
+	mov	r0, #988
+	add	r5, r3, #32
+	mla	r2, r0, r2, r1
+.L524:
 	ldr	r0, [r3]	@ unaligned
+	ldr	r1, [r3, #4]	@ unaligned
 	adds	r3, r3, #8
-	ldr	r1, [r3, #-4]	@ unaligned
 	cmp	r3, r5
 	mov	r4, r2
 	stmia	r4!, {r0, r1}
 	mov	r2, r4
-	bne	.L511
+	bne	.L524
 	ldr	r0, [r3]	@ unaligned
-	mov	r3, ip
 	str	r0, [r4]
-	movs	r0, #20
-	ldr	r2, [r6, #4]	@ unaligned
-	ldr	r1, [r6]	@ unaligned
-	bl	vsys_add_node_to_map
-	movs	r3, #0
-	mov	r2, #-1
-	str	r3, [r7, #180]
-	ldr	r1, .L524+12
-	ldr	r3, .L524+32
-	ldr	r0, .L524+36
-	bl	kthread_create_on_node
-	cmn	r0, #4096
-	mov	r4, r0
-	bhi	.L512
-	bl	wake_up_process
-.L512:
-	movs	r1, #4
-	movw	r3, #1836
-	str	r4, [sp, #4]
-	mov	r0, r1
-	str	r3, [sp]
-	ldr	r2, .L524+40
-	ldr	r3, .L524+4
-	str	r4, [r7, #168]
-	bl	vlog
-	b	.L498
-.L525:
+	movs	r0, #0
+	b	.L520
+.L528:
 	.align	2
-.L524:
-	.word	.LC39
-	.word	.LANCHOR0+564
+.L527:
+	.word	.LC0
+	.word	.LANCHOR0+579
 	.word	.LC1
-	.word	g_venc_dev
-	.word	.LC40
-	.word	g_venc_dev+4
-	.word	.LC41
-	.word	g_venc_dev+37212
-	.word	.LC9
-	.word	venc_thread_fn
-	.word	.LC42
-	.word	g_venc_dev+37272
+	.word	g_venc_dev+3260
 	.fnend
-	.size	venc_node_pp_create, .-venc_node_pp_create
+	.size	venc_node_pp_set_md_attr, .-venc_node_pp_set_md_attr
+	.align	1
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	venc_open, %function
+venc_open:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r0, r1, r4, lr}
+	.save {r4, lr}
+	.pad #8
+	mov	r2, #-1
+	mov	r4, r1
+	movs	r0, #12
+	mov	r1, #3520
+	bl	kvmalloc_node
+	str	r0, [r4, #128]
+	cbnz	r0, .L530
+	movw	r3, #2280
+	ldr	r2, .L532
+	str	r3, [sp]
+	movs	r1, #2
+	ldr	r3, .L532+4
+	movs	r0, #4
+	bl	vlog
+	mov	r0, #-1
+.L529:
+	add	sp, sp, #8
+	@ sp needed
+	pop	{r4, pc}
+.L530:
+	ldr	r0, .L532+8
+	bl	mpi_obj_ref
+	movs	r0, #0
+	b	.L529
+.L533:
+	.align	2
+.L532:
+	.word	.LC39
+	.word	.LANCHOR0+604
+	.word	g_venc_dev+4
+	.fnend
+	.size	venc_open, .-venc_open
 	.align	1
 	.global	venc_node_pp_get_result
 	.syntax unified
@@ -3634,74 +3588,75 @@ venc_node_pp_get_result:
 	ldr	r3, [r1, #4]	@ unaligned
 	.pad #20
 	sub	sp, sp, #20
-	ldr	r4, [r0, #128]
 	cmp	r3, #32
-	beq	.L527
-	movw	r3, #1941
-	ldr	r2, .L545
+	beq	.L535
+	movw	r3, #2038
+	ldr	r2, .L553
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L545+4
+	ldr	r3, .L553+4
 	movs	r0, #4
 	bl	vlog
-.L544:
+.L552:
 	mov	r0, #-1
-.L526:
+.L534:
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, r6, r7, pc}
-.L527:
-	ldr	r3, [r1]	@ unaligned
-	cmp	r3, #0
-	ble	.L529
-	movs	r2, #1
+.L535:
+	ldr	r4, [r1]	@ unaligned
+	cmp	r4, #7
+	ble	.L537
+	movs	r3, #8
+	ldr	r2, .L553+8
+	strd	r4, r3, [sp, #4]
 	movs	r1, #2
-	strd	r3, r2, [sp, #4]
+	movw	r3, #2043
 	movs	r0, #4
-	movw	r3, #1946
-	ldr	r2, .L545+8
 	str	r3, [sp]
-	ldr	r3, .L545+4
+	ldr	r3, .L553+4
 	bl	vlog
-	b	.L544
-.L529:
+	b	.L552
+.L537:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	r3, cpsr	@ arch_local_irq_save
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r1, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	movw	r2, #37156
-	ldr	r6, [r4, r2]
+	ldr	r7, .L553+12
+	mov	r3, #988
+	mla	r3, r3, r4, r7
+	ldr	r2, [r3, #2460]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, r3	@ local_irq_restore
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r1	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	movw	r3, #37112
-	ldr	r3, [r4, r3]
-	cbz	r3, .L530
-	ldr	r3, [r1, #8]	@ unaligned
-	cbz	r3, .L530
-	movw	r3, #37164
-	add	r6, r4, r6, lsl #2
-	ldr	r3, [r4, r3]
-	movw	r7, #37268
-	str	r3, [r1, #20]	@ unaligned
+	ldr	r1, [r3, #2416]
+	cbz	r1, .L538
+	ldr	r1, [r5, #8]	@ unaligned
+	cbz	r1, .L538
+	movs	r6, #247
+	ldr	r3, [r3, #2468]
+	mla	r6, r6, r4, r2
 	movs	r1, #0
-	ldr	r3, [r6, r7]
+	str	r3, [r5, #20]	@ unaligned
+	add	r6, r6, #644
+	add	r6, r7, r6, lsl #2
+	ldr	r3, [r6, #4]
 	ldr	r0, [r3, #448]
 	bl	dma_buf_fd
 	str	r0, [r5, #16]	@ unaligned
-	ldr	r3, [r6, r7]
+	ldr	r3, [r6, #4]
 	ldr	r3, [r3, #448]
 	ldr	r3, [r3, #4]
 	add	r2, r3, #28
 	pld	[r2]
 	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
+@ 223 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_add
 1:	ldrex	r1, [r2]
 	add	r1, r1, #1
@@ -3711,70 +3666,548 @@ venc_node_pp_get_result:
 @ 0 "" 2
 	.thumb
 	.syntax unified
-.L530:
-	movw	r3, #37116
-	ldr	r3, [r4, r3]
-	cbz	r3, .L531
-	ldr	r3, [r5, #12]	@ unaligned
-	cbz	r3, .L531
-	movw	r3, #37168
-	ldr	r3, [r4, r3]
-	str	r3, [r5, #24]	@ unaligned
-	movw	r3, #37172
-	ldr	r3, [r4, r3]
+.L538:
+	mov	r3, #988
+	mla	r3, r3, r4, r7
+	ldr	r2, [r3, #2420]
+	cbz	r2, .L539
+	ldr	r2, [r5, #12]	@ unaligned
+	cbz	r2, .L539
+	ldr	r2, [r3, #2472]
+	str	r2, [r5, #24]	@ unaligned
+	ldr	r3, [r3, #2476]
 	str	r3, [r5, #28]	@ unaligned
-.L531:
-	movw	r3, #37160
+.L539:
+	mov	r3, #988
 	movs	r0, #0
-	str	r0, [r4, r3]
-	b	.L526
-.L546:
+	mla	r4, r3, r4, r7
+	str	r0, [r4, #2464]
+	b	.L534
+.L554:
 	.align	2
-.L545:
-	.word	.LC43
-	.word	.LANCHOR0+584
+.L553:
+	.word	.LC40
+	.word	.LANCHOR0+614
 	.word	.LC1
+	.word	g_venc_dev
 	.fnend
 	.size	venc_node_pp_get_result, .-venc_node_pp_get_result
 	.align	1
-	.global	vcodec_create_dev
 	.syntax unified
 	.thumb
 	.thumb_func
 	.fpu softvfp
-	.type	vcodec_create_dev, %function
-vcodec_create_dev:
+	.type	venc_thread_fn, %function
+venc_thread_fn:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 424
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	.pad #444
+	sub	sp, sp, #444
+	adds	r3, r0, #4
+	mov	r5, r0
+	str	r3, [sp, #8]
+	movs	r1, #5
+	ldr	r3, [r0, #48]
+	movs	r0, #4
+	ldr	r2, .L634
+	str	r3, [sp, #4]
+	movw	r3, #2394
+	str	r3, [sp]
+	ldr	r3, .L634+4
+	bl	vlog
+	add	r3, r5, #196
+	str	r3, [sp, #20]
+.L556:
+	bl	kthread_should_stop
+	cbz	r0, .L593
+	movs	r1, #4
+	movw	r3, #2550
+	ldr	r2, .L634+8
+	mov	r0, r1
+	str	r3, [sp]
+	ldr	r3, .L634+4
+	bl	vlog
+	movs	r0, #0
+	add	sp, sp, #444
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
+.L593:
+	ldr	r3, [r5, #180]
+	cbz	r3, .L557
+	movs	r0, #1
+	bl	msleep
+	b	.L556
+.L635:
+	.align	2
+.L634:
+	.word	.LC41
+	.word	.LANCHOR0+638
+	.word	.LC42
+.L557:
+	ldr	r0, [sp, #20]
+	mov	r10, r5
+	bl	down
+	ldr	r7, [r10, #92]!
+.L633:
+	subs	r7, r7, #48
+	add	r3, r7, #48
+	cmp	r3, r10
+	beq	.L556
+	movs	r4, #0
+.L561:
+	mov	r0, r4
+	bl	get_pp_node
+	cmp	r7, r0
+	beq	.L560
+	adds	r4, r4, #1
+	cmp	r4, #16
+	bne	.L561
+	mov	r4, #-1
+.L560:
+	ldr	r3, [r7, #288]
+	ldr	r0, [r3]
+	bl	mpi_queue_pop_obj
+	mov	r6, r0
+	cmp	r0, #0
+	beq	.L562
+	mov	r3, #988
+	ldrd	r2, r0, [r0, #620]
+	mla	r3, r3, r4, r5
+	ldr	r1, [r3, #2428]
+	cmp	r2, r1
+	bhi	.L563
+	ldr	r1, [r3, #2432]
+	cmp	r1, r0
+	bcc	.L563
+	ldr	r1, [r3, #2400]
+	cmp	r2, r1
+	bne	.L564
+	ldr	r3, [r3, #2404]
+	cmp	r3, r0
+	beq	.L565
+.L564:
+	mov	r2, #988
+	movs	r1, #0
+	muls	r2, r4, r2
+	mov	r0, r4
+	adds	r3, r5, r2
+	add	r2, r2, #2400
+	add	r2, r2, r5
+	str	r1, [r3, #3376]
+	ldr	r1, [r6, #620]
+	str	r1, [r3, #2400]
+	ldr	r1, [r6, #624]
+	str	r1, [r3, #2404]
+	movs	r1, #17
+	bl	vepu_pp_control
+.L565:
+	mov	r8, #988
+	movs	r3, #6
+	mla	r8, r8, r4, r5
+	str	r3, [sp, #180]
+	movs	r1, #16
+	mov	r0, r4
+	str	r6, [sp, #196]
+	ldr	r3, [r8, #3376]
+	adds	r2, r3, #1
+	str	r2, [r8, #3376]
+	str	r3, [sp, #176]
+	add	r2, sp, #176
+	ldr	r3, [r8, #2556]
+	str	r3, [sp, #184]
+	movs	r3, #1
+	strd	r3, r3, [sp, #188]
+	bl	vepu_pp_control
+	.syntax unified
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r3, cpsr	@ arch_local_irq_save
+	cpsid	i
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	ldr	r2, [r8, #2460]
+	add	r9, r2, #1
+	cmp	r9, #5
+	it	ge
+	movge	r9, #0
+	.syntax unified
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r3	@ local_irq_restore
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	ldr	r3, [r8, #2416]
+	cmp	r3, #0
+	beq	.L567
+	movs	r3, #247
+	mla	r3, r3, r4, r9
+	add	r3, r5, r3, lsl #2
+	ldr	r3, [r3, #2580]
+	str	r3, [sp, #120]
+	ldr	r3, [r8, #3276]
+	usat	r3, #2, r3
+	str	r3, [sp, #124]
+	ldr	r3, [r8, #3272]
+	cmp	r3, #0
+	ble	.L568
+	ldr	r2, [r8, #3268]
+	cmp	r2, #0
+	ble	.L568
+	movw	r1, #4095
+	cmp	r2, r1
+	ite	le
+	strle	r2, [sp, #128]
+	strgt	r1, [sp, #128]
+	cmp	r3, #4
+	it	ge
+	movge	r3, #4
+.L629:
+	str	r3, [sp, #132]
+	mov	r3, #988
+	mla	r3, r3, r4, r5
+	movs	r1, #32
+	mov	r0, r4
+	ldr	r2, [r3, #2568]
+	str	r2, [sp, #136]
+	ldr	r2, [r3, #3280]
+	str	r2, [sp, #140]
+	ldr	r2, [r3, #3284]
+	str	r2, [sp, #144]
+	ldr	r2, [r3, #3288]
+	ldr	r3, [r3, #3292]
+	str	r2, [sp, #148]
+	add	r2, sp, #120
+	str	r3, [sp, #152]
+	bl	vepu_pp_control
+.L567:
+	mov	r2, #988
+	mla	r2, r2, r4, r5
+	ldr	r3, [r2, #2420]
+	cbz	r3, .L572
+	ldr	r1, [r2, #2400]
+	ldr	r3, [r2, #2404]
+	ldr	r0, [r2, #2572]
+	ldr	r2, [r2, #2424]
+	muls	r3, r1, r3
+	cmp	r2, #0
+	beq	.L573
+	asrs	r3, r3, #8
+.L574:
+	cmp	r0, #6
+	bgt	.L575
+	mov	r1, #988
+	movs	r2, #230
+	mla	r1, r1, r4, r5
+	muls	r2, r3, r2
+	ldr	r1, [r1, #3300]
+	cmp	r1, r2
+	it	gt
+	addgt	r0, r0, #1
+.L575:
+	muls	r3, r0, r3
+	movs	r1, #1
+	movs	r2, #12
+	mov	r0, r4
+	strd	r1, r2, [sp, #28]
+	add	r2, sp, #28
+	movs	r1, #48
+	asrs	r3, r3, #3
+	str	r3, [sp, #36]
+	bl	vepu_pp_control
+.L572:
+	mov	r3, #988
+	muls	r3, r4, r3
+	adds	r2, r5, r3
+	ldr	r1, [r2, #2408]
+	cbz	r1, .L576
+	.syntax unified
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r1, cpsr	@ arch_local_irq_save
+	cpsid	i
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	ldr	r2, [r2, #3256]
+	adds	r2, r2, #90
+	add	r3, r3, r2, lsl #3
+	add	r3, r3, r5
+	ldr	r2, [r3, #2404]
+	str	r2, [sp, #308]
+	movs	r2, #0
+	str	r2, [r3, #2408]
+	.syntax unified
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r1	@ local_irq_restore
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	movs	r1, #64
+	add	r2, sp, #308
+	mov	r0, r4
+	bl	vepu_pp_control
+.L576:
+	mov	r3, #988
+	mla	r3, r3, r4, r5
+	ldr	r3, [r3, #2412]
+	cbz	r3, .L577
+	add	r2, sp, #240
+	movs	r1, #80
+	mov	r0, r4
+	bl	vepu_pp_control
+.L577:
+	mov	r3, #988
+	mla	r3, r3, r4, r5
+	ldr	r2, [r3, #2416]
+	cbnz	r2, .L578
+	ldr	r2, [r3, #2420]
+	cbnz	r2, .L578
+	ldr	r2, [r3, #2408]
+	cbnz	r2, .L578
+	ldr	r3, [r3, #2412]
+	cmp	r3, #0
+	beq	.L579
+.L578:
+	mov	r8, #988
+	add	r2, sp, #176
+	mul	r8, r8, r4
+	movs	r1, #96
+	mov	r0, r4
+	bl	vepu_pp_control
+	add	r3, r5, r8
+	ldr	r3, [r3, #2420]
+	cbz	r3, .L579
+	add	r2, r8, #3296
+	movs	r1, #112
+	add	r2, r2, r5
+	mov	r0, r4
+	bl	vepu_pp_control
+	addw	r3, r8, #3372
+	add	r3, r3, r5
+	movs	r2, #9
+.L581:
+	ldr	r1, [r3, #-4]
+	subs	r2, r2, #1
+	str	r1, [r3], #-4
+	bne	.L581
+	mov	r3, #988
+	mla	r3, r3, r4, r5
+	ldr	r2, [r3, #3300]
+	str	r2, [r3, #3336]
+	ldr	r3, [r3, #3296]
+	cbz	r3, .L579
+	addw	r8, r8, #3340
+	movs	r1, #95
+	movs	r0, #105
+	add	r8, r8, r5
+	muls	r1, r2, r1
+	mov	ip, #100
+	muls	r0, r2, r0
+	movs	r2, #1
+.L584:
+	ldr	r3, [r8], #4
+	mul	r3, ip, r3
+	cmp	r1, r3
+	bgt	.L582
+	cmp	r3, r0
+	ble	.L583
+.L582:
+	mov	r3, #988
+	movs	r2, #0
+	mla	r3, r3, r4, r5
+	str	r2, [r3, #3296]
+.L579:
+	mov	r8, #988
+	mul	r8, r8, r4
+	add	fp, r5, r8
+	ldr	r3, [fp, #2412]
+	cbz	r3, .L585
+	add	r2, sp, #72
+	movs	r1, #128
+	mov	r0, r4
+	bl	vepu_pp_control
+	.syntax unified
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	lr, cpsr	@ arch_local_irq_save
+	cpsid	i
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	ldr	r2, [fp, #3120]
+	addw	r3, r8, #2600
+	movs	r1, #52
+	add	fp, sp, #120
+	mla	r3, r1, r2, r3
+	add	r2, sp, #72
+	add	r3, r3, r5
+.L586:
+	mov	ip, r2
+	adds	r3, r3, #8
+	ldmia	ip!, {r0, r1}
+	cmp	ip, fp
+	str	r0, [r3, #-8]	@ unaligned
+	mov	r2, ip
+	str	r1, [r3, #-4]	@ unaligned
+	bne	.L586
+	mov	r1, #988
+	movs	r0, #52
+	muls	r1, r4, r1
+	adds	r2, r5, r1
+	ldr	r3, [r2, #3120]
+	mla	r3, r0, r3, r1
+	ldr	r1, [r6, #668]
+	add	r3, r3, r5
+	str	r1, [r3, #2648]
+	ldr	r3, [r2, #3120]
+	adds	r3, r3, #1
+	cmp	r3, #9
+	it	gt
+	movgt	r3, #0
+	str	r3, [r2, #3120]
+	.syntax unified
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, lr	@ local_irq_restore
+@ 0 "" 2
+	.thumb
+	.syntax unified
+.L585:
+	mov	r3, #988
+	muls	r3, r4, r3
+	adds	r2, r5, r3
+	ldr	r1, [r2, #2408]
+	cbz	r1, .L589
+	.syntax unified
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	ip, cpsr	@ arch_local_irq_save
+	cpsid	i
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	ldr	r0, [r2, #3256]
+	ldr	r1, [r6, #668]
+	adds	r0, r0, #90
+	add	r3, r3, r0, lsl #3
+	add	r3, r3, r5
+	str	r1, [r3, #2408]
+	ldr	r3, [r2, #3256]
+	adds	r3, r3, #1
+	cmp	r3, #1
+	it	gt
+	movgt	r3, #0
+	str	r3, [r2, #3256]
+	.syntax unified
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, ip	@ local_irq_restore
+@ 0 "" 2
+	.thumb
+	.syntax unified
+.L589:
+	.syntax unified
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r1, cpsr	@ arch_local_irq_save
+	cpsid	i
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	mov	r3, #988
+	addw	r2, r8, #2472
+	mla	r4, r3, r4, r5
+	movs	r3, #1
+	add	r2, r2, r5
+	str	r3, [r4, #2464]
+	add	r3, r8, #3296
+	add	r3, r3, r5
+	str	r9, [r4, #2460]
+	add	r0, r3, #40
+.L592:
+	ldr	r4, [r3], #4	@ unaligned
+	cmp	r3, r0
+	str	r4, [r2], #4	@ unaligned
+	bne	.L592
+	.syntax unified
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r1	@ local_irq_restore
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	addw	r0, r8, #3380
+	movs	r3, #0
+	movs	r2, #1
+	movs	r1, #3
+	add	r0, r0, r5
+	bl	__wake_up
+.L632:
+	ldr	r0, [r7, #76]
+	movs	r2, #0
+	mov	r1, r6
+	bl	remove_user_from_buf
+	mov	r0, r6
+	bl	mpi_buf_unref
+.L562:
+	ldr	r7, [r7, #48]
+	b	.L633
+.L568:
+	mov	r3, #988
+	mla	r3, r3, r4, r5
+	ldr	r3, [r3, #2576]
+	cmp	r3, #1
+	bne	.L570
+	movs	r3, #70
+	str	r3, [sp, #128]
+	movs	r3, #3
+	b	.L629
+.L570:
+	cmp	r3, #2
+	itett	ne
+	movne	r3, #30
+	moveq	r2, #50
+	strne	r3, [sp, #128]
+	movne	r3, #1
+	it	eq
+	streq	r2, [sp, #128]
+	b	.L629
+.L573:
+	asrs	r3, r3, #4
+	b	.L574
+.L583:
+	adds	r2, r2, #1
+	cmp	r2, #10
+	bne	.L584
+	b	.L579
+.L563:
+	strd	r2, r0, [sp, #4]
+	mov	r3, #2544
+	ldr	r2, .L636
+	movs	r1, #2
+	str	r3, [sp]
+	movs	r0, #4
+	ldr	r3, .L636+4
+	bl	vlog
+	b	.L632
+.L637:
+	.align	2
+.L636:
+	.word	.LC43
+	.word	.LANCHOR0+638
+	.fnend
+	.size	venc_thread_fn, .-venc_thread_fn
+	.align	1
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	kzalloc.constprop.16, %function
+kzalloc.constprop.16:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	ldr	r3, .L552
-	push	{r4, r5, r6, lr}
-	.save {r4, r5, r6, lr}
-	mov	r6, r0
-	mov	r5, r1
-	ldr	r0, [r3, #8]
+	@ link register save eliminated.
 	mov	r1, #3520
-	bl	kmem_cache_alloc
-	mov	r4, r0
-	cbz	r0, .L547
-	ldr	r3, [r5]
-	mov	r2, r6
-	movs	r1, #8
-	str	r3, [r0, #68]
-	ldr	r3, [r5, #8]
-	str	r3, [r0, #80]
-	ldr	r3, [r5, #4]
-	str	r3, [r0, #76]
-	bl	mpi_dev_register
-.L547:
-	mov	r0, r4
-	pop	{r4, r5, r6, pc}
-.L553:
-	.align	2
-.L552:
-	.word	kmalloc_caches
+	b	__kmalloc
 	.fnend
-	.size	vcodec_create_dev, .-vcodec_create_dev
+	.size	kzalloc.constprop.16, .-kzalloc.constprop.16
 	.align	1
 	.syntax unified
 	.thumb
@@ -3787,152 +4220,62 @@ venc_create_ctx:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r3, r4, r5, lr}
 	.save {r3, r4, r5, lr}
-	mov	r1, #3520
-	ldr	r3, .L559
-	ldr	r0, [r3, #12]
-	bl	kmem_cache_alloc
+	movs	r0, #4
+	bl	kzalloc.constprop.16
 	mov	r4, r0
-	cbz	r0, .L554
-	ldr	r2, .L559+4
+	cbz	r0, .L639
+	ldr	r2, .L644
 	movs	r1, #4
 	movs	r0, #1
 	bl	mpi_queue_create
 	mov	r5, r0
 	str	r0, [r4]
-	cbnz	r0, .L554
+	cbnz	r0, .L639
 	mov	r0, r4
 	mov	r4, r5
 	bl	kfree
-.L554:
+.L639:
 	mov	r0, r4
 	pop	{r3, r4, r5, pc}
-.L560:
+.L645:
 	.align	2
-.L559:
-	.word	kmalloc_caches
+.L644:
 	.word	mpi_obj_unref
 	.fnend
 	.size	venc_create_ctx, .-venc_create_ctx
 	.align	1
-	.global	venc_node_pp_delete
+	.global	vcodec_create_dev
 	.syntax unified
 	.thumb
 	.thumb_func
 	.fpu softvfp
-	.type	venc_node_pp_delete, %function
-venc_node_pp_delete:
+	.type	vcodec_create_dev, %function
+vcodec_create_dev:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r2, r3, r4, r5, r6, r7, r8, lr}
-	.save {r4, r5, r6, r7, r8, lr}
-	.pad #16
-	ldr	r6, [r1]
-	ldr	r4, [r0, #128]
-	cmp	r6, #0
-	ble	.L562
-	movs	r3, #1
-	ldr	r2, .L586
-	strd	r6, r3, [sp, #4]
-	movs	r1, #2
-	movw	r3, #1849
-	movs	r0, #4
-	str	r3, [sp]
-	ldr	r3, .L586+4
-	bl	vlog
-	mov	r0, #-1
-.L561:
-	add	sp, sp, #16
-	@ sp needed
-	pop	{r4, r5, r6, r7, r8, pc}
-.L562:
-	ldr	r3, [r4, #164]
-	cbz	r3, .L564
-	cmn	r3, #4096
-	bhi	.L564
-	movs	r3, #1
-	add	r0, r4, #192
-	str	r3, [r4, #176]
-	bl	up
-	ldr	r3, [r4, #164]
-	movs	r1, #4
-	ldr	r2, .L586+8
-	mov	r0, r1
-	str	r3, [sp, #4]
-	mov	r3, #1856
-	str	r3, [sp]
-	ldr	r3, .L586+4
-	bl	vlog
-	ldr	r0, [r4, #164]
-	bl	kthread_stop
-	ldr	r3, [r4, #164]
-	movs	r1, #4
-	ldr	r2, .L586+12
-	mov	r0, r1
-	str	r3, [sp, #4]
-	movw	r3, #1858
-	str	r3, [sp]
-	ldr	r3, .L586+4
-	bl	vlog
-	movs	r3, #0
-	str	r3, [r4, #164]
-.L564:
-	add	r5, r4, #37120
-	add	r7, r4, #37120
-	adds	r5, r5, #148
-	adds	r7, r7, #168
-	mov	r8, #0
-.L566:
-	ldr	r0, [r5], #4
-	cbz	r0, .L565
-	bl	mpi_obj_unref
-	str	r8, [r5, #-4]
-.L565:
-	cmp	r5, r7
-	bne	.L566
-	movw	r5, #37812
-	ldr	r0, [r4, r5]
-	cbz	r0, .L567
-	bl	mpi_obj_unref
-	movs	r3, #0
-	str	r3, [r4, r5]
-.L567:
-	movw	r5, #37820
-	ldr	r0, [r4, r5]
-	cbz	r0, .L568
-	bl	mpi_obj_unref
-	movs	r3, #0
-	str	r3, [r4, r5]
-.L568:
-	mov	r0, r6
-	bl	vepu_pp_destroy_chn
-	mov	r0, r6
-	bl	get_pp_node
-	mov	r5, r0
-	cbz	r0, .L569
+	push	{r4, r5, r6, lr}
+	.save {r4, r5, r6, lr}
+	mov	r6, r0
+	movs	r0, #164
+	mov	r5, r1
+	bl	kzalloc.constprop.16
+	mov	r4, r0
+	cbz	r0, .L646
+	ldr	r3, [r5]
 	mov	r2, r6
-	movs	r1, #0
-	movs	r0, #20
-	bl	vsys_remove_node_from_map
-	mov	r0, r5
-	bl	mpi_node_destroy
-.L569:
-	add	r0, r4, #64512
-	movs	r2, #36
-	movs	r1, #0
-	adds	r0, r0, #156
-	bl	memset
-	movs	r0, #0
-	b	.L561
-.L587:
-	.align	2
-.L586:
-	.word	.LC1
-	.word	.LANCHOR0+608
-	.word	.LC28
-	.word	.LC29
+	movs	r1, #8
+	str	r3, [r0, #68]
+	ldr	r3, [r5, #8]
+	str	r3, [r0, #80]
+	ldr	r3, [r5, #4]
+	str	r3, [r0, #76]
+	bl	mpi_dev_register
+.L646:
+	mov	r0, r4
+	pop	{r4, r5, r6, pc}
 	.fnend
-	.size	venc_node_pp_delete, .-venc_node_pp_delete
+	.size	vcodec_create_dev, .-vcodec_create_dev
 	.align	1
 	.global	to_osd_stride
 	.syntax unified
@@ -3948,31 +4291,31 @@ to_osd_stride:
 	sub	r0, r0, #65536
 	subs	r0, r0, #10
 	cmp	r0, #16
-	bhi	.L594
+	bhi	.L657
 	movs	r2, #1
 	movw	r3, #15375
 	lsl	r0, r2, r0
 	ands	r3, r0, r3
-	bne	.L592
+	bne	.L655
 	tst	r0, #960
-	bne	.L593
+	bne	.L656
 	lsls	r3, r0, #15
-	bpl	.L594
+	bpl	.L657
 	movs	r0, #2
 	mov	r3, r2
-.L590:
+.L653:
 	muls	r1, r3, r1
 	asr	r0, r1, r0
 	bx	lr
-.L592:
+.L655:
 	movs	r0, #0
 	movs	r3, #2
-	b	.L590
-.L593:
+	b	.L653
+.L656:
 	mov	r0, r3
 	movs	r3, #4
-	b	.L590
-.L594:
+	b	.L653
+.L657:
 	mov	r0, #-1
 	bx	lr
 	.fnend
@@ -3990,56 +4333,85 @@ set_2bpp_color_lut:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	mvn	r5, #42
-	ldr	r2, [r1]
-	mvn	r4, #84
-	ldr	r3, [r1, #4]
-	mvn	r8, #106
-	ubfx	ip, r2, #16, #8
-	ubfx	r7, r2, #8, #8
-	uxtb	r2, r2
-	mvn	r9, #20
-	mov	r10, #150
-	mov	fp, #77
-	mul	r1, r5, r2
-	ubfx	lr, r3, #16, #8
-	ubfx	r6, r3, #8, #8
+	mvn	r4, #20
+	ldr	r3, [r1]
+	mvn	r7, #106
+	ldr	r2, [r1, #4]
+	.pad #68
+	sub	sp, sp, #68
+	ubfx	ip, r3, #16, #8
+	ubfx	lr, r3, #8, #8
 	uxtb	r3, r3
+	ubfx	r8, r2, #16, #8
+	ubfx	r9, r2, #8, #8
+	uxtb	r2, r2
+	mul	r1, r4, r3
+	mvn	fp, #42
+	muls	r4, r2, r4
+	mvn	r6, #84
 	add	r1, r1, #32768
-	muls	r5, r3, r5
-	mla	r1, r4, r7, r1
-	add	r5, r5, #32768
+	mov	r10, #150
 	add	r1, r1, ip, lsl #7
-	mla	r4, r4, r6, r5
+	movs	r5, #77
+	add	r4, r4, #32768
+	mla	r1, r7, lr, r1
+	add	r4, r4, r8, lsl #7
+	mla	r7, r7, r9, r4
+	lsls	r4, r2, #7
+	add	r4, r4, #32768
 	asrs	r1, r1, #8
+	str	r1, [sp, #40]
 	strb	r1, [r0]
-	lsls	r1, r2, #7
+	lsls	r1, r3, #7
 	add	r1, r1, #32768
-	add	r4, r4, lr, lsl #7
-	mla	r1, r8, r7, r1
-	asrs	r4, r4, #8
-	strb	r4, [r0, #3]
-	mla	r1, r9, ip, r1
+	asrs	r7, r7, #8
+	mla	r1, fp, ip, r1
+	mla	fp, fp, r8, r4
+	mla	r1, r6, lr, r1
+	mla	fp, r6, r9, fp
+	movs	r6, #77
 	asrs	r1, r1, #8
+	str	r1, [sp, #36]
 	strb	r1, [r0, #1]
-	movs	r1, #29
-	mul	ip, r1, ip
-	mla	r7, r10, r7, ip
-	mla	r2, fp, r2, r7
-	asrs	r2, r2, #8
-	strb	r2, [r0, #2]
-	lsls	r2, r3, #7
-	add	r2, r2, #32768
-	mla	r8, r8, r6, r2
-	mla	r9, r9, lr, r8
-	mul	lr, r1, lr
-	mla	r6, r10, r6, lr
-	asr	r9, r9, #8
-	strb	r9, [r0, #4]
-	mla	r3, fp, r3, r6
-	asrs	r3, r3, #8
-	strb	r3, [r0, #5]
+	mul	r1, r10, lr
+	strb	r7, [r0, #3]
+	mul	r10, r10, r9
+	asr	r4, fp, #8
+	mla	r1, r5, ip, r1
+	movs	r5, #29
+	mla	r10, r6, r8, r10
+	strb	r4, [r0, #4]
+	mla	r1, r5, r3, r1
+	mla	r5, r5, r2, r10
+	asrs	r1, r1, #8
+	strb	r1, [r0, #2]
+	asrs	r5, r5, #8
+	strb	r5, [r0, #5]
+	strd	r4, r7, [sp, #52]
+	str	r5, [sp, #48]
+	ldrb	r4, [r0, #7]	@ zero_extendqisi2
+	str	r1, [sp, #32]
+	str	r4, [sp, #44]
+	ldrb	r1, [r0, #6]	@ zero_extendqisi2
+	movs	r0, #4
+	strd	lr, r3, [sp, #8]
+	mov	r3, #440
+	strd	r8, r9, [sp, #16]
+	strd	r2, r1, [sp, #24]
+	movs	r1, #5
+	str	ip, [sp, #4]
+	str	r3, [sp]
+	ldr	r2, .L659
+	ldr	r3, .L659+4
+	bl	vlog
+	add	sp, sp, #68
+	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
+.L660:
+	.align	2
+.L659:
+	.word	.LC44
+	.word	.LANCHOR0+653
 	.fnend
 	.size	set_2bpp_color_lut, .-set_2bpp_color_lut
 	.align	1
@@ -4061,40 +4433,40 @@ set_invert_buffer:
 	strd	r1, r2, [sp]
 	str	r3, [sp, #8]
 	cmp	r4, #0
-	beq	.L597
+	beq	.L662
 	cmp	r0, #0
-	beq	.L614
+	beq	.L679
 	cmp	r6, #0
-	beq	.L615
+	beq	.L680
 	ldr	r3, [r4, #604]
 	cmp	r3, #0
-	beq	.L616
+	beq	.L681
 	ldr	r2, [r6, #12]
-	cbz	r2, .L598
+	cbz	r2, .L663
 	cmp	r2, #1
-	bne	.L599
+	bne	.L664
 	mov	ip, #0
 	mov	lr, r0
 	mov	r8, ip
 	str	r2, [sp, #12]
-.L600:
+.L665:
 	ldr	r2, [sp, #4]
 	cmp	r8, r2
-	bge	.L599
+	bge	.L664
 	mov	r10, lr
 	movs	r5, #0
-	b	.L613
-.L598:
+	b	.L678
+.L663:
 	mov	lr, r0
 	mov	r8, r2
-.L601:
+.L666:
 	ldr	r1, [sp, #4]
 	cmp	r8, r1
-	bge	.L599
+	bge	.L664
 	mov	r10, lr
 	mov	ip, #0
-	b	.L607
-.L605:
+	b	.L672
+.L670:
 	add	r9, r2, ip, lsr #3
 	and	r5, ip, #7
 	movs	r1, #1
@@ -4109,16 +4481,16 @@ set_invert_buffer:
 	orrcc	r1, r1, r5
 	biccs	r1, r1, r5
 	strb	r1, [r3, r9]
-.L607:
+.L672:
 	ldr	r1, [sp]
 	cmp	ip, r1
-	blt	.L605
+	blt	.L670
 	add	lr, lr, r1
 	ldr	r1, [sp, #8]
 	add	r8, r8, #1
 	add	r2, r2, r1
-	b	.L601
-.L611:
+	b	.L666
+.L676:
 	ldr	r2, [sp, #12]
 	add	r9, ip, r5, lsr #3
 	and	r1, r5, #7
@@ -4133,36 +4505,36 @@ set_invert_buffer:
 	orrhi	r2, r2, r1
 	bicls	r2, r2, r1
 	strb	r2, [r3, r9]
-.L613:
+.L678:
 	ldr	r2, [sp]
 	cmp	r5, r2
-	blt	.L611
+	blt	.L676
 	add	lr, lr, r2
 	ldr	r2, [sp, #8]
 	add	r8, r8, #1
 	add	ip, ip, r2
-	b	.L600
-.L599:
+	b	.L665
+.L664:
 	bl	kfree
 	ldr	r1, [r4, #604]
 	ldr	r0, [r4, #448]
 	bl	dma_buf_vunmap
 	movs	r3, #0
 	str	r3, [r4, #604]
-.L597:
+.L662:
 	mov	r0, r4
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L614:
+.L679:
 	mov	r4, r0
-	b	.L597
-.L615:
+	b	.L662
+.L680:
 	mov	r4, r6
-	b	.L597
-.L616:
+	b	.L662
+.L681:
 	mov	r4, r3
-	b	.L597
+	b	.L662
 	.fnend
 	.size	set_invert_buffer, .-set_invert_buffer
 	.align	1
@@ -4178,22 +4550,21 @@ create_lingt_lut:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, lr}
 	.save {r4, lr}
-	mov	r1, #3520
 	mov	r4, r0
-	bl	__kmalloc
-	cbnz	r0, .L626
-.L622:
+	bl	kzalloc.constprop.16
+	cbnz	r0, .L691
+.L687:
 	pop	{r4, pc}
-.L625:
+.L689:
 	strb	r3, [r0, r3]
 	adds	r3, r3, #1
-.L623:
+.L688:
 	cmp	r3, r4
-	blt	.L625
-	b	.L622
-.L626:
+	blt	.L689
+	b	.L687
+.L691:
 	movs	r3, #0
-	b	.L623
+	b	.L688
 	.fnend
 	.size	create_lingt_lut, .-create_lingt_lut
 	.global	__aeabi_uidiv
@@ -4235,15 +4606,15 @@ to_osd_invert_cfg:
 	cmp	r5, #32
 	mov	r9, r0
 	mul	r10, r0, r8
-	beq	.L628
+	beq	.L693
 	cmp	r5, #64
-	beq	.L629
+	beq	.L694
 	cmp	r5, #16
-	bne	.L630
+	bne	.L695
 	movs	r3, #0
-.L634:
+.L699:
 	str	r3, [r4, #20]
-.L631:
+.L696:
 	movs	r3, #0
 	movs	r2, #1
 	str	r3, [r4, #8]
@@ -4252,29 +4623,29 @@ to_osd_invert_cfg:
 	strd	r3, r3, [r4, #12]
 	str	r7, [r4, #24]
 	bl	create_lingt_lut
-	cbnz	r0, .L632
-	movw	r3, #530
-	ldr	r2, .L635
+	cbnz	r0, .L697
+	movw	r3, #542
+	ldr	r2, .L700
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L635+4
+	ldr	r3, .L700+4
 	movs	r0, #4
 	bl	vlog
-.L627:
+.L692:
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
-.L628:
+.L693:
 	movs	r3, #1
-	b	.L634
-.L629:
+	b	.L699
+.L694:
 	movs	r3, #3
-	b	.L634
-.L630:
-	ldr	r0, .L635+8
+	b	.L699
+.L695:
+	ldr	r0, .L700+8
 	bl	printk
-	b	.L631
-.L632:
+	b	.L696
+.L697:
 	add	r3, r6, #72
 	str	r3, [sp, #4]
 	ldr	r3, [r6, #16]
@@ -4284,13 +4655,13 @@ to_osd_invert_cfg:
 	mov	r3, r7
 	bl	set_invert_buffer
 	str	r0, [r4, #32]
-	b	.L627
-.L636:
+	b	.L692
+.L701:
 	.align	2
-.L635:
+.L700:
+	.word	.LC46
+	.word	.LANCHOR0+672
 	.word	.LC45
-	.word	.LANCHOR0+628
-	.word	.LC44
 	.fnend
 	.size	to_osd_invert_cfg, .-to_osd_invert_cfg
 	.align	1
@@ -4310,15 +4681,15 @@ set_osd_data:
 	mov	r5, r0
 	ldr	r3, [r1, #104]
 	mov	r9, r1
-	cbnz	r3, .L638
+	cbnz	r3, .L703
 	str	r3, [r0, #4]
-.L637:
+.L702:
 	add	sp, sp, #12
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L638:
+.L703:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	fp, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -4327,24 +4698,24 @@ set_osd_data:
 	ldr	r4, [r1, #84]
 	movs	r6, #0
 	subs	r4, r4, #4
-.L640:
+.L705:
 	adds	r3, r4, #4
 	add	r2, r9, #84
 	cmp	r3, r2
-	bne	.L656
+	bne	.L721
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, fp	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	str	r6, [r5, #4]
-	b	.L637
-.L656:
+	b	.L702
+.L721:
 	ldr	r3, [r4, #12]
 	ldr	r3, [r3, #1752]
 	cmp	r3, #0
-	beq	.L641
+	beq	.L706
 	movs	r3, #140
 	ldr	r2, [r4, #20]
 	mla	r3, r3, r6, r5
@@ -4371,9 +4742,9 @@ set_osd_data:
 	ldr	r2, [r4, #12]
 	ldr	r0, [r2, #1752]
 	str	r0, [r3, #136]
-	cbz	r0, .L642
+	cbz	r0, .L707
 	bl	mpi_obj_ref
-.L642:
+.L707:
 	ldr	r3, [r4, #12]
 	movs	r7, #140
 	ldrd	r0, r1, [r3, #36]
@@ -4389,12 +4760,12 @@ set_osd_data:
 	subs	r3, r3, #10
 	cmp	r3, #16
 	itet	ls
-	ldrls	r2, .L679
+	ldrls	r2, .L744
 	movhi	r3, #-1
 	addls	r3, r2, r3, lsl #2
 	mla	r2, r7, r6, r5
 	it	ls
-	ldrls	r3, [r3, #648]
+	ldrls	r3, [r3, #692]
 	mul	r7, r7, r10
 	str	r3, [r2, #20]
 	movs	r3, #0
@@ -4414,19 +4785,19 @@ set_osd_data:
 	sub	r3, r3, #65536
 	subs	r3, r3, #10
 	cmp	r3, #16
-	bhi	.L644
+	bhi	.L709
 	lsl	r3, r1, r3
 	movw	r2, #9797
 	ands	r2, r3, r2
-	bne	.L645
-	ldr	r1, .L679+4
+	bne	.L710
+	ldr	r1, .L744+4
 	tst	r3, r1
-	bne	.L659
-.L644:
-	ldr	r0, .L679+8
+	bne	.L724
+.L709:
+	ldr	r0, .L744+8
 	bl	printk
 	mov	r1, #-1
-.L645:
+.L710:
 	movs	r2, #140
 	mla	r2, r2, r6, r5
 	str	r1, [r2, #24]
@@ -4435,19 +4806,19 @@ set_osd_data:
 	sub	r3, r3, #65536
 	subs	r3, r3, #10
 	cmp	r3, #16
-	bhi	.L646
+	bhi	.L711
 	movs	r1, #1
 	lsl	r3, r1, r3
 	ands	r2, r3, #207
-	bne	.L647
-	ldr	r1, .L679+12
+	bne	.L712
+	ldr	r1, .L744+12
 	tst	r3, r1
-	bne	.L661
-.L646:
-	ldr	r0, .L679+16
+	bne	.L726
+.L711:
+	ldr	r0, .L744+16
 	bl	printk
 	mov	r1, #-1
-.L647:
+.L712:
 	movs	r2, #140
 	mla	r2, r2, r6, r5
 	str	r1, [r2, #92]
@@ -4456,26 +4827,26 @@ set_osd_data:
 	sub	r3, r3, #65536
 	subs	r3, r3, #10
 	cmp	r3, #16
-	bhi	.L648
+	bhi	.L713
 	movs	r2, #1
 	movw	r1, #13260
 	lsl	r3, r2, r3
 	tst	r3, r1
-	bne	.L662
-	ldr	r1, .L679+20
+	bne	.L727
+	ldr	r1, .L744+20
 	tst	r3, r1
-	bne	.L649
-.L648:
-	movw	r3, #395
-	ldr	r2, .L679+24
+	bne	.L714
+.L713:
+	movw	r3, #403
+	ldr	r2, .L744+24
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L679+28
+	ldr	r3, .L744+28
 	movs	r0, #4
 	bl	vlog
-.L662:
+.L727:
 	movs	r2, #0
-.L649:
+.L714:
 	movs	r3, #140
 	mla	r3, r3, r6, r5
 	str	r2, [r3, #104]
@@ -4485,15 +4856,15 @@ set_osd_data:
 	str	r2, [r3, #100]
 	ldr	r3, [r3, #20]
 	cmp	r3, #17
-	bne	.L650
+	bne	.L715
 	add	r1, r4, #64
 	mov	r0, r8
 	bl	set_2bpp_color_lut
-.L650:
+.L715:
 	ldr	r3, [r4, #88]
-	cbz	r3, .L652
+	cbz	r3, .L717
 	ldr	r3, [r4, #16]
-	cbz	r3, .L652
+	cbz	r3, .L717
 	sub	r0, r7, #84
 	mov	r1, r4
 	add	r0, r0, r5
@@ -4501,11 +4872,11 @@ set_osd_data:
 	movs	r3, #140
 	mla	r3, r3, r6, r5
 	ldr	r0, [r3, #88]
-	cbz	r0, .L652
+	cbz	r0, .L717
 	bl	mpi_obj_ref
-.L652:
+.L717:
 	ldr	r3, [r4, #48]
-	cbz	r3, .L654
+	cbz	r3, .L719
 	movs	r3, #140
 	movs	r2, #1
 	mla	r6, r3, r6, r5
@@ -4520,29 +4891,29 @@ set_osd_data:
 	it	ne
 	movne	r3, r2
 	str	r3, [r6, #112]
-.L654:
+.L719:
 	mov	r6, r10
-.L641:
+.L706:
 	ldr	r4, [r4, #4]
 	subs	r4, r4, #4
-	b	.L640
-.L659:
+	b	.L705
+.L724:
 	mov	r1, r2
-	b	.L645
-.L661:
+	b	.L710
+.L726:
 	mov	r1, r2
-	b	.L647
-.L680:
+	b	.L712
+.L745:
 	.align	2
-.L679:
+.L744:
 	.word	.LANCHOR0
 	.word	72074
-	.word	.LC46
-	.word	81664
 	.word	.LC47
-	.word	68611
+	.word	81664
 	.word	.LC48
-	.word	.LANCHOR0+716
+	.word	68611
+	.word	.LC49
+	.word	.LANCHOR0+760
 	.fnend
 	.size	set_osd_data, .-set_osd_data
 	.align	1
@@ -4559,53 +4930,53 @@ mpi_buf_ref_with_node:
 	@ link register save eliminated.
 	push	{r4, r5, r6, r7}
 	.save {r4, r5, r6, r7}
-	cbz	r0, .L681
+	cbz	r0, .L746
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r5, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r6, .L687
+	ldr	r6, .L752
 	movs	r2, #0
 	movs	r3, #12
-.L685:
+.L750:
 	mul	r4, r3, r2
 	ldr	r7, [r4, r6]
-	cbnz	r7, .L683
-	ldr	r3, .L687+4
-	movw	r2, #64708
+	cbnz	r7, .L748
+	ldr	r3, .L752+4
+	movw	r2, #37024
 	add	r3, r3, r4
 	str	r0, [r3, r2]
-	movw	r2, #64716
+	movw	r2, #37032
 	ldr	r1, [r1, #76]
 	str	r1, [r3, r2]
-	movw	r1, #64712
+	movw	r1, #37028
 	ldr	r2, [r3, r1]
 	adds	r2, r2, #1
 	str	r2, [r3, r1]
-.L684:
+.L749:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r5	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	pop	{r4, r5, r6, r7}
 	b	mpi_obj_ref
-.L683:
+.L748:
 	adds	r2, r2, #1
 	cmp	r2, #512
-	bne	.L685
-	b	.L684
-.L681:
+	bne	.L750
+	b	.L749
+.L746:
 	pop	{r4, r5, r6, r7}
 	bx	lr
-.L688:
+.L753:
 	.align	2
-.L687:
-	.word	g_venc_dev+64708
+.L752:
+	.word	g_venc_dev+37024
 	.word	g_venc_dev
 	.fnend
 	.size	mpi_buf_ref_with_node, .-mpi_buf_ref_with_node
@@ -4624,208 +4995,293 @@ vcodec_handle_message:
 	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	mov	r8, r0
 	ldr	r3, [r0, #8]
-	.pad #28
-	sub	sp, sp, #28
-	mov	r7, r1
+	.pad #36
+	sub	sp, sp, #36
+	mov	r4, r1
 	mov	r5, r2
 	cmp	r3, #1
-	beq	.L720
-.L760:
-	movs	r7, #0
-.L732:
-	mov	r0, r7
-	add	sp, sp, #28
+	beq	.L790
+.L825:
+	movs	r4, #0
+.L801:
+	mov	r0, r4
+	add	sp, sp, #36
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L720:
+.L790:
 	movs	r6, #0
-.L690:
+.L755:
 	mov	r0, r6
 	bl	get_venc_node
 	cmp	r8, r0
-	beq	.L692
+	beq	.L757
 	adds	r6, r6, #1
 	cmp	r6, #16
-	bne	.L690
-	mov	r3, #696
+	bne	.L755
+.L823:
+	mov	r3, #716
 	mov	r2, #-1
 	strd	r3, r2, [sp]
-	ldr	r3, .L762
-	ldr	r2, .L762+4
-.L761:
+	ldr	r3, .L827+8
+	ldr	r2, .L827+12
+.L826:
 	movs	r1, #2
 	movs	r0, #4
 	bl	vlog
-	b	.L760
-.L692:
+	b	.L825
+.L757:
+	cmp	r6, #15
+	bhi	.L823
 	ldr	r3, [r8, #288]
 	ldr	r10, [r3]
 	cmp	r10, #0
-	bne	.L757
-	movw	r3, #702
+	bne	.L759
+	movw	r3, #722
 	str	r6, [sp, #4]
 	str	r3, [sp]
-	ldr	r2, .L762+8
-	ldr	r3, .L762
-	b	.L761
-.L757:
-	cmp	r7, #1
-	beq	.L696
-	subs	r3, r7, #7
-	rsbs	r7, r3, #0
-	adcs	r7, r7, r3
-	b	.L732
-.L696:
-	cmp	r5, #0
+	ldr	r2, .L827+16
+	ldr	r3, .L827+8
+	b	.L826
+.L759:
+	cmp	r4, #1
 	beq	.L760
-	ldr	r4, .L762+12
-	add	r9, r6, #54
-	add	r3, r4, r9, lsl #2
-	ldr	r3, [r3, #4]
-	cbz	r3, .L698
-	ldr	r0, [r4, #212]
-	cbz	r0, .L699
-	ldr	r1, [r4, #216]
-	cbz	r1, .L699
+	subs	r3, r4, #7
+	rsbs	r4, r3, #0
+	adcs	r4, r4, r3
+	b	.L801
+.L760:
+	cmp	r5, #0
+	beq	.L825
+	ldr	r7, .L827+20
+	add	fp, r6, #52
+	add	fp, r7, fp, lsl #2
+	ldr	r0, [fp, #4]
+	cbz	r0, .L762
+	add	r9, r6, #68
+	add	r9, r7, r9, lsl #2
+	ldr	r1, [r9, #4]
+	cbz	r1, .L762
 	add	r3, r8, #144
 	add	r2, r8, #152
 	bl	mpi_node_set_frame_rate
 	movs	r3, #0
-	strd	r3, r3, [r4, #212]
-.L699:
-	ldr	r3, [r4, #332]
+	str	r3, [fp, #4]
+	str	r3, [r9, #4]
+.L762:
+	add	r9, r6, #100
+	add	r3, r7, r9, lsl #2
+	ldr	r3, [r3, #4]
+	cbz	r3, .L763
+	add	fp, r6, #312
 	ldr	r2, [r5, #668]
+	ldr	r3, [r7, fp, lsl #2]
 	cmp	r3, r2
-	beq	.L700
+	beq	.L764
 	movs	r1, #4
 	strd	r3, r2, [sp, #4]
 	mov	r0, r1
-	movw	r3, #726
-	ldr	r2, .L762+16
+	movw	r3, #746
+	ldr	r2, .L827+24
 	str	r3, [sp]
-	ldr	r3, .L762
+	ldr	r3, .L827+8
 	bl	vlog
-.L700:
+.L764:
 	ldr	r3, [r5, #668]
 	adds	r3, r3, #1
-	str	r3, [r4, #332]
-.L698:
-	ldr	r3, [r4, #324]
-	cmp	r3, #0
-	ble	.L701
-	subs	r3, r3, #1
-	str	r3, [r4, #324]
-	b	.L760
-.L701:
-	add	r3, r6, #15872
-	adds	r3, r3, #40
-	ldr	r3, [r4, r3, lsl #2]
-	cmp	r3, #9
-	beq	.L702
-	cmp	r3, #15
-	bne	.L703
-.L702:
-	add	r3, r4, r6, lsl #4
-	movw	r2, #36844
-	ldr	r2, [r3, r2]
+	str	r3, [r7, fp, lsl #2]
+.L763:
+	add	r3, r6, #276
+	add	r3, r7, r3, lsl #2
+	ldr	r2, [r3, #4]
 	cmp	r2, #0
-	beq	.L760
-	ble	.L703
-	movw	r2, #36848
-	ldr	r1, [r3, r2]
-	cmp	r1, #0
-	bne	.L760
-	movs	r1, #1
-	str	r1, [r3, r2]
-.L703:
-	adds	r2, r4, r6
-	movw	r3, #37952
-	ldrb	r3, [r2, r3]	@ zero_extendqisi2
+	ble	.L765
+	subs	r2, r2, #1
+	str	r2, [r3, #4]
+	b	.L825
+.L765:
+	add	r3, r6, #8960
+	adds	r3, r3, #40
+	ldr	r3, [r7, r3, lsl #2]
+	cmp	r3, #9
+	beq	.L766
+	cmp	r3, #15
+	bne	.L767
+.L766:
+	add	r3, r7, r6, lsl #4
+	ldr	r2, [r3, #2152]
+	cmp	r2, #0
+	beq	.L825
+	ble	.L767
+	ldr	r2, [r3, #2156]
+	cmp	r2, #0
+	bne	.L825
+	movs	r2, #1
+	str	r2, [r3, #2156]
+.L767:
+	adds	r3, r7, r6
+	add	r3, r3, #10304
+	ldrb	r3, [r3]	@ zero_extendqisi2
 	cmp	r3, #0
-	beq	.L704
-	ldr	r3, .L762+20
-	mov	ip, #0
-.L706:
-	ldrb	r2, [r3], #1	@ zero_extendqisi2
-	cmp	r2, r6
-	beq	.L705
-	add	ip, ip, #1
-	cmp	ip, #16
-	bne	.L706
-	b	.L760
-.L707:
-	add	fp, fp, #1
-	cmp	fp, #100
-	bne	.L708
+	beq	.L768
+	ldr	r3, .L827+28
+	movs	r2, #0
+.L770:
+	ldrb	r1, [r3], #1	@ zero_extendqisi2
+	cmp	r6, r1
+	beq	.L769
+	adds	r2, r2, #1
+	cmp	r2, #16
+	bne	.L770
+	b	.L825
+.L771:
+	add	lr, lr, #1
+	cmp	lr, #100
+	bne	.L772
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, lr	@ local_irq_restore
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, ip	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	b	.L760
-.L710:
-	str	r5, [r4, #352]
-	b	.L712
-.L709:
+	b	.L825
+.L775:
+	str	r5, [r7, r3, lsl #2]
+	b	.L777
+.L774:
 	ldrd	r2, [r5, #672]
 	movs	r1, #4
 	mov	r0, r1
-	mov	r7, #-1
+	mov	r4, #-1
 	strd	r2, [sp, #8]
-	movw	r3, #770
-	ldr	r2, .L762+24
+	movw	r3, #793
+	ldr	r2, .L827+32
 	str	r3, [sp]
-	ldr	r3, .L762
+	ldr	r3, .L827+8
 	bl	vlog
 	mov	r0, r5
 	bl	mpi_buf_unref
-	b	.L732
-.L718:
-	strd	r3, r0, [sp, #4]
-	movs	r1, #5
-	mov	r3, #796
-	ldr	r2, .L762+28
+	b	.L801
+.L781:
+	bl	mcu_wrap_start
+	movs	r3, #1
+	str	r3, [r8, #4]
+	movs	r1, #4
+	ldr	r3, [r5, #668]
+	mov	r0, r1
+	ldr	r2, .L827+36
+	str	r3, [sp, #24]
+	ldr	r3, [r5, #632]
+	str	r3, [sp, #20]
+	ldr	r3, [r5, #628]
+	str	r3, [sp, #16]
+	ldr	r3, [r5, #624]
+	str	r3, [sp, #12]
+	ldr	r3, [r5, #620]
+	strd	r6, r3, [sp, #4]
+	movw	r3, #807
 	str	r3, [sp]
-	movs	r0, #4
-	ldr	r3, .L762
-	str	r6, [r4, #328]
+	ldr	r3, .L827+8
 	bl	vlog
-	b	.L732
-.L705:
+	ldr	r3, [r9, #4]
+	cmp	r3, #0
+	beq	.L801
+	b	.L783
+.L784:
+	add	r6, r7, r6, lsl #2
+	movs	r2, #64
+	mov	r1, r8
+	ldr	r0, .L827+40
+	bl	memset
+	mov	r3, #-1
+	str	r3, [r6, #4]
+	bl	ktime_get
+	cmp	r0, #0
+	mov	r6, r0
+	sbcs	r3, r1, #0
+	mov	r7, r1
+	bge	.L786
+	rsbs	r6, r0, #0
+	sbc	r7, r1, r1, lsl #1
+.L786:
+	adr	r9, .L827
+	ldrd	r8, [r9]
+	mov	ip, #0
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	lr, cpsr	@ arch_local_irq_save
+@ 94 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/div64.h" 1
+	umull	r2, r3, r8, r6
+	cmn	r2, r8
+	adcs	r3, r3, r9
+	adc	r2, ip, #0
+@ 0 "" 2
+@ 112 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/div64.h" 1
+	umlal	r3, r2, r9, r6
+	umlal	r3, ip, r8, r7
+	mov	r3, #0
+	adds	r2, ip, r2
+	adc	r3, r3, #0
+	umlal	r2, r3, r9, r7
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	cmp	r0, #0
+	lsr	r6, r2, #9
+	orr	r6, r6, r3, lsl #23
+	lsr	r7, r3, #9
+	sbcs	r3, r1, #0
+	bge	.L787
+	rsbs	r6, r6, #0
+	sbc	r7, r7, r7, lsl #1
+.L787:
+	ldr	r3, .L827+44
+	strd	r6, [r3]
+	b	.L785
+.L828:
+	.align	3
+.L827:
+	.word	-1924145349
+	.word	-2095944041
+	.word	.LANCHOR0+780
+	.word	.LC31
+	.word	.LC50
+	.word	g_venc_dev
+	.word	.LC51
+	.word	g_venc_dev+10320
+	.word	.LC53
+	.word	.LC54
+	.word	g_venc_dev+1172
+	.word	g_venc_dev+1240
+.L769:
+	.syntax unified
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	ip, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	mov	r2, #800
-	mov	fp, #0
-	mla	r2, r2, ip, r4
-	add	r2, r2, #50688
-	adds	r2, r2, #160
-.L708:
-	ldrd	r0, [r2], #8
-	orrs	r3, r0, r1
-	beq	.L707
+	mov	r3, #800
+	mov	lr, #0
+	mla	r3, r3, r2, r7
+	add	r3, r3, #23168
+	adds	r3, r3, #32
+.L772:
+	ldrd	r0, [r3], #8
+	orrs	fp, r0, r1
+	beq	.L771
 	movs	r3, #100
 	strd	r0, [r5, #672]
-	mla	r3, r3, ip, fp
+	mla	r3, r3, r2, lr
 	movs	r0, #0
 	movs	r1, #0
-	add	r2, r3, #4736
-	add	r3, r3, #6336
-	adds	r2, r2, #20
-	adds	r3, r3, #20
-	add	r2, r4, r2, lsl #3
-	add	r3, r4, r3, lsl #3
+	addw	r2, r3, #1300
+	addw	r3, r3, #2900
+	add	r2, r7, r2, lsl #3
+	add	r3, r7, r3, lsl #3
 	strd	r0, [r2]
 	strd	r0, [r3]
-.L704:
+.L768:
 	ldr	r3, [r10, #16]
 	movs	r1, #5
-	ldr	r2, .L762+32
+	ldr	r2, .L829
 	movs	r0, #4
 	str	r3, [sp, #16]
 	ldr	r3, [r5]
@@ -4835,10 +5291,18 @@ vcodec_handle_message:
 	ldr	r3, [r8, #44]
 	ldr	r3, [r3, #44]
 	str	r3, [sp, #4]
-	movw	r3, #751
+	movw	r3, #771
 	str	r3, [sp]
-	ldr	r3, .L762
+	ldr	r3, .L829+4
 	bl	vlog
+	add	r3, r6, #10752
+	adds	r3, r3, #40
+	ldr	r2, [r7, r3, lsl #2]
+	adds	r2, r2, #1
+	bne	.L789
+	ldr	r2, [r5, #592]
+	str	r2, [r7, r3, lsl #2]
+.L789:
 	mov	r1, r8
 	mov	r0, r5
 	mov	r2, r6
@@ -4846,119 +5310,116 @@ vcodec_handle_message:
 	mov	r1, r5
 	mov	r0, r10
 	bl	mpi_queue_push_obj
-	cbnz	r0, .L713
-	add	r3, r4, r9, lsl #2
+	cbnz	r0, .L773
+	add	r3, r7, r9, lsl #2
 	ldr	r3, [r3, #4]
 	cmp	r3, #0
-	beq	.L709
+	beq	.L774
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	r7, cpsr	@ arch_local_irq_save
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r8, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r3, [r4, #352]
-	cmp	r3, #0
-	beq	.L710
-	ldr	r2, .L762+36
+	add	r3, r6, #392
+	ldr	r2, [r7, r3, lsl #2]
+	cmp	r2, #0
+	beq	.L775
+	ldr	r2, .L829+8
 	ldr	r3, [r2]
 	cmp	r3, #19
 	add	r1, r3, #1
 	str	r1, [r2]
-	bgt	.L711
+	bgt	.L776
 	ldr	r3, [r5, #668]
 	movs	r1, #2
-	ldr	r2, .L762+40
+	ldr	r2, .L829+12
 	movs	r0, #4
-	str	r3, [sp, #4]
-	mov	r3, #760
+	strd	r6, r3, [sp, #4]
+	movw	r3, #783
 	str	r3, [sp]
-	ldr	r3, .L762
+	ldr	r3, .L829+4
 	bl	vlog
-.L711:
+.L776:
 	mov	r0, r5
+	mov	r4, #-1
 	bl	mpi_buf_unref
-.L712:
+.L777:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, r7	@ local_irq_restore
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r8	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	mov	r7, #-1
-.L713:
-	ldr	r3, [r4, #320]
-	cbz	r3, .L715
+.L773:
+	add	r8, r6, #260
+	add	r10, r7, r8, lsl #2
+	ldr	r3, [r10, #4]
+	cbz	r3, .L779
 	bl	mcu_get_wrap_status
 	cmp	r0, #2
 	itt	ne
 	movne	r3, #0
-	strne	r3, [r4, #320]
-.L715:
-	add	r9, r4, r9, lsl #2
+	strne	r3, [r10, #4]
+.L779:
+	add	r9, r7, r9, lsl #2
 	ldr	r3, [r9, #4]
-	cbz	r3, .L717
-	ldr	r3, [r4, #320]
-	cbnz	r3, .L717
-	bl	mcu_wrap_start
-	movs	r3, #1
-	str	r3, [r4, #320]
-	movs	r1, #4
-	ldr	r3, [r5, #668]
-	mov	r0, r1
-	ldr	r2, .L762+44
-	str	r3, [sp, #20]
-	ldr	r3, [r5, #632]
-	str	r3, [sp, #16]
-	ldr	r3, [r5, #628]
-	str	r3, [sp, #12]
-	ldr	r3, [r5, #624]
-	str	r3, [sp, #8]
-	ldr	r3, [r5, #620]
-	str	r3, [sp, #4]
-	mov	r3, #784
-	str	r3, [sp]
-	ldr	r3, .L762
-	bl	vlog
-.L717:
-	cmp	r6, #0
-	bne	.L732
-	ldr	r3, [r4, #220]
 	cmp	r3, #0
-	beq	.L732
+	beq	.L801
+	add	r8, r7, r8, lsl #2
+	ldr	r3, [r8, #4]
+	cmp	r3, #0
+	beq	.L781
+.L783:
 	bl	mcu_get_wrap_status
 	cmp	r0, #2
-	bne	.L732
+	bne	.L801
 	ldr	r3, [r5, #668]
+	mov	r8, #0
 	mov	r0, r6
-	strd	r3, r6, [sp]
+	strd	r3, r8, [sp]
 	ldrd	r2, [r5, #672]
 	bl	mpp_vcodec_run_task
+	add	r1, r6, #164
 	ldrd	r2, [r5, #672]
-	strd	r2, [r4, #336]
-	ldr	r3, [r5, #668]
-	strd	r3, r6, [r4, #344]
+	add	r1, r7, r1, lsl #3
+	strd	r2, [r1]
+	add	r3, r6, #180
+	ldr	r1, [r5, #668]
+	add	r2, r7, r3, lsl #3
+	str	r1, [r7, r3, lsl #3]
+	str	r8, [r2, #4]
+	.syntax unified
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r5, cpsr	@ arch_local_irq_save
+	cpsid	i
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	add	r6, r6, #292
 	cmp	r0, #0
-	bne	.L718
+	bne	.L784
+	add	r6, r7, r6, lsl #2
 	movs	r3, #1
-	str	r3, [r4, #328]
-	b	.L732
-.L763:
+	str	r3, [r6, #4]
+	movw	r3, #43232
+	str	r0, [r7, r3]
+.L785:
+	.syntax unified
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r5	@ local_irq_restore
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	b	.L801
+.L830:
 	.align	2
-.L762:
-	.word	.LANCHOR0+736
-	.word	.LC49
-	.word	.LC50
-	.word	g_venc_dev
-	.word	.LC51
-	.word	g_venc_dev+37968
-	.word	.LC53
+.L829:
 	.word	.LC55
-	.word	.LC56
+	.word	.LANCHOR0+780
 	.word	.LANCHOR1
 	.word	.LC52
-	.word	.LC54
 	.fnend
 	.size	vcodec_handle_message, .-vcodec_handle_message
 	.global	__aeabi_idiv
@@ -4978,44 +5439,44 @@ to_frame_pixel_stride:
 	mov	r3, r0
 	cmp	r3, #65537
 	mov	r0, r1
-	bhi	.L765
+	bhi	.L832
 	cmp	r3, #65536
-	bcs	.L768
+	bcs	.L835
 	cmp	r3, #8
-	beq	.L768
+	beq	.L835
 	cmp	r3, #10
 	ite	eq
 	moveq	r1, #2
 	movne	r1, #1
-.L766:
+.L833:
 	bl	__aeabi_idiv
 	pop	{r3, pc}
-.L765:
-	ldr	r2, .L773
+.L832:
+	ldr	r2, .L840
 	cmp	r3, r2
-	bcc	.L770
+	bcc	.L837
 	adds	r2, r2, #1
 	cmp	r3, r2
-	bls	.L771
+	bls	.L838
 	sub	r3, r3, #65536
 	subs	r3, r3, #10
 	cmp	r3, #3
 	ite	hi
 	movhi	r1, #1
 	movls	r1, #4
-	b	.L766
-.L768:
+	b	.L833
+.L835:
 	movs	r1, #2
-	b	.L766
-.L770:
+	b	.L833
+.L837:
 	movs	r1, #1
-	b	.L766
-.L771:
+	b	.L833
+.L838:
 	movs	r1, #3
-	b	.L766
-.L774:
+	b	.L833
+.L841:
 	.align	2
-.L773:
+.L840:
 	.word	65542
 	.fnend
 	.size	to_frame_pixel_stride, .-to_frame_pixel_stride
@@ -5038,8 +5499,8 @@ dma_buf_import_mpi_buf:
 	bl	mpi_buf_create
 	mov	r4, r0
 	cmp	r0, #0
-	beq	.L775
-	ldr	r3, .L788
+	beq	.L842
+	ldr	r3, .L855
 	str	r3, [r0, #4]
 	ldr	r3, [r5]
 	str	r3, [r0, #620]
@@ -5048,22 +5509,22 @@ dma_buf_import_mpi_buf:
 	ldr	r1, [r5, #8]
 	ldr	r0, [r5, #28]
 	bl	to_frame_pixel_stride
-	ldr	r2, .L788+4
-	add	r7, r2, #764
+	ldr	r2, .L855+4
+	add	r7, r2, #808
 	str	r0, [r4, #628]
 	ldr	r3, [r5, #12]
 	str	r3, [r4, #632]
 	movs	r3, #0
 	ldr	r0, [r5, #28]
-.L779:
+.L846:
 	lsls	r1, r3, #3
 	add	ip, r1, r7
 	ldr	ip, [ip, #4]
 	cmp	r0, ip
-	bne	.L777
+	bne	.L844
 	add	r2, r2, r1
-	ldr	r3, [r2, #764]
-.L778:
+	ldr	r3, [r2, #808]
+.L845:
 	str	r3, [r4, #640]
 	ldrd	r2, [r5, #40]
 	strd	r2, [r4, #672]
@@ -5075,36 +5536,33 @@ dma_buf_import_mpi_buf:
 	movmi	r3, #12
 	strmi	r3, [r4, #584]
 	cmp	r6, #0
-	blt	.L775
-	ldr	r3, [r5, #48]
-	cmp	r3, #15
-	bhi	.L775
-	ldr	r2, .L788+8
-	addw	r3, r3, #2302
+	blt	.L842
+	ldr	r2, [r5, #48]
+	cmp	r2, #15
+	bhi	.L842
+	ldr	r3, .L855+8
 	movs	r1, #1
-	add	r3, r2, r3, lsl #4
-	str	r1, [r3, #4]
-	ldr	r3, [r5, #48]
-	addw	r3, r3, #2302
-	add	r3, r2, r3, lsl #4
-	str	r6, [r3, #8]
-	ldr	r3, [r5, #48]
-	add	r2, r2, r3, lsl #4
-	movw	r3, #36844
-	str	r1, [r2, r3]
-.L775:
+	add	r2, r3, r2, lsl #4
+	str	r1, [r2, #2144]
+	ldr	r2, [r5, #48]
+	add	r2, r3, r2, lsl #4
+	str	r6, [r2, #2148]
+	ldr	r2, [r5, #48]
+	add	r3, r3, r2, lsl #4
+	str	r1, [r3, #2152]
+.L842:
 	mov	r0, r4
 	pop	{r3, r4, r5, r6, r7, pc}
-.L777:
+.L844:
 	adds	r3, r3, #1
 	cmp	r3, #31
-	bne	.L779
+	bne	.L846
 	mov	r3, #-1
-	b	.L778
-.L789:
+	b	.L845
+.L856:
 	.align	2
-.L788:
-	.word	.LC9
+.L855:
+	.word	.LC8
 	.word	.LANCHOR0
 	.word	g_venc_dev
 	.fnend
@@ -5122,43 +5580,43 @@ to_frame_hor_stride:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
 	cmp	r0, #65537
-	bhi	.L791
+	bhi	.L858
 	cmp	r0, #65536
-	bcs	.L793
+	bcs	.L860
 	subs	r0, r0, #9
 	cmp	r0, #1
 	ite	hi
 	movhi	r0, #1
 	movls	r0, #2
-.L792:
+.L859:
 	muls	r0, r1, r0
 	bx	lr
-.L791:
-	ldr	r3, .L798
+.L858:
+	ldr	r3, .L865
 	cmp	r0, r3
-	bcc	.L795
+	bcc	.L862
 	adds	r3, r3, #1
 	cmp	r0, r3
-	bls	.L796
+	bls	.L863
 	sub	r0, r0, #65536
 	subs	r0, r0, #16
 	cmp	r0, #3
 	ite	hi
 	movhi	r0, #1
 	movls	r0, #4
-	b	.L792
-.L793:
+	b	.L859
+.L860:
 	movs	r0, #2
-	b	.L792
-.L795:
+	b	.L859
+.L862:
 	movs	r0, #1
-	b	.L792
-.L796:
+	b	.L859
+.L863:
 	movs	r0, #3
-	b	.L792
-.L799:
+	b	.L859
+.L866:
 	.align	2
-.L798:
+.L865:
 	.word	65542
 	.fnend
 	.size	to_frame_hor_stride, .-to_frame_hor_stride
@@ -5173,365 +5631,362 @@ get_mpi_buf_frm_info:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, lr}
+	ldr	r3, .L950
+	push	{r4, r5, r6, r7, r8, r9, r10, lr}
 	.save {r4, r5, r6, r7, r8, r9, r10, lr}
-	.pad #16
-	mov	r5, r0
-	ldr	r3, .L876
+	.pad #24
+	sub	sp, sp, #24
+	mov	r7, r0
 	mov	r4, r1
-	mov	r7, r2
+	mov	r6, r2
 	mov	r8, #0
-.L803:
-	ldr	r2, [r3]
-	cbz	r2, .L801
-	ldr	r2, [r3, #4]
-	cmp	r7, r2
-	bne	.L801
-	ldr	r3, .L876+4
-	movw	r2, #36844
-	add	r3, r3, r8, lsl #4
-	ldr	r3, [r3, r2]
+	mov	r5, r3
+.L870:
+	ldr	r2, [r3, #2144]
+	cbz	r2, .L868
+	ldr	r2, [r3, #2148]
+	cmp	r6, r2
+	bne	.L868
+	add	r3, r5, r8, lsl #4
+	ldr	r3, [r3, #2152]
 	adds	r2, r3, #1
-	beq	.L802
+	beq	.L869
 	cmp	r3, #0
 	it	le
 	movle	r8, #-1
-.L802:
-	cbnz	r5, .L804
-.L875:
+.L869:
+	cbnz	r7, .L871
+.L949:
 	movs	r0, #0
-.L800:
-	add	sp, sp, #16
+.L867:
+	add	sp, sp, #24
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
-.L801:
+.L868:
 	add	r8, r8, #1
 	adds	r3, r3, #16
 	cmp	r8, #16
-	bne	.L803
+	bne	.L870
 	mov	r8, #-1
-	b	.L802
-.L804:
+	b	.L869
+.L871:
 	cmp	r4, #0
-	beq	.L875
-	ldr	r3, [r5, #620]
+	beq	.L949
+	ldr	r3, [r7, #620]
 	str	r3, [r4]
-	ldr	r3, [r5, #624]
+	ldr	r3, [r7, #624]
 	str	r3, [r4, #4]
-	ldr	r1, [r5, #628]
-	ldr	r0, [r5, #640]
+	ldr	r1, [r7, #628]
+	ldr	r0, [r7, #640]
 	bl	to_frame_hor_stride
 	ldrb	r2, [r4, #96]	@ zero_extendqisi2
-	cmp	r7, #0
+	cmp	r6, #0
 	str	r0, [r4, #8]
-	ldr	r3, [r5, #632]
+	ldr	r3, [r7, #632]
 	str	r3, [r4, #12]
-	ldr	r3, [r5, #584]
+	ldr	r3, [r7, #584]
 	asr	r3, r3, #3
 	bfi	r2, r3, #0, #1
 	strb	r2, [r4, #96]
-	blt	.L808
-	ldrd	r2, [r5, #672]
-	ldr	r6, .L876+4
+	blt	.L875
+	ldrd	r2, [r7, #672]
 	strd	r2, [r4, #40]
-	ldr	r3, [r5, #668]
+	ldr	r3, [r7, #668]
 	str	r3, [r4, #80]
 	movs	r3, #0
 	str	r3, [r4, #84]
-	add	r3, r6, r7, lsl #2
-	ldr	r3, [r3, #220]
-	cbz	r3, .L808
-	ldrd	r2, [r5, #672]
-	ldr	r1, [r5, #668]
-	orrs	r0, r2, r3
-	bne	.L810
-	cbz	r1, .L811
-.L810:
-	adds	r2, r1, #1
-	movs	r3, #0
-.L811:
-	strd	r2, [r4, #80]
-	ldrd	r2, [r5, #672]
+	add	r3, r5, r6, lsl #2
+	ldr	r3, [r3, #404]
+	cbz	r3, .L875
+	ldrd	r0, [r7, #672]
+	ldr	r3, [r7, #668]
+	orrs	r2, r0, r1
+	bne	.L877
+	cbz	r3, .L878
+.L877:
+	adds	r3, r3, #1
+	movs	r1, #0
+	mov	r0, r3
+.L878:
+	strd	r0, [r4, #80]
+	ldrd	r2, [r7, #672]
 	orrs	r3, r2, r3
-	bne	.L812
-	ldr	r3, [r5, #668]
+	bne	.L879
+	ldr	r3, [r7, #668]
 	cmp	r3, #0
-	bne	.L812
-.L815:
+	bne	.L879
+.L882:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	r9, cpsr	@ arch_local_irq_save
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r10, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r3, [r6, #352]
+	add	r9, r6, #392
+	ldr	r3, [r5, r9, lsl #2]
 	cmp	r3, #0
-	bne	.L813
-.L814:
+	bne	.L880
+.L881:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, r9	@ local_irq_restore
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r10	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-.L808:
-	cmp	r7, #15
+.L875:
+	cmp	r6, #15
 	mov	r3, #0
 	strd	r3, r3, [r4, #20]
-	bhi	.L817
-	ldr	r2, .L876+4
+	bhi	.L884
 	movs	r3, #24
-	mla	r3, r3, r7, r2
-	movw	r2, #36452
-	ldr	r2, [r3, r2]
-	cmp	r2, r7
-	bne	.L817
-	movw	r2, #36456
-	ldr	r2, [r3, r2]
-	str	r2, [r4, #20]
-	movw	r2, #36460
-	ldr	r3, [r3, r2]
-	str	r3, [r4, #24]
-.L817:
+	mla	r3, r3, r6, r5
+	ldr	r2, [r3, #1760]
+	cmp	r2, r6
+	itttt	eq
+	ldreq	r2, [r3, #1764]
+	streq	r2, [r4, #20]
+	ldreq	r3, [r3, #1768]
+	streq	r3, [r4, #24]
+.L884:
+	add	r9, r6, #204
 	movs	r3, #0
 	str	r8, [r4, #48]
 	str	r3, [r4, #52]
-	mov	r0, r7
 	str	r3, [r4, #60]
-	mov	r6, #2256
+	ldr	r10, [r5, r9, lsl #3]
+	cmp	r10, #0
+	beq	.L885
+	mov	r0, r6
 	bl	get_venc_node
-	muls	r6, r7, r6
 	mov	r1, r0
 	cmp	r0, #0
-	bne	.L818
-.L820:
+	bne	.L886
+.L887:
 	movs	r3, #0
 	str	r3, [r4, #52]
-.L819:
+.L885:
 	cmp	r8, #-1
-	beq	.L821
+	beq	.L888
+	add	r9, r5, r9, lsl #3
+	ldr	r9, [r9, #4]
+	cmp	r9, #0
+	beq	.L888
 	mov	r0, r8
 	bl	get_venc_node
 	mov	r1, r0
 	cmp	r0, #0
-	bne	.L822
-.L823:
+	bne	.L889
+.L890:
 	movs	r3, #0
 	str	r3, [r4, #60]
-.L821:
-	ldr	r3, [r5]
-	ldr	r2, .L876+8
+.L888:
+	ldr	r3, [r7]
+	ldr	r2, .L950+4
 	str	r3, [r4, #56]
-	add	r0, r2, #764
-	ldr	r1, [r5, #640]
+	add	ip, r2, #808
+	ldr	r1, [r7, #640]
 	movs	r3, #0
-.L826:
-	ldr	r6, [r0, r3, lsl #3]
-	cmp	r1, r6
-	bne	.L824
+.L893:
+	ldr	r0, [ip, r3, lsl #3]
+	cmp	r1, r0
+	bne	.L891
 	add	r3, r2, r3, lsl #3
-	ldr	r3, [r3, #768]
-.L825:
-	ldr	r6, .L876+4
+	ldr	r3, [r3, #812]
+.L892:
 	str	r3, [r4, #28]
-	add	r3, r6, r7, lsl #2
-	ldr	r3, [r3, #220]
+	add	r3, r5, r6, lsl #2
+	ldr	r3, [r3, #404]
 	cmp	r3, #0
-	bne	.L837
-	ldr	r3, [r5, #584]
+	bne	.L905
+	ldr	r3, [r7, #584]
 	tst	r3, #4
 	ite	eq
 	moveq	r3, #1
 	movne	r3, #0
-.L827:
+.L894:
+	cmp	r6, #7
 	str	r3, [r4, #64]
-	movs	r3, #0
+	mov	r3, #0
 	str	r3, [r4, #88]
-	cmp	r7, #0
-	bne	.L875
-	movw	r3, #37108
-	ldr	r2, [r6, r3]
-	movw	r3, #37112
-	ldr	r3, [r6, r3]
-	orrs	r3, r2, r3
-	beq	.L828
+	bhi	.L949
+	mov	r3, #988
+	mla	r3, r3, r6, r5
+	ldr	r2, [r3, #2408]
+	cbnz	r2, .L895
+	ldr	r3, [r3, #2412]
+	cbz	r3, .L896
+.L895:
 	movw	r1, #5500
 	movw	r0, #4500
 	bl	usleep_range
-.L828:
+.L896:
+	mov	r8, #988
 	movs	r2, #112
+	mul	r8, r8, r6
 	movs	r1, #0
-	ldr	r0, .L876+12
+	addw	r9, r8, #3140
+	add	r0, r5, r9
 	bl	memset
-	movw	r3, #37108
-	ldr	r3, [r6, r3]
-	cbz	r3, .L829
+	add	r3, r5, r8
+	ldr	r2, [r3, #2408]
+	cbz	r2, .L897
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r0, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	movw	r2, #37820
-	ldr	r3, [r5, #668]
-	ldr	r2, [r6, r2]
-	cmp	r2, r3
-	beq	.L838
-	movw	r2, #37828
-	ldr	r2, [r6, r2]
-	cmp	r2, r3
-	bne	.L831
+	ldr	r1, [r7, #668]
+	ldr	r2, [r3, #3128]
+	cmp	r1, r2
+	beq	.L906
+	ldr	r3, [r3, #3136]
+	cmp	r1, r3
+	bne	.L899
 	movs	r1, #1
-.L830:
-	add	r3, r1, #4704
-	movw	r2, #37832
-	adds	r3, r3, #23
-	ldr	r3, [r6, r3, lsl #3]
-	ldr	ip, [r3, #448]
-	movs	r3, #56
-	muls	r3, r1, r3
-	adds	r7, r6, r3
-	add	r3, r3, r2
-	add	r3, r3, r6
-	str	ip, [r7, r2]
-	str	r3, [r4, #88]
-	movw	r3, #37944
-	str	r1, [r6, r3]
-.L831:
+.L898:
+	mov	r3, #988
+	add	r2, r1, #90
+	muls	r3, r6, r3
+	add	r2, r3, r2, lsl #3
+	add	r2, r2, r5
+	ldr	r2, [r2, #2404]
+	ldr	lr, [r2, #448]
+	movs	r2, #56
+	muls	r2, r1, r2
+	add	ip, r2, r3
+	add	r3, r3, r5
+	add	ip, ip, r5
+	add	r2, r2, r9
+	add	r2, r2, r5
+	str	lr, [ip, #3140]
+	str	r2, [r4, #88]
+	str	r1, [r3, #3252]
+.L899:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r0	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-.L829:
-	movw	r3, #37112
-	ldr	r3, [r6, r3]
+.L897:
+	mov	r3, #988
+	mla	r3, r3, r6, r5
+	ldr	r3, [r3, #2412]
 	cmp	r3, #0
-	beq	.L875
+	beq	.L949
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	r1, cpsr	@ arch_local_irq_save
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r7, .L876+16
-	movs	r3, #0
-	ldr	r0, [r5, #668]
-	mov	ip, #52
-.L834:
-	mul	r2, ip, r3
-	ldr	r5, [r2, r7]
-	cmp	r0, r5
-	bne	.L832
-	movw	r3, #37944
-	add	r2, r2, r6
-	ldr	r0, [r6, r3]
+	ldr	r1, [r7, #668]
+	add	r8, r8, r5
+	movs	r0, #0
+.L902:
+	ldr	r3, [r8, #2648]
+	cmp	r1, r3
+	bne	.L900
+	mov	r1, #988
+	muls	r1, r6, r1
+	adds	r3, r5, r1
+	ldr	r6, [r3, #3252]
 	movs	r3, #56
-	movw	r5, #37292
-	ldr	r5, [r2, r5]
-	movw	r2, #37840
-	muls	r3, r0, r3
-	adds	r0, r6, r3
-	add	r3, r3, #37632
-	adds	r3, r3, #200
-	str	r5, [r0, r2]
-	add	r6, r6, r3
-	str	r6, [r4, #88]
-.L833:
+	muls	r3, r6, r3
+	movs	r6, #52
+	mla	r6, r6, r0, r1
+	adds	r7, r3, r1
+	add	r3, r3, r9
+	add	r7, r7, r5
+	add	r6, r6, r5
+	add	r5, r5, r3
+	ldr	r1, [r6, #2600]
+	str	r1, [r7, #3148]
+	str	r5, [r4, #88]
+.L901:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, r1	@ local_irq_restore
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	b	.L875
-.L812:
+	b	.L949
+.L879:
 	bl	mcu_get_wrap_status
 	cmp	r0, #2
-	beq	.L815
+	beq	.L882
 	mov	r0, #-1
-	b	.L800
-.L813:
-	mov	r0, r7
+	b	.L867
+.L880:
+	mov	r0, r6
 	bl	get_venc_node
-	ldr	r1, [r6, #352]
+	ldr	r1, [r5, r9, lsl #2]
 	ldr	r3, [r0, #288]
 	ldr	r0, [r3]
 	bl	mpi_queue_push_obj
-	cbz	r0, .L816
+	cbz	r0, .L883
 	movs	r3, #0
-	str	r3, [r6, #352]
-	b	.L814
-.L816:
-	ldr	r1, [r6, #352]
+	str	r3, [r5, r9, lsl #2]
+	b	.L881
+.L883:
+	ldr	r1, [r5, r9, lsl #2]
 	movs	r0, #4
 	ldrd	r2, [r1, #672]
-	strd	r2, [sp, #8]
+	strd	r2, [sp, #16]
 	ldr	r3, [r1, #668]
 	movs	r1, #2
-	ldr	r2, .L876+20
-	str	r3, [sp, #4]
-	movw	r3, #1339
+	ldr	r2, .L950+8
+	strd	r6, r3, [sp, #4]
+	movw	r3, #1414
 	str	r3, [sp]
-	ldr	r3, .L876+24
+	ldr	r3, .L950+12
 	bl	vlog
-	b	.L814
-.L818:
-	ldr	r10, .L876+4
-	add	r9, r6, #356
-	add	r9, r9, r10
-	add	r10, r10, r6
+	b	.L881
+.L886:
+	mov	r0, r10
+	bl	set_osd_data
+	ldr	r3, [r10, #4]
+	cmp	r3, #0
+	beq	.L887
+	str	r10, [r4, #52]
+	b	.L885
+.L889:
 	mov	r0, r9
 	bl	set_osd_data
-	ldr	r3, [r10, #360]
+	ldr	r3, [r9, #4]
 	cmp	r3, #0
-	beq	.L820
-	str	r9, [r4, #52]
-	b	.L819
-.L822:
-	ldr	r8, .L876+4
-	addw	r6, r6, #1484
-	add	r6, r6, r8
-	mov	r0, r6
-	bl	set_osd_data
-	mov	r3, #2256
-	mla	r3, r3, r7, r8
-	ldr	r3, [r3, #1488]
-	cmp	r3, #0
-	beq	.L823
-	str	r6, [r4, #60]
-	b	.L821
-.L877:
+	beq	.L890
+	str	r9, [r4, #60]
+	b	.L888
+.L951:
 	.align	2
-.L876:
-	.word	g_venc_dev+36836
+.L950:
 	.word	g_venc_dev
 	.word	.LANCHOR0
-	.word	g_venc_dev+37832
-	.word	g_venc_dev+37340
-	.word	.LC57
-	.word	.LANCHOR0+1012
-.L824:
+	.word	.LC56
+	.word	.LANCHOR0+1056
+.L891:
 	adds	r3, r3, #1
 	cmp	r3, #31
-	bne	.L826
+	bne	.L893
 	mov	r3, #-1
-	b	.L825
-.L837:
+	b	.L892
+.L905:
 	movs	r3, #0
-	b	.L827
-.L838:
+	b	.L894
+.L906:
 	movs	r1, #0
-	b	.L830
-.L832:
-	adds	r3, r3, #1
-	cmp	r3, #10
-	bne	.L834
-	b	.L833
+	b	.L898
+.L900:
+	adds	r0, r0, #1
+	add	r8, r8, #52
+	cmp	r0, #10
+	bne	.L902
+	b	.L901
 	.fnend
 	.size	get_mpi_buf_frm_info, .-get_mpi_buf_frm_info
 	.align	1
@@ -5545,68 +6000,122 @@ venc_probe:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r3, r4, r5, r6, r7, lr}
-	.save {r3, r4, r5, r6, r7, lr}
+	push	{r0, r1, r2, r4, r5, r6, r7, r8, r9, lr}
+	.save {r4, r5, r6, r7, r8, r9, lr}
+	.pad #12
+	movw	r2, #43240
 	movs	r1, #0
-	ldr	r4, .L879
 	mov	r7, r0
-	ldr	r2, .L879+4
-	adds	r5, r4, #4
-	ldr	r6, .L879+8
-	mov	r0, r4
+	ldr	r0, .L958
+	movs	r6, #0
 	bl	memset
 	movs	r2, #16
 	mov	r1, #-1
-	ldr	r0, .L879+12
+	ldr	r0, .L958+4
 	bl	memset
-	ldr	r2, .L879+16
-	ldr	r1, .L879+20
-	ldr	r0, .L879+24
-	bl	__init_waitqueue_head
+	ldr	r5, .L958
+	ldr	r8, .L958+44
+	ldr	r9, .L958+52
+	mov	r4, r5
+.L955:
+	mov	r0, #1128
+	bl	kzalloc.constprop.16
+	str	r0, [r5, #1632]
+	cbnz	r0, .L953
+	movw	r3, #2567
+	mov	r2, r9
+	str	r3, [sp]
+	movs	r1, #2
+	mov	r3, r8
+	movs	r0, #4
+	bl	vlog
+.L953:
+	mov	r0, #1128
+	bl	kzalloc.constprop.16
+	str	r0, [r5, #1636]
+	cbnz	r0, .L954
+	movw	r3, #2570
+	ldr	r2, .L958+8
+	str	r3, [sp]
+	movs	r1, #2
+	mov	r3, r8
+	movs	r0, #4
+	bl	vlog
+.L954:
+	adds	r6, r6, #1
+	adds	r5, r5, #8
+	cmp	r6, #16
+	bne	.L955
 	mov	r1, #3264
 	mov	r0, r7
 	bl	kstrdup
+	ldr	r5, .L958+12
 	mov	r2, r7
 	movs	r1, #8
-	addw	r3, r6, #1036
 	str	r4, [r4, #164]
-	str	r3, [r4, #188]
-	movs	r3, #23
+	movs	r3, #24
+	str	r5, [r4, #188]
 	str	r3, [r4, #192]
 	str	r0, [r4]
-	mov	r0, r5
+	ldr	r0, .L958+16
 	bl	mpi_dev_register
-	ldr	r3, .L879+28
+	ldr	r3, .L958+20
+	add	r1, r5, #480
 	movs	r2, #0
-	add	r1, r6, #1496
-	mov	r0, r5
+	ldr	r0, .L958+16
 	str	r3, [r4, #72]
-	ldr	r3, .L879+32
+	ldr	r3, .L958+24
 	str	r3, [r4, #80]
-	ldr	r3, .L879+36
+	ldr	r3, .L958+28
 	str	r3, [r4, #84]
 	bl	mpi_sysfs_dev_add
-	add	r3, r4, #172
-	str	r3, [r4, #172]
-	str	r3, [r4, #176]
+	ldr	r1, .L958+32
 	movs	r3, #0
+	ldr	r0, .L958+36
+	add	r2, r1, #28
 	str	r3, [r4, #196]
-	add	r3, r4, #200
-	strd	r3, r3, [r4, #200]
-	pop	{r3, r4, r5, r6, r7, pc}
-.L880:
+	str	r1, [r4, #172]
+	str	r1, [r4, #176]
+	subs	r1, r1, #172
+	strd	r2, r2, [r4, #200]
+	mov	r2, #-1
+	str	r3, [r4, #180]
+	ldr	r3, .L958+40
+	bl	kthread_create_on_node
+	cmn	r0, #4096
+	mov	r5, r0
+	bhi	.L956
+	bl	wake_up_process
+.L956:
+	movs	r1, #4
+	str	r5, [r4, #168]
+	movw	r3, #2597
+	str	r5, [sp, #4]
+	str	r3, [sp]
+	mov	r0, r1
+	ldr	r3, .L958+44
+	ldr	r2, .L958+48
+	bl	vlog
+	add	sp, sp, #12
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, pc}
+.L959:
 	.align	2
-.L879:
+.L958:
 	.word	g_venc_dev
-	.word	70856
-	.word	.LANCHOR0
-	.word	g_venc_dev+37968
-	.word	.LANCHOR1+4
+	.word	g_venc_dev+10320
 	.word	.LC58
-	.word	g_venc_dev+37092
+	.word	.LANCHOR0+1088
+	.word	g_venc_dev+4
 	.word	venc_create_ctx
 	.word	venc_destroy_ctx
 	.word	venc_handle_message
+	.word	g_venc_dev+172
+	.word	venc_thread_fn
+	.word	.LC8
+	.word	.LANCHOR0+1077
+	.word	.LC59
+	.word	.LC57
 	.fnend
 	.size	venc_probe, .-venc_probe
 	.align	1
@@ -5620,19 +6129,75 @@ venc_shutdown:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, lr}
-	.save {r4, lr}
-	ldr	r4, .L882
+	push	{r0, r1, r4, r5, r6, lr}
+	.save {r4, r5, r6, lr}
+	.pad #8
+	ldr	r4, .L975
+	ldr	r3, [r4, #168]
+	cbz	r3, .L961
+	cmn	r3, #4096
+	bhi	.L961
+	add	r0, r4, #196
+	movs	r3, #1
+	str	r3, [r4, #180]
+	bl	up
+	ldr	r3, [r4, #168]
+	movs	r1, #4
+	ldr	r2, .L975+4
+	mov	r0, r1
+	str	r3, [sp, #4]
+	movw	r3, #2609
+	str	r3, [sp]
+	ldr	r3, .L975+8
+	bl	vlog
+	ldr	r0, [r4, #168]
+	bl	kthread_stop
+	ldr	r3, [r4, #168]
+	movs	r1, #4
+	ldr	r2, .L975+12
+	mov	r0, r1
+	str	r3, [sp, #4]
+	movw	r3, #2611
+	str	r3, [sp]
+	ldr	r3, .L975+8
+	bl	vlog
+	movs	r3, #0
+	str	r3, [r4, #168]
+.L961:
+	ldr	r4, .L975+16
+	movs	r5, #0
+	mov	r6, r5
 	mov	r0, r4
 	bl	mpi_sysfs_dev_remove
 	mov	r0, r4
 	bl	mpi_dev_unregister
-	ldr	r0, [r4, #-4]
-	pop	{r4, lr}
-	b	kfree
-.L883:
+	ldr	r0, [r4, #-4]!
+	bl	kfree
+.L964:
+	ldr	r0, [r4, #1632]
+	cbz	r0, .L962
+	bl	kfree
+	str	r6, [r4, #1632]
+.L962:
+	ldr	r0, [r4, #1636]
+	cbz	r0, .L963
+	bl	kfree
+	str	r6, [r4, #1636]
+.L963:
+	adds	r5, r5, #1
+	adds	r4, r4, #8
+	cmp	r5, #16
+	bne	.L964
+	add	sp, sp, #8
+	@ sp needed
+	pop	{r4, r5, r6, pc}
+.L976:
 	.align	2
-.L882:
+.L975:
+	.word	g_venc_dev
+	.word	.LC60
+	.word	.LANCHOR0+1696
+	.word	.LC61
 	.word	g_venc_dev+4
 	.fnend
 	.size	venc_shutdown, .-venc_shutdown
@@ -5650,21 +6215,21 @@ venc_init:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, lr}
 	.save {r4, lr}
-	ldr	r4, .L885
-	ldr	r0, .L885+4
+	ldr	r4, .L978
+	ldr	r0, .L978+4
 	bl	venc_probe
-	add	r0, r4, #68
+	add	r0, r4, #72
 	mov	r1, r4
 	bl	vmpi_register_fn2vcocdec
 	mov	r0, r4
 	bl	register_vmpibuf_func_to_pp
 	movs	r0, #0
 	pop	{r4, pc}
-.L886:
+.L979:
 	.align	2
-.L885:
+.L978:
 	.word	.LANCHOR2
-	.word	.LC9
+	.word	.LC8
 	.fnend
 	.size	venc_init, .-venc_init
 	.section	.exit.text,"ax",%progbits
@@ -5693,142 +6258,154 @@ venc_exit:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__func__.39073, %object
-	.size	__func__.39073, 25
-__func__.39073:
+	.type	__func__.37358, %object
+	.size	__func__.37358, 25
+__func__.37358:
 	.ascii	"venc_node_pp_get_md_attr\000"
-	.type	__func__.39086, %object
-	.size	__func__.39086, 20
-__func__.39086:
+	.type	__func__.37365, %object
+	.size	__func__.37365, 20
+__func__.37365:
 	.ascii	"venc_node_enable_tb\000"
-	.type	__func__.39099, %object
-	.size	__func__.39099, 18
-__func__.39099:
+	.type	__func__.37372, %object
+	.size	__func__.37372, 18
+__func__.37372:
 	.ascii	"venc_node_tb_bind\000"
-	.type	__func__.39113, %object
-	.size	__func__.39113, 21
-__func__.39113:
+	.type	__func__.37380, %object
+	.size	__func__.37380, 21
+__func__.37380:
 	.ascii	"venc_node_tb_request\000"
-	.type	__func__.38571, %object
-	.size	__func__.38571, 14
-__func__.38571:
-	.ascii	"vcodec_notify\000"
-	.type	__func__.38549, %object
-	.size	__func__.38549, 22
-__func__.38549:
+	.type	__func__.36857, %object
+	.size	__func__.36857, 22
+__func__.36857:
 	.ascii	"vcodec_set_intra_info\000"
-	.type	__func__.38637, %object
-	.size	__func__.38637, 14
-__func__.38637:
-	.ascii	"mpi_buf_unref\000"
-	.type	__func__.38813, %object
-	.size	__func__.38813, 17
-__func__.38813:
-	.ascii	"venc_node_create\000"
-	.type	__func__.38829, %object
-	.size	__func__.38829, 17
-__func__.38829:
-	.ascii	"venc_node_delete\000"
-	.type	__func__.38845, %object
-	.size	__func__.38845, 16
-__func__.38845:
-	.ascii	"venc_node_start\000"
-	.type	__func__.38440, %object
-	.size	__func__.38440, 15
-__func__.38440:
-	.ascii	"send_first_buf\000"
-	.type	__func__.39012, %object
-	.size	__func__.39012, 19
-__func__.39012:
-	.ascii	"venc_node_pp_start\000"
-	.type	__func__.38898, %object
-	.size	__func__.38898, 26
-__func__.38898:
-	.ascii	"venc_node_set_vcodec_attr\000"
-	.type	__func__.38912, %object
-	.size	__func__.38912, 26
-__func__.38912:
-	.ascii	"venc_node_get_vcodec_attr\000"
-	.type	__func__.38856, %object
-	.size	__func__.38856, 21
-__func__.38856:
-	.ascii	"venc_node_send_frame\000"
-	.type	__func__.39023, %object
-	.size	__func__.39023, 24
-__func__.39023:
-	.ascii	"venc_node_pp_send_frame\000"
-	.type	__func__.39229, %object
-	.size	__func__.39229, 15
-__func__.39229:
-	.ascii	"venc_thread_fn\000"
-	.type	__func__.38496, %object
-	.size	__func__.38496, 28
-__func__.38496:
-	.ascii	"venc_handle_node_pp_message\000"
-	.type	__func__.39192, %object
-	.size	__func__.39192, 13
-__func__.39192:
-	.ascii	"venc_release\000"
-	.type	__func__.39132, %object
-	.size	__func__.39132, 11
-__func__.39132:
-	.ascii	"venc_ioctl\000"
-	.type	__func__.38563, %object
-	.size	__func__.38563, 23
-__func__.38563:
-	.ascii	"vcodec_notify_drop_frm\000"
-	.type	__func__.38926, %object
-	.size	__func__.38926, 20
-__func__.38926:
-	.ascii	"venc_node_set_combo\000"
-	.type	__func__.38941, %object
-	.size	__func__.38941, 19
-__func__.38941:
-	.ascii	"venc_node_set_snap\000"
-	.type	__func__.38961, %object
-	.size	__func__.38961, 24
-__func__.38961:
+	.type	__func__.37264, %object
+	.size	__func__.37264, 24
+__func__.37264:
 	.ascii	"venc_node_set_framerate\000"
-	.type	__func__.38796, %object
-	.size	__func__.38796, 16
-__func__.38796:
-	.ascii	"venc_node_check\000"
-	.type	__func__.38789, %object
-	.size	__func__.38789, 17
-__func__.38789:
-	.ascii	"venc_get_version\000"
-	.type	__func__.38870, %object
-	.size	__func__.38870, 19
-__func__.38870:
-	.ascii	"venc_node_set_crop\000"
-	.type	__func__.38884, %object
-	.size	__func__.38884, 19
-__func__.38884:
-	.ascii	"venc_node_get_crop\000"
-	.type	__func__.39059, %object
-	.size	__func__.39059, 25
-__func__.39059:
-	.ascii	"venc_node_pp_set_md_attr\000"
-	.type	__func__.38974, %object
-	.size	__func__.38974, 20
-__func__.38974:
+	.type	__func__.36981, %object
+	.size	__func__.36981, 14
+__func__.36981:
+	.ascii	"mpi_buf_unref\000"
+	.type	__func__.37156, %object
+	.size	__func__.37156, 17
+__func__.37156:
+	.ascii	"venc_node_create\000"
+	.type	__func__.37166, %object
+	.size	__func__.37166, 17
+__func__.37166:
+	.ascii	"venc_node_delete\000"
+	.type	__func__.37312, %object
+	.size	__func__.37312, 19
+__func__.37312:
+	.ascii	"venc_node_pp_start\000"
+	.type	__func__.37183, %object
+	.size	__func__.37183, 16
+__func__.37183:
+	.ascii	"venc_node_start\000"
+	.type	__func__.36739, %object
+	.size	__func__.36739, 15
+__func__.36739:
+	.ascii	"send_first_buf\000"
+	.type	__func__.37225, %object
+	.size	__func__.37225, 26
+__func__.37225:
+	.ascii	"venc_node_set_vcodec_attr\000"
+	.type	__func__.37233, %object
+	.size	__func__.37233, 26
+__func__.37233:
+	.ascii	"venc_node_get_vcodec_attr\000"
+	.type	__func__.37190, %object
+	.size	__func__.37190, 15
+__func__.37190:
+	.ascii	"venc_node_stop\000"
+	.type	__func__.37201, %object
+	.size	__func__.37201, 21
+__func__.37201:
+	.ascii	"venc_node_send_frame\000"
+	.type	__func__.37323, %object
+	.size	__func__.37323, 24
+__func__.37323:
+	.ascii	"venc_node_pp_send_frame\000"
+	.type	__func__.37280, %object
+	.size	__func__.37280, 20
+__func__.37280:
 	.ascii	"venc_node_pp_create\000"
-	.type	__func__.39039, %object
-	.size	__func__.39039, 24
-__func__.39039:
-	.ascii	"venc_node_pp_get_result\000"
-	.type	__func__.39000, %object
-	.size	__func__.39000, 20
-__func__.39000:
+	.type	__func__.37300, %object
+	.size	__func__.37300, 20
+__func__.37300:
 	.ascii	"venc_node_pp_delete\000"
-	.type	__func__.38382, %object
-	.size	__func__.38382, 18
-__func__.38382:
+	.type	__func__.37455, %object
+	.size	__func__.37455, 13
+__func__.37455:
+	.ascii	"venc_release\000"
+	.type	__func__.37399, %object
+	.size	__func__.37399, 11
+__func__.37399:
+	.ascii	"venc_ioctl\000"
+	.type	__func__.36796, %object
+	.size	__func__.36796, 28
+__func__.36796:
+	.ascii	"venc_handle_node_pp_message\000"
+	.type	__func__.36883, %object
+	.size	__func__.36883, 23
+__func__.36883:
+	.ascii	"vcodec_notify_drop_frm\000"
+	.type	__func__.37241, %object
+	.size	__func__.37241, 20
+__func__.37241:
+	.ascii	"venc_node_set_combo\000"
+	.type	__func__.37250, %object
+	.size	__func__.37250, 19
+__func__.37250:
+	.ascii	"venc_node_set_snap\000"
+	.type	__func__.36901, %object
+	.size	__func__.36901, 14
+__func__.36901:
+	.ascii	"vcodec_notify\000"
+	.type	__func__.37144, %object
+	.size	__func__.37144, 16
+__func__.37144:
+	.ascii	"venc_node_check\000"
+	.type	__func__.37137, %object
+	.size	__func__.37137, 17
+__func__.37137:
+	.ascii	"venc_get_version\000"
+	.type	__func__.37209, %object
+	.size	__func__.37209, 19
+__func__.37209:
+	.ascii	"venc_node_set_crop\000"
+	.type	__func__.37217, %object
+	.size	__func__.37217, 19
+__func__.37217:
+	.ascii	"venc_node_get_crop\000"
+	.type	__func__.37349, %object
+	.size	__func__.37349, 25
+__func__.37349:
+	.ascii	"venc_node_pp_set_md_attr\000"
+	.type	__func__.37440, %object
+	.size	__func__.37440, 10
+__func__.37440:
+	.ascii	"venc_open\000"
+	.type	__func__.37334, %object
+	.size	__func__.37334, 24
+__func__.37334:
+	.ascii	"venc_node_pp_get_result\000"
+	.type	__func__.37497, %object
+	.size	__func__.37497, 15
+__func__.37497:
+	.ascii	"venc_thread_fn\000"
+	.type	__func__.36623, %object
+	.size	__func__.36623, 19
+__func__.36623:
+	.ascii	"set_2bpp_color_lut\000"
+	.type	__func__.36674, %object
+	.size	__func__.36674, 18
+__func__.36674:
 	.ascii	"to_osd_invert_cfg\000"
 	.space	2
-	.type	CSWTCH.96, %object
-	.size	CSWTCH.96, 68
-CSWTCH.96:
+	.type	CSWTCH.368, %object
+	.size	CSWTCH.368, 68
+CSWTCH.368:
 	.word	65551
 	.word	65551
 	.word	65550
@@ -5846,13 +6423,13 @@ CSWTCH.96:
 	.word	-1
 	.word	-1
 	.word	17
-	.type	__func__.38319, %object
-	.size	__func__.38319, 20
-__func__.38319:
+	.type	__func__.36610, %object
+	.size	__func__.36610, 20
+__func__.36610:
 	.ascii	"to_osd_alpha_source\000"
-	.type	__func__.38456, %object
-	.size	__func__.38456, 25
-__func__.38456:
+	.type	__func__.36755, %object
+	.size	__func__.36755, 25
+__func__.36755:
 	.ascii	"venc_handle_node_message\000"
 	.space	3
 	.type	fmt, %object
@@ -5920,128 +6497,136 @@ fmt:
 	.word	65548
 	.word	65555
 	.word	65549
-	.type	__func__.38748, %object
-	.size	__func__.38748, 21
-__func__.38748:
+	.type	__func__.37095, %object
+	.size	__func__.37095, 21
+__func__.37095:
 	.ascii	"get_mpi_buf_frm_info\000"
-	.space	3
+	.type	__func__.37581, %object
+	.size	__func__.37581, 11
+__func__.37581:
+	.ascii	"venc_probe\000"
 	.type	venc_ioctls, %object
-	.size	venc_ioctls, 460
+	.size	venc_ioctls, 480
 venc_ioctls:
 	.word	-1068735232
 	.word	0
 	.word	venc_get_version
-	.word	.LC59
+	.word	.LC62
 	.word	0
 	.word	-1072667391
 	.word	0
 	.word	venc_node_create
-	.word	.LC60
+	.word	.LC63
 	.word	0
 	.word	1074029826
 	.word	0
 	.word	venc_node_delete
-	.word	.LC61
+	.word	.LC64
 	.word	0
 	.word	1076126979
 	.word	0
 	.word	venc_node_start
-	.word	.LC62
+	.word	.LC65
 	.word	0
 	.word	1079796996
 	.word	0
 	.word	venc_node_send_frame
-	.word	.LC63
+	.word	.LC66
 	.word	0
 	.word	1075340549
 	.word	0
 	.word	venc_node_set_crop
-	.word	.LC64
+	.word	.LC67
 	.word	0
 	.word	1074554118
 	.word	0
 	.word	venc_node_set_combo
-	.word	.LC65
+	.word	.LC68
 	.word	0
 	.word	1074554119
 	.word	0
 	.word	venc_node_set_snap
-	.word	.LC66
+	.word	.LC69
 	.word	0
-	.word	-1069783800
+	.word	-1069259512
 	.word	0
 	.word	venc_node_pp_create
-	.word	.LC67
+	.word	.LC70
 	.word	0
 	.word	1074029833
 	.word	0
 	.word	venc_node_pp_delete
-	.word	.LC68
+	.word	.LC71
 	.word	0
 	.word	1074029834
 	.word	0
 	.word	venc_node_pp_start
-	.word	.LC69
+	.word	.LC72
 	.word	0
 	.word	1079797003
 	.word	0
 	.word	venc_node_pp_send_frame
-	.word	.LC70
+	.word	.LC73
 	.word	0
 	.word	-1071618804
 	.word	0
 	.word	venc_node_pp_get_result
-	.word	.LC71
+	.word	.LC74
 	.word	0
 	.word	1074029837
 	.word	0
 	.word	venc_node_enable_tb
-	.word	.LC72
+	.word	.LC75
 	.word	0
 	.word	1074291982
 	.word	0
 	.word	venc_node_tb_bind
-	.word	.LC73
+	.word	.LC76
 	.word	0
 	.word	1074029839
 	.word	0
 	.word	venc_node_tb_request
-	.word	.LC74
+	.word	.LC77
 	.word	0
 	.word	-1072143088
 	.word	0
 	.word	venc_node_get_crop
-	.word	.LC75
+	.word	.LC78
 	.word	0
 	.word	1077699857
 	.word	0
 	.word	venc_node_set_vcodec_attr
-	.word	.LC76
+	.word	.LC79
 	.word	0
 	.word	-1069783790
 	.word	0
 	.word	venc_node_get_vcodec_attr
-	.word	.LC77
+	.word	.LC80
 	.word	0
 	.word	-1071356653
 	.word	0
 	.word	venc_node_pp_set_md_attr
-	.word	.LC78
+	.word	.LC81
 	.word	0
 	.word	-1071356652
 	.word	0
 	.word	venc_node_pp_get_md_attr
-	.word	.LC79
+	.word	.LC82
 	.word	0
 	.word	1074816277
 	.word	0
 	.word	venc_node_check
-	.word	.LC80
+	.word	.LC83
 	.word	0
 	.word	1074816278
 	.word	0
 	.word	venc_node_set_framerate
-	.word	.LC81
+	.word	.LC84
+	.word	0
+	.word	1074029847
+	.word	0
+	.word	venc_node_stop
+	.word	.LC85
 	.word	0
 	.type	venc_driver_fops, %object
 	.size	venc_driver_fops, 128
@@ -6059,11 +6644,15 @@ venc_driver_fops:
 	.space	4
 	.word	venc_release
 	.space	60
+	.type	__func__.37602, %object
+	.size	__func__.37602, 14
+__func__.37602:
+	.ascii	"venc_shutdown\000"
 	.data
 	.align	2
 	.set	.LANCHOR2,. + 0
 	.type	gmpi_buf_ops, %object
-	.size	gmpi_buf_ops, 68
+	.size	gmpi_buf_ops, 72
 gmpi_buf_ops:
 	.word	mpi_buf_alloc
 	.word	mpi_buf_map
@@ -6076,6 +6665,7 @@ gmpi_buf_ops:
 	.word	mpi_buffer_queue_destroy
 	.word	mpi_buffer_queue_push
 	.word	mpi_buffer_queue_pop
+	.word	mpi_buffer_queue_size
 	.word	dma_buf_import_mpi_buf
 	.word	get_mpi_buf_frm_info
 	.word	mpi_buffer_pool_create
@@ -6097,18 +6687,18 @@ gmpidev_ops:
 	.bss
 	.align	3
 	.set	.LANCHOR1,. + 0
-	.type	__func____LINE__.38476, %object
-	.size	__func____LINE__.38476, 4
-__func____LINE__.38476:
+	.type	__key.37281, %object
+	.size	__key.37281, 0
+__key.37281:
+	.type	__func____LINE__.36775, %object
+	.size	__func____LINE__.36775, 4
+__func____LINE__.36775:
 	.space	4
-	.type	__key.39311, %object
-	.size	__key.39311, 0
-__key.39311:
 	.space	4
 	.type	g_venc_dev, %object
-	.size	g_venc_dev, 70856
+	.size	g_venc_dev, 43240
 g_venc_dev:
-	.space	70856
+	.space	43240
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:
 	.ascii	"\033[1;31mstruct venc_pp_md_attr mismatching\033[0m"
@@ -6118,170 +6708,180 @@ g_venc_dev:
 .LC2:
 	.ascii	"\033[1;31mchnId %d and %d need less than %d\033[0m\000"
 .LC3:
-	.ascii	"wrap trigger again, seq: %llu\000"
+	.ascii	"\033[1;32mchn %d wrap trigger again\033[0m\000"
 .LC4:
-	.ascii	"wrap trigger again fail, seq: %llu\000"
-.LC5:
-	.ascii	"chn %d wrap trigger again\000"
-.LC6:
-	.ascii	"chn %d wrap trigger again fail\000"
-.LC7:
 	.ascii	"\033[1;31mrequest thumbnail more than %d\033[0m\000"
-.LC8:
+.LC5:
+	.ascii	"\033[1;31mstruct venc_framerate mismatching\033[0m\000"
+.LC6:
+	.ascii	"\033[1;32mchn %d vdev->fps_in %d, vdev->fps_out %d\012"
+	.ascii	"\033[0m\000"
+.LC7:
 	.ascii	"valloc\000"
-.LC9:
+.LC8:
 	.ascii	"venc\000"
-.LC10:
+.LC9:
 	.ascii	"buf(%d)\000"
-.LC11:
+.LC10:
 	.ascii	"rkv_enc\000"
-.LC12:
+.LC11:
 	.ascii	"\033[1;31mstruct venc_info mismatching\033[0m\000"
-.LC13:
+.LC12:
 	.ascii	"\033[1;31merror getting vdev  %p\033[0m\000"
-.LC14:
+.LC13:
 	.ascii	"\033[1;31m====== error create venc node\033[0m\000"
-.LC15:
+.LC14:
 	.ascii	"\0013%s[%d] struct venc_frame mismatching\000"
-.LC16:
+.LC15:
 	.ascii	"ch = %d, warp enable = %d, wrap line = %d\000"
-.LC17:
+.LC16:
 	.ascii	"\033[1;32msend first buf to venc %d, %d, %d ,%d\033"
 	.ascii	"[0m\000"
-.LC18:
+.LC17:
 	.ascii	"\033[1;31msend first buf to venc fail: queue is NUL"
 	.ascii	"L!\033[0m\000"
-.LC19:
+.LC18:
 	.ascii	"\033[1;31msend first buf to venc fail: push queue e"
 	.ascii	"rror!\033[0m\000"
-.LC20:
+.LC19:
 	.ascii	"\033[1;31mstruct venc_frame mismatching\033[0m\000"
-.LC21:
+.LC20:
 	.ascii	"\033[1;31mchnId %d send frame fail: node %px, enc_d"
 	.ascii	"ev %px, frameFd %d\033[0m\000"
-.LC22:
+.LC21:
 	.ascii	"\033[1;31mchnId %d send frame fail: pp_node %px, en"
 	.ascii	"c_dev %px, frameFd %d\033[0m\000"
+.LC22:
+	.ascii	"\033[1;31mstruct venc_pp_info mismatching\033[0m\000"
 .LC23:
-	.ascii	"%s register ok = %p\000"
+	.ascii	"\033[1;31mchnId %d is exist!\033[0m\000"
 .LC24:
-	.ascii	"\033[1;32mthread exit\012\033[0m\000"
+	.ascii	"&pp->wait\000"
 .LC25:
-	.ascii	"venc_pp(%s-%d) buf(%d) ready, pending: %d\000"
+	.ascii	"\033[1;31merror\033[0m\000"
 .LC26:
-	.ascii	"venc(%s-%d) drop buf(%d)\000"
+	.ascii	"\033[1;31m====== error create venc pp node\033[0m\000"
 .LC27:
 	.ascii	"%s %d\000"
 .LC28:
-	.ascii	"\033[1;32mstop thread %p\012\033[0m\000"
-.LC29:
-	.ascii	"\033[1;32mstop thread %p ok\012\033[0m\000"
-.LC30:
 	.ascii	"======error: index = %d\000"
-.LC31:
+.LC29:
 	.ascii	"======error: ioctl is null\000"
-.LC32:
+.LC30:
 	.ascii	"======error venc ioctl\000"
+.LC31:
+	.ascii	"\033[1;31mchn %d error!\033[0m\000"
+.LC32:
+	.ascii	"venc_pp(%s-%d) buf(%d) ready, pending: %d\000"
 .LC33:
-	.ascii	"\033[1;31mstruct venc_combo mismatching\033[0m\000"
+	.ascii	"venc(%s-%d) drop buf(%d)\000"
 .LC34:
-	.ascii	"\033[1;31mstruct venc_snap mismatching\033[0m\000"
+	.ascii	"\033[1;31mstruct venc_combo mismatching\033[0m\000"
 .LC35:
-	.ascii	"\033[1;31mstruct venc_framerate mismatching\033[0m\000"
+	.ascii	"\033[1;31mstruct venc_snap mismatching\033[0m\000"
 .LC36:
-	.ascii	"\033[1;32mvdev->wrap_in %d, vdev->wrap_out %d\012\033"
-	.ascii	"[0m\000"
+	.ascii	"chn %d wrap trigger again, seq: %llu\000"
 .LC37:
 	.ascii	"\033[1;31mstruct venc_version mismatching\033[0m\000"
 .LC38:
 	.ascii	"\033[1;31mstruct venc_crop mismatching\033[0m\000"
 .LC39:
-	.ascii	"\033[1;31mstruct venc_pp_info mismatching\033[0m\000"
+	.ascii	"\033[1;31mdata alloc failed!\012\033[0m\000"
 .LC40:
-	.ascii	"\033[1;31merror\033[0m\000"
-.LC41:
-	.ascii	"\033[1;31m====== error create venc pp node\033[0m\000"
-.LC42:
-	.ascii	"\033[1;32mcreate thread %p\012\033[0m\000"
-.LC43:
 	.ascii	"\033[1;31mstruct venc_pp_result mismatching\033[0m\000"
+.LC41:
+	.ascii	"%s register ok = %p\000"
+.LC42:
+	.ascii	"\033[1;32mthread exit\012\033[0m\000"
+.LC43:
+	.ascii	"\033[1;31mvepu pp drop buf(%dx%d)\033[0m\000"
 .LC44:
-	.ascii	"Inverted cells do not support size\012\000"
+	.ascii	"rgb[0]:(%d %d %d) rgb[1]:(%d %d %d) ayuv[0]:(%d %d "
+	.ascii	"%d %d) ayuv[1]:(%d %d %d %d)\000"
 .LC45:
-	.ascii	"\033[1;31mcreate light lut failed!\033[0m\000"
+	.ascii	"Inverted cells do not support size\012\000"
 .LC46:
-	.ascii	"rbuv_swap not support\000"
+	.ascii	"\033[1;31mcreate light lut failed!\033[0m\000"
 .LC47:
-	.ascii	"alpha_swap not support\000"
+	.ascii	"rbuv_swap not support\000"
 .LC48:
-	.ascii	"\033[1;31merror format!\033[0m\000"
+	.ascii	"alpha_swap not support\000"
 .LC49:
-	.ascii	"\033[1;31mchn %d error!\033[0m\000"
+	.ascii	"\033[1;31merror format!\033[0m\000"
 .LC50:
 	.ascii	"\033[1;31mchn %d queue is NULL!\033[0m\000"
 .LC51:
 	.ascii	"\033[1;32mseq lost = %d, %d\033[0m\000"
 .LC52:
-	.ascii	"\033[1;31mwrap mode lost buf, seq = %d\033[0m\000"
+	.ascii	"\033[1;31mchn %d wrap mode lost buf, seq = %d\033[0"
+	.ascii	"m\000"
 .LC53:
-	.ascii	"\033[1;32mvenc lost a buf pts = %d\033[0m\000"
+	.ascii	"\033[1;32mvenc lost a buf pts = %llu\033[0m\000"
 .LC54:
-	.ascii	"\033[1;32mstart wrap buf: %d, %d, %d ,%d, seq_id = "
-	.ascii	"%d\033[0m\000"
+	.ascii	"\033[1;32mchn %d start wrap buf: %d, %d, %d ,%d, se"
+	.ascii	"q_id = %d\033[0m\000"
 .LC55:
-	.ascii	"wrap trigger fail, seq: %d, result %d\000"
-.LC56:
 	.ascii	"venc(%s-%d) buf(%d) ready, pending: %d\000"
+.LC56:
+	.ascii	"\033[1;31mchn %d re send a buf fail seq = %d, pts ="
+	.ascii	" %d\033[0m\000"
 .LC57:
-	.ascii	"\033[1;31mre send a buf fail seq = %d, pts = %d\033"
-	.ascii	"[0m\000"
+	.ascii	"\033[1;31mosd kzalloc failed!\033[0m\000"
 .LC58:
-	.ascii	"&vdev->wait\000"
+	.ascii	"\033[1;31mjpg_osd kzalloc failed!\033[0m\000"
 .LC59:
-	.ascii	"VENC_IOCTL_VERSION\000"
+	.ascii	"\033[1;32mcreate thread %p\012\033[0m\000"
 .LC60:
-	.ascii	"VENC_IOCTL_NODE_CREATE\000"
+	.ascii	"\033[1;32mstop thread %p\012\033[0m\000"
 .LC61:
-	.ascii	"VENC_IOCTL_NODE_DELETE\000"
+	.ascii	"\033[1;32mstop thread %p ok\012\033[0m\000"
 .LC62:
-	.ascii	"VENC_IOCTL_NODE_START\000"
+	.ascii	"VENC_IOCTL_VERSION\000"
 .LC63:
-	.ascii	"VENC_IOCTL_NODE_SEND_FRAME\000"
+	.ascii	"VENC_IOCTL_NODE_CREATE\000"
 .LC64:
-	.ascii	"VENC_IOCTL_NODE_SET_CROP\000"
+	.ascii	"VENC_IOCTL_NODE_DELETE\000"
 .LC65:
-	.ascii	"VENC_IOCTL_NODE_SET_COMBO\000"
+	.ascii	"VENC_IOCTL_NODE_START\000"
 .LC66:
-	.ascii	"VENC_IOCTL_NODE_SET_SNAP\000"
+	.ascii	"VENC_IOCTL_NODE_SEND_FRAME\000"
 .LC67:
-	.ascii	"VENC_IOCTL_NODE_PP_CREATE\000"
+	.ascii	"VENC_IOCTL_NODE_SET_CROP\000"
 .LC68:
-	.ascii	"VENC_IOCTL_NODE_PP_DELETE\000"
+	.ascii	"VENC_IOCTL_NODE_SET_COMBO\000"
 .LC69:
-	.ascii	"VENC_IOCTL_NODE_PP_START\000"
+	.ascii	"VENC_IOCTL_NODE_SET_SNAP\000"
 .LC70:
-	.ascii	"VENC_IOCTL_NODE_PP_SEND_FRAME\000"
+	.ascii	"VENC_IOCTL_NODE_PP_CREATE\000"
 .LC71:
-	.ascii	"VENC_IOCTL_NODE_PP_GET_RESULT\000"
+	.ascii	"VENC_IOCTL_NODE_PP_DELETE\000"
 .LC72:
-	.ascii	"VENC_IOCTL_NODE_ENABLE_TB\000"
+	.ascii	"VENC_IOCTL_NODE_PP_START\000"
 .LC73:
-	.ascii	"VENC_IOCTL_NODE_TB_BIND\000"
+	.ascii	"VENC_IOCTL_NODE_PP_SEND_FRAME\000"
 .LC74:
-	.ascii	"VENC_IOCTL_NODE_TB_REQUEST\000"
+	.ascii	"VENC_IOCTL_NODE_PP_GET_RESULT\000"
 .LC75:
-	.ascii	"VENC_IOCTL_NODE_GET_CROP\000"
+	.ascii	"VENC_IOCTL_NODE_ENABLE_TB\000"
 .LC76:
-	.ascii	"VENC_IOCTL_NODE_SET_VCODEC_ATTR\000"
+	.ascii	"VENC_IOCTL_NODE_TB_BIND\000"
 .LC77:
-	.ascii	"VENC_IOCTL_NODE_GET_VCODEC_ATTR\000"
+	.ascii	"VENC_IOCTL_NODE_TB_REQUEST\000"
 .LC78:
-	.ascii	"VENC_IOCTL_NODE_PP_SET_MD_ATTR\000"
+	.ascii	"VENC_IOCTL_NODE_GET_CROP\000"
 .LC79:
-	.ascii	"VENC_IOCTL_NODE_PP_GET_MD_ATTR\000"
+	.ascii	"VENC_IOCTL_NODE_SET_VCODEC_ATTR\000"
 .LC80:
-	.ascii	"VENC_IOCTL_NODE_CHECK\000"
+	.ascii	"VENC_IOCTL_NODE_GET_VCODEC_ATTR\000"
 .LC81:
+	.ascii	"VENC_IOCTL_NODE_PP_SET_MD_ATTR\000"
+.LC82:
+	.ascii	"VENC_IOCTL_NODE_PP_GET_MD_ATTR\000"
+.LC83:
+	.ascii	"VENC_IOCTL_NODE_CHECK\000"
+.LC84:
 	.ascii	"VENC_IOCTL_NODE_SET_FRAMERATE\000"
+.LC85:
+	.ascii	"VENC_IOCTL_NODE_STOP\000"
 	.ident	"GCC: (crosstool-NG 1.24.0) 8.3.0"
 	.section	.note.GNU-stack,"",%progbits

@@ -92,6 +92,7 @@ typedef struct _rkMpiAICtx {
     RK_S32      s32VqeEnable;
     RK_S32      s32VqeResult;
     RK_S32      s32DumpAlgo;
+    const char *pBcdModelPath;
     const char *pVqeCfgPath;
     TEST_AI_MODE_E enMode;
     // for aenc
@@ -108,6 +109,15 @@ static AUDIO_SOUND_MODE_E ai_find_sound_mode(RK_S32 ch) {
         break;
       case 2:
         channel = AUDIO_SOUND_MODE_STEREO;
+        break;
+      case 4:
+        channel = AUDIO_SOUND_MODE_4_CHN;
+        break;
+      case 6:
+        channel = AUDIO_SOUND_MODE_6_CHN;
+        break;
+      case 8:
+        channel = AUDIO_SOUND_MODE_8_CHN;
         break;
       default:
         RK_LOGE("channel = %d not support", ch);
@@ -246,8 +256,9 @@ RK_S32 test_init_ai_aed(TEST_AI_CTX_S *params) {
         AI_AED_CONFIG_S stAiAedConfig, stAiAedConfig2;
 
         stAiAedConfig.fSnrDB = 10.0f;
-        stAiAedConfig.fLsdDB = -25.0f;
+        stAiAedConfig.fLsdDB = -35.0f;
         stAiAedConfig.s32Policy = 1;
+        stAiAedConfig.fSmoothParam = 0.9f;
 
         result = RK_MPI_AI_SetAedAttr(params->s32DevId, params->s32ChnIndex, &stAiAedConfig);
         if (result != RK_SUCCESS) {
@@ -287,8 +298,9 @@ static RK_S32 test_init_ai_aed2(TEST_AI_CTX_S *params) {
         AI_AED_CONFIG_S stAiAedConfig, stAiAedConfig2;
 
         stAiAedConfig.fSnrDB = 10.0f;
-        stAiAedConfig.fLsdDB = -25.0f;
+        stAiAedConfig.fLsdDB = -35.0f;
         stAiAedConfig.s32Policy = 2;
+        stAiAedConfig.fSmoothParam = 0.9;
 
         result = RK_MPI_AI_SetAedAttr(params->s32DevId, params->s32ChnIndex, &stAiAedConfig);
         if (result != RK_SUCCESS) {
@@ -327,7 +339,35 @@ static RK_S32 test_init_ai_bcd(TEST_AI_CTX_S *params) {
     if (params->s32BcdEnable) {
         AI_BCD_CONFIG_S stAiBcdConfig, stAiBcdConfig2;
 
-        stAiBcdConfig.mFrameLen = 100;
+        memset(&stAiBcdConfig, 0, sizeof(AI_BCD_CONFIG_S));
+        memset(&stAiBcdConfig2, 0, sizeof(AI_BCD_CONFIG_S));
+
+        stAiBcdConfig.mFrameLen = 60;
+        stAiBcdConfig.mConfirmProb = 0.85f;
+        switch (params->s32DeviceChannel) {
+        case 4:
+            // just for example: 2mic + 2ref
+            stAiBcdConfig.stSedCfg.s64RecChannelType = 0x03;
+            break;
+        case 6:
+            // just for example: 4mic + 2ref
+            stAiBcdConfig.stSedCfg.s64RecChannelType = 0x0f;
+            break;
+        case 8:
+            // just for example: 6mic + 2ref
+            stAiBcdConfig.stSedCfg.s64RecChannelType = 0x3f;
+            break;
+        default:
+            // by default is 1mic + 1ref, it will be set by internal if is not specified.
+            // stAiBcdConfig.stSedCfg.s64RecChannelType = 0x01;
+            break;
+        }
+        // stAiBcdConfig.stSedCfg.s32FrameLen = 90; // by default is 90 if is not specified.
+        if (stAiBcdConfig.stSedCfg.s64RecChannelType != 0 ||
+            stAiBcdConfig.stSedCfg.s32FrameLen != 0)
+            stAiBcdConfig.stSedCfg.bUsed = RK_TRUE;
+        if (params->pBcdModelPath != RK_NULL)
+            memcpy(stAiBcdConfig.aModelPath, params->pBcdModelPath, strlen(params->pBcdModelPath));
 
         result = RK_MPI_AI_SetBcdAttr(params->s32DevId, params->s32ChnIndex, &stAiBcdConfig);
         if (result != RK_SUCCESS) {
@@ -366,7 +406,35 @@ static RK_S32 test_init_ai_bcd2(TEST_AI_CTX_S *params) {
     if (params->s32BcdEnable) {
         AI_BCD_CONFIG_S stAiBcdConfig, stAiBcdConfig2;
 
-        stAiBcdConfig.mFrameLen = 100;
+        memset(&stAiBcdConfig, 0, sizeof(AI_BCD_CONFIG_S));
+        memset(&stAiBcdConfig2, 0, sizeof(AI_BCD_CONFIG_S));
+
+        stAiBcdConfig.mFrameLen = 40;
+        stAiBcdConfig.mConfirmProb = 0.85f;
+        switch (params->s32DeviceChannel) {
+        case 4:
+            // just for example: 2mic + 2ref
+            stAiBcdConfig.stSedCfg.s64RecChannelType = 0x03;
+            break;
+        case 6:
+            // just for example: 4mic + 2ref
+            stAiBcdConfig.stSedCfg.s64RecChannelType = 0x0f;
+            break;
+        case 8:
+            // just for example: 6mic + 2ref
+            stAiBcdConfig.stSedCfg.s64RecChannelType = 0x3f;
+            break;
+        default:
+            // by default is 1mic + 1ref, it will be set by internal if is not specified.
+            // stAiBcdConfig.stSedCfg.s64RecChannelType = 0x01;
+            break;
+        }
+        stAiBcdConfig.stSedCfg.s32FrameLen = 80;
+        if (stAiBcdConfig.stSedCfg.s64RecChannelType != 0 ||
+            stAiBcdConfig.stSedCfg.s32FrameLen != 0)
+            stAiBcdConfig.stSedCfg.bUsed = RK_TRUE;
+        if (params->pBcdModelPath != RK_NULL)
+            memcpy(stAiBcdConfig.aModelPath, params->pBcdModelPath, strlen(params->pBcdModelPath));
 
         result = RK_MPI_AI_SetBcdAttr(params->s32DevId, params->s32ChnIndex, &stAiBcdConfig);
         if (result != RK_SUCCESS) {
@@ -406,6 +474,7 @@ static RK_S32 test_init_ai_buz(TEST_AI_CTX_S *params) {
         AI_BUZ_CONFIG_S stAiBuzConfig, stAiBuzConfig2;
 
         stAiBuzConfig.mFrameLen = 100;
+        stAiBuzConfig.mConfirmProb = 0.5f;
 
         result = RK_MPI_AI_SetBuzAttr(params->s32DevId, params->s32ChnIndex, &stAiBuzConfig);
         if (result != RK_SUCCESS) {
@@ -445,6 +514,7 @@ static RK_S32 test_init_ai_buz2(TEST_AI_CTX_S *params) {
         AI_BUZ_CONFIG_S stAiBuzConfig, stAiBuzConfig2;
 
         stAiBuzConfig.mFrameLen = 100;
+        stAiBuzConfig.mConfirmProb = 0.5f;
 
         result = RK_MPI_AI_SetBuzAttr(params->s32DevId, params->s32ChnIndex, &stAiBuzConfig);
         if (result != RK_SUCCESS) {
@@ -484,6 +554,7 @@ static RK_S32 test_init_ai_gbs(TEST_AI_CTX_S *params) {
         AI_GBS_CONFIG_S stAiGbsConfig, stAiGbsConfig2;
 
         stAiGbsConfig.mFrameLen = 30;
+        stAiGbsConfig.mConfirmProb = 0.8f;
 
         result = RK_MPI_AI_SetGbsAttr(params->s32DevId, params->s32ChnIndex, &stAiGbsConfig);
         if (result != RK_SUCCESS) {
@@ -523,6 +594,7 @@ static RK_S32 test_init_ai_gbs2(TEST_AI_CTX_S *params) {
         AI_GBS_CONFIG_S stAiGbsConfig, stAiGbsConfig2;
 
         stAiGbsConfig.mFrameLen = 30;
+        stAiGbsConfig.mConfirmProb = 0.8f;
 
         result = RK_MPI_AI_SetGbsAttr(params->s32DevId, params->s32ChnIndex, &stAiGbsConfig);
         if (result != RK_SUCCESS) {
@@ -555,6 +627,63 @@ static RK_S32 test_init_ai_gbs2(TEST_AI_CTX_S *params) {
     return RK_SUCCESS;
 }
 
+static RK_S32 test_init_ai_sed_agc(TEST_AI_CTX_S *params) {
+    RK_S32 result;
+    AUDIO_AGC_CONFIG_S stSedAgcConfig;
+
+    stSedAgcConfig.fAttackTime = 200.0f;
+    stSedAgcConfig.fReleaseTime = 400.0f;
+    stSedAgcConfig.fMaxGain = 30.0f;
+    stSedAgcConfig.fMaxPeak = -3.0f;
+    stSedAgcConfig.fRk0 = 2.0f;
+    stSedAgcConfig.fRth0 = -70.0f;
+    stSedAgcConfig.fRth1 = -45.0f;
+    stSedAgcConfig.fRth2 = -40.0f;
+
+    stSedAgcConfig.fAttenuateTime = 1000.0f;
+    stSedAgcConfig.fRk1 = 0.8f;
+    stSedAgcConfig.fRk2 = 0.4f;
+    stSedAgcConfig.fLineGainDb = -25.0f;
+    stSedAgcConfig.s32SwSmL0 = 40;
+    stSedAgcConfig.s32SwSmL1 = 80;
+    stSedAgcConfig.s32SwSmL2 = 80;
+
+    result = RK_MPI_AI_SetSedAgcAttr(params->s32DevId, params->s32ChnIndex, &stSedAgcConfig);
+    if (result != RK_SUCCESS) {
+        RK_LOGE("%s: SetGbsAttr(%d,%d) failed with %#x",
+            __FUNCTION__, params->s32DevId, params->s32ChnIndex, result);
+        return result;
+    }
+
+    result = RK_MPI_AI_GetSedAgcAttr(params->s32DevId, params->s32ChnIndex, &stSedAgcConfig);
+    if (result != RK_SUCCESS) {
+        RK_LOGE("%s: SetGbsAttr(%d,%d) failed with %#x",
+            __FUNCTION__, params->s32DevId, params->s32ChnIndex, result);
+        return result;
+    }
+
+    result = RK_MPI_AI_EnableSedAgc(params->s32DevId, params->s32ChnIndex);
+    if (result != RK_SUCCESS) {
+        RK_LOGE("%s: EnableSedAgc(%d,%d) failed with %#x",
+            __FUNCTION__, params->s32DevId, params->s32ChnIndex, result);
+        return result;
+    }
+
+    return RK_SUCCESS;
+}
+
+static RK_S32 test_init_ai_sed_fir(TEST_AI_CTX_S *params) {
+    RK_S32 result;
+    result = RK_MPI_AI_EnableSedFir(params->s32DevId, params->s32ChnIndex);
+    if (result != RK_SUCCESS) {
+        RK_LOGE("%s: EnableSedFir(%d,%d) failed with %#x",
+            __FUNCTION__, params->s32DevId, params->s32ChnIndex, result);
+        return result;
+    }
+
+    return RK_SUCCESS;
+}
+
 RK_S32 test_init_ai_vqe(TEST_AI_CTX_S *params) {
     AI_VQE_CONFIG_S stAiVqeConfig, stAiVqeConfig2;
     AI_VQE_MOD_ENABLE_S stAiVqeModEnable;
@@ -572,6 +701,7 @@ RK_S32 test_init_ai_vqe(TEST_AI_CTX_S *params) {
     if (params->s32VqeEnable == 2) {
         //When it is necessary to configure module switches separately, this interface needs to be called.
         //By default, it can be ignored.
+        memset(&stAiVqeModEnable, 0, sizeof(AI_VQE_MOD_ENABLE_S));
         stAiVqeModEnable.bAec = RK_TRUE;
         stAiVqeModEnable.bBf = RK_TRUE;
         stAiVqeModEnable.bFastAec = RK_TRUE;
@@ -585,6 +715,7 @@ RK_S32 test_init_ai_vqe(TEST_AI_CTX_S *params) {
         stAiVqeModEnable.bDtd = RK_TRUE;
         stAiVqeModEnable.bHowling = RK_TRUE;
         stAiVqeModEnable.bDoa = RK_TRUE;
+        stAiVqeModEnable.bWakeup = RK_FALSE;
 
         //When it is necessary to configure module switches separately, this interface needs to be called.
         //By default, it can be ignored.
@@ -676,6 +807,21 @@ RK_S32 test_init_mpi_ai(TEST_AI_CTX_S *params) {
     if (result != 0) {
         RK_LOGE("ai gbs init fail, reason = %x, aiChn = %d", result, params->s32ChnIndex);
         return RK_FAILURE;
+    }
+
+    if (params->s32AedEnable || params->s32BcdEnable ||
+        params->s32BuzEnable || params->s32GbsEnable) {
+        result = test_init_ai_sed_agc(params);
+        if (result != 0) {
+            RK_LOGE("ai sed agc init fail, reason = %x, aiChn = %d", result, params->s32ChnIndex);
+            return RK_FAILURE;
+        }
+
+        result = test_init_ai_sed_fir(params);
+        if (result != 0) {
+            RK_LOGE("ai sed fir init fail, reason = %x, aiChn = %d", result, params->s32ChnIndex);
+            return RK_FAILURE;
+        }
     }
 
     result = test_init_ai_vqe(params);
@@ -780,6 +926,23 @@ RK_S32 test_deinit_mpi_ai(TEST_AI_CTX_S *params) {
         params->s32GbsEnable = 0;
     }
 
+    if (params->s32AedEnable || params->s32BcdEnable ||
+        params->s32BuzEnable || params->s32GbsEnable) {
+        result = RK_MPI_AI_DisableSedAgc(params->s32DevId, params->s32ChnIndex);
+        if (result != RK_SUCCESS) {
+            RK_LOGE("%s: RK_MPI_AI_DisableSedAgc(%d,%d) failed with %#x",
+                __FUNCTION__, params->s32DevId, params->s32ChnIndex, result);
+            return result;
+        }
+
+        result = RK_MPI_AI_DisableSedFir(params->s32DevId, params->s32ChnIndex);
+        if (result != RK_SUCCESS) {
+            RK_LOGE("%s: RK_MPI_AI_DisableSedFir(%d,%d) failed with %#x",
+                __FUNCTION__, params->s32DevId, params->s32ChnIndex, result);
+            return result;
+        }
+    }
+
     if (params->s32VqeEnable) {
         result = RK_MPI_AI_DisableVqe(params->s32DevId, params->s32ChnIndex);
         if (result != RK_SUCCESS) {
@@ -844,6 +1007,15 @@ static AUDIO_SOUND_MODE_E find_sound_mode(RK_S32 ch) {
       case 2:
         channel = AUDIO_SOUND_MODE_STEREO;
         break;
+      case 4:
+        channel = AUDIO_SOUND_MODE_4_CHN;
+        break;
+      case 6:
+        channel = AUDIO_SOUND_MODE_6_CHN;
+        break;
+      case 8:
+        channel = AUDIO_SOUND_MODE_8_CHN;
+        break;
       default:
         RK_LOGE("channel = %d not support", ch);
         return AUDIO_SOUND_MODE_BUTT;
@@ -869,14 +1041,16 @@ void* sendDataThread(void * ptr) {
 
     file = fopen(params->srcFilePath, "rb");
     if (file == RK_NULL) {
+        gAiExit = RK_TRUE;
         RK_LOGE("open input file %s failed because %s.", params->srcFilePath, strerror(errno));
-        goto __EXIT;
+        goto __FAILED;
     }
 
     srcData = reinterpret_cast<RK_U8 *>(calloc(bufferLen, sizeof(RK_U8)));
     if (!srcData) {
+        gAiExit = RK_TRUE;
         RK_LOGE("malloc pstVdecCtx falied");
-        goto __EXIT;
+        goto __FAILED;
     }
 
     while (!gAiExit) {
@@ -884,6 +1058,7 @@ void* sendDataThread(void * ptr) {
 
         sendFrame.u32Len = size;
         sendFrame.u64TimeStamp = timeStamp++;
+        sendFrame.s32SampleRate = params->s32DeviceSampleRate;
         sendFrame.enBitWidth = find_bit_width(params->s32BitWidth);
         sendFrame.enSoundMode = find_sound_mode(params->s32DeviceChannel);
         sendFrame.bBypassMbBlk = RK_FALSE;
@@ -909,6 +1084,7 @@ __RETRY:
         }
     }
 
+__FAILED:
     if (gAiExit) {
         sendFrame.u32Len = 0;
         sendFrame.u64TimeStamp = timeStamp++;
@@ -932,7 +1108,6 @@ __RETRY:
         RK_MPI_MB_ReleaseMB(sendFrame.pMbBlk);
     }
 
-__EXIT:
     if (file) {
         fclose(file);
         file = RK_NULL;
@@ -1612,6 +1787,7 @@ static void mpi_ai_test_show_options(const TEST_AI_CTX_S *ctx) {
     RK_PRINT("vqe gap duration (ms) : %d\n", ctx->s32VqeGapMs);
     RK_PRINT("vqe enable            : %d\n", ctx->s32VqeEnable);
     RK_PRINT("get vqe result        : %d\n", ctx->s32VqeResult);
+    RK_PRINT("bcd NN model path     : %s\n", ctx->pBcdModelPath);
     RK_PRINT("vqe config file       : %s\n", ctx->pVqeCfgPath);
     RK_PRINT("dump algo pcm data    : %d\n", ctx->s32DumpAlgo);
     RK_PRINT("test mode             : %d\n", ctx->enMode);
@@ -1662,6 +1838,7 @@ int main(int argc, const char **argv) {
     ctx->s32GbsEnable       = 0;
     ctx->s32VqeGapMs        = 16;
     ctx->s32VqeEnable       = 0;
+    ctx->pBcdModelPath      = RK_NULL;
     ctx->pVqeCfgPath        = RK_NULL;
     ctx->s32DumpAlgo        = 0;
 
@@ -1729,6 +1906,8 @@ int main(int argc, const char **argv) {
                     "the vqe enable, 0:disable 1:enable 2:VqeModEnable. default(0).", NULL, 0, 0),
         OPT_INTEGER('\0', "vqe_result", &(ctx->s32VqeResult),
                     "get vqe result, 0:disable 1:enable. default(0).", NULL, 0, 0),
+        OPT_STRING('\0', "bcd_model", &(ctx->pBcdModelPath),
+                    "the bcd config file, default(NULL)", NULL, 0, 0),
         OPT_STRING('\0', "vqe_cfg", &(ctx->pVqeCfgPath),
                     "the vqe config file, default(NULL)", NULL, 0, 0),
         OPT_INTEGER('\0', "dump_algo", &(ctx->s32DumpAlgo),

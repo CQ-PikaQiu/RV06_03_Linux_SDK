@@ -32,7 +32,6 @@ modules:
 	@rm -rf *.o *~ .depend .*.cmd  *.mod.c .tmp_versions *.symvers modules.order *.mod
 	@make -C $(shell pwd)/src;
 	@make -C $(shell pwd)/sample;
-	cp $(shell pwd)/sample/motor_24byj48_test $(M_OUT_DIR)
 
 clean:
 	@rm -rf *.o *~ .depend .*.cmd  *.mod.c .tmp_versions *.ko *.symvers modules.order *.mod

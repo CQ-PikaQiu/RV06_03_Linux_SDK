@@ -62,6 +62,8 @@ typedef struct rkIVS_CHN_ATTR_S {
     union {
         IVS_DET_ATTR_S stDetAttr;
     };
+    RK_U32 u32MaxWidth;
+    RK_U32 u32MaxHeight;
 } IVS_CHN_ATTR_S;
 
 typedef struct rkIVS_MD_ATTR_S {

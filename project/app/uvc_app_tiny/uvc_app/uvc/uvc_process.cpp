@@ -299,8 +299,9 @@ int UVCProcess::startVi() {
 
 int UVCProcess::stopVi() {
   UVCProcessCtx *ctx = getUVCProcessCtx(mCtx);
+#ifndef RK_ENABLE_FASTBOOT
   uvc_vi_stop(ctx->mUvcCfg, MPI_VI_CHANNEL_TYPE_UVC);
-
+#endif
   return 0;
 }
 
@@ -498,41 +499,47 @@ int UVCProcess::configProcess(UVC_CTRL_INFO uvcCtrlInfo) {
           ctx->mUvcCfg.vpss_cfg[MPI_VPSS_CHANNEL_TYPE_UVC].buf_cnt;
       break;
     case V4L2_PIX_FMT_MJPEG:
-      if (ctx->mUvcCfg.common_cfg.uvc_enable_vpss)
-        ctx->mFmtType = UVC_FMT_TYPE_VI_VPSS_VENC_UVC;
-      else
-        ctx->mFmtType = UVC_FMT_TYPE_VI_VENC_UVC;
+      if (ctx->mUvcCfg.common_cfg.uvc_enable_vpss) {
+          ctx->mFmtType = UVC_FMT_TYPE_VI_VPSS_VENC_UVC;
+          ctx->mUvcBuffCount =
+              ctx->mUvcCfg.venc_cfg.mjpeg_cfg.buf_cnt +
+              ctx->mUvcCfg.vpss_cfg[MPI_VPSS_CHANNEL_TYPE_UVC].buf_cnt;
+      } else {
+          ctx->mFmtType = UVC_FMT_TYPE_VI_VENC_UVC;
+          ctx->mUvcBuffCount = ctx->mUvcCfg.venc_cfg.mjpeg_cfg.buf_cnt;
+      }
       ctx->vencTempInfo.force_idr_cnt = 0;
-      ctx->mUvcBuffCount =
-          ctx->mUvcCfg.venc_cfg.mjpeg_cfg.buf_cnt +
-          ctx->mUvcCfg.vpss_cfg[MPI_VPSS_CHANNEL_TYPE_UVC].buf_cnt;
       break;
     case V4L2_PIX_FMT_H264:
-      if (ctx->mUvcCfg.common_cfg.uvc_enable_vpss)
+      if (ctx->mUvcCfg.common_cfg.uvc_enable_vpss) {
         ctx->mFmtType = UVC_FMT_TYPE_VI_VPSS_VENC_UVC;
-      else
+        ctx->mUvcBuffCount =
+            ctx->mUvcCfg.venc_cfg.h264_cfg.buf_cnt +
+            ctx->mUvcCfg.vpss_cfg[MPI_VPSS_CHANNEL_TYPE_UVC].buf_cnt;
+      } else {
         ctx->mFmtType = UVC_FMT_TYPE_VI_VENC_UVC;
+        ctx->mUvcBuffCount = ctx->mUvcCfg.venc_cfg.h264_cfg.buf_cnt;
+      }
 
       ctx->vencTempInfo.force_idr_cnt =
           ctx->mUvcCfg.venc_cfg.common_cfg.idr_gop *
           ctx->mUvcCfg.venc_cfg.common_cfg.idr_cnt;
 
-      ctx->mUvcBuffCount =
-          ctx->mUvcCfg.venc_cfg.h264_cfg.buf_cnt +
-          ctx->mUvcCfg.vpss_cfg[MPI_VPSS_CHANNEL_TYPE_UVC].buf_cnt;
       break;
     case V4L2_PIX_FMT_H265:
-      if (ctx->mUvcCfg.common_cfg.uvc_enable_vpss)
+      if (ctx->mUvcCfg.common_cfg.uvc_enable_vpss) {
         ctx->mFmtType = UVC_FMT_TYPE_VI_VPSS_VENC_UVC;
-      else
+        ctx->mUvcBuffCount =
+            ctx->mUvcCfg.venc_cfg.h265_cfg.buf_cnt +
+            ctx->mUvcCfg.vpss_cfg[MPI_VPSS_CHANNEL_TYPE_UVC].buf_cnt;
+      } else {
         ctx->mFmtType = UVC_FMT_TYPE_VI_VENC_UVC;
+        ctx->mUvcBuffCount = ctx->mUvcCfg.venc_cfg.h265_cfg.buf_cnt;
+      }
 
       ctx->vencTempInfo.force_idr_cnt =
           ctx->mUvcCfg.venc_cfg.common_cfg.idr_gop *
           ctx->mUvcCfg.venc_cfg.common_cfg.idr_cnt;
-      ctx->mUvcBuffCount =
-          ctx->mUvcCfg.venc_cfg.h264_cfg.buf_cnt +
-          ctx->mUvcCfg.vpss_cfg[MPI_VPSS_CHANNEL_TYPE_UVC].buf_cnt;
       break;
     default:
       LOG_ERROR("process not support this fcc 0x%x\n", ctx->mUvcCtx.fcc);
@@ -949,7 +956,7 @@ static UVC_RET_TYPE uvc_out_venc_process(UVCProcessCtx *ctx) {
   queue_uvc_buf(ctx);
   // LOG_INFO("test lqh\n");
   if (!ctx->mUvcBuf) {
-    LOG_INFO("uvc_buffer_write_get null buff\n");
+    LOG_DEBUG("uvc_buffer_write_get null buff\n");
     usleep(2 * 1000);
   } else {
     s32Ret = RK_MPI_VENC_GetStream(ctx->vencChnCtx.channelId,

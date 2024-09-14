@@ -69,6 +69,13 @@ __kstrtabns_mpi_buf_pool_create:
 	.previous						
 
 	.section "__ksymtab_strings","aMS",%progbits,1	
+__kstrtab_mpi_buf_pool_dup:					
+	.asciz 	"mpi_buf_pool_dup"					
+__kstrtabns_mpi_buf_pool_dup:					
+	.asciz 	""					
+	.previous						
+
+	.section "__ksymtab_strings","aMS",%progbits,1	
 __kstrtab_mpi_allocator_alloc:					
 	.asciz 	"mpi_allocator_alloc"					
 __kstrtabns_mpi_allocator_alloc:					
@@ -130,7 +137,7 @@ mpi_buf_pool_import:
 	ldr	r3, [r0, #56]
 	str	r3, [r1, #596]
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r1, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -143,7 +150,7 @@ mpi_buf_pool_import:
 	str	r3, [r2]
 	str	r3, [r0, #80]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r1	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -325,7 +332,7 @@ mpi_allocator_register:
 	movs	r1, #5
 	movs	r0, #0
 	str	r3, [sp, #4]
-	movw	r3, #565
+	movw	r3, #634
 	str	r3, [sp]
 	ldr	r3, .L34+4
 	bl	vlog
@@ -382,7 +389,7 @@ mpi_allocator_alloc:
 	movs	r1, #5
 	ldr	r2, .L44
 	str	r3, [sp, #4]
-	mov	r3, #512
+	movw	r3, #581
 	str	r3, [sp]
 	ldr	r3, .L44+4
 	bl	vlog
@@ -410,7 +417,7 @@ atomic_sub.constprop.3:
 	@ link register save eliminated.
 	pld	[r0]
 	.syntax unified
-@ 224 "./arch/arm/include/asm/atomic.h" 1
+@ 224 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_sub
 1:	ldrex	r3, [r0]
 	sub	r3, r3, #1
@@ -541,7 +548,7 @@ atomic_add.constprop.4:
 	@ link register save eliminated.
 	pld	[r0]
 	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
+@ 223 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_add
 1:	ldrex	r3, [r0]
 	add	r3, r3, #1
@@ -620,7 +627,7 @@ mpi_buf_pool_destroy:
 	bl	atomic_sub.constprop.3
 	pld	[r4]
 	.syntax unified
-@ 224 "./arch/arm/include/asm/atomic.h" 1
+@ 224 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_sub_return
 1:	ldrex	r5, [r4]
 	sub	r5, r5, #1
@@ -683,7 +690,7 @@ mpi_buf_release:
 	mov	r0, r5
 	bl	mpi_obj_ref
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r6, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -692,7 +699,7 @@ mpi_buf_release:
 	mov	r0, r4
 	bl	mpi_buf_destroy
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r6	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -886,6 +893,126 @@ mpi_buf_pool_import_dmabuf:
 	.fnend
 	.size	mpi_buf_pool_import_dmabuf, .-mpi_buf_pool_import_dmabuf
 	.align	1
+	.global	mpi_buf_pool_dup
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	mpi_buf_pool_dup, %function
+mpi_buf_pool_dup:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, lr}
+	.save {r4, r5, r6, r7, r8, r9, r10, lr}
+	.pad #16
+	mov	r5, r0
+	ldr	r3, .L142
+	mov	r10, r1
+	ldr	r8, [r0, #16]
+	mov	r1, #3520
+	ldrd	r9, r7, [r0, #56]
+	ldr	r0, [r3, #4]
+	bl	kmem_cache_alloc
+	mov	r4, r0
+	cmp	r0, #0
+	beq	.L121
+	add	r3, r0, #76
+	movs	r6, #0
+	str	r3, [r0, #80]
+	movs	r2, #64
+	str	r6, [r0, #68]
+	movs	r1, #5
+	str	r3, [r0, #76]
+	add	r3, r0, #84
+	strd	r9, r7, [r0, #56]
+	str	r3, [r0, #84]
+	str	r3, [r0, #88]
+	str	r8, [r0, #72]
+	ldr	r3, .L142+4
+	bl	mpi_obj_register
+	cmp	r7, r6
+	str	r10, [r4, #4]
+	bge	.L123
+	cmp	r9, #0
+	beq	.L131
+	mov	r3, r5
+	ldr	r2, [r3, #76]!
+	cmp	r2, r3
+	beq	.L132
+	ldr	r5, [r2, #12]
+	cbnz	r5, .L124
+.L125:
+	mov	r0, r4
+	movs	r1, #0
+	bl	mpi_buf_pool_destroy
+	movs	r4, #0
+	b	.L121
+.L127:
+	mov	r2, r7
+	mov	r1, r5
+	mov	r0, r4
+	subs	r6, r6, #1
+	bl	mpi_buf_pool_import_dmabuf
+	cmp	r0, #0
+	blt	.L125
+.L126:
+	cmp	r6, #0
+	bne	.L127
+.L130:
+	ldr	r3, [r4, #16]
+	movs	r1, #5
+	ldr	r2, .L142+8
+	movs	r0, #0
+	str	r3, [sp, #8]
+	ldr	r3, [r4]
+	str	r3, [sp, #4]
+	movw	r3, #549
+	str	r3, [sp]
+	ldr	r3, .L142+12
+	bl	vlog
+.L121:
+	mov	r0, r4
+	add	sp, sp, #16
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
+.L131:
+	mov	r5, r9
+.L124:
+	mov	r6, r8
+	b	.L126
+.L132:
+	mov	r5, r6
+	b	.L124
+.L123:
+	ldr	r6, [r5, #76]!
+	orr	r7, r7, #-2147483648
+	sub	r6, r6, #436
+.L128:
+	add	r3, r6, #436
+	cmp	r3, r5
+	beq	.L130
+	ldr	r1, [r6, #448]
+	cmp	r1, #0
+	beq	.L125
+	mov	r2, r7
+	mov	r0, r4
+	bl	mpi_buf_pool_import_dmabuf
+	cmp	r0, #0
+	blt	.L125
+	ldr	r6, [r6, #436]
+	sub	r6, r6, #436
+	b	.L128
+.L143:
+	.align	2
+.L142:
+	.word	kmalloc_caches
+	.word	mpi_buf_pool_release
+	.word	.LC10
+	.word	.LANCHOR0+177
+	.fnend
+	.size	mpi_buf_pool_dup, .-mpi_buf_pool_dup
+	.align	1
 	.global	mpi_buf_pool_create
 	.syntax unified
 	.thumb
@@ -900,7 +1027,7 @@ mpi_buf_pool_create:
 	.save {r4, r5, r6, r7, r8, r9, r10, lr}
 	.pad #16
 	mov	r7, r3
-	ldr	r3, .L157
+	ldr	r3, .L180
 	mov	r9, r0
 	mov	r6, r1
 	mov	r1, #3520
@@ -908,7 +1035,7 @@ mpi_buf_pool_create:
 	ldr	r0, [r3, #4]
 	bl	kmem_cache_alloc
 	mov	r4, r0
-	cbz	r0, .L121
+	cbz	r0, .L144
 	add	r3, r0, #76
 	movs	r5, #0
 	str	r3, [r0, #80]
@@ -921,70 +1048,70 @@ mpi_buf_pool_create:
 	str	r3, [r0, #84]
 	str	r3, [r0, #88]
 	str	r7, [r0, #72]
-	ldr	r3, .L157+4
+	ldr	r3, .L180+4
 	bl	mpi_obj_register
 	cmp	r6, r5
 	ldr	r3, [sp, #48]
 	str	r3, [r4, #4]
-	blt	.L123
-.L125:
+	blt	.L146
+.L148:
 	bic	r10, r6, #-2147483648
-.L124:
-	cbnz	r7, .L132
+.L147:
+	cbnz	r7, .L155
 	cmp	r6, #0
-	bge	.L133
-	cbz	r5, .L133
+	bge	.L156
+	cbz	r5, .L156
 	mov	r0, r5
 	bl	dma_buf_put
-.L133:
+.L156:
 	ldr	r3, [r4, #16]
 	movs	r1, #5
-	ldr	r2, .L157+8
+	ldr	r2, .L180+8
 	movs	r0, #0
 	str	r3, [sp, #8]
 	ldr	r3, [r4]
 	str	r3, [sp, #4]
 	mov	r3, #480
 	str	r3, [sp]
-	ldr	r3, .L157+12
+	ldr	r3, .L180+12
 	bl	vlog
-.L121:
+.L144:
 	mov	r0, r4
 	add	sp, sp, #16
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
-.L134:
+.L157:
 	mov	r5, r8
-	b	.L125
-.L123:
+	b	.L148
+.L146:
 	cmp	r8, #0
-	beq	.L134
+	beq	.L157
 	mov	r2, r8
 	mov	r1, r6
 	mov	r0, r9
 	bl	mpi_allocator_alloc
 	mov	r5, r0
 	cmp	r0, #0
-	bne	.L125
-.L130:
+	bne	.L148
+.L153:
 	mov	r0, r4
 	movs	r1, #0
 	bl	mpi_buf_pool_destroy
 	movs	r4, #0
-	b	.L121
-.L132:
+	b	.L144
+.L155:
 	cmp	r6, #0
-	blt	.L127
+	blt	.L150
 	cmp	r8, #0
-	beq	.L127
+	beq	.L150
 	mov	r2, r8
 	mov	r1, r6
 	mov	r0, r9
 	bl	mpi_allocator_alloc
 	mov	r5, r0
 	cmp	r0, #0
-	beq	.L130
-.L127:
+	beq	.L153
+.L150:
 	ldr	r3, [r4, #72]
 	mov	r1, r5
 	mov	r0, r4
@@ -994,28 +1121,28 @@ mpi_buf_pool_create:
 	moveq	r2, r10
 	bl	mpi_buf_pool_import_dmabuf
 	cmp	r0, #0
-	bge	.L129
+	bge	.L152
 	cmp	r5, #0
-	beq	.L130
+	beq	.L153
 	mov	r0, r5
 	bl	dma_buf_put
-	b	.L130
-.L129:
+	b	.L153
+.L152:
 	cmp	r6, #0
-	blt	.L131
-	cbz	r5, .L131
+	blt	.L154
+	cbz	r5, .L154
 	mov	r0, r5
 	bl	dma_buf_put
-.L131:
+.L154:
 	subs	r7, r7, #1
-	b	.L124
-.L158:
+	b	.L147
+.L181:
 	.align	2
-.L157:
+.L180:
 	.word	kmalloc_caches
 	.word	mpi_buf_pool_release
 	.word	.LC10
-	.word	.LANCHOR0+177
+	.word	.LANCHOR0+194
 	.fnend
 	.size	mpi_buf_pool_create, .-mpi_buf_pool_create
 	.align	1
@@ -1034,7 +1161,7 @@ mpi_buf_pool_del_user:
 	.pad #16
 	mov	r4, r1
 	ldr	r3, [r1]
-	ldr	r2, .L160
+	ldr	r2, .L183
 	str	r3, [sp, #12]
 	ldr	r3, [r1, #44]
 	movs	r1, #5
@@ -1045,13 +1172,13 @@ mpi_buf_pool_del_user:
 	str	r3, [sp, #4]
 	movw	r3, #339
 	str	r3, [sp]
-	ldr	r3, .L160+4
+	ldr	r3, .L183+4
 	bl	vlog
 	movs	r1, #1
 	mov	r0, r4
 	bl	mpi_node_flush
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r1, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -1065,7 +1192,7 @@ mpi_buf_pool_del_user:
 	movs	r3, #0
 	str	r3, [r4, #60]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r1	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -1073,11 +1200,11 @@ mpi_buf_pool_del_user:
 	add	sp, sp, #16
 	@ sp needed
 	pop	{r4, pc}
-.L161:
+.L184:
 	.align	2
-.L160:
+.L183:
 	.word	.LC11
-	.word	.LANCHOR0+197
+	.word	.LANCHOR0+214
 	.fnend
 	.size	mpi_buf_pool_del_user, .-mpi_buf_pool_del_user
 	.align	1
@@ -1098,12 +1225,12 @@ mpi_buf_pool_destroy_rcu:
 	mov	r4, r0
 	ldr	r5, [r1], #-64
 	subs	r5, r5, #64
-.L163:
+.L186:
 	add	r3, r1, #64
 	cmp	r3, r7
-	bne	.L164
+	bne	.L187
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r8, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -1114,12 +1241,12 @@ mpi_buf_pool_destroy_rcu:
 	sub	r0, r0, #436
 	ldr	r5, [r0, #436]
 	sub	r5, r5, #436
-.L165:
+.L188:
 	add	r3, r0, #436
 	cmp	r3, r7
-	bne	.L167
+	bne	.L190
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r8	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -1130,23 +1257,23 @@ mpi_buf_pool_destroy_rcu:
 	str	r3, [r4, #-16]
 	pop	{r4, r5, r6, r7, r8, lr}
 	b	mpi_obj_unref
-.L164:
+.L187:
 	mov	r0, r6
 	bl	mpi_buf_pool_del_user
 	ldr	r3, [r5, #64]
 	mov	r1, r5
 	sub	r5, r3, #64
-	b	.L163
-.L167:
+	b	.L186
+.L190:
 	ldr	r3, [r0, #12]
 	lsls	r3, r3, #21
-	bpl	.L166
+	bpl	.L189
 	bl	mpi_buf_destroy
-.L166:
+.L189:
 	ldr	r3, [r5, #436]
 	mov	r0, r5
 	sub	r5, r3, #436
-	b	.L165
+	b	.L188
 	.fnend
 	.size	mpi_buf_pool_destroy_rcu, .-mpi_buf_pool_destroy_rcu
 	.align	1
@@ -1167,9 +1294,9 @@ mpi_buf_pool_add_user:
 	ldr	r3, [r0, #12]
 	mov	r6, r1
 	lsls	r3, r3, #30
-	bpl	.L171
+	bpl	.L194
 	ldr	r3, [r1]
-	ldr	r2, .L192
+	ldr	r2, .L215
 	str	r3, [sp, #12]
 	ldr	r3, [r1, #44]
 	movs	r1, #5
@@ -1180,15 +1307,15 @@ mpi_buf_pool_add_user:
 	str	r3, [sp, #4]
 	movw	r3, #303
 	str	r3, [sp]
-	ldr	r3, .L192+4
+	ldr	r3, .L215+4
 	bl	vlog
 	ldr	r0, [r6, #60]
-	cbz	r0, .L173
+	cbz	r0, .L196
 	mov	r1, r6
 	bl	mpi_buf_pool_del_user
-.L173:
+.L196:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r1, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -1202,42 +1329,42 @@ mpi_buf_pool_add_user:
 	str	r3, [r2]
 	str	r3, [r4, #88]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r1	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	cbz	r4, .L174
+	cbz	r4, .L197
 	ldr	r3, [r4, #12]
 	and	r3, r3, #6
 	cmp	r3, #2
-	beq	.L175
-.L174:
-.L175:
+	beq	.L198
+.L197:
+.L198:
 	ldr	r5, [r4, #76]!
-.L191:
+.L214:
 	sub	r5, r5, #436
 	add	r3, r5, #436
 	cmp	r3, r4
-	bne	.L178
-.L171:
+	bne	.L201
+.L194:
 	add	sp, sp, #16
 	@ sp needed
 	pop	{r4, r5, r6, pc}
-.L178:
+.L201:
 	ldr	r3, [r5, #16]
-	cbnz	r3, .L177
+	cbnz	r3, .L200
 	mov	r1, r5
 	mov	r0, r6
 	bl	mpi_node_buffer_available
-.L177:
+.L200:
 	ldr	r5, [r5, #436]
-	b	.L191
-.L193:
+	b	.L214
+.L216:
 	.align	2
-.L192:
+.L215:
 	.word	.LC12
-	.word	.LANCHOR0+219
+	.word	.LANCHOR0+236
 	.fnend
 	.size	mpi_buf_pool_add_user, .-mpi_buf_pool_add_user
 	.align	1
@@ -1257,17 +1384,17 @@ mpi_allocator_unregister:
 	mov	r4, r0
 	ldr	r3, [r0, #44]
 	movs	r1, #5
-	ldr	r2, .L201
+	ldr	r2, .L224
 	movs	r0, #0
 	str	r3, [sp, #4]
-	movw	r3, #530
+	movw	r3, #599
 	str	r3, [sp]
-	ldr	r3, .L201+4
+	ldr	r3, .L224+4
 	bl	vlog
-	cbz	r4, .L195
+	cbz	r4, .L218
 	mov	r0, r4
 	bl	mpi_obj_ref
-.L195:
+.L218:
 	ldr	r3, [r4, #12]
 	bic	r3, r3, #2
 	str	r3, [r4, #12]
@@ -1283,10 +1410,10 @@ mpi_allocator_unregister:
 	mov	r0, r6
 	bl	atomic_add.constprop.4
 	ldr	r3, [r4, #16]
-	cbnz	r3, .L196
+	cbnz	r3, .L219
 	mov	r0, r7
 	bl	complete_all
-.L196:
+.L219:
 	mov	r0, r4
 	bl	mpi_obj_unref
 	mov	r0, r7
@@ -1295,7 +1422,7 @@ mpi_allocator_unregister:
 	bl	atomic_sub.constprop.3
 	pld	[r5]
 	.syntax unified
-@ 224 "./arch/arm/include/asm/atomic.h" 1
+@ 224 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_sub_return
 1:	ldrex	r3, [r5]
 	sub	r3, r3, #1
@@ -1305,10 +1432,10 @@ mpi_allocator_unregister:
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	cbnz	r3, .L197
+	cbnz	r3, .L220
 	mov	r0, r5
 	bl	kfree
-.L197:
+.L220:
 	ldr	r0, [r4, #44]
 	bl	kfree
 	mov	r0, r4
@@ -1317,66 +1444,70 @@ mpi_allocator_unregister:
 	add	sp, sp, #12
 	@ sp needed
 	pop	{r4, r5, r6, r7, pc}
-.L202:
+.L225:
 	.align	2
-.L201:
+.L224:
 	.word	.LC13
-	.word	.LANCHOR0+241
+	.word	.LANCHOR0+258
 	.fnend
 	.size	mpi_allocator_unregister, .-mpi_allocator_unregister
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__func__.37650, %object
-	.size	__func__.37650, 20
-__func__.37650:
+	.type	__func__.35921, %object
+	.size	__func__.35921, 20
+__func__.35921:
 	.ascii	"mpi_buf_pool_import\000"
-	.type	__func__.37506, %object
-	.size	__func__.37506, 16
-__func__.37506:
+	.type	__func__.35777, %object
+	.size	__func__.35777, 16
+__func__.35777:
 	.ascii	"mpi_buf_destroy\000"
-	.type	__func__.37832, %object
-	.size	__func__.37832, 21
-__func__.37832:
+	.type	__func__.36103, %object
+	.size	__func__.36103, 21
+__func__.36103:
 	.ascii	"mpi_buf_pool_release\000"
-	.type	__func__.38001, %object
-	.size	__func__.38001, 23
-__func__.38001:
+	.type	__func__.36331, %object
+	.size	__func__.36331, 23
+__func__.36331:
 	.ascii	"mpi_allocator_register\000"
-	.type	__func__.37969, %object
-	.size	__func__.37969, 20
-__func__.37969:
+	.type	__func__.36299, %object
+	.size	__func__.36299, 20
+__func__.36299:
 	.ascii	"mpi_allocator_alloc\000"
-	.type	__func__.37677, %object
-	.size	__func__.37677, 25
-__func__.37677:
+	.type	__func__.35948, %object
+	.size	__func__.35948, 25
+__func__.35948:
 	.ascii	"mpi_buf_pool_request_buf\000"
-	.type	__func__.37914, %object
-	.size	__func__.37914, 21
-__func__.37914:
+	.type	__func__.36185, %object
+	.size	__func__.36185, 21
+__func__.36185:
 	.ascii	"mpi_buf_pool_destroy\000"
-	.type	__func__.37520, %object
-	.size	__func__.37520, 16
-__func__.37520:
+	.type	__func__.35791, %object
+	.size	__func__.35791, 16
+__func__.35791:
 	.ascii	"mpi_buf_release\000"
-	.type	__func__.37625, %object
-	.size	__func__.37625, 15
-__func__.37625:
+	.type	__func__.35896, %object
+	.size	__func__.35896, 15
+__func__.35896:
 	.ascii	"mpi_buf_create\000"
-	.type	__func__.37946, %object
-	.size	__func__.37946, 20
-__func__.37946:
+	.type	__func__.36279, %object
+	.size	__func__.36279, 17
+__func__.36279:
+	.ascii	"mpi_buf_pool_dup\000"
+	.type	__func__.36217, %object
+	.size	__func__.36217, 20
+__func__.36217:
 	.ascii	"mpi_buf_pool_create\000"
-	.type	__func__.37810, %object
-	.size	__func__.37810, 22
-__func__.37810:
+	.type	__func__.36081, %object
+	.size	__func__.36081, 22
+__func__.36081:
 	.ascii	"mpi_buf_pool_del_user\000"
-	.type	__func__.37749, %object
-	.size	__func__.37749, 22
-__func__.37749:
+	.type	__func__.36020, %object
+	.size	__func__.36020, 22
+__func__.36020:
 	.ascii	"mpi_buf_pool_add_user\000"
-	.type	__func__.37981, %object
-	.size	__func__.37981, 25
-__func__.37981:
+	.type	__func__.36311, %object
+	.size	__func__.36311, 25
+__func__.36311:
 	.ascii	"mpi_allocator_unregister\000"
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:
@@ -1471,6 +1602,14 @@ __ksymtab_mpi_buf_pool_destroy:
 	.word	mpi_buf_pool_destroy
 	.word	__kstrtab_mpi_buf_pool_destroy
 	.word	__kstrtabns_mpi_buf_pool_destroy
+	.section	___ksymtab_gpl+mpi_buf_pool_dup,"a"
+	.align	2
+	.type	__ksymtab_mpi_buf_pool_dup, %object
+	.size	__ksymtab_mpi_buf_pool_dup, 12
+__ksymtab_mpi_buf_pool_dup:
+	.word	mpi_buf_pool_dup
+	.word	__kstrtab_mpi_buf_pool_dup
+	.word	__kstrtabns_mpi_buf_pool_dup
 	.section	___ksymtab_gpl+mpi_buf_pool_import,"a"
 	.align	2
 	.type	__ksymtab_mpi_buf_pool_import, %object

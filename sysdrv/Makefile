@@ -96,14 +96,11 @@ OUTPUT_ROOTFS_SOURCE_DIR :=
 OUTPUT_ROOTFS_TOOLS_DIR :=
 endif
 
-ifeq ($(RK_ENABLE_FASTBOOT),y)
-OUTPUT_FASTBOOT_IMAGE_PATH := $(RK_PROJECT_PATH_FASTBOOT)
-else
-OUTPUT_FASTBOOT_IMAGE_PATH :=
-endif
-
 ifneq ($(OUTPUT_SYSDRV_RAMDISK_DIR),)
-SYSDRV_BUILD_RAMDISK_FLAG := YES
+SYSDRV_RAMDISK_DIR := $(OUTPUT_SYSDRV_RAMDISK_DIR)
+else
+SYSDRV_KERNEL_INSTALL_BOOTIMG := y
+SYSDRV_KERNEL_UPDATE_DTB := y
 endif
 
 ################################################################################
@@ -207,19 +204,11 @@ $(error TODO rndis for $(CHIP) ...)
 endif
 endif
 
-ifeq ($(ENABLE_RECOVERY),y)
-ifneq ($(OUTPUT_SYSDRV_RAMDISK_DIR),)
-ifeq ($(CHIP),rv1106)
-override KERNEL_CFG_FRAGMENT += rv1106-recovery.config
-else
-$(warning TODO add recovery config for $(CHIP) ...)
-endif
-endif
-endif
-
 ifeq ($(RK_ENABLE_FASTBOOT), y)
+ifneq ($(SYSDRV_BUILD_RECOVERY), y)
 ifeq ($(CHIP),rv1106)
 SYSDRV_DRIVER_MODULE := y
+endif
 endif
 endif
 
@@ -227,13 +216,13 @@ endif
 KERNEL_CFG ?=
 KERNEL_DTS ?=
 KERNEL_DIR ?= $(SYSDRV_DIR)/source/kernel
-KERNEL_DIR_DRV_KO ?= $(KERNEL_DIR)/drv_ko
+KERNEL_DIR_DRV_KO ?= $(SYSDRV_KERNEL_OBJS_OUTPUT_DIR)/drv_ko
 KERNEL_DTB :=
 ifeq ($(ARCH),arm)
-KERNEL_DTB := $(KERNEL_DIR)/arch/$(ARCH)/boot/dts/$(KERNEL_DTS:dts=dtb)
+KERNEL_DTB := $(SYSDRV_KERNEL_OBJS_OUTPUT_DIR)/arch/$(ARCH)/boot/dts/$(KERNEL_DTS:dts=dtb)
 endif
 ifeq ($(ARCH),arm64)
-KERNEL_DTB := $(KERNEL_DIR)/arch/$(ARCH)/boot/dts/rockchip/$(KERNEL_DTS:dts=dtb)
+KERNEL_DTB := $(SYSDRV_KERNEL_OBJS_OUTPUT_DIR)/arch/$(ARCH)/boot/dts/rockchip/$(KERNEL_DTS:dts=dtb)
 endif
 
 TOOLCHAIN_FILE := $(shell which $(SYSDRV_CROSS)-gcc )
@@ -250,8 +239,8 @@ IDBLOCK_IMG := idblock.img
 IDBLOCK_SRC_BIN := *_idblock_v*.img
 UBOOT_COMPILE_MAKE := $(UBOOT_DIR)/make.sh
 
-ifneq ($(RK_UBOOT_RKBIN_INI_OVERLAY),)
-UBOOT_COMPILE_MAKE_OPTS ?= --spl-new $(RKBIN_DIR)/$(RK_UBOOT_RKBIN_INI_OVERLAY)
+ifneq ($(SYSDRV_UBOOT_RKBIN_OVERLAY_INI),)
+UBOOT_COMPILE_MAKE_OPTS ?= --spl-new $(SYSDRV_UBOOT_RKBIN_OVERLAY_INI)
 else
 UBOOT_COMPILE_MAKE_OPTS ?= --spl-new
 endif
@@ -259,16 +248,13 @@ endif
 UBOOT_CFG ?=
 UBOOT_CFG_FRAGMENT ?=
 
-ifeq ($(SYSDRV_BUILD_RAMDISK_FLAG),YES)
-ifneq ($(TINY_ROOTFS_BUSYBOX_CFG),)
-BUSYBOX_CFG ?= $(TINY_ROOTFS_BUSYBOX_CFG)
-else
-$(error Please config TINY_ROOTFS_BUSYBOX_CFG on cfg/cfg.mk)
-endif
+ifeq ($(SYSDRV_BUILD_RECOVERY),y)
+BUSYBOX_CFG := config_tiny_arm
 endif
 BUSYBOX_CFG ?= config_normal
 BUSYBOX_VER ?= busybox-1.27.2
 BUSYBOX_DIR := $(SYSDRV_DIR)/source/busybox
+SYSDRV_BUSYBOX_OBJS_OUTPUT_DIR ?= $(BUSYBOX_DIR)/objs_$(BUSYBOX_CFG)
 
 BUILDROOT_VER ?= buildroot-2024.02.2
 BUILDROOT_DIR := $(SYSDRV_DIR)/source/buildroot
@@ -295,6 +281,8 @@ SYSDRV_KERNEL_MOD_PATH:=$(SYSDRV_DIR)/out/kernel_drv_ko
 SYSDRV_ROOTFS_OUT_IMAGE := $(SYSDRV_DIR_OUT_IMAGE)/rootfs_base.img
 SYSDRV_UBOOT_ENV_CFG_FILE :=$(SYSDRV_DIR_OUT_IMAGE)/.env.txt
 
+SYSDRV_RAMDISK_DIR ?= $(SYSDRV_DIR_OUT_BOARD)
+
 export SYSDRV_DIR_OUT_PC
 export SYSDRV_DIR_OUT_BOARD
 export SYSDRV_DIR_OUT_ROOTFS
@@ -307,6 +295,17 @@ ifeq ($(ROOTFS_PART_SIZE),0)
 $(warning Check ROOTFS_PART_SIZE is 0 on $(CONFIG_SYSDRV_PARTITION))
 # default build rootfs partition size 32MB
 ROOTFS_PART_SIZE := 32*0x100000
+endif
+
+ifeq ($(SYSDRV_DRIVER_MODULE), y)
+sysdrv_kernel_driver_rockit_dir :=	$(shell test -d $(SYSDRV_DIR)/drv_ko/rockit/rockit-ko && \
+		echo "../../../drv_ko/rockit/rockit-ko" ||\
+		echo "../../../drv_ko/rockit/release_rockit-ko_rv1106_arm_asm" \
+		)
+sysdrv_kernel_driver_kmpp_dir :=	$(shell test -d $(SYSDRV_DIR)/drv_ko/kmpp/kmpp && \
+		echo "../../../drv_ko/kmpp/kmpp" ||\
+		echo "../../../drv_ko/kmpp/release_kmpp_rv1106_arm_asm" \
+		)
 endif
 
 ################################################################################
@@ -338,8 +337,22 @@ info:
 	@echo -e "$(C_YELLOW)    $(C_NORMAL)"
 	@echo -e "$(C_YELLOW)    <> kernel compile: $(C_NORMAL)"
 	@echo -e "$(C_YELLOW)       cd $(KERNEL_DIR)$(C_NORMAL)"
-	@echo -e "$(C_YELLOW)       $(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) $(KERNEL_CFG) $(KERNEL_CFG_FRAGMENT)$(C_NORMAL)"
-	@echo -e "$(C_YELLOW)       $(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) BOOT_ITS=boot.its $(KERNEL_DTS:dts=img) -j$(SYSDRV_JOBS)$(C_NORMAL)"
+ifeq ($(SYSDRV_DRIVER_MODULE), y)
+	@echo -e "$(C_YELLOW)       ln -sf $(sysdrv_kernel_driver_rockit_dir) drivers/rockit-ko $(C_NORMAL)"
+	@echo -e "$(C_YELLOW)       ln -sf $(sysdrv_kernel_driver_kmpp_dir) drivers/kmpp $(C_NORMAL)"
+	@echo -en "$(C_YELLOW)"
+	@echo -n "       test $$"
+	@echo -n "(grep -wq \"+=.*rockit-ko\" drivers/Makefile; echo $$"
+	@echo -n "? ) -eq 0 || echo \"obj-\\$$"
+	@echo "(CONFIG_ROCKCHIP_THUNDER_BOOT)    += rockit-ko/\" >> drivers/Makefile"
+	@echo -n "       test $$"
+	@echo -n "(grep -wq \"+=.*kmpp\" drivers/Makefile; echo $$"
+	@echo -n "? ) -eq 0 || echo \"obj-\\$$"
+	@echo "(CONFIG_ROCKCHIP_THUNDER_BOOT)    += kmpp/\" >> drivers/Makefile"
+	@echo -en "$(C_NORMAL)"
+endif
+	@echo -e "$(C_YELLOW)       $(MAKE) O=$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR) -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) $(KERNEL_CFG) $(KERNEL_CFG_FRAGMENT) $(C_NORMAL)"
+	@echo -e "$(C_YELLOW)       $(MAKE) O=$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR) -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) BOOT_ITS=$(KERNEL_DIR)/boot.its $(KERNEL_DTS:dts=img) -j$(SYSDRV_JOBS)$(C_NORMAL)"
 	@echo -e "$(C_YELLOW)    <> kernel out image: boot.img $(C_NORMAL)"
 	@echo -e "$(C_YELLOW)    $(C_NORMAL)"
 	@echo -e "$(C_YELLOW)    <> uboot compile: $(C_NORMAL)"
@@ -429,44 +442,34 @@ ifeq ($(SYSDRV_DRIVER_MODULE), y)
 	$(call MACRO_CHK_DRIVER_MODULE, $(SYSDRV_DIR)/drv_ko/rockit/, rockit-ko)
 	$(call MACRO_CHK_DRIVER_MODULE, $(SYSDRV_DIR)/drv_ko/kmpp/, kmpp)
 endif
+	$(AT)test ! -f $(KERNEL_DIR)/vmlinux || make -C $(KERNEL_DIR) distclean
 	@rm -rf $(KERNEL_DTB)
-	$(MAKE) -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) $(KERNEL_CFG) $(KERNEL_CFG_FRAGMENT) || exit 1
-	$(MAKE) -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) $(KERNEL_DTS:dts=img) BOOT_ITS=boot.its -j$(SYSDRV_JOBS) || exit 1
+	$(MAKE) O=$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR) -C $(KERNEL_DIR) ARCH=$(ARCH) \
+		CROSS_COMPILE=$(CROSS_COMPILE) $(KERNEL_CFG) $(KERNEL_CFG_FRAGMENT) || exit 1
+	$(MAKE) O=$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR) -C $(KERNEL_DIR) ARCH=$(ARCH) \
+		CROSS_COMPILE=$(CROSS_COMPILE) $(KERNEL_DTS:dts=img) BOOT_ITS=$(KERNEL_DIR)/boot.its -j$(SYSDRV_JOBS) || exit 1
 ifeq ($(SYSDRV_DRIVER_MODULE), y)
 	$(call MACRO_CLEAN_DRIVER_MODULE, rockit-ko)
 	$(call MACRO_CLEAN_DRIVER_MODULE, kmpp)
 endif
-	cp -fv $(KERNEL_DIR)/vmlinux $(SYSDRV_DIR_OUT_BOARD)
-	update_dtb_bootargs.sh --cmdline '$(KERNEL_CMDLINE_FRAGMENT)' --dtb $(KERNEL_DTB) --output $(KERNEL_DTB) || exit 1
-ifneq ($(RK_ENABLE_FASTBOOT), y)
-	$(MAKE) -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) $(KERNEL_DTS:dts=img) BOOT_ITS=boot.its -j$(SYSDRV_JOBS) || exit 1
-endif
-ifneq ($(KERNEL_DTB),)
-	cp -fv $(KERNEL_DTB) $(SYSDRV_DIR_OUT_BOARD)
+ifeq ($(SYSDRV_KERNEL_INSTALL_BOOTIMG),y)
+	cp -fv $(SYSDRV_KERNEL_OBJS_OUTPUT_DIR)/boot.img $(SYSDRV_DIR_OUT_IMAGE)/boot.img
+	$(call MAROC_COPY_PKG_TO_SYSDRV_OUTPUT, $(OUTPUT_IMAGE_PATH), $(SYSDRV_DIR_OUT_IMAGE)/boot.img)
 endif
 	# Start install kernel drivers
-ifeq ($(SYSDRV_BUILD_RAMDISK_FLAG),YES)
-	$(call MAROC_COPY_PKG_TO_SYSDRV_OUTPUT, $(OUTPUT_SYSDRV_RAMDISK_DIR), \
-		$(KERNEL_DIR)/arch/$(ARCH)/boot/Image* \
+	$(call MAROC_COPY_PKG_TO_SYSDRV_OUTPUT, $(SYSDRV_RAMDISK_DIR), \
+		$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR)/arch/$(ARCH)/boot/Image* \
 		$(KERNEL_DTB) \
-		$(KERNEL_DIR)/arch/$(ARCH)/boot/zImage \
-		$(KERNEL_DIR)/resource.img)
-else
-ifneq ($(RK_ENABLE_FASTBOOT), y)
-	cp -fv $(KERNEL_DIR)/boot.img $(SYSDRV_DIR_OUT_IMAGE)/boot.img
-endif
-ifneq ($(OUTPUT_FASTBOOT_IMAGE_PATH),)
-	$(call MAROC_COPY_PKG_TO_SYSDRV_OUTPUT, $(OUTPUT_FASTBOOT_IMAGE_PATH), $(KERNEL_DIR)/arch/$(ARCH)/boot/Image)
-	$(call MAROC_COPY_PKG_TO_SYSDRV_OUTPUT, $(OUTPUT_FASTBOOT_IMAGE_PATH), $(KERNEL_DIR)/resource.img)
-	$(call MAROC_COPY_PKG_TO_SYSDRV_OUTPUT, $(OUTPUT_FASTBOOT_IMAGE_PATH), $(KERNEL_DTB))
-endif
-	$(call MAROC_COPY_PKG_TO_SYSDRV_OUTPUT, $(OUTPUT_IMAGE_PATH), $(SYSDRV_DIR_OUT_IMAGE)/boot.img)
+		$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR)/arch/$(ARCH)/boot/zImage \
+		$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR)/resource.img)
+	cp -fv $(SYSDRV_KERNEL_OBJS_OUTPUT_DIR)/vmlinux $(SYSDRV_DIR_OUT_BOARD)
+	cp -fv $(KERNEL_DTB) $(SYSDRV_DIR_OUT_BOARD)
 	$(call MAROC_COPY_PKG_TO_SYSDRV_OUTPUT, $(OUTPUT_BOARD_BIN_PATH), \
 		$(SYSDRV_DIR_OUT_BOARD)/$(KERNEL_DTS:dts=dtb) $(SYSDRV_DIR_OUT_BOARD)/vmlinux)
-endif
 
 kernel_clean:
-	$(MAKE) -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) distclean
+	$(MAKE) O=$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR) -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) distclean
+	@-rm -rf $(SYSDRV_DIR)/source/objs_*
 	@-rm -rf $(SYSDRV_KERNEL_MOD_PATH) $(KERNEL_DIR_DRV_KO)
 
 ##########################################################################################
@@ -494,40 +497,37 @@ rootfs_prepare: prepare
 #	build busybox
 ##########################################################################################
 busybox_menuconfig:
-	@$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) menuconfig \
+	@$(MAKE) O=$(SYSDRV_BUSYBOX_OBJS_OUTPUT_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) menuconfig \
 		-C $(BUSYBOX_DIR)/$(BUSYBOX_VER)/
-	@cp -f $(BUSYBOX_DIR)/$(BUSYBOX_VER)/.config \
+	@cp -f $(SYSDRV_BUSYBOX_OBJS_OUTPUT_DIR)/.config \
 			$(SYSDRV_DIR)/tools/board/busybox/$(BUSYBOX_CFG);
 
 busybox: prepare
 	@echo -e "$(C_GREEN) ==sysdrv== build busybox   $(C_NORMAL)"
-	test -f $(BUSYBOX_DIR)/$(BUSYBOX_VER)/_install/bin/busybox  || (\
-		rm $(BUSYBOX_DIR)/$(BUSYBOX_VER) -rf ;\
-		mkdir -p $(BUSYBOX_DIR) ;\
+	test -f $(SYSDRV_BUSYBOX_OBJS_OUTPUT_DIR)/_install/bin/busybox  || (\
+		rm $(SYSDRV_BUSYBOX_OBJS_OUTPUT_DIR) -rf ;\
+		mkdir -p $(SYSDRV_BUSYBOX_OBJS_OUTPUT_DIR) ;\
 		tar xjf $(SYSDRV_DIR)/tools/board/busybox/$(BUSYBOX_VER).tar.bz2 -C $(BUSYBOX_DIR) ;\
-		cp $(SYSDRV_DIR)/tools/board/busybox/$(BUSYBOX_CFG) $(BUSYBOX_DIR)/$(BUSYBOX_VER)/.config ;\
-		cp -fv $(SYSDRV_DIR)/tools/board/busybox/*.patch $(SYSDRV_DIR)/tools/board/busybox/busybox.patch.sh $(BUSYBOX_DIR)/$(BUSYBOX_VER)/ ;\
-		pushd $(BUSYBOX_DIR)/$(BUSYBOX_VER)/;$(SHELL) ./busybox.patch.sh ; $(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -j$(SYSDRV_JOBS)  || exit 1; popd ;\
+		cp $(SYSDRV_DIR)/tools/board/busybox/$(BUSYBOX_CFG) $(SYSDRV_BUSYBOX_OBJS_OUTPUT_DIR)/.config ;\
+		cp -fv $(SYSDRV_DIR)/tools/board/busybox/*.patch $(SYSDRV_DIR)/tools/board/busybox/busybox.patch.sh $(BUSYBOX_DIR)/$(BUSYBOX_VER)/;\
+		pushd $(BUSYBOX_DIR)/$(BUSYBOX_VER)/;$(SHELL) ./busybox.patch.sh ; $(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -j$(SYSDRV_JOBS) O=$(SYSDRV_BUSYBOX_OBJS_OUTPUT_DIR)/ || exit 1; popd ;\
 		CFLAGS="$(SYSDRV_CROSS_CFLAGS)" \
-		$(MAKE) CROSS_COMPILE=$(CROSS_COMPILE) -C $(BUSYBOX_DIR)/$(BUSYBOX_VER) install  || exit 1;\
+		$(MAKE) CROSS_COMPILE=$(CROSS_COMPILE) -C $(BUSYBOX_DIR)/$(BUSYBOX_VER) install O=$(SYSDRV_BUSYBOX_OBJS_OUTPUT_DIR) || exit 1;\
 	);
-ifeq ($(SYSDRV_BUILD_RAMDISK_FLAG),YES)
-	tar xf $(SYSDRV_DIR)/tools/board/rootfs_script.tar -C $(BUSYBOX_DIR)/$(BUSYBOX_VER)/_install
 ifneq ($(OUTPUT_SYSDRV_RAMDISK_TINY_ROOTFS_DIR),)
+	tar xf $(SYSDRV_DIR)/tools/board/rootfs_script.tar -C $(OUTPUT_SYSDRV_RAMDISK_TINY_ROOTFS_DIR)
 	$(call MAROC_COPY_PKG_TO_SYSDRV_OUTPUT, $(OUTPUT_SYSDRV_RAMDISK_TINY_ROOTFS_DIR), \
 		$(SYSDRV_DIR)/tools/board/busybox/init \
-		$(BUSYBOX_DIR)/$(BUSYBOX_VER)/_install)
+		$(SYSDRV_BUSYBOX_OBJS_OUTPUT_DIR)/_install)
 else
 	$(call MAROC_COPY_PKG_TO_SYSDRV_OUTPUT, $(SYSDRV_DIR_OUT_ROOTFS), \
 		$(SYSDRV_DIR)/tools/board/busybox/init \
-		$(BUSYBOX_DIR)/$(BUSYBOX_VER)/_install)
-endif
-else
-	cp -af $(BUSYBOX_DIR)/$(BUSYBOX_VER)/_install/* $(SYSDRV_DIR_OUT_ROOTFS)
+		$(SYSDRV_BUSYBOX_OBJS_OUTPUT_DIR)/_install)
 endif
 
 busybox_clean:
 	$(AT)rm -rf $(BUSYBOX_DIR)/$(BUSYBOX_VER)
+	$(AT)rm -rf $(BUSYBOX_DIR)/objs_*
 
 buildroot_menuconfig:
 	cp -v $(SYSDRV_DIR)/tools/board/buildroot/$(BUILDROOT_DEFCONFIG) $(BUILDROOT_DIR)/$(BUILDROOT_VER)/configs/
@@ -611,11 +611,15 @@ drv: prepare
 	@-rm -rf $(SYSDRV_KERNEL_MOD_PATH) $(KERNEL_DIR_DRV_KO)
 	@-mkdir -p $(SYSDRV_KERNEL_MOD_PATH)
 	$(MAKE) -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -j$(SYSDRV_JOBS) \
+		O=$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR) \
+		modules
+	$(MAKE) -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -j$(SYSDRV_JOBS) \
+		O=$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR) \
 		modules_install INSTALL_MOD_STRIP=1 \
 		INSTALL_MOD_PATH=$(KERNEL_DIR_DRV_KO)
 	$(AT)find $(KERNEL_DIR_DRV_KO)/lib/modules/*/kernel \
 		-name "*.ko" -type f -exec cp -fav {} $(SYSDRV_KERNEL_MOD_PATH) \;
-	@test ! -d drv_ko || ($(MAKE) -C $(SYSDRV_DIR)/drv_ko KERNEL_DRV_KO_INSTALL_PATH=$(SYSDRV_KERNEL_MOD_PATH))
+	@test ! -d drv_ko || ($(MAKE) O=$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR) -C $(SYSDRV_DIR)/drv_ko KERNEL_DRV_KO_INSTALL_PATH=$(SYSDRV_KERNEL_MOD_PATH))
 	$(call MAROC_COPY_PKG_TO_SYSDRV_OUTPUT, $(OUTPUT_ROOTFS_SOURCE_DIR), $(SYSDRV_KERNEL_MOD_PATH), SELF)
 
 drv_clean:

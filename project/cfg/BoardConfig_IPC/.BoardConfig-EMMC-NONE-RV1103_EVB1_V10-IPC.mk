@@ -81,3 +81,12 @@ export RK_BUILD_APP_TO_OEM_PARTITION=y
 
 # enable rockchip test
 export RK_ENABLE_ROCKCHIP_TEST=y
+
+# config AUDIO model
+export RK_AUDIO_MODEL=NONE
+
+# config AI-ISP model
+export RK_AIISP_MODEL=NONE
+
+# config NPU model
+export RK_NPU_MODEL="object_detection_pfp_512x288.data"

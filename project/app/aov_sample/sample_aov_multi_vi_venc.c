@@ -72,6 +72,8 @@ typedef struct _rkCmdArgs {
 	RK_S32 s32SuspendTime;
 	RK_U32 u32BootFrame;
 	RK_U32 u32QuickStart;
+	RK_BOOL bWrapIfEnable;
+	RK_U32 u32WrapLine;
 } RkCmdArgs;
 
 typedef struct _rkMpiCtx {
@@ -167,8 +169,8 @@ static RK_S32 venc_get_frame_and_save2sdcard(SAMPLE_VENC_CTX_S *ctx, char *const
 		} else {
 			RK_LOGD("save stream to sdcard\n");
 			RK_MPI_VENC_RequestIDR(ctx->s32ChnId, RK_FALSE);
-			SAMPLE_COMM_AOV_CopyStreamToSdcard(ctx->s32ChnId, buffer, *psize, data,
-			                                   frame.pstPack->u32Len);
+			SAMPLE_COMM_AOV_CopyRawStreamToSdcard(ctx->s32ChnId, buffer, *psize, data,
+			                                      frame.pstPack->u32Len);
 			*psize = 0;
 		}
 	}
@@ -222,13 +224,13 @@ static void *venc_get_stream(void *pArgs) {
 	}
 	if (g_cmd_args->bEnableSaveToSdcard) {
 		if (main_buffer_size) {
-			SAMPLE_COMM_AOV_CopyStreamToSdcard(VENC_MAIN_CHN, main_buffer,
-			                                   main_buffer_size, NULL, 0);
+			SAMPLE_COMM_AOV_CopyRawStreamToSdcard(VENC_MAIN_CHN, main_buffer,
+			                                      main_buffer_size, NULL, 0);
 			main_buffer_size = 0;
 		}
 		if (sub_buffer_size) {
-			SAMPLE_COMM_AOV_CopyStreamToSdcard(VENC_SUB_CHN, sub_buffer, sub_buffer_size,
-			                                   NULL, 0);
+			SAMPLE_COMM_AOV_CopyRawStreamToSdcard(VENC_SUB_CHN, sub_buffer,
+			                                      sub_buffer_size, NULL, 0);
 			sub_buffer_size = 0;
 		}
 	}
@@ -275,13 +277,13 @@ static void *venc_get_stream(void *pArgs) {
 
 	if (g_cmd_args->bEnableSaveToSdcard) {
 		if (main_buffer_size) {
-			SAMPLE_COMM_AOV_CopyStreamToSdcard(VENC_MAIN_CHN, main_buffer,
-			                                   main_buffer_size, NULL, 0);
+			SAMPLE_COMM_AOV_CopyRawStreamToSdcard(VENC_MAIN_CHN, main_buffer,
+			                                      main_buffer_size, NULL, 0);
 			main_buffer_size = 0;
 		}
 		if (sub_buffer_size) {
-			SAMPLE_COMM_AOV_CopyStreamToSdcard(VENC_SUB_CHN, sub_buffer, sub_buffer_size,
-			                                   NULL, 0);
+			SAMPLE_COMM_AOV_CopyRawStreamToSdcard(VENC_SUB_CHN, sub_buffer,
+			                                      sub_buffer_size, NULL, 0);
 			sub_buffer_size = 0;
 		}
 	}
@@ -408,6 +410,12 @@ static RK_S32 vi_chn_init(SAMPLE_MPI_CTX_S *ctx, RkCmdArgs *pArgs) {
 	ctx->vi[0].stChnAttr.enCompressMode = COMPRESS_MODE_NONE;
 	ctx->vi[0].stChnAttr.stFrameRate.s32SrcFrameRate = -1;
 	ctx->vi[0].stChnAttr.stFrameRate.s32DstFrameRate = -1;
+	ctx->vi[0].stChnAttr.stIspOpt.stMaxSize.u32Width = pArgs->u32Main0Width;
+	ctx->vi[0].stChnAttr.stIspOpt.stMaxSize.u32Height = pArgs->u32Main0Height;
+	if (pArgs->bWrapIfEnable) {
+		ctx->vi[0].bWrapIfEnable = RK_TRUE;
+		ctx->vi[0].u32BufferLine = ctx->vi[0].u32Height / pArgs->u32WrapLine;
+	}
 	s32Ret = SAMPLE_COMM_VI_CreateChn(&(ctx->vi[0]));
 	if (s32Ret != RK_SUCCESS)
 		RK_LOGE("SAMPLE_COMM_VI_CreateChn 0 failure:%d", s32Ret);
@@ -426,6 +434,12 @@ static RK_S32 vi_chn_init(SAMPLE_MPI_CTX_S *ctx, RkCmdArgs *pArgs) {
 	ctx->vi[1].stChnAttr.enCompressMode = COMPRESS_MODE_NONE;
 	ctx->vi[1].stChnAttr.stFrameRate.s32SrcFrameRate = -1;
 	ctx->vi[1].stChnAttr.stFrameRate.s32DstFrameRate = -1;
+	ctx->vi[1].stChnAttr.stIspOpt.stMaxSize.u32Width = pArgs->u32Main1Width;
+	ctx->vi[1].stChnAttr.stIspOpt.stMaxSize.u32Height = pArgs->u32Main1Height;
+	if (pArgs->bWrapIfEnable) {
+		ctx->vi[1].bWrapIfEnable = RK_TRUE;
+		ctx->vi[1].u32BufferLine = ctx->vi[1].u32Height / pArgs->u32WrapLine;
+	}
 	s32Ret = SAMPLE_COMM_VI_CreateChn(&(ctx->vi[1]));
 	if (s32Ret != RK_SUCCESS)
 		RK_LOGE("SAMPLE_COMM_VI_CreateChn 1 failure:%d", s32Ret);
@@ -473,6 +487,11 @@ static RK_S32 venc_chn_init(SAMPLE_MPI_CTX_S *ctx, RkCmdArgs *pArgs) {
 	} else {
 		ctx->venc[0].stChnAttr.stVencAttr.u32Profile = 100;
 	}
+
+	if (pArgs->bWrapIfEnable) {
+		ctx->venc[0].bWrapIfEnable = RK_TRUE;
+		ctx->venc[0].u32BufferLine = ctx->venc[0].u32Height / pArgs->u32WrapLine;
+	}
 	s32Ret = SAMPLE_COMM_VENC_CreateChn(&ctx->venc[0]);
 	if (s32Ret != RK_SUCCESS)
 		RK_LOGE("SAMPLE_COMM_VENC_CreateChn venc0 failed %#X\n", s32Ret);
@@ -499,6 +518,10 @@ static RK_S32 venc_chn_init(SAMPLE_MPI_CTX_S *ctx, RkCmdArgs *pArgs) {
 		ctx->venc[1].stChnAttr.stVencAttr.u32Profile = 0;
 	} else {
 		ctx->venc[1].stChnAttr.stVencAttr.u32Profile = 100;
+	}
+	if (pArgs->bWrapIfEnable) {
+		ctx->venc[1].bWrapIfEnable = RK_TRUE;
+		ctx->venc[1].u32BufferLine = ctx->venc[1].u32Height / pArgs->u32WrapLine;
 	}
 	s32Ret = SAMPLE_COMM_VENC_CreateChn(&ctx->venc[1]);
 	if (s32Ret != RK_SUCCESS)
@@ -608,6 +631,7 @@ static const struct option long_options[] = {
     {"output_path", required_argument, RK_NULL, 'o'},
     {"bitrate", required_argument, NULL, 'b'},
     {"fps", required_argument, RK_NULL, 'f'},
+    {"wrap", required_argument, RK_NULL, 'r'},
     {"vi_buff_cnt", required_argument, RK_NULL, 'v'},
     {"gop", required_argument, RK_NULL, 'g'},
     {"enable_multi_frame", required_argument, RK_NULL, 'e' + 'm' + 'f'},
@@ -617,6 +641,7 @@ static const struct option long_options[] = {
     {"help", optional_argument, RK_NULL, '?'},
     {"boot_frame", required_argument, NULL, 'b' + 'f'},
     {"quick_start", required_argument, NULL, 'q' + 'k' + 's'},
+    {"wrap_lines", required_argument, RK_NULL, 'w' + 'l'},
     {RK_NULL, 0, RK_NULL, 0},
 };
 
@@ -650,6 +675,8 @@ static void print_usage(const RK_CHAR *name) {
 	printf("\t--boot_frame: How long will it take to enter AOV mode after boot"
 	       ", Default: 60 frames\n");
 	printf("\t--quick_start: quick start stream, Default: 0\n");
+	printf("\t-r | --wrap : wrap for mainStream, 0: close 1: open, Default: 0\n");
+	printf("\t--wrap_lines : 0: height/2, 1: height/4, 2: height/8. default: 1\n");
 }
 
 /******************************************************************************
@@ -681,6 +708,8 @@ static RK_S32 parse_cmd_args(int argc, char **argv, RkCmdArgs *pArgs) {
 	pArgs->bEnableMultiMode = RK_TRUE;
 	pArgs->u32BootFrame = 60;
 	pArgs->u32QuickStart = 0;
+	pArgs->bWrapIfEnable = RK_FALSE;
+	pArgs->u32WrapLine = 4;
 	int sensor_index = 0;
 
 	RK_S32 c = 0;
@@ -747,6 +776,20 @@ static RK_S32 parse_cmd_args(int argc, char **argv, RkCmdArgs *pArgs) {
 			break;
 		case 'f':
 			pArgs->u32VencFps = atoi(optarg);
+			break;
+		case 'r':
+			pArgs->bWrapIfEnable = atoi(optarg);
+			break;
+		case 'w' + 'l':
+			if (0 == atoi(optarg)) {
+				pArgs->u32WrapLine = 2;
+			} else if (1 == atoi(optarg)) {
+				pArgs->u32WrapLine = 4;
+			} else if (2 == atoi(optarg)) {
+				pArgs->u32WrapLine = 8;
+			} else {
+				RK_LOGE("ERROR: Invalid WrapLine Value.");
+			}
 			break;
 		case 'v':
 			pArgs->u32ViBuffCnt = atoi(optarg);

@@ -601,7 +601,7 @@ vpss_ioctl:
 	pop	{r4, r5, r6, r7, r8, pc}
 .L71:
 	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
+@ 87 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
 	cmp	r4, r1
 	sbc	r1, r4, r4
 .inst.w 0xf3af8014
@@ -774,21 +774,21 @@ vpss_exit:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR1,. + 0
-	.type	__func__.37487, %object
-	.size	__func__.37487, 13
-__func__.37487:
+	.type	__func__.35758, %object
+	.size	__func__.35758, 13
+__func__.35758:
 	.ascii	"vpss_version\000"
-	.type	__func__.37497, %object
-	.size	__func__.37497, 18
-__func__.37497:
+	.type	__func__.35768, %object
+	.size	__func__.35768, 18
+__func__.35768:
 	.ascii	"vpss_map_node_set\000"
-	.type	__func__.37511, %object
-	.size	__func__.37511, 21
-__func__.37511:
+	.type	__func__.35782, %object
+	.size	__func__.35782, 21
+__func__.35782:
 	.ascii	"vpss_map_node_remove\000"
-	.type	__func__.37528, %object
-	.size	__func__.37528, 11
-__func__.37528:
+	.type	__func__.35799, %object
+	.size	__func__.35799, 11
+__func__.35799:
 	.ascii	"vpss_ioctl\000"
 	.space	1
 	.type	vpss_ioctls, %object
@@ -841,10 +841,10 @@ g_vpss_dev:
 .LC0:
 	.ascii	"\033[1;31mstruct vpss_version mismatching\033[0m\000"
 .LC1:
-	.ascii	"-2024-01-22-17:02:23\000"
+	.ascii	"-2024-05-24-16:21:01\000"
 .LC2:
-	.ascii	"vmpi:a9dd19f6acbf3ae9d621a285aa64278d958f9b03-v1.4."
-	.ascii	"67\000"
+	.ascii	"vmpi:28ee389dbc33c2c7db812cd08e54fd3a0f2f992b-v1.4."
+	.ascii	"81\000"
 .LC3:
 	.ascii	"\033[1;31mstruct vpss_map_info mismatching\033[0m\000"
 .LC4:

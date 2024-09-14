@@ -270,7 +270,7 @@ EXTRA_CFLAGS += -Wno-error=unused-result -Werror=return-type
 all: modules
 modules:
 	#make -C $(KDIR) M=$(PWD) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) modules
-	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KERNEL_DIR) M=$(shell pwd) -j8
+	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KERNEL_DIR) M=$(shell pwd) -j8 O=$(WIFI_BUILD_KERNEL_OBJ_DIR)
 	$(CROSS_COMPILE)strip --strip-debug $(shell pwd)/aic8800_netdrv.ko
 	cp $(shell pwd)/aic8800_netdrv.ko $(M_OUT_DIR)
 clean:

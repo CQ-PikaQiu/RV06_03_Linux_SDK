@@ -16,6 +16,8 @@
 
 #include "rk_aiq_mems_sensor.h"
 #include "sample_comm.h"
+#include "sample_comm_aov.h"
+
 #define MAX_AIQ_CTX 4
 static rk_aiq_sys_ctx_t *g_aiq_ctx[MAX_AIQ_CTX];
 #ifdef RKAIQ_GRP
@@ -32,7 +34,7 @@ rk_aiq_cpsl_cfg_t g_cpsl_cfg[MAX_AIQ_CTX];
 rk_aiq_wb_gain_t gs_wb_auto_gain = {2.083900, 1.000000, 1.000000, 2.018500};
 RK_U32 g_2dnr_default_level = 50;
 RK_U32 g_3dnr_default_level = 50;
-RK_S32 g_devBufCnt[MAX_AIQ_CTX] = {2, 2, 2, 2, 2, 2, 2, 2};
+RK_S32 g_devBufCnt[MAX_AIQ_CTX] = {2, 2, 2, 2};
 rk_aiq_working_mode_t g_WDRMode[MAX_AIQ_CTX];
 
 typedef enum _SHUTTERSPEED_TYPE_E {
@@ -112,6 +114,9 @@ RK_S32 SAMPLE_COMM_ISP_Init(RK_S32 CamId, rk_aiq_working_mode_t WDRMode, RK_BOOL
 	// rk_aiq_uapi_sysctl_enumStaticMetas(CamId, &aiq_static_info);
 	rk_aiq_uapi_sysctl_enumStaticMetasByPhyId(CamId, &aiq_static_info);
 
+	SAMPLE_COMM_AOV_PreInitIsp(aiq_static_info.sensor_info.sensor_name, iq_file_dir,
+	                           CamId);
+
 	printf("ID: %d, sensor_name is %s, iqfiles is %s\n", CamId,
 	       aiq_static_info.sensor_info.sensor_name, iq_file_dir);
 
@@ -121,6 +126,7 @@ RK_S32 SAMPLE_COMM_ISP_Init(RK_S32 CamId, rk_aiq_working_mode_t WDRMode, RK_BOOL
 		rk_aiq_uapi_sysctl_setMulCamConc(aiq_ctx, true);
 
 	g_aiq_ctx[CamId] = aiq_ctx;
+
 	return 0;
 }
 
@@ -185,6 +191,7 @@ RK_S32 SAMPLE_COMM_ISP_Run(RK_S32 CamId) {
 		printf("%s : CamId is over 3 or not init\n", __FUNCTION__);
 		return -1;
 	}
+
 	if (rk_aiq_uapi_sysctl_prepare(g_aiq_ctx[CamId], 0, 0, g_WDRMode[CamId])) {
 		printf("rkaiq engine prepare failed !\n");
 		g_aiq_ctx[CamId] = NULL;
@@ -250,6 +257,20 @@ RK_S32 SAMPLE_COMM_ISP_SetFrameRate(RK_S32 CamId, RK_U32 uFps) {
 
 	printf("SAMPLE_COMM_ISP_SetFrameRate %d\n", uFps);
 	return ret;
+}
+
+RK_S32 SAMPLE_COMM_ISP_GetFrameRate(RK_S32 CamId) {
+	if (CamId >= MAX_AIQ_CTX || !g_aiq_ctx[CamId]) {
+		printf("%s : CamId is over 3 or not init\n", __FUNCTION__);
+		return -1;
+	}
+	RK_S32 ret = 0;
+
+	frameRateInfo_t info;
+	ret = rk_aiq_uapi_getFrameRate(g_aiq_ctx[CamId], &info);
+
+	printf("SAMPLE_COMM_ISP_GetFrameRate %d\n", info.fps);
+	return info.fps;
 }
 
 RK_S32 SAMPLE_COMM_ISP_SetLDCH(RK_S32 CamId, RK_U32 level, RK_BOOL bIfEnable) {
@@ -800,7 +821,7 @@ RK_S32 SAMPLE_COMM_ISP_SET_Correction(RK_S32 CamId, RK_U32 u32Mode, RK_U32 u32Va
 	return ret;
 }
 
-RK_S32 SAMPLE_COMM_ISP_SET_mirror(RK_S32 CamId, RK_U32 u32Value) {
+RK_S32 SAMPLE_COMM_ISP_SetMirrorFlip(int CamId, RK_U32 u32Value) {
 	if (CamId >= MAX_AIQ_CTX || !g_aiq_ctx[CamId]) {
 		printf("%s : CamId is over 3 or not init\n", __FUNCTION__);
 		return -1;
@@ -1100,5 +1121,65 @@ RK_S32 SAMPLE_COMM_ISP_CamGroup_SetLDCH(RK_U32 CamId, RK_U32 u32Level,
 	}
 	return RK_SUCCESS;
 }
-#endif
-// #endif
+
+#endif // RKAIQ_GRP
+
+RK_S32 SAMPLE_COMM_ISP_SingleFrame(int cam_id) {
+	int ret;
+	ret = rk_aiq_uapi_sysctl_stopMotionDetect(g_aiq_ctx[cam_id]);
+	printf("cam %d rk_aiq_uapi_sysctl_stopMotionDetect ret = %d\n", cam_id, ret);
+	ret = rk_aiq_uapi_sysctl_pause(g_aiq_ctx[cam_id], true);
+	printf("cam %d rk_aiq_uapi2_sysctl_pause ret = %d\n", cam_id, ret);
+	return ret;
+}
+
+RK_S32 SAMPLE_COMM_ISP_MultiFrame(int cam_id) {
+	int ret;
+	ret = rk_aiq_uapi_sysctl_resume(g_aiq_ctx[cam_id]);
+	printf("cam %d rk_aiq_uapi2_sysctl_resume ret = %d\n", cam_id, ret);
+	ret = rk_aiq_uapi_sysctl_startMotionDetect(g_aiq_ctx[cam_id]);
+	printf("cam %d rk_aiq_uapi_sysctl_startMotionDetect ret = %d\n", cam_id, ret);
+	return ret;
+}
+
+RK_BOOL SAMPLE_COMM_ISP_IsExpBigChange(int cam_id) {
+	if (cam_id >= MAX_AIQ_CTX || !g_aiq_ctx[cam_id]) {
+		printf("%s : CamId is over %d or not init\n", __FUNCTION__, MAX_AIQ_CTX);
+		return RK_FALSE;
+	}
+	Uapi_ExpQueryInfo_t expInfo;
+	Uapi_LinExpAttr_t linExpAttr;
+	memset(&expInfo, 0, sizeof(Uapi_ExpQueryInfo_t));
+	memset(&linExpAttr, 0, sizeof(Uapi_LinExpAttr_t));
+	rk_aiq_user_api_ae_queryExpResInfo(g_aiq_ctx[cam_id], &expInfo);
+	rk_aiq_user_api_ae_getLinExpAttr(g_aiq_ctx[cam_id], &linExpAttr);
+	if (fabs(expInfo.LumaDeviation) * 100 > linExpAttr.ToleranceOut * 4) {
+		printf("Cur Exp Info :\n");
+		printf("ToleranceOut %f LumaDeviation %f\n", linExpAttr.ToleranceOut,
+		       fabs(expInfo.LumaDeviation) * 100);
+		printf("IsConverged: %d\n", expInfo.IsConverged);
+		printf("IsExpMax: %d\n", expInfo.IsExpMax);
+		printf("LinePeriodsPerField: %f\n", expInfo.LinePeriodsPerField);
+		printf("PixelPeriodsPerLine: %f\n", expInfo.PixelPeriodsPerLine);
+		printf("PixelClockFreqMHZ: %f\n", expInfo.PixelClockFreqMHZ);
+		printf("GlobalEnvLuv: %f\n", expInfo.GlobalEnvLux);
+		return RK_TRUE;
+	}
+	return RK_FALSE;
+}
+RK_BOOL SAMPLE_COMM_ISP_IsExpConverge(int cam_id) {
+	int ret = RK_SUCCESS;
+	if (cam_id >= MAX_AIQ_CTX || !g_aiq_ctx[cam_id]) {
+		printf("%s : CamId is over %d or not init\n", __FUNCTION__, MAX_AIQ_CTX);
+		return RK_TRUE;
+	}
+	Uapi_ExpQueryInfo_t expInfo;
+	memset(&expInfo, 0, sizeof(Uapi_ExpQueryInfo_t));
+	ret = rk_aiq_user_api_ae_queryExpResInfo(g_aiq_ctx[cam_id], &expInfo);
+	if (ret == RK_SUCCESS) {
+		return expInfo.IsConverged;
+	} else {
+		printf("[%s()] failed ret = 0x%x\n", __FUNCTION__, ret);
+		return RK_FALSE;
+	}
+}

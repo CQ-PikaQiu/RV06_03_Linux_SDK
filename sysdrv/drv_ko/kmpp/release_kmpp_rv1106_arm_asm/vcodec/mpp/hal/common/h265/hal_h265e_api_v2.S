@@ -363,13 +363,13 @@ hal_h265ev2_init:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__FUNCTION__.19113, %object
-	.size	__FUNCTION__.19113, 19
-__FUNCTION__.19113:
+	.type	__FUNCTION__.19122, %object
+	.size	__FUNCTION__.19122, 19
+__FUNCTION__.19122:
 	.ascii	"hal_h265ev2_deinit\000"
-	.type	__FUNCTION__.19103, %object
-	.size	__FUNCTION__.19103, 17
-__FUNCTION__.19103:
+	.type	__FUNCTION__.19112, %object
+	.size	__FUNCTION__.19112, 17
+__FUNCTION__.19112:
 	.ascii	"hal_h265ev2_init\000"
 	.type	hal_api_h265e_v2, %object
 	.size	hal_api_h265e_v2, 64

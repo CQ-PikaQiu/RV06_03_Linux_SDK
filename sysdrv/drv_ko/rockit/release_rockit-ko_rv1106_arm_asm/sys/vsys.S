@@ -1247,11 +1247,11 @@ vsys_read:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	.pad #92
-	sub	sp, sp, #92
+	.pad #100
+	sub	sp, sp, #100
 	ldr	r5, [r0, #128]
 	mov	r9, r2
-	str	r1, [sp, #84]
+	str	r1, [sp, #92]
 	adds	r5, r5, #4
 	mov	r0, r5
 	bl	mpi_fs_buf_read
@@ -1285,41 +1285,43 @@ vsys_read:
 	mov	r0, r5
 	ldr	r2, [r4, #16]
 	ldr	r3, [r4, #44]
-	str	r1, [sp, #76]
+	str	r1, [sp, #80]
 	ldr	r1, [r4, #284]
-	str	r1, [sp, #72]
+	str	r1, [sp, #76]
 	ldr	r1, [r4, #280]
-	str	r1, [sp, #68]
+	str	r1, [sp, #72]
 	ldr	r1, [r4, #384]
-	str	r1, [sp, #64]
+	str	r1, [sp, #68]
 	ldr	r1, [r4, #392]
-	str	r1, [sp, #60]
+	str	r1, [sp, #64]
 	ldr	r1, [r4, #400]
-	str	r1, [sp, #56]
+	str	r1, [sp, #60]
 	ldr	r1, [r4, #204]
-	str	r1, [sp, #52]
+	str	r1, [sp, #56]
 	ldr	r1, [r4, #196]
-	str	r1, [sp, #48]
+	str	r1, [sp, #52]
 	ldr	r1, [r4, #192]
-	str	r1, [sp, #44]
+	str	r1, [sp, #48]
 	ldr	r1, [r4, #184]
-	str	r1, [sp, #40]
+	str	r1, [sp, #44]
 	ldr	r1, [r4, #380]
-	str	r1, [sp, #36]
+	str	r1, [sp, #40]
 	ldr	r1, [r4, #388]
-	str	r1, [sp, #32]
+	str	r1, [sp, #36]
 	ldr	r1, [r4, #396]
-	str	r1, [sp, #28]
+	str	r1, [sp, #32]
 	ldr	r1, [r4, #144]
-	str	r1, [sp, #24]
+	str	r1, [sp, #28]
 	ldr	r1, [r4, #136]
-	str	r1, [sp, #20]
+	str	r1, [sp, #24]
 	ldr	r1, [r4, #132]
-	str	r1, [sp, #16]
+	str	r1, [sp, #20]
 	ldr	r1, [r4, #124]
-	strd	r2, r1, [sp, #8]
-	ldr	r2, [r4, #56]
+	strd	r2, r1, [sp, #12]
+	ldr	r2, [r4, #76]
 	ldr	r1, .L186+28
+	str	r2, [sp, #8]
+	ldr	r2, [r4, #56]
 	strd	r4, r2, [sp]
 	ldr	r3, [r3, #44]
 	ldr	r2, [r4]
@@ -1342,9 +1344,9 @@ vsys_read:
 	bne	.L174
 .L166:
 	mov	r2, r9
-	ldr	r1, [sp, #84]
+	ldr	r1, [sp, #92]
 	mov	r0, r5
-	add	sp, sp, #92
+	add	sp, sp, #100
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	b	mpi_fs_buf_read
@@ -1445,7 +1447,7 @@ vsys_read:
 	bl	mpi_fs_buf_reset
 .L154:
 	mov	r0, r4
-	add	sp, sp, #92
+	add	sp, sp, #100
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
 .L187:
@@ -1759,7 +1761,7 @@ dumpsys_callback:
 	ldr	r3, [r4, #184]
 	cbnz	r3, .L229
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r7, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -1796,7 +1798,7 @@ dumpsys_callback:
 	bl	up
 .L231:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r7	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -1868,7 +1870,7 @@ vsys_ioctl:
 	pop	{r4, r5, r6, r7, r8, pc}
 .L241:
 	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
+@ 87 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
 	cmp	r4, r0
 	sbc	r0, r4, r4
 .inst.w 0xf3af8014
@@ -2292,7 +2294,7 @@ vsys_thread_fn:
 	cbz	r0, .L350
 .L338:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r8, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -2321,7 +2323,7 @@ vsys_thread_fn:
 	cmp	r4, r5
 	bne	.L354
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r8	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -2335,7 +2337,7 @@ vsys_thread_fn:
 	add	r0, r5, #168
 	bl	down
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r4, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -2348,7 +2350,7 @@ vsys_thread_fn:
 	add	r8, r5, r1, lsl #2
 	ldr	r6, [r8, r3]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r4	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -2416,7 +2418,7 @@ vsys_thread_fn:
 	movs	r3, #0
 	str	r3, [r8, r10]
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -2426,7 +2428,7 @@ vsys_thread_fn:
 	adds	r3, r3, #1
 	str	r3, [r9]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -2796,29 +2798,29 @@ vsys_close:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__func__.38093, %object
-	.size	__func__.38093, 21
-__func__.38093:
+	.type	__func__.36364, %object
+	.size	__func__.36364, 21
+__func__.36364:
 	.ascii	"vsys_add_node_to_map\000"
-	.type	__func__.38116, %object
-	.size	__func__.38116, 23
-__func__.38116:
+	.type	__func__.36387, %object
+	.size	__func__.36387, 23
+__func__.36387:
 	.ascii	"vsys_get_node_from_map\000"
-	.type	__func__.38138, %object
-	.size	__func__.38138, 26
-__func__.38138:
+	.type	__func__.36409, %object
+	.size	__func__.36409, 26
+__func__.36409:
 	.ascii	"vsys_remove_node_from_map\000"
-	.type	__func__.37842, %object
-	.size	__func__.37842, 13
-__func__.37842:
+	.type	__func__.36113, %object
+	.size	__func__.36113, 13
+__func__.36113:
 	.ascii	"vsys_version\000"
-	.type	__func__.37850, %object
-	.size	__func__.37850, 10
-__func__.37850:
+	.type	__func__.36121, %object
+	.size	__func__.36121, 10
+__func__.36121:
 	.ascii	"vsys_bind\000"
-	.type	__func__.37859, %object
-	.size	__func__.37859, 12
-__func__.37859:
+	.type	__func__.36130, %object
+	.size	__func__.36130, 12
+__func__.36130:
 	.ascii	"vsys_unbind\000"
 	.space	3
 	.type	usages, %object
@@ -2826,33 +2828,33 @@ __func__.37859:
 usages:
 	.word	.LC67
 	.word	0
-	.type	__func__.37707, %object
-	.size	__func__.37707, 14
-__func__.37707:
+	.type	__func__.35978, %object
+	.size	__func__.35978, 14
+__func__.35978:
 	.ascii	"set_dump_info\000"
-	.type	__func__.37976, %object
-	.size	__func__.37976, 22
-__func__.37976:
+	.type	__func__.36247, %object
+	.size	__func__.36247, 22
+__func__.36247:
 	.ascii	"vsys_force_lost_frame\000"
-	.type	__func__.37931, %object
-	.size	__func__.37931, 17
-__func__.37931:
+	.type	__func__.36202, %object
+	.size	__func__.36202, 17
+__func__.36202:
 	.ascii	"vsys_pool_create\000"
-	.type	__func__.37989, %object
-	.size	__func__.37989, 11
-__func__.37989:
+	.type	__func__.36260, %object
+	.size	__func__.36260, 11
+__func__.36260:
 	.ascii	"vsys_ioctl\000"
-	.type	__func__.38011, %object
-	.size	__func__.38011, 10
-__func__.38011:
+	.type	__func__.36282, %object
+	.size	__func__.36282, 10
+__func__.36282:
 	.ascii	"vsys_open\000"
-	.type	__func__.38039, %object
-	.size	__func__.38039, 13
-__func__.38039:
+	.type	__func__.36310, %object
+	.size	__func__.36310, 13
+__func__.36310:
 	.ascii	"vsys_release\000"
-	.type	__func__.37943, %object
-	.size	__func__.37943, 17
-__func__.37943:
+	.type	__func__.36214, %object
+	.size	__func__.36214, 17
+__func__.36214:
 	.ascii	"vsys_pool_delete\000"
 	.type	vsys_ioctls, %object
 	.size	vsys_ioctls, 200
@@ -3007,25 +3009,25 @@ g_vsys_dev:
 .LC35:
 	.ascii	"\033[1;31m%s open fail\033[0m\000"
 .LC36:
-	.ascii	"vmpi:a9dd19f6acbf3ae9d621a285aa64278d958f9b03-v1.4."
-	.ascii	"67\000"
+	.ascii	"vmpi:28ee389dbc33c2c7db812cd08e54fd3a0f2f992b-v1.4."
+	.ascii	"81\000"
 .LC37:
 	.ascii	"module: %s\012version: %s\012build: %s\012\000"
 .LC38:
-	.ascii	"-2024-01-22-17:02:23\000"
+	.ascii	"-2024-05-24-16:21:01\000"
 .LC39:
 	.ascii	"***********************************************mpi "
 	.ascii	"node list******************************************"
 	.ascii	"*********\012\000"
 .LC40:
-	.ascii	"id---name--------handle-----nid-ref-infa_cnt-lcnt-f"
-	.ascii	"rate-fbase-wcnt-depth-timeout-onfa_cnt-lcnt-frate-f"
-	.ascii	"base-wcnt-depth-timeout-itime-otime-state-next_node"
-	.ascii	"-------------\012\000"
+	.ascii	"id---name--------handle-----nid-uid-ref-infa_cnt-lc"
+	.ascii	"nt-frate-fbase-wcnt-depth-timeout-onfa_cnt-lcnt-fra"
+	.ascii	"te-fbase-wcnt-depth-timeout-itime-otime-state-next_"
+	.ascii	"node-------------\012\000"
 .LC41:
-	.ascii	"%-#4d %-#11s %-#10x %-#3d %-#3d %-#8d %-#4d %-#5d %"
-	.ascii	"-#5d %-#4d %-#5d %-#7d %-#8d %-#4d %-#5d %-#5d %-#4"
-	.ascii	"d %-#5d %-#7d %-#5ld %-#5ld %-#5x \000"
+	.ascii	"%-#4d %-#11s %-#10x %-#3d %-#3d %-#3d %-#8d %-#4d %"
+	.ascii	"-#5d %-#5d %-#4d %-#5d %-#7d %-#8d %-#4d %-#5d %-#5"
+	.ascii	"d %-#4d %-#5d %-#7d %-#5ld %-#5ld %-#5x \000"
 .LC42:
 	.ascii	"*********************************************mpi no"
 	.ascii	"de frame control***********************************"

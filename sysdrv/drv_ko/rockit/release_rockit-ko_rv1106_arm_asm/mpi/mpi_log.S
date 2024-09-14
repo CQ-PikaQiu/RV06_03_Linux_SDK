@@ -63,7 +63,7 @@ vlog:
 	cmp	r3, r1
 	blt	.L3
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r6, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -97,7 +97,7 @@ vlog:
 	str	r2, [sp, #36]
 	bl	mpi_fs_buf_loop_add
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r6	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -416,7 +416,7 @@ vlog_ioctl:
 	pop	{r4, r5, r6, r7, r8, pc}
 .L37:
 	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
+@ 87 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
 	cmp	r4, r0
 	sbc	r0, r4, r4
 .inst.w 0xf3af8014
@@ -584,25 +584,25 @@ vlog_probe:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR2,. + 0
-	.type	__func__.37623, %object
-	.size	__func__.37623, 13
-__func__.37623:
+	.type	__func__.35894, %object
+	.size	__func__.35894, 13
+__func__.35894:
 	.ascii	"vlog_release\000"
-	.type	__func__.37571, %object
-	.size	__func__.37571, 13
-__func__.37571:
+	.type	__func__.35842, %object
+	.size	__func__.35842, 13
+__func__.35842:
 	.ascii	"vlog_version\000"
-	.type	__func__.37578, %object
-	.size	__func__.37578, 15
-__func__.37578:
+	.type	__func__.35849, %object
+	.size	__func__.35849, 15
+__func__.35849:
 	.ascii	"vlog_set_level\000"
-	.type	__func__.37594, %object
-	.size	__func__.37594, 11
-__func__.37594:
+	.type	__func__.35865, %object
+	.size	__func__.35865, 11
+__func__.35865:
 	.ascii	"vlog_ioctl\000"
-	.type	__func__.37616, %object
-	.size	__func__.37616, 10
-__func__.37616:
+	.type	__func__.35887, %object
+	.size	__func__.35887, 10
+__func__.35887:
 	.ascii	"vlog_open\000"
 	.space	2
 	.type	vlog_ioctls, %object

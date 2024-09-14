@@ -36,7 +36,6 @@ extern "C" {
 #include <time.h>
 #include <unistd.h>
 
-#include "font_factory.h"
 #include "rtsp_demo.h"
 #include "sample_comm.h"
 #include "sample_comm_aov.h"
@@ -59,6 +58,10 @@ static RK_U32 g_u32BootFrame = 60;
 static RK_S32 g_s32AovLoopCount = -1;
 static RK_S32 g_enable_save_sd = 1;
 static RK_S32 g_max_wakeup_frame_count = 3000;
+static RK_S32 g_low_power_mode = 1;
+static RK_U32 g_u32Fps = 0;
+static RK_S32 g_enable_fast_ae = 0;
+static RK_S32 s32SuspendTime = 1000;
 
 #define RED_COLOR 0x0000FF
 #define BLUE_COLOR 0xFF0000
@@ -76,6 +79,7 @@ typedef struct _rkMpiCtx {
 	SAMPLE_IVA_CTX_S iva;
 #endif
 	SAMPLE_RGN_CTX_S rgn[2];
+	SAMPLE_IVS_CTX_S ivs;
 } SAMPLE_MPI_CTX_S;
 
 SAMPLE_MPI_CTX_S *g_mpi_ctx = NULL;
@@ -85,7 +89,7 @@ static void sigterm_handler(int sig) {
 	quit = true;
 }
 
-static RK_CHAR optstr[] = "?::a::b:w:h:l:o:e:d:D:I:i:L:M:";
+static RK_CHAR optstr[] = "?::a::b:w:h:l:o:e:d:D:I:i:L:M:g:f:";
 static const struct option long_options[] = {
     {"aiq", optional_argument, NULL, 'a'},
     {"bitrate", required_argument, NULL, 'b'},
@@ -98,8 +102,8 @@ static const struct option long_options[] = {
     {"camid", required_argument, NULL, 'I'},
     {"multictx", required_argument, NULL, 'M'},
     {"fps", required_argument, NULL, 'f'},
+    {"gop", required_argument, NULL, 'g'},
     {"hdr_mode", required_argument, NULL, 'h' + 'm'},
-    {"ae_mode", required_argument, NULL, 'a' + 'm'},
     {"aov_loop_count", required_argument, NULL, 'a' + 'm' + 'c'},
     {"suspend_time", required_argument, NULL, 's' + 't'},
     {"enable_aiisp", required_argument, NULL, 'a' + 'i'},
@@ -110,6 +114,9 @@ static const struct option long_options[] = {
     {"enable_save_sdcard", required_argument, RK_NULL, 'e' + 's'},
     {"max_wakeup_frame_count", required_argument, RK_NULL, 'm' + 'w'},
     {"quick_start", required_argument, NULL, 'q' + 'k' + 's'},
+    {"low_power", required_argument, NULL, 'l' + 'w' + 'p'},
+    {"camera_mirror_flip", required_argument, NULL, 'm' + 'p'},
+    {"fast_ae", required_argument, NULL, 'f' + 'a'},
     {"help", optional_argument, NULL, '?'},
     {NULL, 0, NULL, 0},
 };
@@ -134,16 +141,15 @@ static void print_usage(const RK_CHAR *name) {
 	printf("\t-I | --camid: camera ctx id, Default 0\n");
 	printf("\t-w | --width: camera with, Default 1920\n");
 	printf("\t-h | --height: camera height, Default 1080\n");
-	printf("\t-f | --fps: vi framerate. Default: 15\n");
-	printf("\t-e | --encode: encode type, Default:h264cbr, Value:h264cbr, "
+	printf("\t-f | --fps: camera framerate. Default: 25\n");
+	printf("\t-g | --gop: venc gop. Default: fps x 2\n");
+	printf("\t-e | --encode: encode type, Default:h265vbr, Value:h264cbr, "
 	       "h264vbr, h264avbr "
 	       "h265cbr, h265vbr, h265avbr, mjpegcbr, mjpegvbr\n");
 	printf("\t-b | --bitrate: encode bitrate, Default 4096\n");
 	printf("\t-i | --input_bmp_name: input file path of logo.bmp, Default NULL\n");
 	printf("\t-o | --output_path: encode save file path, Default /data/\n");
 	printf("\t--enable_save_sdcard : enable save venc stream to sdcard, default: 1\n");
-	printf("\t--ae_mode: set aov ae wakeup mode, 0: MD wakupe: 1: always wakeup, 2: no "
-	       "wakeup, Default: 0\n");
 	printf("\t--aov_loop_count: set aov wakeup loop count, Default: -1(unlimit)\n");
 	printf("\t--suspend_time: set aov suspend time, Default: 1000ms\n");
 	printf("\t--enable_aiisp : enable ai isp, 0: close, 1: enable. default: 1\n");
@@ -156,9 +162,15 @@ static void print_usage(const RK_CHAR *name) {
 	printf("\t--max_wakeup_frame_count: max frame count running in multi "
 	       "frame mode after wakeup by gpio, Default: 3000\n");
 	printf("\t--quick_start: quick start stream, Default: 0\n");
+	printf("\t--low_power: After awakening, perform human form detection and encoding. "
+	       "1: open, 0: close. default: 1\n");
+	printf("\t--camera_mirror_flip: camera mirror flip, 0: 0, 1: 90, 2: 180, 3: 270. "
+	       "Defaule 0\n");
+	printf("\t--fast_ae: enable faset ae, 0: close, 1: enable. default: 0\n");
 }
 
 static RK_S32 aiisp_callback(RK_VOID *pAinrParam, RK_VOID *pPrivateData) {
+	static int lastAiispStatus = 0;
 	if (pAinrParam == RK_NULL) {
 		return RK_FAILURE;
 	}
@@ -166,6 +178,28 @@ static RK_S32 aiisp_callback(RK_VOID *pAinrParam, RK_VOID *pPrivateData) {
 	SAMPLE_COMM_ISP_GetAINrParams(0, pAinrParam);
 	RK_LOGD("aiisp status is %s\n",
 	        ((rk_ainr_param *)pAinrParam)->enable ? "enable" : "disabled");
+	if (((rk_ainr_param *)pAinrParam)->enable != lastAiispStatus) {
+		if (((rk_ainr_param *)pAinrParam)->enable) {
+			SAMPLE_COMM_ISP_SetFrameRate(0, 10);
+			// change venc fps to 10 fps
+			VENC_CHN_ATTR_S venc_chn_attr;
+			RK_MPI_VENC_GetChnAttr(VENC_MAIN_CHANNEL, &venc_chn_attr);
+			// The frame rate is the same in the union, so 264 is used directly to set
+			// the frame rate
+			venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateNum = 10;
+			venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateNum = 10;
+		} else {
+			SAMPLE_COMM_ISP_SetFrameRate(VENC_MAIN_CHANNEL, g_u32Fps);
+			VENC_CHN_ATTR_S venc_chn_attr;
+			RK_MPI_VENC_GetChnAttr(VENC_MAIN_CHANNEL, &venc_chn_attr);
+			// The frame rate is the same in the union, so 264 is used directly to set
+			// the frame rate
+			venc_chn_attr.stRcAttr.stH264Cbr.fr32DstFrameRateNum = g_u32Fps;
+			venc_chn_attr.stRcAttr.stH264Cbr.u32SrcFrameRateNum = g_u32Fps;
+		}
+	}
+	lastAiispStatus = ((rk_ainr_param *)pAinrParam)->enable;
+
 	//((rk_ainr_param *)pAinrParam)->enable = RK_TRUE;
 	return RK_SUCCESS;
 }
@@ -181,6 +215,7 @@ static void *venc_get_stream(void *pArgs) {
 	RK_S32 loopCount = 0;
 	RK_S32 venc_data_size = 0;
 	RK_S32 force_flush_to_storage = 0;
+	RK_U64 last_venc_pts;
 
 	char *venc_data = NULL;
 	if (g_enable_save_sd)
@@ -206,9 +241,9 @@ static void *venc_get_stream(void *pArgs) {
 					}
 				} else {
 					RK_MPI_VENC_RequestIDR(ctx->s32ChnId, RK_FALSE);
-					SAMPLE_COMM_AOV_CopyStreamToSdcard(ctx->s32ChnId, venc_data,
-					                                   venc_data_size, pData,
-					                                   ctx->stFrame.pstPack->u32Len);
+					SAMPLE_COMM_AOV_CopyRawStreamToSdcard(ctx->s32ChnId, venc_data,
+					                                      venc_data_size, pData,
+					                                      ctx->stFrame.pstPack->u32Len);
 					venc_data_size = 0;
 				}
 			}
@@ -220,10 +255,11 @@ static void *venc_get_stream(void *pArgs) {
 				rtsp_do_event(g_rtsplive);
 			}
 
-			RK_LOGD("chn:%d, loopCount:%d, len:%u, pts:%llu, seq:%u", ctx->s32ChnId,
-			        loopCount, ctx->stFrame.pstPack->u32Len, ctx->stFrame.pstPack->u64PTS,
+			RK_LOGI("chn:%d, loopCount:%d, len:%u, pts:%llu, seq:%u", ctx->s32ChnId,
+			        loopCount, ctx->stFrame.pstPack->u32Len,
+			        (ctx->stFrame.pstPack->u64PTS - last_venc_pts) / 1000,
 			        ctx->stFrame.u32Seq);
-
+			last_venc_pts = ctx->stFrame.pstPack->u64PTS;
 			SAMPLE_COMM_VENC_ReleaseStream(ctx);
 
 			loopCount++;
@@ -231,8 +267,8 @@ static void *venc_get_stream(void *pArgs) {
 	}
 
 	if (g_enable_save_sd && venc_data && venc_data_size > 0) {
-		SAMPLE_COMM_AOV_CopyStreamToSdcard(ctx->s32ChnId, venc_data, venc_data_size, NULL,
-		                                   0);
+		SAMPLE_COMM_AOV_CopyRawStreamToSdcard(ctx->s32ChnId, venc_data, venc_data_size,
+		                                      NULL, 0);
 		venc_data_size = 0;
 	}
 
@@ -243,89 +279,6 @@ static void *venc_get_stream(void *pArgs) {
 }
 
 #ifdef ROCKIVA
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
-static RK_S32 draw_rect_from_iva_result() {
-	RK_S32 s32Ret = RK_SUCCESS;
-	int line_pixel = 2;
-	int video_width = g_mpi_ctx->vi.u32Width;
-	int video_height = g_mpi_ctx->vi.u32Height;
-	RGN_HANDLE RgnHandle = 1;
-	RGN_CANVAS_INFO_S stCanvasInfo;
-	RockIvaDetectResult *iva_result = NULL;
-	RockIvaObjectInfo *objectInfo = NULL;
-	struct timespec now;
-	iva_result = SAMPLE_COMM_IVA_Pop_Result();
-	if (iva_result == NULL) {
-		RK_LOGI("empty iva result list...\n");
-		// return RK_FAILURE;
-	}
-	s32Ret = RK_MPI_RGN_GetCanvasInfo(RgnHandle, &stCanvasInfo);
-	if (s32Ret != RK_SUCCESS) {
-		SAMPLE_COMM_IVA_Release_Result(iva_result);
-		RK_LOGE("RK_MPI_RGN_GetCanvasInfo failed with %#x!", s32Ret);
-		return s32Ret;
-	}
-
-	memset((void *)stCanvasInfo.u64VirAddr, 0,
-	       stCanvasInfo.u32VirWidth * stCanvasInfo.u32VirHeight >> 2);
-	if (iva_result != NULL) {
-		for (int i = 0; i < iva_result->objNum; i++) {
-			RK_LOGD("topLeft:[%d,%d], bottomRight:[%d,%d],"
-			        "objId is %d, frameId is %d, score is %d, type is %d\n",
-			        iva_result->objInfo[i].rect.topLeft.x,
-			        iva_result->objInfo[i].rect.topLeft.y,
-			        iva_result->objInfo[i].rect.bottomRight.x,
-			        iva_result->objInfo[i].rect.bottomRight.y,
-			        iva_result->objInfo[i].objId, iva_result->objInfo[i].frameId,
-			        iva_result->objInfo[i].score, iva_result->objInfo[i].type);
-			int x, y, w, h;
-			objectInfo = &iva_result->objInfo[i];
-			x = video_width * objectInfo->rect.topLeft.x / 10000;
-			y = video_height * objectInfo->rect.topLeft.y / 10000;
-			w = video_width *
-			    (objectInfo->rect.bottomRight.x - objectInfo->rect.topLeft.x) / 10000;
-			h = video_height *
-			    (objectInfo->rect.bottomRight.y - objectInfo->rect.topLeft.y) / 10000;
-			x = x / 16 * 16;
-			y = y / 16 * 16;
-			w = (w + 3) / 16 * 16;
-			h = (h + 3) / 16 * 16;
-			while (x + w + line_pixel >= video_width)
-				w -= 8;
-			while (y + h + line_pixel >= video_height)
-				h -= 8;
-			RK_LOGD("draw rect x:%d, y:%d, w:%d, h:%d\n", x, y, w, h);
-			if (x >= 0 && y >= 0 && w > 0 && h > 0) {
-				if (objectInfo->type == ROCKIVA_OBJECT_TYPE_PERSON) {
-					draw_rect_2bpp((RK_U8 *)stCanvasInfo.u64VirAddr,
-					               stCanvasInfo.u32VirWidth, stCanvasInfo.u32VirHeight, x,
-					               y, w, h, line_pixel, RGN_COLOR_LUT_INDEX_0);
-				} else if (objectInfo->type == ROCKIVA_OBJECT_TYPE_FACE) {
-					draw_rect_2bpp((RK_U8 *)stCanvasInfo.u64VirAddr,
-					               stCanvasInfo.u32VirWidth, stCanvasInfo.u32VirHeight, x,
-					               y, w, h, line_pixel, RGN_COLOR_LUT_INDEX_0);
-				} else if (objectInfo->type == ROCKIVA_OBJECT_TYPE_VEHICLE) {
-					draw_rect_2bpp((RK_U8 *)stCanvasInfo.u64VirAddr,
-					               stCanvasInfo.u32VirWidth, stCanvasInfo.u32VirHeight, x,
-					               y, w, h, line_pixel, RGN_COLOR_LUT_INDEX_1);
-				} else if (objectInfo->type == ROCKIVA_OBJECT_TYPE_NON_VEHICLE) {
-					draw_rect_2bpp((RK_U8 *)stCanvasInfo.u64VirAddr,
-					               stCanvasInfo.u32VirWidth, stCanvasInfo.u32VirHeight, x,
-					               y, w, h, line_pixel, RGN_COLOR_LUT_INDEX_1);
-				}
-			}
-		}
-
-		SAMPLE_COMM_IVA_Release_Result(iva_result);
-	}
-	s32Ret = RK_MPI_RGN_UpdateCanvas(RgnHandle);
-	if (s32Ret != RK_SUCCESS)
-		RK_LOGE("RK_MPI_RGN_UpdateCanvas failed with %#x!", s32Ret);
-	return s32Ret;
-}
-#pragma GCC diagnostic pop
 
 static void rkIvaEvent_callback(const RockIvaDetectResult *result,
                                 const RockIvaExecuteStatus status, void *userData) {
@@ -374,6 +327,260 @@ static void rkIvaFrame_releaseCallBack(const RockIvaReleaseFrames *releaseFrames
 	}
 }
 
+static void *vpss_iva_low_power_thread(void *pArgs) {
+	prctl(PR_SET_NAME, "vpss_iva_low_power_thread");
+	SAMPLE_MPI_CTX_S *ctx = (SAMPLE_MPI_CTX_S *)pArgs;
+	RK_S32 s32Ret = RK_FAILURE;
+	RK_CHAR *pData = RK_NULL;
+	RK_S32 s32Fd = 0;
+	RockIvaImage ivaImage;
+	RK_U32 u32Loopcount = 0;
+	RK_U32 size = 0;
+	RK_U32 u32GetOneFrameTime = 1000 / ctx->iva.u32IvaDetectFrameRate;
+	RK_U32 u32IvaDetectStep = g_u32Fps / ctx->iva.u32IvaDetectFrameRate;
+	VIDEO_FRAME_INFO_S *stVpssFrame = NULL;
+	enum ISP_MODE wakeup_current_mode = MULTI_FRAME_MODE;
+	bool is_gpioirq_happened = false;
+	RK_S32 wakeup_frame_count = 0;
+	RK_U64 last_vi_pts;
+	struct timespec aiisp_start_time, aiisp_end_time, iva_end_time, osd_end_time;
+	VIDEO_FRAME_INFO_S stVencFrameInfos;
+	RK_BOOL bExpBigChange = RK_FALSE;
+
+	sem_init(&g_wakeup_nn_result_semaphore, 0, 0);
+	g_wakeup_nn_flag = 1;
+
+	// befor enter AOV
+	for (int i = 0; i < g_u32BootFrame; i++) {
+		s32Ret = RK_MPI_VI_GetChnFrame(g_mpi_ctx->vi.u32PipeId, g_mpi_ctx->vi.s32ChnId,
+		                               &g_mpi_ctx->vi.stViFrame, -1);
+
+		// 1. send VI frame to VPSS
+		do {
+			s32Ret =
+			    RK_MPI_VPSS_SendFrame(g_mpi_ctx->vpss.s32GrpId, g_mpi_ctx->vpss.s32GrpId,
+			                          &g_mpi_ctx->vi.stViFrame, 1000);
+		} while (s32Ret != RK_SUCCESS);
+
+		if (s32Ret == RK_SUCCESS) {
+			RK_MPI_VI_ReleaseChnFrame(g_mpi_ctx->vi.u32PipeId, g_mpi_ctx->vi.s32ChnId,
+			                          &g_mpi_ctx->vi.stViFrame);
+			u32Loopcount++;
+		}
+
+		// 2. Get frame from VPSS and send frame to VENC
+		s32Ret = RK_MPI_VPSS_GetChnFrame(ctx->vpss.s32GrpId, VPSS_CHNNAL,
+		                                 &stVencFrameInfos, 2000);
+		if (s32Ret != RK_SUCCESS) {
+			RK_LOGE("-----RK_MPI_VPSS_GetChnFrame chnd %d failed %#X", VPSS_CHNNAL,
+			        s32Ret);
+			continue;
+		}
+
+		s32Ret = RK_MPI_VENC_SendFrame(0, &stVencFrameInfos, 1000);
+		if (s32Ret != RK_SUCCESS) {
+			RK_LOGE("RK_MPI_VENC_SendFrame chnd  %d failed %#X", 0, s32Ret);
+		}
+		s32Ret = RK_MPI_VPSS_ReleaseChnFrame(ctx->vpss.s32GrpId, VPSS_CHNNAL,
+		                                     &stVencFrameInfos);
+		if (s32Ret != RK_SUCCESS)
+			RK_LOGE("RK_MPI_VPSS_ReleaseChnFrame chnd  %d failed %#X", s32Ret);
+	}
+
+	SAMPLE_COMM_AOV_GetGpioIrqStat(); // ignore previous input events.
+	while (!quit) {
+		// 0. Check input event to detect weather gpio irq is happened.
+		is_gpioirq_happened = SAMPLE_COMM_AOV_GetGpioIrqStat();
+		RK_LOGD("is_gpioirq_happened %d", is_gpioirq_happened);
+		s32Ret = RK_MPI_VI_GetChnFrame(g_mpi_ctx->vi.u32PipeId, g_mpi_ctx->vi.s32ChnId,
+		                               &g_mpi_ctx->vi.stViFrame, -1);
+		size = g_mpi_ctx->vi.stViFrame.stVFrame.u32VirWidth *
+		       g_mpi_ctx->vi.stViFrame.stVFrame.u32VirHeight * 3 / 2;
+		RK_LOGI("RK_MPI_VI_GetChnFrame DevId %d ok:size:%u loop:%d seq:%d pts:%lld ms\n",
+		        g_mpi_ctx->vi.s32DevId, size, u32Loopcount,
+		        g_mpi_ctx->vi.stViFrame.stVFrame.u32TimeRef,
+		        (g_mpi_ctx->vi.stViFrame.stVFrame.u64PTS - last_vi_pts) / 1000);
+		last_vi_pts = g_mpi_ctx->vi.stViFrame.stVFrame.u64PTS;
+
+		// 1. Enter AOV
+		switch (wakeup_current_mode) {
+		case SINGLE_FRAME_MODE:
+			// The condition for switching to multi frame mode is:
+			//	1) Have detected a human body.
+			//	2) GPIO irq is happend.
+			//  3) FastAE mode
+			if (g_enable_fast_ae)
+				bExpBigChange = SAMPLE_COMM_ISP_IsExpBigChange(0);
+			if (g_wakeup_nn_flag > 0 || is_gpioirq_happened || bExpBigChange) {
+				// to multi frame
+				RK_LOGI("#Resume isp, Enter multi frame, wakeup because %s\n",
+				        is_gpioirq_happened ? "gpio irq" : "detected human body");
+				SAMPLE_COMM_ISP_MultiFrame(0);
+				SAMPLE_COMM_IVA_SetWorkMode(&ctx->iva, ROCKIVA_MODE_VIDEO);
+				wakeup_current_mode = MULTI_FRAME_MODE;
+				if (is_gpioirq_happened) {
+					wakeup_frame_count = g_max_wakeup_frame_count;
+					is_gpioirq_happened = false;
+				}
+			}
+			break;
+		case MULTI_FRAME_MODE:
+			// The condition for switching to single frame mode is:
+			//	1) Have not detected human body too much times.
+			//	2) GPIO irq is happend.
+			//	3) wakeup_frame_count equals to zero.
+			if (wakeup_frame_count > 0 && !is_gpioirq_happened) {
+				--wakeup_frame_count;
+				RK_LOGD("wakeup_frame_count %d", wakeup_frame_count);
+			} else if (g_wakeup_nn_flag > 0 || bExpBigChange) {
+				// keep multi frame mode
+				RK_LOGD("detected human body, loop %d", u32Loopcount);
+				if (bExpBigChange && SAMPLE_COMM_ISP_IsExpConverge(0))
+					bExpBigChange = RK_FALSE;
+			} else if (g_wakeup_nn_flag == 0 || wakeup_frame_count == 0 ||
+			           is_gpioirq_happened) {
+				// to single frame
+				RK_LOGI("#Pause isp, Enter single frame\n");
+				SAMPLE_COMM_ISP_SingleFrame(0);
+				SAMPLE_COMM_IVA_SetWorkMode(&ctx->iva, ROCKIVA_MODE_PICTURE);
+				wakeup_current_mode = SINGLE_FRAME_MODE;
+				wakeup_frame_count = 0;
+				// drop frame
+				VIDEO_FRAME_INFO_S stViFrame_tmp;
+				while (RK_MPI_VI_GetChnFrame(g_mpi_ctx->vi.u32PipeId,
+				                             g_mpi_ctx->vi.s32ChnId, &stViFrame_tmp,
+				                             1000) == RK_SUCCESS) {
+					RK_MPI_VI_ReleaseChnFrame(g_mpi_ctx->vi.u32PipeId,
+					                          g_mpi_ctx->vi.s32ChnId, &stViFrame_tmp);
+				}
+			}
+			break;
+		}
+
+		if (wakeup_current_mode == SINGLE_FRAME_MODE) {
+			if (g_s32AovLoopCount != 0) {
+				if (g_s32AovLoopCount > 0)
+					--g_s32AovLoopCount;
+				SAMPLE_COMM_AOV_GetGpioIrqStat(); // ignore previous input events
+				SAMPLE_COMM_AOV_EnterSleep();
+			} else if (g_s32AovLoopCount == 0) {
+				quit = true;
+				RK_LOGI("Exit AOV!");
+				break;
+			}
+		}
+
+		clock_gettime(CLOCK_MONOTONIC, &aiisp_start_time);
+		// 1. send VI frame to VPSS
+		do {
+			s32Ret =
+			    RK_MPI_VPSS_SendFrame(g_mpi_ctx->vpss.s32GrpId, g_mpi_ctx->vpss.s32GrpId,
+			                          &g_mpi_ctx->vi.stViFrame, 1000);
+		} while (s32Ret != RK_SUCCESS);
+		RK_MPI_VI_ReleaseChnFrame(g_mpi_ctx->vi.u32PipeId, g_mpi_ctx->vi.s32ChnId,
+		                          &g_mpi_ctx->vi.stViFrame);
+
+		// 2. Get frame from VPSS and send frame to VENC
+		s32Ret = RK_MPI_VPSS_GetChnFrame(ctx->vpss.s32GrpId, VPSS_CHNNAL,
+		                                 &stVencFrameInfos, 2000);
+		if (s32Ret != RK_SUCCESS) {
+			RK_LOGE("-----RK_MPI_VPSS_GetChnFrame chnd %d failed %#X", VPSS_CHNNAL,
+			        s32Ret);
+			continue;
+		}
+
+		s32Ret = RK_MPI_VENC_SendFrame(0, &stVencFrameInfos, 1000);
+		if (s32Ret != RK_SUCCESS) {
+			RK_LOGE("RK_MPI_VENC_SendFrame chnd  %d failed %#X", 0, s32Ret);
+		}
+		s32Ret = RK_MPI_VPSS_ReleaseChnFrame(ctx->vpss.s32GrpId, VPSS_CHNNAL,
+		                                     &stVencFrameInfos);
+		if (s32Ret != RK_SUCCESS)
+			RK_LOGE("RK_MPI_VPSS_ReleaseChnFrame chnd  %d failed %#X", s32Ret);
+
+		// 3. Get frame from VPSS and send frame to IVA
+		s32Ret = RK_MPI_VPSS_GetChnFrame(ctx->vpss.s32GrpId, VPSS_IVA_CHNNAL_IDX,
+		                                 &ctx->vpss.stChnFrameInfos, 2000);
+		if (s32Ret != RK_SUCCESS) {
+			RK_LOGE("-----RK_MPI_VPSS_GetChnFrame chnd %d failed %#X",
+			        VPSS_IVA_CHNNAL_IDX, s32Ret);
+			continue;
+		}
+		switch (wakeup_current_mode) {
+		case SINGLE_FRAME_MODE:
+			SAMPLE_COMM_RGN_DrawOsd(&ctx->rgn[1], RK_TRUE, 1000 / (float)s32SuspendTime);
+			// use ivs
+			if (SAMPLE_COMM_IVS_bMove(&ctx->ivs, &ctx->vpss.stChnFrameInfos) != RK_TRUE) {
+				s32Ret = RK_MPI_VPSS_ReleaseChnFrame(
+				    ctx->vpss.s32GrpId, VPSS_IVA_CHNNAL_IDX, &ctx->vpss.stChnFrameInfos);
+				if (s32Ret != RK_SUCCESS)
+					RK_LOGE("SAMPLE_COMM_VI_ReleaseChnFrame chnd  %d failed %#X",
+					        VPSS_IVA_CHNNAL_IDX, s32Ret);
+				continue;
+			}
+			break;
+		case MULTI_FRAME_MODE:
+			if (ctx->vpss.stChnFrameInfos.stVFrame.u32TimeRef % u32IvaDetectStep != 0) {
+				s32Ret = RK_MPI_VPSS_ReleaseChnFrame(
+				    ctx->vpss.s32GrpId, VPSS_IVA_CHNNAL_IDX, &ctx->vpss.stChnFrameInfos);
+				if (s32Ret != RK_SUCCESS)
+					RK_LOGE("RK_MPI_VPSS_ReleaseChnFrame chnd  %d failed %#X",
+					        VPSS_IVA_CHNNAL_IDX, s32Ret);
+				continue;
+			}
+			SAMPLE_COMM_RGN_DrawOsd(&ctx->rgn[1], RK_FALSE,
+			                        SAMPLE_COMM_ISP_GetFrameRate(0));
+			break;
+		}
+		clock_gettime(CLOCK_MONOTONIC, &aiisp_end_time);
+
+		stVpssFrame = (VIDEO_FRAME_INFO_S *)malloc(sizeof(VIDEO_FRAME_INFO_S));
+		if (!stVpssFrame) {
+			RK_LOGE("-----error malloc fail for stVpssFrame");
+			RK_MPI_VPSS_ReleaseChnFrame(ctx->vpss.s32GrpId, VPSS_IVA_CHNNAL_IDX,
+			                            &ctx->vpss.stChnFrameInfos);
+			continue;
+		}
+		memcpy(stVpssFrame, &ctx->vpss.stChnFrameInfos, sizeof(VIDEO_FRAME_INFO_S));
+		s32Fd = RK_MPI_MB_Handle2Fd(stVpssFrame->stVFrame.pMbBlk);
+		memset(&ivaImage, 0, sizeof(RockIvaImage));
+		ivaImage.info.transformMode = ctx->iva.eImageTransform;
+		ivaImage.info.width = stVpssFrame->stVFrame.u32Width;
+		ivaImage.info.height = stVpssFrame->stVFrame.u32Height;
+		ivaImage.info.format = ctx->iva.eImageFormat;
+		ivaImage.frameId = u32Loopcount;
+		ivaImage.dataAddr = NULL;
+		ivaImage.dataPhyAddr = NULL;
+		ivaImage.dataFd = s32Fd;
+		ivaImage.extData = stVpssFrame;
+		s32Ret = ROCKIVA_PushFrame(ctx->iva.ivahandle, &ivaImage, NULL);
+		// 4. Wait IVA result callback
+		sem_wait(&g_wakeup_nn_result_semaphore);
+		clock_gettime(CLOCK_MONOTONIC, &iva_end_time);
+
+		if (!g_multi_frame_enable) {
+			g_wakeup_nn_flag = 0;
+			is_gpioirq_happened = false;
+		}
+		u32Loopcount++;
+		SAMPLE_COMM_RGN_DrawRectFromIVA(&g_mpi_ctx->rgn[0], RK_TRUE);
+		clock_gettime(CLOCK_MONOTONIC, &osd_end_time);
+		RK_LOGE("cost time: aiisp %lld ms, iva %lld ms, osd %lld\n",
+		        (aiisp_end_time.tv_sec - aiisp_start_time.tv_sec) * 1000LL +
+		            (aiisp_end_time.tv_nsec - aiisp_start_time.tv_nsec) / 1000000LL,
+		        (iva_end_time.tv_sec - aiisp_end_time.tv_sec) * 1000LL +
+		            (iva_end_time.tv_nsec - aiisp_end_time.tv_nsec) / 1000000LL,
+		        (osd_end_time.tv_sec - iva_end_time.tv_sec) * 1000LL +
+		            (osd_end_time.tv_nsec - iva_end_time.tv_nsec) / 1000000LL);
+	}
+	if (wakeup_current_mode == SINGLE_FRAME_MODE) {
+		SAMPLE_COMM_ISP_MultiFrame(0);
+		wakeup_current_mode = MULTI_FRAME_MODE;
+	}
+	RK_LOGE("vpss_iva_low_power_thread exit !!!");
+	return RK_NULL;
+}
+
 static void *vpss_iva_thread(void *pArgs) {
 	prctl(PR_SET_NAME, "vpss_iva_thread");
 	SAMPLE_MPI_CTX_S *ctx = (SAMPLE_MPI_CTX_S *)pArgs;
@@ -387,6 +594,7 @@ static void *vpss_iva_thread(void *pArgs) {
 	enum ISP_MODE wakeup_current_mode = MULTI_FRAME_MODE;
 	bool is_gpioirq_happened = false;
 	RK_S32 wakeup_frame_count = 0;
+	RK_BOOL bExpBigChange = RK_FALSE;
 
 	sem_init(&g_wakeup_nn_result_semaphore, 0, 0);
 	g_wakeup_nn_flag = 1;
@@ -439,7 +647,7 @@ static void *vpss_iva_thread(void *pArgs) {
 		sem_wait(&g_wakeup_nn_result_semaphore);
 
 		if (!g_wakeup_enable) {
-			draw_rect_from_iva_result();
+			SAMPLE_COMM_RGN_DrawRectFromIVA(&g_mpi_ctx->rgn[0], RK_TRUE);
 			continue;
 		}
 
@@ -453,17 +661,22 @@ static void *vpss_iva_thread(void *pArgs) {
 			// The condition for switching to multi frame mode is:
 			//	1) Have detected a human body.
 			//	2) GPIO irq is happend.
-			if (g_wakeup_nn_flag > 0 || is_gpioirq_happened) {
+			//  3) FastAE mode
+			if (g_enable_fast_ae)
+				bExpBigChange = SAMPLE_COMM_ISP_IsExpBigChange(0);
+			if (g_wakeup_nn_flag > 0 || is_gpioirq_happened || bExpBigChange) {
 				// to multi frame
 				RK_LOGI("#Resume isp, Enter multi frame, wakeup because %s\n",
 				        is_gpioirq_happened ? "gpio irq" : "detected human body");
 				SAMPLE_COMM_ISP_MultiFrame(0);
+				SAMPLE_COMM_IVA_SetWorkMode(&ctx->iva, ROCKIVA_MODE_VIDEO);
 				wakeup_current_mode = MULTI_FRAME_MODE;
 				if (is_gpioirq_happened) {
 					wakeup_frame_count = g_max_wakeup_frame_count;
 					is_gpioirq_happened = false;
 				}
 			}
+			SAMPLE_COMM_RGN_DrawOsd(&ctx->rgn[1], RK_TRUE, 1000 / (float)s32SuspendTime);
 			break;
 		case MULTI_FRAME_MODE:
 			// The condition for switching to single frame mode is:
@@ -473,14 +686,18 @@ static void *vpss_iva_thread(void *pArgs) {
 			if (wakeup_frame_count > 0 && !is_gpioirq_happened) {
 				--wakeup_frame_count;
 				RK_LOGD("wakeup_frame_count %d", wakeup_frame_count);
-			} else if (g_wakeup_nn_flag > 0) {
+			} else if (g_wakeup_nn_flag > 0 || bExpBigChange) {
 				// keep multi frame mode
 				RK_LOGD("detected human body, loop %d", u32Loopcount);
+				usleep(u32GetOneFrameTime * 1000);
+				if (bExpBigChange && SAMPLE_COMM_ISP_IsExpConverge(0))
+					bExpBigChange = RK_FALSE;
 			} else if (g_wakeup_nn_flag == 0 || wakeup_frame_count == 0 ||
 			           is_gpioirq_happened) {
 				// to single frame
 				RK_LOGI("#Pause isp, Enter single frame\n");
 				SAMPLE_COMM_ISP_SingleFrame(0);
+				SAMPLE_COMM_IVA_SetWorkMode(&ctx->iva, ROCKIVA_MODE_PICTURE);
 				wakeup_current_mode = SINGLE_FRAME_MODE;
 				wakeup_frame_count = 0;
 				// drop frame
@@ -491,6 +708,8 @@ static void *vpss_iva_thread(void *pArgs) {
 					                            &stVpssFrame_tmp);
 				}
 			}
+			SAMPLE_COMM_RGN_DrawOsd(&ctx->rgn[1], RK_FALSE,
+			                        SAMPLE_COMM_ISP_GetFrameRate(0));
 			break;
 		}
 
@@ -498,7 +717,6 @@ static void *vpss_iva_thread(void *pArgs) {
 			if (g_s32AovLoopCount != 0) {
 				if (g_s32AovLoopCount > 0)
 					--g_s32AovLoopCount;
-				SAMPLE_COMM_AOV_GetGpioIrqStat(); // ignore previous input events
 				SAMPLE_COMM_AOV_EnterSleep();
 			} else if (g_s32AovLoopCount == 0) {
 				quit = true;
@@ -507,7 +725,7 @@ static void *vpss_iva_thread(void *pArgs) {
 			}
 		}
 		u32Loopcount++;
-		draw_rect_from_iva_result();
+		SAMPLE_COMM_RGN_DrawRectFromIVA(&g_mpi_ctx->rgn[0], RK_TRUE);
 	}
 
 	if (wakeup_current_mode == SINGLE_FRAME_MODE) {
@@ -521,200 +739,6 @@ static void *vpss_iva_thread(void *pArgs) {
 
 #endif
 
-#if 1
-#define UPALIGNTO(value, align) ((value + align - 1) & (~(align - 1)))
-#define UPALIGNTO2(value) UPALIGNTO(value, 2)
-#define UPALIGNTO4(value) UPALIGNTO(value, 4)
-#define UPALIGNTO16(value) UPALIGNTO(value, 16)
-#define DOWNALIGNTO16(value) (UPALIGNTO(value, 16) - 16)
-#define MULTI_UPALIGNTO16(grad, value) UPALIGNTO16((int)(grad * value))
-
-#define DRAW_TIME_OSD_ID 0
-#define FONT_LIBRARY_PATH "/usr/share/simsun_en.ttf"
-#define WEB_VIEW_RECT_W 704
-#define WEB_VIEW_RECT_H 480
-#define MAX_WCH_BYTE 128
-
-typedef struct text_data {
-	wchar_t wch[MAX_WCH_BYTE];
-	unsigned int font_size;
-	unsigned int font_color;
-	unsigned int color_inverse;
-	const char *font_path;
-	char format[128];
-} text_data_s;
-typedef struct border_data {
-	int color_index;
-	int color_key;
-	int thick;
-	int display_style;
-} border_data_s;
-typedef struct osd_data {
-	int type;
-	union {
-		const char *image;
-		text_data_s text;
-		border_data_s border;
-	};
-	int width;
-	int height;
-	unsigned char *buffer;
-	unsigned int size;
-	int origin_x;
-	int origin_y;
-	int enable;
-} osd_data_s;
-
-static int fill_text(osd_data_s *data) {
-	if (data->text.font_path == NULL) {
-		RK_LOGE("font_path is NULL\n");
-		return -1;
-	}
-	set_font_color(data->text.font_color);
-	draw_argb8888_text(data->buffer, data->width, data->height, data->text.wch);
-	return 0;
-}
-static int generate_date_time(wchar_t *result, const int r_size) {
-	char time_str[64];
-	time_t curtime;
-	curtime = time(0);
-	strftime(time_str, sizeof(time_str), "%Y-%m-%d %A %H:%M:%S", localtime(&curtime));
-	return swprintf(result, r_size, L"%s", time_str);
-}
-
-static void *osd_time_thread(void *arg) {
-	printf("#Start %s thread, arg:%p\n", __func__, arg);
-	prctl(PR_SET_NAME, "osd_time_thread", 0, 0, 0);
-	int osd_time_id = 0;
-	int last_time_sec, wchar_cnt;
-	int ret;
-	const char *osd_type;
-	const char *date_style;
-	const char *time_style;
-	int video_width = g_mpi_ctx->vi.u32Width;
-	int video_height = g_mpi_ctx->vi.u32Height;
-	int normalized_screen_width = WEB_VIEW_RECT_W;
-	int normalized_screen_height = WEB_VIEW_RECT_H;
-	double x_rate = (double)video_width / (double)normalized_screen_width;
-	double y_rate = (double)video_height / (double)normalized_screen_height;
-	char entry[128] = {'\0'};
-	osd_data_s osd_data;
-	time_t rawtime;
-	struct tm *cur_time_info;
-	BITMAP_S stBitmap;
-	memset(&osd_data, 0, sizeof(osd_data));
-	// init
-	osd_data.enable = 1;
-	osd_data.origin_x = UPALIGNTO16((int)(16 * x_rate));
-	osd_data.origin_y = UPALIGNTO16((int)(16 * y_rate));
-	osd_data.text.font_size = 32;
-	osd_data.text.font_color = 0xfff799;
-	osd_data.text.color_inverse = 1;
-	osd_data.text.font_path = "/oem/usr/share/simsun_en.ttf";
-	// osd_data.text.format = rk_param_get_int("osd.common:???", -1);
-	// Initialize font
-	ret = create_font(osd_data.text.font_path, osd_data.text.font_size);
-	if (ret != 0) {
-		RK_LOGE("Failed create font!\n");
-		return NULL;
-	}
-	time(&rawtime);
-	cur_time_info = localtime(&rawtime);
-	last_time_sec = cur_time_info->tm_sec;
-	while (!quit) {
-		// 200 millis
-		usleep(200000);
-		time(&rawtime);
-		cur_time_info = localtime(&rawtime);
-		if (cur_time_info->tm_sec == last_time_sec)
-			continue;
-		else
-			last_time_sec = cur_time_info->tm_sec;
-		// generate time string.
-		wchar_cnt = generate_date_time(osd_data.text.wch, MAX_WCH_BYTE);
-		if (wchar_cnt <= 0) {
-			RK_LOGE("generate_date_time error\n");
-			continue;
-		}
-		// calculate really buffer size and allocate buffer for time string.
-		osd_data.width = UPALIGNTO16(wstr_get_actual_advance_x(osd_data.text.wch) /
-		                             osd_data.text.font_size);
-		osd_data.height = UPALIGNTO16(osd_data.text.font_size);
-		osd_data.size = osd_data.width * osd_data.height * 4; // BGRA8888 4byte
-		osd_data.buffer = malloc(osd_data.size);
-		memset(osd_data.buffer, 0, osd_data.size);
-		// draw font in buffer
-		fill_text(&osd_data);
-		// set bitmap
-		stBitmap.enPixelFormat = RK_FMT_2BPP;
-		stBitmap.u32Width = osd_data.width;
-		stBitmap.u32Height = osd_data.height;
-		stBitmap.pData = (RK_VOID *)osd_data.buffer;
-		ret = RK_MPI_RGN_SetBitMap(DRAW_TIME_OSD_ID, &stBitmap);
-		if (ret != RK_SUCCESS)
-			RK_LOGE("RK_MPI_RGN_SetBitMap failed with %#x\n", ret);
-		free(osd_data.buffer);
-	}
-	destroy_font();
-	RK_LOGI("exit\n");
-	return NULL;
-}
-
-static void initTimeOsd() {
-	RK_S32 s32Ret = RK_FAILURE;
-	RGN_ATTR_S stRgnAttr;
-	MPP_CHN_S stMppChn;
-	RGN_CHN_ATTR_S stRgnChnAttr;
-	int rotation = 0;
-	// 2. Draw time string.
-	memset(&stRgnAttr, 0, sizeof(stRgnAttr));
-	stRgnAttr.enType = OVERLAY_RGN;
-	stRgnAttr.unAttr.stOverlay.enPixelFmt = RK_FMT_2BPP;
-	stRgnAttr.unAttr.stOverlay.stSize.u32Width = 512;
-	stRgnAttr.unAttr.stOverlay.stSize.u32Height = 128;
-	s32Ret = RK_MPI_RGN_Create(DRAW_TIME_OSD_ID, &stRgnAttr);
-	if (RK_SUCCESS != s32Ret) {
-		RK_LOGE("RK_MPI_RGN_Create (%d) failed with %#x\n", DRAW_TIME_OSD_ID, s32Ret);
-		RK_MPI_RGN_Destroy(DRAW_TIME_OSD_ID);
-		return;
-	}
-	// display overlay regions to vpss 1
-	stMppChn.enModId = RK_ID_VENC;
-	stMppChn.s32DevId = 0;
-	stMppChn.s32ChnId = 0;
-	memset(&stRgnChnAttr, 0, sizeof(stRgnChnAttr));
-	stRgnChnAttr.bShow = true;
-	stRgnChnAttr.enType = OVERLAY_RGN;
-	stRgnChnAttr.unChnAttr.stOverlayChn.stPoint.s32X = 0;
-	stRgnChnAttr.unChnAttr.stOverlayChn.stPoint.s32Y = 0;
-	stRgnChnAttr.unChnAttr.stOverlayChn.u32BgAlpha = 64;
-	stRgnChnAttr.unChnAttr.stOverlayChn.u32FgAlpha = 64;
-	stRgnChnAttr.unChnAttr.stOverlayChn.u32Layer = 3;
-	s32Ret = RK_MPI_RGN_AttachToChn(DRAW_TIME_OSD_ID, &stMppChn, &stRgnChnAttr);
-	if (RK_SUCCESS != s32Ret)
-		RK_LOGE("RK_MPI_RGN_AttachToChn (%d) to venc0 failed with %#x\n",
-		        DRAW_TIME_OSD_ID, s32Ret);
-}
-
-static void deinitTimeOsd() {
-	RK_S32 s32Ret = RK_SUCCESS;
-
-	MPP_CHN_S stMppChn;
-	stMppChn.enModId = RK_ID_VENC;
-	stMppChn.s32DevId = 0;
-	stMppChn.s32ChnId = 0;
-
-	s32Ret = RK_MPI_RGN_DetachFromChn(DRAW_TIME_OSD_ID, &stMppChn);
-	if (RK_SUCCESS != s32Ret)
-		RK_LOGE("RK_MPI_RGN_DetachFrmChn (%d) to venc0 failed with %#x\n",
-		        DRAW_TIME_OSD_ID, s32Ret);
-	// destory region
-	s32Ret = RK_MPI_RGN_Destroy(DRAW_TIME_OSD_ID);
-	if (RK_SUCCESS != s32Ret)
-		RK_LOGE("RK_MPI_RGN_Destroy [%d] failed with %#x\n", DRAW_TIME_OSD_ID, s32Ret);
-}
-#endif
-
 /******************************************************************************
  * function    : main()
  * Description : main
@@ -723,25 +747,30 @@ int main(int argc, char *argv[]) {
 	int video_width = 1920;
 	int video_height = 1080;
 	RK_CHAR *pDeviceName = NULL;
-	CODEC_TYPE_E enCodecType = RK_CODEC_TYPE_H264;
-	VENC_RC_MODE_E enRcMode = VENC_RC_MODE_H264CBR;
+	CODEC_TYPE_E enCodecType = RK_CODEC_TYPE_H265;
+	VENC_RC_MODE_E enRcMode = VENC_RC_MODE_H265VBR;
 	RK_CHAR *pCodecName = "H264";
 	RK_S32 s32CamId = 0;
 	RK_S32 s32BitRate = 4 * 1024;
 	MPP_CHN_S stSrcChn, stDestChn;
 	RK_S32 s32AeMode = 0;
-	RK_S32 s32SuspendTime = 1000;
+#if defined(RV1126)
+	RK_U32 u32IvaWidth = 640;
+	RK_U32 u32IvaHeight = 384;
+#else
 	RK_U32 u32IvaWidth = 512;
 	RK_U32 u32IvaHeight = 288;
+#endif
 	RK_U32 u32IvaDetectFrameRate = 10;
 	RK_BOOL bEnableAIISP = RK_TRUE;
 	RK_CHAR *pIvaModelPath = "/oem/usr/lib/";
 	RK_U32 u32ViFps = 10;
 	RK_S32 u32QuickStart = 0;
 	RK_S32 s32Ret;
+	RK_S32 s32MirrorFlip = -1;
+	RK_U32 u32Gop = 0;
 
 	pthread_t vi_iva_thread_id;
-	pthread_t osd_thread_id;
 
 	if (argc < 2) {
 		print_usage(argv[0]);
@@ -822,7 +851,10 @@ int main(int argc, char *argv[]) {
 			video_height = atoi(optarg);
 			break;
 		case 'f':
-			u32ViFps = atoi(optarg);
+			g_u32Fps = atoi(optarg);
+			break;
+		case 'g':
+			u32Gop = atoi(optarg);
 			break;
 		case 'I':
 			s32CamId = atoi(optarg);
@@ -864,8 +896,17 @@ int main(int argc, char *argv[]) {
 		case 'q' + 'k' + 's':
 			u32QuickStart = atoi(optarg);
 			break;
+		case 'l' + 'w' + 'p':
+			g_low_power_mode = atoi(optarg);
+			break;
 		case 'b' + 'f':
 			g_u32BootFrame = atoi(optarg);
+			break;
+		case 'm' + 'p':
+			s32MirrorFlip = atoi(optarg);
+			break;
+		case 'f' + 'a':
+			g_enable_fast_ae = atoi(optarg);
 			break;
 		case '?':
 		default:
@@ -880,10 +921,25 @@ int main(int argc, char *argv[]) {
 	printf("#AOV loop count: %d\n", g_s32AovLoopCount);
 
 	SAMPLE_COMM_AOV_Init();
+
+	// setting fps and gop
+#ifdef AOV_FASTBOOT_ENABLE
+	RK_S32 rk_cam_fps = SAMPLE_COMM_ExtractValueFromCmdline("rk_cam_fps");
+	if (rk_cam_fps != -1)
+		g_u32Fps = rk_cam_fps;
+#endif
+	if (g_u32Fps == 0)
+		g_u32Fps = 25;
+	if (u32Gop == 0)
+		u32Gop = g_u32Fps * 2;
+	printf("Fps = %u, Gop = %u, mirror_flip = %d\n", g_u32Fps, u32Gop, s32MirrorFlip);
 #ifdef RKAIQ
 	printf("#bMultictx: %d\n\n", bMultictx);
 	rk_aiq_working_mode_t hdr_mode = RK_AIQ_WORKING_MODE_NORMAL;
 	SAMPLE_COMM_ISP_Init(s32CamId, hdr_mode, bMultictx, iq_file_dir);
+	SAMPLE_COMM_ISP_SetFrameRate(s32CamId, g_u32Fps);
+	if (s32MirrorFlip != -1)
+		SAMPLE_COMM_ISP_SetMirrorFlip(s32CamId, s32MirrorFlip);
 	SAMPLE_COMM_ISP_Run(s32CamId);
 #endif
 
@@ -907,15 +963,19 @@ int main(int argc, char *argv[]) {
 #ifdef ROCKIVA
 	/* Init iva */
 	g_mpi_ctx->iva.pModelDataPath = pIvaModelPath;
-	g_mpi_ctx->iva.u32ImageHeight = u32IvaWidth;
-	g_mpi_ctx->iva.u32ImageWidth = u32IvaHeight;
+	g_mpi_ctx->iva.u32ImageHeight = u32IvaHeight;
+	g_mpi_ctx->iva.u32ImageWidth = u32IvaWidth;
 	g_mpi_ctx->iva.u32DetectStartX = 0;
 	g_mpi_ctx->iva.u32DetectStartY = 0;
 	g_mpi_ctx->iva.u32DetectWidth = u32IvaWidth;
 	g_mpi_ctx->iva.u32DetectHight = u32IvaHeight;
 	g_mpi_ctx->iva.eImageTransform = ROCKIVA_IMAGE_TRANSFORM_NONE;
 	g_mpi_ctx->iva.eImageFormat = ROCKIVA_IMAGE_FORMAT_YUV420SP_NV12;
+#if defined(RV1126)
+	g_mpi_ctx->iva.eModeType = ROCKIVA_DET_MODEL_CLS7;
+#else
 	g_mpi_ctx->iva.eModeType = ROCKIVA_DET_MODEL_PFP;
+#endif
 	g_mpi_ctx->iva.u32IvaDetectFrameRate = u32IvaDetectFrameRate;
 	g_mpi_ctx->iva.detectResultCallback = rkIvaEvent_callback;
 	g_mpi_ctx->iva.releaseCallback = rkIvaFrame_releaseCallBack;
@@ -927,6 +987,10 @@ int main(int argc, char *argv[]) {
 #endif
 	// Init VI[0]
 	g_mpi_ctx->vi.bIfQuickStart = u32QuickStart;
+#if defined(RV1126)
+	// RV1126 not support RK_MPI_VI_EnableChnExt
+	g_mpi_ctx->vi.bIfQuickStart = true;
+#endif
 	g_mpi_ctx->vi.u32Width = video_width;
 	g_mpi_ctx->vi.u32Height = video_height;
 	g_mpi_ctx->vi.s32DevId = s32CamId;
@@ -934,7 +998,10 @@ int main(int argc, char *argv[]) {
 	g_mpi_ctx->vi.s32ChnId = VI_MAIN_CHANNEL;
 	g_mpi_ctx->vi.stChnAttr.stIspOpt.u32BufCount = 2;
 	g_mpi_ctx->vi.stChnAttr.stIspOpt.enMemoryType = VI_V4L2_MEMORY_TYPE_DMABUF;
-	g_mpi_ctx->vi.stChnAttr.u32Depth = 0;
+	if (g_low_power_mode)
+		g_mpi_ctx->vi.stChnAttr.u32Depth = 2;
+	else
+		g_mpi_ctx->vi.stChnAttr.u32Depth = 0;
 	g_mpi_ctx->vi.stChnAttr.enPixelFormat = RK_FMT_YUV420SP;
 	g_mpi_ctx->vi.stChnAttr.stFrameRate.s32SrcFrameRate = -1;
 	g_mpi_ctx->vi.stChnAttr.stFrameRate.s32DstFrameRate = -1;
@@ -958,7 +1025,7 @@ int main(int argc, char *argv[]) {
 	g_mpi_ctx->vpss.stCropInfo.stCropRect.u32Width = video_width;
 	g_mpi_ctx->vpss.stCropInfo.stCropRect.u32Height = video_height;
 
-	g_mpi_ctx->vpss.stVpssChnAttr[0].enChnMode = VPSS_CHN_MODE_AUTO;
+	g_mpi_ctx->vpss.stVpssChnAttr[0].enChnMode = VPSS_CHN_MODE_PASSTHROUGH;
 	g_mpi_ctx->vpss.stVpssChnAttr[0].enCompressMode = COMPRESS_MODE_NONE;
 	g_mpi_ctx->vpss.stVpssChnAttr[0].enDynamicRange = DYNAMIC_RANGE_SDR8;
 	g_mpi_ctx->vpss.stVpssChnAttr[0].enPixelFormat = RK_FMT_YUV420SP;
@@ -966,7 +1033,10 @@ int main(int argc, char *argv[]) {
 	g_mpi_ctx->vpss.stVpssChnAttr[0].stFrameRate.s32DstFrameRate = -1;
 	g_mpi_ctx->vpss.stVpssChnAttr[0].u32Width = video_width;
 	g_mpi_ctx->vpss.stVpssChnAttr[0].u32Height = video_height;
-	g_mpi_ctx->vpss.stVpssChnAttr[0].u32Depth = 0;
+	if (g_low_power_mode)
+		g_mpi_ctx->vpss.stVpssChnAttr[0].u32Depth = 1;
+	else
+		g_mpi_ctx->vpss.stVpssChnAttr[0].u32Depth = 0;
 	g_mpi_ctx->vpss.stVpssChnAttr[0].u32FrameBufCnt = 1;
 #ifdef ROCKIVA
 	g_mpi_ctx->vpss.stVpssChnAttr[1].enChnMode = VPSS_CHN_MODE_AUTO;
@@ -1002,13 +1072,15 @@ int main(int argc, char *argv[]) {
 	g_mpi_ctx->venc.s32ChnId = VENC_MAIN_CHANNEL;
 	g_mpi_ctx->venc.u32Width = video_width;
 	g_mpi_ctx->venc.u32Height = video_height;
-	g_mpi_ctx->venc.u32Fps = u32ViFps;
-	g_mpi_ctx->venc.u32Gop = 20;
+	g_mpi_ctx->venc.u32Fps = g_u32Fps;
+	g_mpi_ctx->venc.u32Gop = u32Gop;
 	g_mpi_ctx->venc.u32BitRate = s32BitRate;
 	g_mpi_ctx->venc.enCodecType = enCodecType;
 	g_mpi_ctx->venc.enRcMode = enRcMode;
 	g_mpi_ctx->venc.getStreamCbFunc = venc_get_stream;
+#if defined(RV1106)
 	g_mpi_ctx->venc.enable_buf_share = 1;
+#endif
 	g_mpi_ctx->venc.u32BuffSize = video_width * video_height;
 	// H264  66：Baseline  77：Main Profile 100：High Profile
 	// H265  0：Main Profile  1：Main 10 Profile
@@ -1025,11 +1097,15 @@ int main(int argc, char *argv[]) {
 	g_mpi_ctx->rgn[0].stMppChn.enModId = RK_ID_VENC;
 	g_mpi_ctx->rgn[0].stMppChn.s32ChnId = RGN_CHANNEL;
 	g_mpi_ctx->rgn[0].stMppChn.s32DevId = 0;
-	g_mpi_ctx->rgn[0].stRegion.s32X = 0;         // must be 16 aligned
-	g_mpi_ctx->rgn[0].stRegion.s32Y = 0;         // must be 16 aligned
-	g_mpi_ctx->rgn[0].stRegion.u32Width = 1920;  // must be 16 aligned
-	g_mpi_ctx->rgn[0].stRegion.u32Height = 1080; // must be 16 aligned
+	g_mpi_ctx->rgn[0].stRegion.s32X = 0;                 // must be 16 aligned
+	g_mpi_ctx->rgn[0].stRegion.s32Y = 0;                 // must be 16 aligned
+	g_mpi_ctx->rgn[0].stRegion.u32Width = video_width;   // must be 16 aligned
+	g_mpi_ctx->rgn[0].stRegion.u32Height = video_height; // must be 16 aligned
+#if defined(RV1126)
+	g_mpi_ctx->rgn[0].u32BmpFormat = RK_FMT_8BPP;
+#else
 	g_mpi_ctx->rgn[0].u32BmpFormat = RK_FMT_2BPP;
+#endif
 	g_mpi_ctx->rgn[0].u32BgAlpha = 0;
 	g_mpi_ctx->rgn[0].u32FgAlpha = 255;
 	g_mpi_ctx->rgn[0].u32Layer = 1;
@@ -1041,6 +1117,45 @@ int main(int argc, char *argv[]) {
 	    RED_COLOR;
 	SAMPLE_COMM_RGN_CreateChn(&g_mpi_ctx->rgn[0]);
 
+	// Init RGN[1]
+	g_mpi_ctx->rgn[1].rgnHandle = 2;
+	g_mpi_ctx->rgn[1].stRgnAttr.enType = OVERLAY_RGN;
+	g_mpi_ctx->rgn[1].bDrawBmpManual = RK_TRUE;
+	g_mpi_ctx->rgn[1].stMppChn.enModId = RK_ID_VENC;
+	g_mpi_ctx->rgn[1].stMppChn.s32ChnId = RGN_CHANNEL;
+	g_mpi_ctx->rgn[1].stMppChn.s32DevId = 0;
+	g_mpi_ctx->rgn[1].stRegion.s32X = 0;       // must be 16 aligned
+	g_mpi_ctx->rgn[1].stRegion.s32Y = 0;       // must be 16 aligned
+	g_mpi_ctx->rgn[1].stRegion.u32Width = 576; // must be 16 aligned
+	g_mpi_ctx->rgn[1].stRegion.u32Height = 32; // must be 16 aligned
+	g_mpi_ctx->rgn[1].u32BmpFormat = RK_FMT_ARGB8888;
+	g_mpi_ctx->rgn[1].u32BgAlpha = 64;
+	g_mpi_ctx->rgn[1].u32FgAlpha = 64;
+	g_mpi_ctx->rgn[1].u32Layer = 2;
+	g_mpi_ctx->rgn[1].st_osd_data.enable = 1; // enable time osd
+	SAMPLE_COMM_RGN_CreateChn(&g_mpi_ctx->rgn[1]);
+
+	/* Init ivs */
+	g_mpi_ctx->ivs.s32ChnId = 0;
+	g_mpi_ctx->ivs.stIvsAttr.enMode = IVS_MODE_MD_OD;
+	g_mpi_ctx->ivs.stIvsAttr.u32PicWidth = u32IvaWidth;
+	g_mpi_ctx->ivs.stIvsAttr.u32PicHeight = u32IvaHeight;
+	g_mpi_ctx->ivs.stIvsAttr.enPixelFormat = RK_FMT_YUV420SP;
+	g_mpi_ctx->ivs.stIvsAttr.s32Gop = u32Gop;
+	g_mpi_ctx->ivs.stIvsAttr.bSmearEnable = RK_FALSE;
+	g_mpi_ctx->ivs.stIvsAttr.bWeightpEnable = RK_FALSE;
+	g_mpi_ctx->ivs.stIvsAttr.bMDEnable = RK_TRUE;
+	g_mpi_ctx->ivs.stIvsAttr.s32MDInterval = 1;
+	g_mpi_ctx->ivs.stIvsAttr.bMDNightMode = RK_TRUE;
+	g_mpi_ctx->ivs.stIvsAttr.u32MDSensibility = 3;
+	g_mpi_ctx->ivs.stIvsAttr.bODEnable = RK_FALSE;
+	g_mpi_ctx->ivs.stIvsAttr.s32ODInterval = 1;
+	g_mpi_ctx->ivs.stIvsAttr.s32ODPercent = 7;
+	s32Ret = SAMPLE_COMM_IVS_Create(&g_mpi_ctx->ivs);
+	if (s32Ret != RK_SUCCESS) {
+		RK_LOGE("SAMPLE_COMM_IVS_Create failure:%X", s32Ret);
+	}
+
 	// Bind VI[0] and VPSS[0]
 	stSrcChn.enModId = RK_ID_VI;
 	stSrcChn.s32DevId = g_mpi_ctx->vi.s32DevId;
@@ -1048,7 +1163,8 @@ int main(int argc, char *argv[]) {
 	stDestChn.enModId = RK_ID_VPSS;
 	stDestChn.s32DevId = g_mpi_ctx->vpss.s32GrpId;
 	stDestChn.s32ChnId = g_mpi_ctx->vpss.s32ChnId;
-	SAMPLE_COMM_Bind(&stSrcChn, &stDestChn);
+	if (!g_low_power_mode)
+		SAMPLE_COMM_Bind(&stSrcChn, &stDestChn);
 
 	// Bind VPSS[0] and VENC[0]
 	stSrcChn.enModId = RK_ID_VPSS;
@@ -1057,22 +1173,24 @@ int main(int argc, char *argv[]) {
 	stDestChn.enModId = RK_ID_VENC;
 	stDestChn.s32DevId = 0;
 	stDestChn.s32ChnId = g_mpi_ctx->venc.s32ChnId;
-	SAMPLE_COMM_Bind(&stSrcChn, &stDestChn);
+	if (!g_low_power_mode)
+		SAMPLE_COMM_Bind(&stSrcChn, &stDestChn);
 
 	if (!u32QuickStart)
 		RK_MPI_VI_StartPipe(g_mpi_ctx->vi.u32PipeId);
 
 	SAMPLE_COMM_AOV_SetSuspendTime(s32SuspendTime);
 
-	initTimeOsd();
-
 	printf("%s initial finish\n", __func__);
 #ifdef ROCKIVA
 	// /* VI[1] IVA thread launch */
-	pthread_create(&vi_iva_thread_id, 0, vpss_iva_thread, (void *)g_mpi_ctx);
+	if (g_low_power_mode)
+		pthread_create(&vi_iva_thread_id, 0, vpss_iva_low_power_thread,
+		               (void *)g_mpi_ctx);
+	else
+		pthread_create(&vi_iva_thread_id, 0, vpss_iva_thread, (void *)g_mpi_ctx);
 #endif
 
-	pthread_create(&osd_thread_id, 0, osd_time_thread, (void *)g_mpi_ctx);
 	while (!quit) {
 		sleep(1);
 	}
@@ -1083,8 +1201,12 @@ int main(int argc, char *argv[]) {
 	pthread_join(vi_iva_thread_id, RK_NULL);
 	SAMPLE_COMM_IVA_Destroy(&g_mpi_ctx->iva);
 #endif
+	/* ivs chn destroy*/
+	s32Ret = RK_MPI_IVS_DestroyChn(g_mpi_ctx->ivs.s32ChnId);
+	if (s32Ret != RK_SUCCESS) {
+		RK_LOGE("RK_MPI_IVS_DestroyChn failure:%X", s32Ret);
+	}
 
-	pthread_join(osd_thread_id, RK_NULL);
 	if (g_mpi_ctx->venc.getStreamCbFunc) {
 		pthread_join(g_mpi_ctx->venc.getStreamThread, NULL);
 	}
@@ -1092,8 +1214,8 @@ int main(int argc, char *argv[]) {
 	if (g_rtsplive)
 		rtsp_del_demo(g_rtsplive);
 
-	deinitTimeOsd();
 	SAMPLE_COMM_RGN_DestroyChn(&g_mpi_ctx->rgn[0]);
+	SAMPLE_COMM_RGN_DestroyChn(&g_mpi_ctx->rgn[1]);
 
 	// UnBind VPSS[0] and VENC[0]
 	stSrcChn.enModId = RK_ID_VPSS;
@@ -1102,7 +1224,8 @@ int main(int argc, char *argv[]) {
 	stDestChn.enModId = RK_ID_VENC;
 	stDestChn.s32DevId = 0;
 	stDestChn.s32ChnId = g_mpi_ctx->venc.s32ChnId;
-	SAMPLE_COMM_UnBind(&stSrcChn, &stDestChn);
+	if (!g_low_power_mode)
+		SAMPLE_COMM_UnBind(&stSrcChn, &stDestChn);
 
 	// UnBind VI[0] and VPSS[0]
 	stSrcChn.enModId = RK_ID_VI;
@@ -1111,7 +1234,8 @@ int main(int argc, char *argv[]) {
 	stDestChn.enModId = RK_ID_VPSS;
 	stDestChn.s32DevId = g_mpi_ctx->vpss.s32GrpId;
 	stDestChn.s32ChnId = g_mpi_ctx->vpss.s32ChnId;
-	SAMPLE_COMM_UnBind(&stSrcChn, &stDestChn);
+	if (!g_low_power_mode)
+		SAMPLE_COMM_UnBind(&stSrcChn, &stDestChn);
 
 	// Destroy VENC[0]
 	SAMPLE_COMM_VENC_DestroyChn(&g_mpi_ctx->venc);

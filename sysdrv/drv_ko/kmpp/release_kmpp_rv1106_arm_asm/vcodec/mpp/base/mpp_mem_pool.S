@@ -29,7 +29,7 @@ mpp_mem_get_pool_f:
 	.save {r4, r5, r6, lr}
 	mov	r5, r1
 	ldr	r0, .L6
-	movs	r1, #40
+	movs	r1, #44
 	mov	r6, r2
 	mov	r4, r3
 	bl	mpp_osal_malloc
@@ -43,7 +43,7 @@ mpp_mem_get_pool_f:
 	str	r6, [r0, #8]
 	strd	r2, r2, [r0, #28]
 	str	r5, [r0, #4]
-	str	r4, [r0, #36]
+	strd	r4, r2, [r0, #36]
 	str	r3, [r0, #20]
 	str	r3, [r0, #24]
 .L1:
@@ -65,25 +65,25 @@ mpp_mem_put_pool_f:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r4, r5, r6, r7, r8, lr}
+	push	{r0, r1, r2, r3, r4, r5, r6, r7, r8, lr}
 	.save {r4, r5, r6, r7, r8, lr}
-	.pad #8
+	.pad #16
 	mov	r4, r1
 	ldr	r3, [r1]
 	cmp	r3, r1
 	beq	.L9
-	str	r3, [sp]
-	movs	r2, #72
-	mov	r3, r1
+	strd	r1, r3, [sp]
+	movs	r2, #75
+	ldr	r3, [r1, #4]
 	ldr	r0, .L30
 	ldr	r1, .L30+4
 	bl	printk
-	add	sp, sp, #8
+	add	sp, sp, #16
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, pc}
 .L9:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r6, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -99,14 +99,16 @@ mpp_mem_put_pool_f:
 	cmp	r7, r3
 	beq	.L13
 	ldr	r3, [r4, #8]
-	movs	r2, #89
+	movs	r2, #93
 	ldr	r1, .L30+4
 	ldr	r0, .L30+8
-	str	r3, [sp]
+	str	r3, [sp, #4]
 	ldr	r3, [r4, #28]
+	ldr	r8, .L30+16
+	str	r3, [sp]
+	ldr	r3, [r4, #4]
 	bl	printk
 	ldr	r1, [r4, #12]
-	ldr	r8, .L30+16
 	ldr	r5, [r1], #-4
 	subs	r5, r5, #4
 .L20:
@@ -117,22 +119,24 @@ mpp_mem_put_pool_f:
 	ldrd	r3, r2, [r4, #28]
 	orrs	r1, r3, r2
 	beq	.L19
-	strd	r3, r2, [sp]
-	movs	r2, #99
+	strd	r3, r2, [sp, #4]
+	movs	r2, #103
 	ldr	r3, [r4, #8]
 	ldr	r1, .L30+4
 	ldr	r0, .L30+12
+	str	r3, [sp]
+	ldr	r3, [r4, #4]
 	bl	printk
 .L19:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r6	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	ldr	r0, .L30+16
 	mov	r1, r4
-	add	sp, sp, #8
+	add	sp, sp, #16
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, lr}
 	b	mpp_osal_free
@@ -189,23 +193,24 @@ mpp_mem_pool_get_f:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r3, r4, r5, r6, r7, lr}
-	.save {r3, r4, r5, r6, r7, lr}
+	push	{r0, r1, r2, r4, r5, r6, r7, lr}
+	.save {r4, r5, r6, r7, lr}
+	.pad #12
 	mov	r4, r1
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	r1, cpsr	@ arch_local_irq_save
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	mov	r6, r1
+	mov	r6, r2
 	ldr	r3, [r4, #20]
-	add	r2, r4, #20
-	cmp	r2, r3
+	adds	r1, r1, #20
+	cmp	r1, r3
 	beq	.L33
 	ldr	r3, [r4, #20]
-	cmp	r2, r3
+	cmp	r1, r3
 	beq	.L33
 	subs	r0, r3, #4
 	beq	.L33
@@ -229,7 +234,7 @@ mpp_mem_pool_get_f:
 	str	r0, [r3, #-4]
 .L34:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r6	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -241,53 +246,60 @@ mpp_mem_pool_get_f:
 	bl	memset
 	b	.L32
 .L33:
-	ldrd	r2, r3, [r4, #32]
+	ldrd	r3, r1, [r4, #32]
 	ldr	r0, [r4, #28]
-	add	r2, r2, r0
-	cmp	r2, r3
+	add	r3, r3, r0
+	cmp	r3, r1
 	bcc	.L35
-	ldr	r2, [r4, #8]
-	movs	r1, #129
-	ldr	r0, .L44
+	str	r1, [sp]
 	movs	r5, #0
+	ldrd	r2, r3, [r4, #4]
+	movs	r1, #133
+	ldr	r0, .L44
 	bl	printk
 	mov	r0, r5
 	b	.L34
 .L35:
 	add	r7, r4, #12
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, r1	@ local_irq_restore
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	ldr	r1, [r4, #8]
 	ldr	r0, .L44+4
-	adds	r1, r1, #20
+	adds	r1, r1, #24
 	bl	mpp_osal_malloc
 	mov	r5, r0
 	cbnz	r0, .L36
 	ldr	r3, [r4, #4]
-	movs	r2, #136
+	movs	r2, #140
 	ldr	r1, .L44+8
 	ldr	r0, .L44+12
 	bl	printk
 .L32:
 	mov	r0, r5
-	pop	{r3, r4, r5, r6, r7, pc}
+	add	sp, sp, #12
+	@ sp needed
+	pop	{r4, r5, r6, r7, pc}
 .L36:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r6, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	str	r0, [r5]
-	add	r3, r0, #20
+	add	r3, r0, #24
 	str	r3, [r0, #12]
 	ldr	r3, [r4, #8]
 	str	r3, [r0, #16]
+	ldr	r3, [r4, #40]
+	adds	r2, r3, #1
+	str	r2, [r4, #40]
+	str	r3, [r0, #20]
 	adds	r3, r0, #4
 	str	r3, [r0, #4]
 	str	r3, [r0, #8]
@@ -320,63 +332,65 @@ mpp_mem_pool_put_f:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	mov	r3, r1
-	push	{r0, r1, r2, r4, r5, lr}
+	push	{r4, r5, lr}
 	.save {r4, r5, lr}
-	.pad #12
-	sub	r1, r2, #20
-	ldr	r0, [r3]
-	cmp	r0, r3
+	sub	r0, r2, #24
+	ldr	r3, [r1]
+	.pad #20
+	sub	sp, sp, #20
+	cmp	r3, r1
 	beq	.L47
-	str	r0, [sp]
-	movs	r2, #166
-	ldr	r1, .L50
-	ldr	r0, .L50+4
+	strd	r1, r3, [sp]
+	movs	r2, #172
+	ldr	r3, [r1, #4]
+	ldr	r0, .L50
+	ldr	r1, .L50+4
 	bl	printk
 .L46:
-	add	sp, sp, #12
+	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, pc}
 .L47:
-	ldr	r3, [r2, #-20]
-	cmp	r3, r1
+	ldr	r1, [r2, #-24]
+	cmp	r1, r0
 	beq	.L49
-	strd	r1, r3, [sp]
-	mov	r3, r2
-	ldr	r1, .L50
-	movs	r2, #172
+	strd	r0, r1, [sp, #4]
+	str	r2, [sp]
+	movs	r2, #178
+	ldr	r3, [r3, #4]
+	ldr	r1, .L50+4
 	ldr	r0, .L50+8
 	bl	printk
 	b	.L46
 .L49:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r5, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldrd	r4, r1, [r2, #-16]
-	sub	r3, r2, #16
+	ldrd	r4, r0, [r2, #-20]
+	sub	r1, r2, #20
+	str	r0, [r4, #4]
+	str	r4, [r0]
+	mov	r0, r3
+	str	r1, [r2, #-20]
+	str	r1, [r2, #-16]
+	ldr	r4, [r0, #20]!
 	str	r1, [r4, #4]
-	str	r4, [r1]
-	mov	r1, r0
-	str	r3, [r2, #-16]
-	str	r3, [r2, #-12]
-	ldr	r4, [r1, #20]!
-	str	r3, [r4, #4]
-	strd	r4, r1, [r2, #-16]
-	str	r3, [r0, #20]
-	ldr	r3, [r0, #28]
-	subs	r3, r3, #1
-	str	r3, [r0, #28]
-	ldr	r3, [r0, #32]
-	adds	r3, r3, #1
-	str	r3, [r0, #32]
+	strd	r4, r0, [r2, #-20]
+	str	r1, [r3, #20]
+	ldr	r1, [r3, #28]
+	subs	r1, r1, #1
+	str	r1, [r3, #28]
+	ldr	r1, [r3, #32]
+	adds	r1, r1, #1
+	str	r1, [r3, #32]
 	movs	r3, #0
-	str	r3, [r2, #-20]
+	str	r3, [r2, #-24]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r5	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -385,9 +399,9 @@ mpp_mem_pool_put_f:
 .L51:
 	.align	2
 .L50:
+	.word	.LC0
 	.word	.LANCHOR0+95
 	.word	.LC5
-	.word	.LC6
 	.fnend
 	.size	mpp_mem_pool_put_f, .-mpp_mem_pool_put_f
 	.align	1
@@ -432,72 +446,71 @@ mpp_mem_pool_info_show:
 .L54:
 	.align	2
 .L53:
-	.word	.LC7
-	.word	.LC11
-	.word	.LC9
+	.word	.LC6
 	.word	.LC10
-	.word	.LC12
 	.word	.LC8
-	.word	.LC13
+	.word	.LC9
+	.word	.LC11
+	.word	.LC7
+	.word	.LC12
 	.fnend
 	.size	mpp_mem_pool_info_show, .-mpp_mem_pool_info_show
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__FUNCTION__.23949, %object
-	.size	__FUNCTION__.23949, 19
-__FUNCTION__.23949:
+	.type	__FUNCTION__.23939, %object
+	.size	__FUNCTION__.23939, 19
+__FUNCTION__.23939:
 	.ascii	"mpp_mem_get_pool_f\000"
-	.type	__func__.23960, %object
-	.size	__func__.23960, 19
-__func__.23960:
+	.type	__func__.23950, %object
+	.size	__func__.23950, 19
+__func__.23950:
 	.ascii	"mpp_mem_put_pool_f\000"
-	.type	__FUNCTION__.23982, %object
-	.size	__FUNCTION__.23982, 19
-__FUNCTION__.23982:
+	.type	__FUNCTION__.23972, %object
+	.size	__FUNCTION__.23972, 19
+__FUNCTION__.23972:
 	.ascii	"mpp_mem_put_pool_f\000"
-	.type	__FUNCTION__.24031, %object
-	.size	__FUNCTION__.24031, 19
-__FUNCTION__.24031:
+	.type	__FUNCTION__.24021, %object
+	.size	__FUNCTION__.24021, 19
+__FUNCTION__.24021:
 	.ascii	"mpp_mem_pool_get_f\000"
-	.type	__func__.24032, %object
-	.size	__func__.24032, 19
-__func__.24032:
+	.type	__func__.24022, %object
+	.size	__func__.24022, 19
+__func__.24022:
 	.ascii	"mpp_mem_pool_get_f\000"
-	.type	__func__.24047, %object
-	.size	__func__.24047, 19
-__func__.24047:
+	.type	__func__.24037, %object
+	.size	__func__.24037, 19
+__func__.24037:
 	.ascii	"mpp_mem_pool_put_f\000"
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:
-	.ascii	"\0013%s:%d: invalid mem impl %p check %p\012\000"
+	.ascii	"\0013%s:%d: invalid mem %s pool %p check %p\012\000"
 .LC1:
-	.ascii	"\0013%s:%d: found %d used buffer size %d\012\000"
+	.ascii	"\0013%s:%d: %s pool found %d used buffer size %d\012"
+	.ascii	"\000"
 .LC2:
-	.ascii	"\0013%s:%d: pool size %d found leaked buffer used:u"
-	.ascii	"nused [%d:%d]\012\000"
+	.ascii	"\0013%s:%d: %s pool size %d found leaked buffer use"
+	.ascii	"d:unused [%d:%d]\012\000"
 .LC3:
-	.ascii	"\0016%d: pool %d reach max cnt %d\012\000"
+	.ascii	"\0016%d: %s pool %d reach max cnt %d\012\000"
 .LC4:
 	.ascii	"\0013%s:%d: failed to create node from %s pool\012\000"
 .LC5:
-	.ascii	"\0013%s:%d: invalid mem pool %p check %p\012\000"
+	.ascii	"\0013%s:%d: invalid mem %s pool ptr %p node %p chec"
+	.ascii	"k %p\012\000"
 .LC6:
-	.ascii	"\0013%s:%d: invalid mem pool ptr %p node %p check %"
-	.ascii	"p\012\000"
-.LC7:
 	.ascii	"\012--------%s pool--------------------------------"
 	.ascii	"-------------------------------------------\012\000"
-.LC8:
+.LC7:
 	.ascii	"used_cnt\000"
-.LC9:
+.LC8:
 	.ascii	"unused_cnt\000"
-.LC10:
+.LC9:
 	.ascii	"%12s|%12s|%12s|%12s\012\000"
-.LC11:
+.LC10:
 	.ascii	"max_cnt\000"
-.LC12:
+.LC11:
 	.ascii	"total_cnt\000"
-.LC13:
+.LC12:
 	.ascii	"%12u|%12u|%12u|%12u\012\000"
 	.ident	"GCC: (crosstool-NG 1.24.0) 8.3.0"
 	.section	.note.GNU-stack,"",%progbits

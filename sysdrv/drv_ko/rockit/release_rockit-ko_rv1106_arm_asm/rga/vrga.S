@@ -104,7 +104,7 @@ vrga_ioctl:
 	cmp	r5, r4
 	bls	.L7
 	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
+@ 87 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
 	cmp	r4, r5
 	sbc	r5, r4, r4
 .inst.w 0xf3af8014
@@ -151,30 +151,28 @@ vrga_handle_message:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	push	{r4, r5, r6, r7, r8, r9, r10, lr}
+	.save {r4, r5, r6, r7, r8, r9, r10, lr}
 	mov	r7, r2
-	.pad #36
-	sub	sp, sp, #36
-	mov	r5, r0
+	.pad #32
+	sub	sp, sp, #32
+	mov	r6, r0
 	cbnz	r0, .L14
 	ldr	r3, [r0, #8]
 	cmp	r3, #1
 	bne	.L32
 .L14:
 	subs	r3, r1, #2
-	ldr	r8, [r5, #288]
+	ldr	r5, [r6, #288]
 	cmp	r3, #1
 	bhi	.L16
-	cmp	r8, #0
-	beq	.L32
-	ldr	r4, [r8]
-	cmp	r4, #0
-	beq	.L13
+	cbz	r5, .L32
+	ldr	r4, [r5]
+	cbz	r4, .L13
 	mov	r0, r4
 	bl	mpi_obj_ref
 	ldr	r3, [r4, #48]
-	cmp	r5, r3
+	cmp	r6, r3
 	bne	.L17
 	mov	r0, r4
 	bl	mpi_job_wait
@@ -196,121 +194,123 @@ vrga_handle_message:
 	ldr	r2, .L44+4
 	mov	r0, r4
 	str	r3, [sp, #12]
-	ldr	r3, [r5]
+	ldr	r3, [r6]
 	str	r3, [sp, #8]
-	ldr	r3, [r5, #44]
+	ldr	r3, [r6, #44]
 	ldr	r3, [r3, #44]
 	str	r3, [sp, #4]
 	movw	r3, #1073
 	str	r3, [sp]
 	ldr	r3, .L44+8
 	bl	vlog
-	ldr	r10, [r5, #288]
-	ldr	fp, [r5, #44]
-	cmp	r10, #0
+	ldr	r5, [r5, #4]
+	cbz	r5, .L18
+	mov	r2, r4
+	mov	r1, r7
+	mov	r0, r6
+	bl	mpi_node_buffer_out
+.L13:
+	mov	r0, r4
+	add	sp, sp, #32
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
+.L18:
+	ldr	r8, [r6, #288]
+	ldr	r9, [r6, #44]
+	cmp	r8, #0
 	beq	.L34
 	cmp	r7, #0
 	beq	.L34
 	mov	r0, r7
 	bl	mpi_obj_ref
-	ldr	r3, [r10, #4]
-	cbnz	r3, .L35
-	mov	r1, r4
-	mov	r0, r5
+	ldr	r1, [r8, #4]
+	cbnz	r1, .L35
+	mov	r0, r6
 	bl	mpi_node_request_buf
-	mov	r9, r0
-	cbnz	r0, .L18
-.L19:
+	mov	r4, r0
+	cbnz	r0, .L19
+.L20:
 	mov	r0, r7
 	b	.L43
 .L35:
-	mov	r9, r4
-.L18:
-	mov	r1, r5
-	mov	r0, fp
+	mov	r4, r5
+.L19:
+	mov	r1, r6
+	mov	r0, r9
 	bl	mpi_dev_request_job_for_node
-	mov	r6, r0
-	cbz	r0, .L20
+	mov	r5, r0
+	cbz	r0, .L21
 	ldr	r3, [r0, #12]
 	and	r3, r3, #6
 	cmp	r3, #2
-	beq	.L21
-	bl	mpi_obj_unref
-.L20:
-	mov	r0, r9
-	bl	mpi_obj_unref
-	b	.L19
-.L21:
-	str	r7, [r0, #60]
-	ldr	r3, [r10, #4]
-	cmp	r3, #0
 	beq	.L22
+	bl	mpi_obj_unref
+.L21:
+	mov	r0, r4
+	bl	mpi_obj_unref
+	b	.L20
+.L22:
+	str	r7, [r0, #60]
+	ldr	r3, [r8, #4]
+	cmp	r3, #0
+	beq	.L23
 	str	r7, [r0, #64]
 	mov	r0, r7
 	bl	mpi_obj_ref
-.L23:
-	ldr	r3, [r6, #64]
+.L24:
+	ldr	r3, [r5, #64]
 	movs	r1, #5
 	ldr	r2, .L44+12
 	movs	r0, #0
 	ldr	r3, [r3]
 	str	r3, [sp, #20]
-	ldr	r3, [r6, #60]
+	ldr	r3, [r5, #60]
 	ldr	r3, [r3]
 	str	r3, [sp, #16]
-	ldr	r3, [r5]
-	str	r3, [sp, #12]
-	ldr	r3, [fp, #44]
-	str	r3, [sp, #8]
 	ldr	r3, [r6]
+	str	r3, [sp, #12]
+	ldr	r3, [r9, #44]
+	str	r3, [sp, #8]
+	ldr	r3, [r5]
 	str	r3, [sp, #4]
 	movw	r3, #1007
 	str	r3, [sp]
 	ldr	r3, .L44+16
 	bl	vlog
-	mov	r0, r6
+	mov	r0, r5
 	bl	mpi_job_set_ready
-	mov	r0, r6
-	ldr	r10, .L44+16
+	mov	r0, r5
+	ldr	r9, .L44+16
 	bl	mpi_obj_ref
-	ldr	fp, .L44+24
-.L24:
-	mov	r1, r6
-	ldr	r0, [r5, #308]
+	ldr	r10, .L44+24
+	movw	r8, #1027
+.L25:
+	mov	r1, r5
+	ldr	r0, [r6, #308]
 	bl	mpi_queue_push_obj
-	mov	r9, r0
-	cbz	r0, .L42
-	ldr	r6, [r8, #4]
-	cmp	r6, #0
-	beq	.L28
-	movs	r1, #0
-	ldr	r0, [r5, #44]
-	bl	mpi_dev_run_job
-	movs	r1, #0
-	bl	mpi_job_done
-.L13:
-	mov	r0, r4
-	add	sp, sp, #36
-	@ sp needed
-	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L22:
-	str	r9, [r0, #64]
-	b	.L23
-.L42:
-	ldr	r0, [r5, #308]
-	bl	mpi_queue_pop_obj
 	mov	r7, r0
-	cbnz	r0, .L25
+	cbz	r0, .L42
+	ldr	r0, .L44+20
+	bl	up
+	b	.L32
+.L23:
+	str	r4, [r0, #64]
+	b	.L24
+.L42:
+	ldr	r0, [r6, #308]
+	bl	mpi_queue_pop_obj
+	mov	r4, r0
+	cbnz	r0, .L26
 	movs	r1, #1
-	mov	r0, r6
+	mov	r0, r5
 	bl	mpi_job_cancel
-	mov	r0, r6
+	mov	r0, r5
 .L43:
 	bl	mpi_obj_unref
 .L34:
 	mov	r4, #-1
 	b	.L13
-.L25:
+.L26:
 	ldr	r3, [r0, #60]
 	ldr	r2, [r0, #16]
 	ldr	r1, [r3, #16]
@@ -318,29 +318,23 @@ vrga_handle_message:
 	movs	r1, #5
 	ldr	r3, [r3]
 	strd	r2, r3, [sp, #16]
-	mov	r2, fp
+	mov	r2, r10
 	ldr	r3, [r0]
-	mov	r0, r9
+	mov	r0, r7
 	str	r3, [sp, #12]
-	ldr	r3, [r5]
+	ldr	r3, [r6]
 	str	r3, [sp, #8]
-	ldr	r3, [r5, #44]
+	ldr	r3, [r6, #44]
 	ldr	r3, [r3, #44]
-	str	r3, [sp, #4]
-	movw	r3, #1027
-	str	r3, [sp]
-	mov	r3, r10
+	strd	r8, r3, [sp]
+	mov	r3, r9
 	bl	vlog
 	movs	r1, #1
-	mov	r0, r7
+	mov	r0, r4
 	bl	mpi_job_cancel
-	mov	r0, r7
+	mov	r0, r4
 	bl	mpi_obj_unref
-	b	.L24
-.L28:
-	ldr	r0, .L44+20
-	bl	up
-	b	.L32
+	b	.L25
 .L45:
 	.align	2
 .L44:
@@ -2467,7 +2461,7 @@ vrga_user_request:
 	ldr	r3, [r0]
 	movs	r0, #0
 	str	r3, [sp, #4]
-	movw	r3, #1146
+	movw	r3, #1145
 	str	r3, [sp]
 	ldr	r3, .L369+8
 	bl	vlog
@@ -2644,97 +2638,97 @@ vrga_exit:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR1,. + 0
-	.type	__func__.38373, %object
-	.size	__func__.38373, 10
-__func__.38373:
+	.type	__func__.36644, %object
+	.size	__func__.36644, 10
+__func__.36644:
 	.ascii	"vrga_open\000"
-	.type	__func__.38357, %object
-	.size	__func__.38357, 11
-__func__.38357:
+	.type	__func__.36628, %object
+	.size	__func__.36628, 11
+__func__.36628:
 	.ascii	"vrga_ioctl\000"
-	.type	__func__.38520, %object
-	.size	__func__.38520, 25
-__func__.38520:
+	.type	__func__.36791, %object
+	.size	__func__.36791, 25
+__func__.36791:
 	.ascii	"vrga_handle_node_message\000"
-	.type	__func__.38484, %object
-	.size	__func__.38484, 13
-__func__.38484:
+	.type	__func__.36755, %object
+	.size	__func__.36755, 13
+__func__.36755:
 	.ascii	"vrga_new_job\000"
-	.type	__func__.38164, %object
-	.size	__func__.38164, 13
-__func__.38164:
+	.type	__func__.36435, %object
+	.size	__func__.36435, 13
+__func__.36435:
 	.ascii	"vrga_version\000"
-	.type	__func__.38410, %object
-	.size	__func__.38410, 13
-__func__.38410:
+	.type	__func__.36681, %object
+	.size	__func__.36681, 13
+__func__.36681:
 	.ascii	"vrga_release\000"
-	.type	__func__.38460, %object
-	.size	__func__.38460, 15
-__func__.38460:
+	.type	__func__.36731, %object
+	.size	__func__.36731, 15
+__func__.36731:
 	.ascii	"vrga_thread_fn\000"
-	.type	__func__.38422, %object
-	.size	__func__.38422, 26
-__func__.38422:
+	.type	__func__.36693, %object
+	.size	__func__.36693, 26
+__func__.36693:
 	.ascii	"vrga_set_rga_job_src_info\000"
-	.type	__func__.38432, %object
-	.size	__func__.38432, 26
-__func__.38432:
+	.type	__func__.36703, %object
+	.size	__func__.36703, 26
+__func__.36703:
 	.ascii	"vrga_set_rga_job_dst_info\000"
-	.type	__func__.38440, %object
-	.size	__func__.38440, 24
-__func__.38440:
+	.type	__func__.36711, %object
+	.size	__func__.36711, 24
+__func__.36711:
 	.ascii	"vrga_set_dst_frame_info\000"
-	.type	__func__.38177, %object
-	.size	__func__.38177, 17
-__func__.38177:
+	.type	__func__.36448, %object
+	.size	__func__.36448, 17
+__func__.36448:
 	.ascii	"vrga_node_create\000"
-	.type	__func__.38150, %object
-	.size	__func__.38150, 39
-__func__.38150:
+	.type	__func__.36421, %object
+	.size	__func__.36421, 39
+__func__.36421:
 	.ascii	"vrga_get_node_site_from_map_by_nick_id\000"
-	.type	__func__.38191, %object
-	.size	__func__.38191, 17
-__func__.38191:
+	.type	__func__.36462, %object
+	.size	__func__.36462, 17
+__func__.36462:
 	.ascii	"vrga_node_delete\000"
-	.type	__func__.38222, %object
-	.size	__func__.38222, 16
-__func__.38222:
+	.type	__func__.36493, %object
+	.size	__func__.36493, 16
+__func__.36493:
 	.ascii	"vrga_node_start\000"
-	.type	__func__.38231, %object
-	.size	__func__.38231, 15
-__func__.38231:
+	.type	__func__.36502, %object
+	.size	__func__.36502, 15
+__func__.36502:
 	.ascii	"vrga_node_stop\000"
-	.type	__func__.38242, %object
-	.size	__func__.38242, 12
-__func__.38242:
+	.type	__func__.36513, %object
+	.size	__func__.36513, 12
+__func__.36513:
 	.ascii	"vrga_mb_get\000"
-	.type	__func__.38252, %object
-	.size	__func__.38252, 16
-__func__.38252:
+	.type	__func__.36523, %object
+	.size	__func__.36523, 16
+__func__.36523:
 	.ascii	"vrga_mb_release\000"
-	.type	__func__.38266, %object
-	.size	__func__.38266, 13
-__func__.38266:
+	.type	__func__.36537, %object
+	.size	__func__.36537, 13
+__func__.36537:
 	.ascii	"vrga_mb_send\000"
-	.type	__func__.38280, %object
-	.size	__func__.38280, 21
-__func__.38280:
+	.type	__func__.36551, %object
+	.size	__func__.36551, 21
+__func__.36551:
 	.ascii	"vrga_node_set_bypass\000"
-	.type	__func__.38290, %object
-	.size	__func__.38290, 19
-__func__.38290:
+	.type	__func__.36561, %object
+	.size	__func__.36561, 19
+__func__.36561:
 	.ascii	"vrga_node_set_crop\000"
-	.type	__func__.38312, %object
-	.size	__func__.38312, 20
-__func__.38312:
+	.type	__func__.36583, %object
+	.size	__func__.36583, 20
+__func__.36583:
 	.ascii	"vrga_node_set_scale\000"
-	.type	__func__.38333, %object
-	.size	__func__.38333, 25
-__func__.38333:
+	.type	__func__.36604, %object
+	.size	__func__.36604, 25
+__func__.36604:
 	.ascii	"vrga_node_frame_rate_ctl\000"
-	.type	__func__.38550, %object
-	.size	__func__.38550, 18
-__func__.38550:
+	.type	__func__.36821, %object
+	.size	__func__.36821, 18
+__func__.36821:
 	.ascii	"vrga_user_request\000"
 	.type	vrga_ioctls, %object
 	.size	vrga_ioctls, 420

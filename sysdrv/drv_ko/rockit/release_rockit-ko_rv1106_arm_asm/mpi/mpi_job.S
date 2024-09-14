@@ -64,7 +64,7 @@ atomic_set_if:
 	pld	[r0]
 .L2:
 	.syntax unified
-@ 114 "./arch/arm/include/asm/atomic.h" 1
+@ 114 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_cmpxchg
 ldrex	r3, [r0]
 mov	r4, #0
@@ -543,7 +543,7 @@ mpi_job_pool_alloc:
 	mov	r0, r4
 	bl	mpi_obj_register
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r1, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -556,7 +556,7 @@ mpi_job_pool_alloc:
 	str	r3, [r2]
 	str	r3, [r5, #44]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r1	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -621,7 +621,7 @@ mpi_job_pool_flush:
 	bl	synchronize_rcu
 	cbz	r4, .L71
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r8, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -635,7 +635,7 @@ mpi_job_pool_flush:
 	cmp	r3, r6
 	bne	.L76
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r8	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -649,7 +649,7 @@ mpi_job_pool_flush:
 	strmi	r3, [r5, #12]
 	pld	[r4]
 	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
+@ 223 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_add
 1:	ldrex	r3, [r4]
 	add	r3, r3, #1
@@ -662,7 +662,7 @@ mpi_job_pool_flush:
 	adds	r6, r4, #4
 	pld	[r6]
 	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
+@ 223 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_add
 1:	ldrex	r3, [r6]
 	add	r3, r3, #1
@@ -684,7 +684,7 @@ mpi_job_pool_flush:
 	mov	r0, r7
 	bl	wait_for_completion
 	.syntax unified
-@ 224 "./arch/arm/include/asm/atomic.h" 1
+@ 224 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_sub
 1:	ldrex	r3, [r6]
 	sub	r3, r3, #1
@@ -696,7 +696,7 @@ mpi_job_pool_flush:
 	.syntax unified
 	pld	[r4]
 	.syntax unified
-@ 224 "./arch/arm/include/asm/atomic.h" 1
+@ 224 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_sub_return
 1:	ldrex	r3, [r4]
 	sub	r3, r3, #1
@@ -1060,49 +1060,49 @@ mpi_job_pool_create:
 	.size	mpi_job_pool_create, .-mpi_job_pool_create
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__func__.37395, %object
-	.size	__func__.37395, 18
-__func__.37395:
+	.type	__func__.35666, %object
+	.size	__func__.35666, 18
+__func__.35666:
 	.ascii	"mpi_job_set_ready\000"
-	.type	__func__.37496, %object
-	.size	__func__.37496, 16
-__func__.37496:
+	.type	__func__.35767, %object
+	.size	__func__.35767, 16
+__func__.35767:
 	.ascii	"mpi_job_release\000"
-	.type	__func__.37423, %object
-	.size	__func__.37423, 18
-__func__.37423:
+	.type	__func__.35694, %object
+	.size	__func__.35694, 18
+__func__.35694:
 	.ascii	"mpi_job_do_cancel\000"
-	.type	__func__.37470, %object
-	.size	__func__.37470, 13
-__func__.37470:
+	.type	__func__.35741, %object
+	.size	__func__.35741, 13
+__func__.35741:
 	.ascii	"mpi_job_done\000"
-	.type	__func__.37644, %object
-	.size	__func__.37644, 21
-__func__.37644:
+	.type	__func__.35915, %object
+	.size	__func__.35915, 21
+__func__.35915:
 	.ascii	"mpi_job_pool_release\000"
-	.type	__func__.37518, %object
-	.size	__func__.37518, 19
-__func__.37518:
+	.type	__func__.35789, %object
+	.size	__func__.35789, 19
+__func__.35789:
 	.ascii	"mpi_job_pool_alloc\000"
-	.type	__func__.37701, %object
-	.size	__func__.37701, 19
-__func__.37701:
+	.type	__func__.35972, %object
+	.size	__func__.35972, 19
+__func__.35972:
 	.ascii	"mpi_job_pool_flush\000"
-	.type	__func__.37411, %object
-	.size	__func__.37411, 20
-__func__.37411:
+	.type	__func__.35682, %object
+	.size	__func__.35682, 20
+__func__.35682:
 	.ascii	"mpi_job_set_running\000"
-	.type	__func__.37534, %object
-	.size	__func__.37534, 25
-__func__.37534:
+	.type	__func__.35805, %object
+	.size	__func__.35805, 25
+__func__.35805:
 	.ascii	"mpi_job_pool_request_job\000"
-	.type	__func__.37721, %object
-	.size	__func__.37721, 21
-__func__.37721:
+	.type	__func__.35992, %object
+	.size	__func__.35992, 21
+__func__.35992:
 	.ascii	"mpi_job_pool_destroy\000"
-	.type	__func__.37732, %object
-	.size	__func__.37732, 20
-__func__.37732:
+	.type	__func__.36003, %object
+	.size	__func__.36003, 20
+__func__.36003:
 	.ascii	"mpi_job_pool_create\000"
 	.bss
 	.set	.LANCHOR1,. + 0

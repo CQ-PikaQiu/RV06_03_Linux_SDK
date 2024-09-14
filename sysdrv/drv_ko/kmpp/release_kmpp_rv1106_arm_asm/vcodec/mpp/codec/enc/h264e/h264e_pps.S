@@ -388,13 +388,13 @@ h264e_pps_dump:
 	.size	h264e_pps_dump, .-h264e_pps_dump
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__FUNCTION__.8922, %object
-	.size	__FUNCTION__.8922, 17
-__FUNCTION__.8922:
+	.type	__FUNCTION__.8934, %object
+	.size	__FUNCTION__.8934, 17
+__FUNCTION__.8934:
 	.ascii	"h264e_pps_update\000"
-	.type	__func__.8925, %object
-	.size	__func__.8925, 17
-__func__.8925:
+	.type	__func__.8937, %object
+	.size	__func__.8937, 17
+__func__.8937:
 	.ascii	"h264e_pps_update\000"
 	.type	zigzag, %object
 	.size	zigzag, 64

@@ -81,7 +81,7 @@ __insmod motor.ko
 
 __chk_camera_sensor_height
 
-__insmod rockit.ko mcu_fw_path="./hpmcu_wrap.bin" mcu_fw_addr=0xff6ff000 isp_max_h=$sensor_height
+__insmod rockit.ko mcu_fw_path="./hpmcu_wrap.bin" mcu_fw_addr=0xff6fe000 isp_max_h=$sensor_height
 
 __insmod rve.ko
 

@@ -284,7 +284,7 @@ int RK_get_pirstate(unsigned int *pir_ret);
  * 低功耗专用API
  */
 //进入低功耗
-int RK_wifi_enter_sleep(void);
+int RK_wifi_enter_sleep(int argc, char *argv[]);
 //退出低功耗
 int RK_wifi_exit_sleep(void);
 //启动保活

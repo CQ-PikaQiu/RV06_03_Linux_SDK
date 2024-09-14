@@ -30,6 +30,10 @@ extern "C" {
 #include <time.h>
 #include <ucontext.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/mman.h>
 
 #include "sample_comm.h"
 
@@ -232,33 +236,221 @@ RK_VOID SAMPLE_COMM_CheckFd(RK_BOOL bStart) {
 	}
 }
 
-RK_S32 SAMPLE_COMM_ECHO(RK_CHAR *file_path, RK_CHAR *buf, RK_U32 lenth) {
-	FILE *fp = NULL;
-	fp = fopen(file_path, "w");
-	if (fp == NULL) {
-		perror("fopen error\n");
+RK_S32 SAMPLE_COMM_ECHO(RK_CHAR *file_path, RK_CHAR *buf, RK_U32 length) {
+	int fd = -1;
+	ssize_t ret = -1;
+
+	fd = open(file_path, O_WRONLY | O_TRUNC);
+	if (fd == -1) {
+		perror("open error\n");
 		return -1;
 	}
 
-	if (lenth > fwrite(buf, 1, lenth, fp)) {
-		printf("fwrite error\n");
-		fclose(fp);
+	ret = write(fd, buf, length);
+	if (ret == -1) {
+		perror("write error\n");
+		close(fd);
 		return -1;
 	}
-	printf("echo \"%s\" > %s successfully\n", buf, file_path);
-	fclose(fp);
+
+	RK_LOGD("echo \"%s\" > %s successfully\n", buf, file_path);
+
+	close(fd);
+
 	return 0;
 }
 
 #if _SAMPLE_AOV_ENABLE_KLOG_
 RK_VOID SAMPLE_COMM_KLOG(const RK_CHAR *log) {
-	FILE *fp = fopen("/dev/kmsg", "w");
-	if (NULL != fp) {
-		fprintf(fp, "[app]: %s\n", log);
-		fclose(fp);
+	int fd = open("/dev/kmsg", O_WRONLY | O_APPEND);
+	if (fd != -1) {
+		dprintf(fd, "[app]: %s\n", log);
+		close(fd);
 	}
 }
 #endif
+
+#define MAX_CMDLINE_SIZE 4096
+RK_S32 SAMPLE_COMM_ExtractValueFromCmdline(const char *param) {
+	int cmdline_file = open("/proc/cmdline", O_RDONLY);
+	if (cmdline_file == -1) {
+		perror("Error opening /proc/cmdline");
+		return -1;
+	}
+
+	char cmdline[MAX_CMDLINE_SIZE];
+	ssize_t bytesRead = read(cmdline_file, cmdline, sizeof(cmdline));
+	if (bytesRead == -1) {
+		perror("Error reading /proc/cmdline");
+		close(cmdline_file);
+		return -1;
+	}
+	cmdline[bytesRead] = '\0'; // Null-terminate the string
+
+	close(cmdline_file);
+
+	RK_S32 value = -1;
+
+	// Find the position of the parameter in the string
+	const char *param_str = strstr(cmdline, param);
+	if (param_str != NULL) {
+		sscanf(param_str, "%*[^=]=%d", &value);
+	}
+
+	return value;
+}
+
+static void copyOrAppendFile(const char *sourcePath, const char *destinationPath,
+                             const char *mode) {
+	if (sourcePath == NULL || destinationPath == NULL || mode == NULL) {
+		return;
+	}
+
+	int sourceFile = open(sourcePath, O_RDONLY);
+	if (sourceFile == -1) {
+		perror("Error opening source file");
+		return;
+	}
+
+	int destinationFile =
+	    open(destinationPath,
+	         O_WRONLY | O_CREAT | (strcmp(mode, "a") == 0 ? O_APPEND : O_TRUNC),
+	         S_IRUSR | S_IWUSR);
+	if (destinationFile == -1) {
+		perror("Error opening destination file");
+		close(sourceFile);
+		return;
+	}
+
+	dprintf(destinationFile, "============ %s ============\n", sourcePath);
+
+	char buffer[1024];
+	ssize_t bytesRead;
+
+	while ((bytesRead = read(sourceFile, buffer, sizeof(buffer))) > 0) {
+		ssize_t bytesWritten = write(destinationFile, buffer, bytesRead);
+		if (bytesWritten != bytesRead) {
+			perror("Error writing to destination file");
+			close(sourceFile);
+			close(destinationFile);
+			return;
+		}
+	}
+
+	close(sourceFile);
+	close(destinationFile);
+}
+
+RK_S32 SAMPLE_COMM_DumpDebugInfoToTmp(RK_VOID) {
+	char *debugRockit = getenv("debug_rockit");
+	if (debugRockit == NULL) {
+		return RK_FAILURE;
+	}
+	copyOrAppendFile("/proc/rkcif-mipi-lvds", "/tmp/debugInfo.txt", "w");
+	copyOrAppendFile("/proc/rkcif-mipi-lvds1", "/tmp/debugInfo.txt", "a");
+	copyOrAppendFile("/proc/rkisp-vir0", "/tmp/debugInfo.txt", "a");
+	copyOrAppendFile("/proc/rkisp-vir1", "/tmp/debugInfo.txt", "a");
+	copyOrAppendFile("/dev/mpi/vsys", "/tmp/debugInfo.txt", "a");
+	copyOrAppendFile("/dev/mpi/valloc", "/tmp/debugInfo.txt", "a");
+	copyOrAppendFile("/dev/mpi/vlog", "/tmp/debugInfo.txt", "a");
+	copyOrAppendFile("/proc/vcodec/enc/venc_info", "/tmp/debugInfo.txt", "a");
+	return RK_SUCCESS;
+}
+
+RK_S32 SAMPLE_COMM_WriteReg(RK_S32 addr, RK_S32 value) {
+	int mem_fd = open("/dev/mem", O_RDWR | O_SYNC);
+	if (mem_fd < 0) {
+		perror("Error opening /dev/mem");
+		return -1;
+	}
+
+	// 获取页大小
+	size_t page_size = getpagesize();
+
+	// 计算页对齐的地址和偏移量
+	off_t page_base = (addr & ~(page_size - 1));
+	off_t page_offset = addr - page_base;
+
+	// 映射内存
+	void *mem_map =
+	    mmap(NULL, page_size, PROT_READ | PROT_WRITE, MAP_SHARED, mem_fd, page_base);
+	if (mem_map == MAP_FAILED) {
+		perror("Error mapping memory");
+		close(mem_fd);
+		return -1;
+	}
+
+	// 计算寄存器地址
+	int *target_reg = (int *)((char *)mem_map + page_offset);
+
+	// 写入数据
+	*target_reg = value;
+
+	// 解除内存映射
+	munmap(mem_map, page_size);
+	close(mem_fd);
+
+	return 0;
+}
+
+RK_S32 SAMPLE_COMM_ReadReg(RK_S32 addr, RK_U8 *buf, RK_U32 len) {
+	int mem_fd = open("/dev/mem", O_RDWR | O_SYNC);
+	if (mem_fd < 0) {
+		perror("Error opening /dev/mem");
+		return RK_FAILURE;
+	}
+
+	// 获取页大小
+	size_t page_size = getpagesize();
+	if (len > page_size) {
+		printf("Dump length is too long!\n");
+		return RK_FAILURE;
+	}
+
+	// 计算页对齐的地址和偏移量
+	off_t page_base = (addr & ~(page_size - 1));
+	off_t page_offset = addr - page_base;
+
+	// 映射内存
+	void *mem_map =
+	    mmap(NULL, page_size, PROT_READ | PROT_WRITE, MAP_SHARED, mem_fd, page_base);
+	if (mem_map == MAP_FAILED) {
+		perror("Error mapping memory");
+		close(mem_fd);
+		return RK_FAILURE;
+	}
+
+	// 计算寄存器地址
+	const RK_U8 *target_reg = (RK_U8 *)((char *)mem_map + page_offset);
+
+	// 读取数据
+	memcpy(buf, target_reg, len);
+
+	// 解除内存映射
+	munmap(mem_map, page_size);
+	close(mem_fd);
+
+	return RK_SUCCESS;
+}
+
+RK_S32 SAMPLE_COMM_DumpReg(RK_S32 addr, RK_U32 len) {
+	RK_U8 *data;
+	data = (RK_U8 *)malloc(len);
+	if (!data) {
+		printf("malloc failed!\n");
+		return RK_FAILURE;
+	}
+	memset(data, 0, len);
+	if (SAMPLE_COMM_ReadReg(addr, data, len) != RK_SUCCESS) {
+		free(data);
+		printf("read register file failed!\n");
+		return RK_FAILURE;
+	}
+	for (RK_U32 i = 0; i < len; ++i)
+		printf("[DUMP REG] reg %#X value %#X\n", addr + i, data[i]);
+	free(data);
+	return RK_SUCCESS;
+}
 
 #ifdef __cplusplus
 #if __cplusplus

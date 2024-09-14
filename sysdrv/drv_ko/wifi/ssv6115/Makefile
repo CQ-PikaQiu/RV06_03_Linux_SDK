@@ -139,7 +139,7 @@ version:
 
 modules:
 	#$(MAKE) -C $(KERNEL_OBJ_PATH) M=$(SSV_DRV_PATH) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) modules
-	$(MAKE) -C $(KERNEL_DIR) M=$(shell pwd) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) modules -j12
+	$(MAKE) -C $(KERNEL_DIR) M=$(shell pwd) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) modules -j12 O=$(WIFI_BUILD_KERNEL_OBJ_DIR)
 	cp $(SSV_DRV_PATH)/ssv6x5x.ko $(M_OUT_DIR)/ssv6115.ko
 
 strip:
@@ -151,4 +151,4 @@ install:
 	depmod -a
 
 clean:
-	$(MAKE) -C $(KERNEL_DIR) M=$(shell pwd) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) clean
+	$(MAKE) -C $(KERNEL_DIR) M=$(shell pwd) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) clean O=$(WIFI_BUILD_KERNEL_OBJ_DIR)

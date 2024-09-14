@@ -139,7 +139,21 @@ unsigned int capture_sample(FILE *file, unsigned int card, unsigned int device,
     frames_read = 0;
 
     if (handle)
+    {
         rockaa_capt_effect_create(handle);
+        /**
+         * handle->ch_out is configured after rockaa_capt_effect_create()
+         * if BF model is enabled, then ch_out == 1, otherwise ch_out == ch_near
+         */
+        handle->out_bytes = sizeof(short) * period_size * handle->ch_out;
+        handle->out_buf = (char *)malloc(handle->out_bytes);
+        if (!handle->out_buf)
+        {
+            fprintf(stderr, "Unable to allocate out_buf\n");
+            goto exit_capt;
+        }
+    }
+
     while (capturing)
     {
         frames_read = pcm_readi(pcm, buffer, read_len);
@@ -175,6 +189,7 @@ unsigned int capture_sample(FILE *file, unsigned int card, unsigned int device,
     if (handle)
         rockaa_capt_effect_destroy(handle);
 
+exit_capt:
     free(buffer);
     pcm_close(pcm);
     return total_frames_read;
@@ -210,14 +225,18 @@ static int offline_file_process(rockaa_c *handle, char *in_file)
         LOGE("alloc pcm_in failed\n");
         return -1;
     }
-    pcm_out = (short *)malloc(handle->nb_samples * sizeof(short) * 1);
+
+    rockaa_capt_effect_create(handle);
+    /**
+     * handle->ch_out is configured after rockaa_capt_effect_create()
+     * if BF model is enabled, then ch_out == 1, otherwise ch_out == ch_near
+     */
+    pcm_out = (short *)malloc(handle->nb_samples * sizeof(short) * handle->ch_out);
     if (!pcm_out)
     {
         LOGE("alloc pcm_out failed\n");
         return -1;
     }
-
-    rockaa_capt_effect_create(handle);
     while (capturing && !feof(handle->in_fp))
     {
         read_len = fread(pcm_in, 1,
@@ -233,7 +252,7 @@ static int offline_file_process(rockaa_c *handle, char *in_file)
                  handle->results.angle_pitch);
         }
         fwrite(pcm_out, 1,
-               handle->nb_samples * sizeof(short) * 1,
+               handle->nb_samples * sizeof(short) * handle->ch_out,
                handle->out_fp);
     }
 
@@ -458,8 +477,6 @@ int main(int argc, char **argv)
         handle->nb_samples = period_size;
         handle->enable_doa = enable_doa;
         handle->conf_path = conf_name;
-        handle->out_bytes = sizeof(short) * period_size * 1; /* output mono */
-        handle->out_buf = (char *)malloc(handle->out_bytes);
 
         if (out_file)
         {

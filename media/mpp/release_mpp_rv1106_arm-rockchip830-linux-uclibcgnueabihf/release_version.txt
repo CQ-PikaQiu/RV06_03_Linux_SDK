@@ -1,8 +1,8 @@
-commit 2e25ab7ce2694905a72e19b81d066894758bd27c
+commit 16e796a4523914b96730a9082aee99eae6b9688b
 Author: hdl <hdl@rock-chips.com>
-Date:   Fri Jan 5 14:35:48 2024 +0800
+Date:   Tue Jan 31 19:36:58 2023 +0800
 
-    [mpp]: Adding smt param for mpi_enc_test.
+    [venc540c]: Adding scene_mode of IPC_PTZ.
     
     Signed-off-by: hdl <hdl@rock-chips.com>
-    Change-Id: I55dda3114bb0fa837aaab3796d99f03fd2105e3e
+    Change-Id: Ib99c290617a2c56e0ea9995565cbe529529a8a33

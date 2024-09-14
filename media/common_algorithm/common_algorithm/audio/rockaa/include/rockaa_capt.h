@@ -54,6 +54,7 @@ typedef struct _rockaa_c
     bool enable_doa;
     int ch_near;
     int ch_far;
+    int ch_out;  /* ==1: BF is enabled, ==ch_near: BF is disabled, configured by rockaa_capt_effect_create() */
     result_capt results;
 } rockaa_c;
 

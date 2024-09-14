@@ -29,6 +29,10 @@ if (USE_UCLIBC)
 				${CMAKE_CURRENT_SOURCE_DIR}/uclibc/librkaudio_common.a
 			DESTINATION "lib"
 		)
+		install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/conf/
+			DESTINATION "vqefiles"
+			FILES_MATCHING PATTERN "*.rknn"
+		)
 	endif()
 
 	if(RKAPPLUS_ENABLE)
@@ -38,6 +42,15 @@ if (USE_UCLIBC)
 				RENAME libaec_bf_process.so
 			)
 			install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/uclibc/libaec_bf_process_wakeup.a
+				DESTINATION "lib"
+				RENAME libaec_bf_process.a
+			)
+	elseif (RKAPPLUS_AINR_ENABLE)
+			install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/uclibc/libaec_bf_process_ainr.so
+				DESTINATION "lib"
+				RENAME libaec_bf_process.so
+			)
+			install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/uclibc/libaec_bf_process_ainr.a
 				DESTINATION "lib"
 				RENAME libaec_bf_process.a
 			)
@@ -82,6 +95,16 @@ if (USE_UCLIBC)
 		)
 	endif()
 
+	if (RKAPPLUS_EFFECT_EQDRC_ENABLE)
+		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/uclibc/librkaudio_effect_eqdrc.so
+			      ${CMAKE_CURRENT_SOURCE_DIR}/uclibc/librkaudio_effect_eqdrc.a
+			DESTINATION "lib"
+		)
+		install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/conf/
+			DESTINATION "vqefiles"
+			FILES_MATCHING PATTERN "*.bin"
+		)
+	endif()
 endif()
 
 if (USE_32BIT)
@@ -117,6 +140,17 @@ if (USE_32BIT)
 	)
 	endif()
 
+	if (RKAPPLUS_EFFECT_EQDRC_ENABLE)
+		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/lib32/librkaudio_effect_eqdrc.so
+			      ${CMAKE_CURRENT_SOURCE_DIR}/lib32/librkaudio_effect_eqdrc.a
+			DESTINATION "lib"
+		)
+		install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/conf/
+			DESTINATION "vqefiles"
+			FILES_MATCHING PATTERN "*.bin"
+		)
+	endif()
+
 endif()
 
 if (USE_64BIT)
@@ -150,5 +184,16 @@ if (USE_64BIT)
 				${CMAKE_CURRENT_SOURCE_DIR}/lib64/librkaudio_detect.a
 			DESTINATION "lib"
 	)
+	endif()
+
+	if (RKAPPLUS_EFFECT_EQDRC_ENABLE)
+		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/lib64/librkaudio_effect_eqdrc.so
+			      ${CMAKE_CURRENT_SOURCE_DIR}/lib64/librkaudio_effect_eqdrc.a
+			DESTINATION "lib"
+		)
+		install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/conf/
+			DESTINATION "vqefiles"
+			FILES_MATCHING PATTERN "*.bin"
+		)
 	endif()
 endif()

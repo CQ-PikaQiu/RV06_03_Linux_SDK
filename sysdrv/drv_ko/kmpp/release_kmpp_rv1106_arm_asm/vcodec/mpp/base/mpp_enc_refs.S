@@ -2412,121 +2412,121 @@ mpp_enc_refs_rollback:
 	.global	enc_refs_debug
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__func__.9031, %object
-	.size	__func__.9031, 17
-__func__.9031:
+	.type	__func__.9044, %object
+	.size	__func__.9044, 17
+__func__.9044:
 	.ascii	"get_ref_from_cpb\000"
-	.type	__FUNCTION__.9008, %object
-	.size	__FUNCTION__.9008, 18
-__FUNCTION__.9008:
+	.type	__FUNCTION__.9021, %object
+	.size	__FUNCTION__.9021, 18
+__FUNCTION__.9021:
 	.ascii	"set_st_cfg_to_frm\000"
-	.type	__FUNCTION__.9095, %object
-	.size	__FUNCTION__.9095, 17
-__FUNCTION__.9095:
+	.type	__FUNCTION__.9108, %object
+	.size	__FUNCTION__.9108, 17
+__FUNCTION__.9108:
 	.ascii	"store_ref_to_cpb\000"
-	.type	__func__.9108, %object
-	.size	__func__.9108, 17
-__func__.9108:
+	.type	__func__.9121, %object
+	.size	__func__.9121, 17
+__func__.9121:
 	.ascii	"store_ref_to_cpb\000"
-	.type	__func__.9069, %object
-	.size	__func__.9069, 16
-__func__.9069:
+	.type	__func__.9082, %object
+	.size	__func__.9082, 16
+__func__.9082:
 	.ascii	"save_cpb_status\000"
-	.type	__FUNCTION__.9062, %object
-	.size	__FUNCTION__.9062, 16
-__FUNCTION__.9062:
+	.type	__FUNCTION__.9075, %object
+	.size	__FUNCTION__.9075, 16
+__FUNCTION__.9075:
 	.ascii	"save_cpb_status\000"
-	.type	__FUNCTION__.8952, %object
-	.size	__FUNCTION__.8952, 10
-__FUNCTION__.8952:
+	.type	__FUNCTION__.8965, %object
+	.size	__FUNCTION__.8965, 10
+__FUNCTION__.8965:
 	.ascii	"_dump_cpb\000"
-	.type	__func__.9039, %object
-	.size	__func__.9039, 18
-__func__.9039:
+	.type	__func__.9052, %object
+	.size	__func__.9052, 18
+__func__.9052:
 	.ascii	"check_ref_cpb_pos\000"
-	.type	__FUNCTION__.9049, %object
-	.size	__FUNCTION__.9049, 18
-__FUNCTION__.9049:
+	.type	__FUNCTION__.9062, %object
+	.size	__FUNCTION__.9062, 18
+__FUNCTION__.9062:
 	.ascii	"check_ref_cpb_pos\000"
-	.type	__func__.8969, %object
-	.size	__func__.8969, 18
-__func__.8969:
+	.type	__func__.8982, %object
+	.size	__func__.8982, 18
+__func__.8982:
 	.ascii	"mpp_enc_refs_init\000"
-	.type	__FUNCTION__.8970, %object
-	.size	__FUNCTION__.8970, 18
-__FUNCTION__.8970:
+	.type	__FUNCTION__.8983, %object
+	.size	__FUNCTION__.8983, 18
+__FUNCTION__.8983:
 	.ascii	"mpp_enc_refs_init\000"
-	.type	__func__.8975, %object
-	.size	__func__.8975, 20
-__func__.8975:
+	.type	__func__.8988, %object
+	.size	__func__.8988, 20
+__func__.8988:
 	.ascii	"mpp_enc_refs_deinit\000"
-	.type	__FUNCTION__.8976, %object
-	.size	__FUNCTION__.8976, 20
-__FUNCTION__.8976:
+	.type	__FUNCTION__.8989, %object
+	.size	__FUNCTION__.8989, 20
+__FUNCTION__.8989:
 	.ascii	"mpp_enc_refs_deinit\000"
-	.type	__func__.8986, %object
-	.size	__func__.8986, 21
-__func__.8986:
+	.type	__func__.8999, %object
+	.size	__func__.8999, 21
+__func__.8999:
 	.ascii	"mpp_enc_refs_set_cfg\000"
-	.type	__FUNCTION__.8985, %object
-	.size	__FUNCTION__.8985, 21
-__FUNCTION__.8985:
+	.type	__FUNCTION__.8998, %object
+	.size	__FUNCTION__.8998, 21
+__FUNCTION__.8998:
 	.ascii	"mpp_enc_refs_set_cfg\000"
-	.type	__func__.9128, %object
-	.size	__func__.9128, 20
-__func__.9128:
+	.type	__func__.9141, %object
+	.size	__func__.9141, 20
+__func__.9141:
 	.ascii	"mpp_enc_refs_dryrun\000"
-	.type	__FUNCTION__.9013, %object
-	.size	__FUNCTION__.9013, 18
-__FUNCTION__.9013:
+	.type	__FUNCTION__.9026, %object
+	.size	__FUNCTION__.9026, 18
+__FUNCTION__.9026:
 	.ascii	"set_lt_cfg_to_frm\000"
-	.type	__func__.9152, %object
-	.size	__func__.9152, 25
-__func__.9152:
+	.type	__func__.9165, %object
+	.size	__func__.9165, 25
+__func__.9165:
 	.ascii	"mpp_enc_refs_set_usr_cfg\000"
-	.type	__func__.9158, %object
-	.size	__func__.9158, 25
-__func__.9158:
+	.type	__func__.9171, %object
+	.size	__func__.9171, 25
+__func__.9171:
 	.ascii	"mpp_enc_refs_set_rc_igop\000"
-	.type	__func__.9164, %object
-	.size	__func__.9164, 24
-__func__.9164:
+	.type	__func__.9177, %object
+	.size	__func__.9177, 24
+__func__.9177:
 	.ascii	"mpp_enc_refs_update_hdr\000"
-	.type	__func__.9170, %object
-	.size	__func__.9170, 26
-__func__.9170:
+	.type	__func__.9183, %object
+	.size	__func__.9183, 26
+__func__.9183:
 	.ascii	"mpp_enc_refs_get_cpb_info\000"
-	.type	__func__.9194, %object
-	.size	__func__.9194, 21
-__func__.9194:
+	.type	__func__.9207, %object
+	.size	__func__.9207, 21
+__func__.9207:
 	.ascii	"mpp_enc_refs_get_cpb\000"
-	.type	__FUNCTION__.9200, %object
-	.size	__FUNCTION__.9200, 21
-__FUNCTION__.9200:
+	.type	__FUNCTION__.9213, %object
+	.size	__FUNCTION__.9213, 21
+__FUNCTION__.9213:
 	.ascii	"mpp_enc_refs_get_cpb\000"
-	.type	__func__.9210, %object
-	.size	__func__.9210, 31
-__func__.9210:
+	.type	__func__.9223, %object
+	.size	__func__.9223, 31
+__func__.9223:
 	.ascii	"mpp_enc_refs_next_frm_is_intra\000"
-	.type	__func__.9218, %object
-	.size	__func__.9218, 31
-__func__.9218:
+	.type	__func__.9231, %object
+	.size	__func__.9231, 31
+__func__.9231:
 	.ascii	"mpp_enc_refs_next_frm_is_kpfrm\000"
-	.type	__func__.9228, %object
-	.size	__func__.9228, 27
-__func__.9228:
+	.type	__func__.9241, %object
+	.size	__func__.9241, 27
+__func__.9241:
 	.ascii	"mpp_enc_refs_get_cpb_pass1\000"
-	.type	__FUNCTION__.9230, %object
-	.size	__FUNCTION__.9230, 27
-__FUNCTION__.9230:
+	.type	__FUNCTION__.9243, %object
+	.size	__FUNCTION__.9243, 27
+__FUNCTION__.9243:
 	.ascii	"mpp_enc_refs_get_cpb_pass1\000"
-	.type	__func__.9237, %object
-	.size	__func__.9237, 19
-__func__.9237:
+	.type	__func__.9250, %object
+	.size	__func__.9250, 19
+__func__.9250:
 	.ascii	"mpp_enc_refs_stash\000"
-	.type	__func__.9242, %object
-	.size	__func__.9242, 22
-__func__.9242:
+	.type	__func__.9255, %object
+	.size	__func__.9255, 22
+__func__.9255:
 	.ascii	"mpp_enc_refs_rollback\000"
 	.bss
 	.align	2

@@ -149,7 +149,7 @@ aiisp_node_reset:
 	movs	r1, #4
 	ldr	r2, .L8
 	str	r3, [sp, #4]
-	movw	r3, #303
+	mov	r3, #304
 	str	r3, [sp]
 	ldr	r3, .L8+4
 	bl	vlog
@@ -389,13 +389,13 @@ aiisp_node_destroy:
 	cmp	r3, #32
 	beq	.L30
 	movs	r3, #192
-	ldr	r2, .L52
+	ldr	r2, .L54
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L52+4
+	ldr	r3, .L54+4
 	movs	r0, #23
 	bl	vlog
-.L51:
+.L53:
 	mov	r0, #-1
 .L29:
 	add	sp, sp, #8
@@ -410,14 +410,14 @@ aiisp_node_destroy:
 	cbnz	r0, .L32
 	ldr	r3, [r6, #4]	@ unaligned
 	movs	r1, #2
-	ldr	r2, .L52+8
+	ldr	r2, .L54+8
 	movs	r0, #23
 	str	r3, [sp, #4]
 	movs	r3, #199
 	str	r3, [sp]
-	ldr	r3, .L52+4
+	ldr	r3, .L54+4
 	bl	vlog
-	b	.L51
+	b	.L53
 .L32:
 	ldr	r7, [r0, #60]
 	ldr	r5, [r0, #288]
@@ -427,34 +427,37 @@ aiisp_node_destroy:
 	mov	r0, r7
 	bl	mpi_buf_pool_del_user
 	cbnz	r5, .L34
-.L38:
+.L40:
 	ldr	r2, [r6, #4]	@ unaligned
 	movs	r1, #0
 	movs	r0, #23
 	bl	vsys_remove_node_from_map
+	ldr	r3, [r4, #324]
+	cbz	r3, .L36
 	mov	r0, r4
 	bl	mpi_node_del_in_watcher
+.L36:
 	mov	r0, r4
 	bl	mpi_node_destroy
 	ldr	r3, [r6, #4]	@ unaligned
-	ldr	r2, .L52+12
+	ldr	r2, .L54+12
 	movs	r1, #4
 	movs	r0, #23
 	str	r3, [sp, #4]
-	movs	r3, #233
+	movs	r3, #234
 	str	r3, [sp]
-	ldr	r3, .L52+4
+	ldr	r3, .L54+4
 	bl	vlog
 	movs	r0, #0
 	b	.L29
 .L34:
 	ldr	r3, [r5, #20]
 	cmp	r3, #2
-	bne	.L36
+	bne	.L38
 	movs	r1, #1
 	mov	r0, r7
 	bl	mpi_buf_pool_destroy
-.L36:
+.L38:
 	ldr	r2, [r4, #76]
 	mvn	r8, #43
 	ldr	r1, [r5]
@@ -464,12 +467,12 @@ aiisp_node_destroy:
 	add	r2, r1, r2, lsl #3
 	ldr	r7, [r2, #52]
 	add	r7, r7, r3
-.L39:
+.L41:
 	ldr	r3, [r4, #76]
 	add	r0, r1, r3, lsl #3
 	adds	r0, r0, #52
 	cmp	r0, r5
-	bne	.L41
+	bne	.L43
 	add	r7, r3, #33
 	ldr	r1, [r5, #8]!
 	mvn	r8, #43
@@ -478,17 +481,17 @@ aiisp_node_destroy:
 	add	r3, r1, r3, lsl #3
 	ldr	r7, [r3, #308]
 	add	r7, r7, r2
-.L42:
+.L44:
 	ldr	r0, [r4, #76]
 	add	r0, r1, r0, lsl #3
 	add	r0, r0, #308
 	cmp	r0, r5
-	beq	.L38
-	cbz	r1, .L43
+	beq	.L40
+	cbz	r1, .L45
 	bl	list_del
 	mov	r0, r1
 	bl	mpi_obj_unref
-.L43:
+.L45:
 	ldr	r3, [r4, #76]
 	mov	r1, r7
 	add	r2, r3, #33
@@ -496,17 +499,17 @@ aiisp_node_destroy:
 	sub	r2, r8, r2, lsl #3
 	ldr	r3, [r3, #308]
 	adds	r7, r3, r2
-	b	.L42
+	b	.L44
 .L33:
 	cmp	r5, #0
-	bne	.L36
-	b	.L38
-.L41:
-	cbz	r1, .L40
+	bne	.L38
+	b	.L40
+.L43:
+	cbz	r1, .L42
 	bl	list_del
 	mov	r0, r1
 	bl	mpi_obj_unref
-.L40:
+.L42:
 	ldr	r3, [r4, #76]
 	mov	r1, r7
 	adds	r2, r3, #1
@@ -514,10 +517,10 @@ aiisp_node_destroy:
 	sub	r2, r8, r2, lsl #3
 	ldr	r3, [r3, #52]
 	adds	r7, r3, r2
-	b	.L39
-.L53:
+	b	.L41
+.L55:
 	.align	2
-.L52:
+.L54:
 	.word	.LC3
 	.word	.LANCHOR0+35
 	.word	.LC15
@@ -541,62 +544,62 @@ aiisp_node_bypass:
 	mov	r4, r1
 	ldr	r3, [r1]	@ unaligned
 	cmp	r3, #32
-	beq	.L55
-	movw	r3, #317
-	ldr	r2, .L63
+	beq	.L57
+	mov	r3, #318
+	ldr	r2, .L65
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L63+4
+	ldr	r3, .L65+4
 	movs	r0, #23
 	bl	vlog
 	mov	r0, #-1
-.L54:
+.L56:
 	add	sp, sp, #16
 	@ sp needed
 	pop	{r4, pc}
-.L55:
+.L57:
 	ldr	r2, [r1, #4]	@ unaligned
 	movs	r0, #23
 	movs	r1, #0
 	bl	vsys_get_node_from_map
-	cbz	r0, .L57
+	cbz	r0, .L59
 	ldr	r3, [r4, #8]	@ unaligned
 	ldr	r2, [r0, #288]
 	cmp	r3, #1
 	str	r3, [r2, #16]
-	bne	.L58
+	bne	.L60
 	bl	mpi_node_del_in_watcher
-.L59:
+.L61:
 	ldr	r3, [r4, #8]	@ unaligned
 	movs	r1, #4
-	ldr	r2, .L63+8
+	ldr	r2, .L65+8
 	movs	r0, #23
 	str	r3, [sp, #8]
 	ldr	r3, [r4, #4]	@ unaligned
 	str	r3, [sp, #4]
-	mov	r3, #330
+	movw	r3, #331
 	str	r3, [sp]
-	ldr	r3, .L63+4
+	ldr	r3, .L65+4
 	bl	vlog
-.L57:
+.L59:
 	ldr	r3, [r4, #4]	@ unaligned
 	movs	r1, #4
-	ldr	r2, .L63+12
+	ldr	r2, .L65+12
 	movs	r0, #23
 	str	r3, [sp, #4]
-	movw	r3, #333
+	mov	r3, #334
 	str	r3, [sp]
-	ldr	r3, .L63+4
+	ldr	r3, .L65+4
 	bl	vlog
 	movs	r0, #0
-	b	.L54
-.L58:
+	b	.L56
+.L60:
 	movs	r1, #2
 	bl	mpi_node_add_in_watcher
-	b	.L59
-.L64:
+	b	.L61
+.L66:
 	.align	2
-.L63:
+.L65:
 	.word	.LC3
 	.word	.LANCHOR0+54
 	.word	.LC17
@@ -621,68 +624,68 @@ aiisp_mb_get:
 	.pad #28
 	sub	sp, sp, #28
 	cmp	r3, #108
-	beq	.L66
-	movw	r3, #367
-	ldr	r2, .L88
+	beq	.L68
+	mov	r3, #368
+	ldr	r2, .L90
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L88+4
+	ldr	r3, .L90+4
 	movs	r0, #23
 	bl	vlog
-.L71:
+.L73:
 	mov	r0, #-1
-.L65:
+.L67:
 	add	sp, sp, #28
 	@ sp needed
 	pop	{r4, r5, r6, r7, pc}
-.L66:
+.L68:
 	ldr	r7, [r1, #4]	@ unaligned
 	movs	r0, #23
 	movs	r1, #0
 	mov	r2, r7
 	bl	vsys_get_node_from_map
 	mov	r6, r0
-	cbnz	r0, .L68
-	mov	r3, #376
+	cbnz	r0, .L70
+	movw	r3, #377
 	str	r7, [sp, #4]
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L88+4
+	ldr	r3, .L90+4
 	movs	r0, #23
-	ldr	r2, .L88+8
+	ldr	r2, .L90+8
 	bl	vlog
-	b	.L71
-.L68:
+	b	.L73
+.L70:
 	ldr	r1, [r5, #8]	@ unaligned
 	cmp	r1, #0
-	bne	.L69
+	bne	.L71
 	ldr	r3, [r5, #12]	@ unaligned
 	str	r3, [r0, #380]
 	bl	mpi_node_get_in_buffer
 	mov	r4, r0
 	cmp	r0, #0
-	beq	.L71
+	beq	.L73
 	ldr	r3, [r0, #16]
 	movs	r1, #5
-	ldr	r2, .L88+12
+	ldr	r2, .L90+12
 	str	r3, [sp, #16]
 	ldr	r3, [r0]
 	str	r7, [sp, #4]
 	strd	r0, r3, [sp, #8]
-	movw	r3, #385
+	mov	r3, #386
 	movs	r0, #23
 	str	r3, [sp]
-	ldr	r3, .L88+4
+	ldr	r3, .L90+4
 	bl	vlog
 	ldr	r3, [r4, #448]
 	cmp	r3, #0
-	beq	.L71
-.L72:
+	beq	.L73
+.L74:
 	ldr	r3, [r6, #288]
-	cbz	r3, .L73
+	cbz	r3, .L75
 	ldr	r2, [r5, #8]	@ unaligned
 	cmp	r2, #0
-	bne	.L74
+	bne	.L76
 	ldr	r2, [r6, #76]
 	ldr	r0, [r3, #4]
 	add	r1, r4, r2, lsl #3
@@ -690,49 +693,49 @@ aiisp_mb_get:
 	adds	r1, r1, #52
 	str	r1, [r3, #4]
 	strd	r3, r0, [r2, #52]
-.L87:
+.L89:
 	str	r1, [r0]
-.L73:
+.L75:
 	movs	r2, #80
 	add	r1, r4, #616
 	add	r0, r5, #28
 	bl	memcpy
 	ldr	r3, [r4, #448]
-	cbz	r3, .L75
+	cbz	r3, .L77
 	ldr	r3, [r3]
-.L75:
+.L77:
 	str	r3, [r5, #24]	@ unaligned
 	movs	r0, #0
 	ldr	r3, [r4]
 	str	r3, [r5, #16]	@ unaligned
-	b	.L65
-.L69:
+	b	.L67
+.L71:
 	cmp	r1, #2
-	bne	.L76
+	bne	.L78
 	movs	r1, #0
 	bl	mpi_node_request_buf
 	mov	r4, r0
 	cmp	r0, #0
-	beq	.L71
+	beq	.L73
 	ldr	r3, [r0, #16]
 	movs	r1, #5
-	ldr	r2, .L88+16
+	ldr	r2, .L90+16
 	str	r3, [sp, #16]
 	ldr	r3, [r0]
 	str	r7, [sp, #4]
 	strd	r0, r3, [sp, #8]
-	mov	r3, #392
+	movw	r3, #393
 	movs	r0, #23
 	str	r3, [sp]
-	ldr	r3, .L88+4
+	ldr	r3, .L90+4
 	bl	vlog
-	b	.L72
-.L76:
+	b	.L74
+.L78:
 	movs	r4, #0
-	b	.L72
-.L74:
+	b	.L74
+.L76:
 	cmp	r2, #2
-	bne	.L73
+	bne	.L75
 	ldr	r2, [r6, #76]
 	adds	r3, r3, #8
 	ldr	r0, [r3, #4]
@@ -741,10 +744,10 @@ aiisp_mb_get:
 	add	r1, r1, #308
 	str	r1, [r3, #4]
 	strd	r3, r0, [r2, #308]
-	b	.L87
-.L89:
+	b	.L89
+.L91:
 	.align	2
-.L88:
+.L90:
 	.word	.LC19
 	.word	.LANCHOR0+72
 	.word	.LC15
@@ -770,59 +773,59 @@ aiisp_mb_send:
 	.pad #36
 	sub	sp, sp, #36
 	cmp	r3, #108
-	beq	.L91
-	movw	r3, #427
-	ldr	r2, .L100
+	beq	.L93
+	mov	r3, #428
+	ldr	r2, .L102
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L100+4
+	ldr	r3, .L102+4
 	movs	r0, #23
 	bl	vlog
-.L98:
+.L100:
 	mov	r0, #-1
-.L90:
+.L92:
 	add	sp, sp, #36
 	@ sp needed
 	pop	{r4, r5, r6, r7, pc}
-.L91:
+.L93:
 	ldr	r6, [r1, #4]	@ unaligned
 	movs	r0, #23
 	movs	r1, #0
 	mov	r2, r6
 	bl	vsys_get_node_from_map
 	mov	r7, r0
-	cbnz	r0, .L93
-	mov	r3, #436
+	cbnz	r0, .L95
+	movw	r3, #437
 	str	r6, [sp, #4]
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L100+4
+	ldr	r3, .L102+4
 	movs	r0, #23
-	ldr	r2, .L100+8
+	ldr	r2, .L102+8
 	bl	vlog
-	b	.L98
-.L93:
+	b	.L100
+.L95:
 	ldr	r0, [r4, #20]	@ unaligned
 	cmp	r0, #0
-	bge	.L94
-.L99:
+	bge	.L96
+.L101:
 	movs	r0, #0
-	b	.L90
-.L94:
+	b	.L92
+.L96:
 	bl	get_mpi_buf
 	ldr	r3, [r4, #20]	@ unaligned
 	mov	r5, r0
-	cbnz	r0, .L95
+	cbnz	r0, .L97
 	strd	r6, r3, [sp, #4]
 	movs	r1, #2
-	movw	r3, #443
-	ldr	r2, .L100+12
+	mov	r3, #444
+	ldr	r2, .L102+12
 	str	r3, [sp]
 	movs	r0, #23
-	ldr	r3, .L100+4
+	ldr	r3, .L102+4
 	bl	vlog
-	b	.L98
-.L95:
+	b	.L100
+.L97:
 	ldr	r1, [r4, #8]	@ unaligned
 	ldr	r2, [r0, #16]
 	strd	r3, r1, [sp, #24]
@@ -830,36 +833,36 @@ aiisp_mb_send:
 	ldr	r3, [r0, #448]
 	strd	r2, r3, [sp, #16]
 	ldr	r3, [r0]
-	ldr	r2, .L100+16
+	ldr	r2, .L102+16
 	str	r6, [sp, #4]
 	strd	r0, r3, [sp, #8]
-	movw	r3, #449
+	mov	r3, #450
 	movs	r0, #23
 	str	r3, [sp]
-	ldr	r3, .L100+4
+	ldr	r3, .L102+4
 	bl	vlog
 	add	r1, r4, #28
 	movs	r2, #80
 	add	r0, r5, #616
 	bl	memcpy
 	ldr	r4, [r4, #8]	@ unaligned
-	cbnz	r4, .L96
+	cbnz	r4, .L98
 	mov	r2, r4
 	mov	r1, r5
 	mov	r0, r7
 	bl	mpi_node_buffer_in
-	b	.L99
-.L96:
+	b	.L101
+.L98:
 	cmp	r4, #1
-	bne	.L99
+	bne	.L101
 	movs	r2, #0
 	mov	r1, r5
 	mov	r0, r7
 	bl	mpi_node_buffer_out
-	b	.L99
-.L101:
+	b	.L101
+.L103:
 	.align	2
-.L100:
+.L102:
 	.word	.LC19
 	.word	.LANCHOR0+85
 	.word	.LC15
@@ -885,19 +888,19 @@ aiisp_handle_message:
 	sub	sp, sp, #20
 	mov	r5, r2
 	cmp	r3, #1
-	bne	.L104
+	bne	.L106
 	subs	r3, r1, #2
 	cmp	r3, #1
-	bls	.L104
-	ldr	r3, .L109
+	bls	.L106
+	ldr	r3, .L111
 	ldr	r6, [r3]
-	cbnz	r6, .L104
+	cbnz	r6, .L106
 	cmp	r1, #1
-	bne	.L104
+	bne	.L106
 	ldr	r3, [r2]
 	movs	r1, #5
 	ldr	r7, [r0, #288]
-	ldr	r2, .L109+4
+	ldr	r2, .L111+4
 	str	r3, [sp, #12]
 	ldr	r3, [r0]
 	str	r3, [sp, #8]
@@ -905,24 +908,24 @@ aiisp_handle_message:
 	movs	r0, #23
 	ldr	r3, [r3, #44]
 	str	r3, [sp, #4]
-	movw	r3, #689
+	mov	r3, #692
 	str	r3, [sp]
-	ldr	r3, .L109+8
+	ldr	r3, .L111+8
 	bl	vlog
 	ldr	r3, [r7, #16]
-	cbz	r3, .L104
+	cbz	r3, .L106
 	mov	r2, r6
 	mov	r1, r5
 	mov	r0, r4
 	bl	mpi_node_buffer_out
-.L104:
+.L106:
 	movs	r0, #0
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, r6, r7, pc}
-.L110:
+.L112:
 	.align	2
-.L109:
+.L111:
 	.word	.LANCHOR1
 	.word	.LC24
 	.word	.LANCHOR0+99
@@ -946,61 +949,61 @@ aiisp_mb_release:
 	.pad #36
 	sub	sp, sp, #36
 	cmp	r3, #108
-	beq	.L112
-	movw	r3, #473
-	ldr	r2, .L121
+	beq	.L114
+	mov	r3, #474
+	ldr	r2, .L123
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L121+4
+	ldr	r3, .L123+4
 	movs	r0, #23
 	bl	vlog
-.L119:
+.L121:
 	mov	r0, #-1
-.L111:
+.L113:
 	add	sp, sp, #36
 	@ sp needed
 	pop	{r4, r5, r6, r7, pc}
-.L112:
+.L114:
 	ldr	r7, [r1, #4]	@ unaligned
 	movs	r0, #23
 	movs	r1, #0
 	mov	r2, r7
 	bl	vsys_get_node_from_map
 	mov	r5, r0
-	cbnz	r0, .L114
-	mov	r3, #482
+	cbnz	r0, .L116
+	movw	r3, #483
 	str	r7, [sp, #4]
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L121+4
+	ldr	r3, .L123+4
 	movs	r0, #23
-	ldr	r2, .L121+8
+	ldr	r2, .L123+8
 	bl	vlog
-	b	.L119
-.L114:
+	b	.L121
+.L116:
 	movs	r1, #4
 	ldr	r0, [r6, #16]	@ unaligned
 	bl	mpi_obj_from_id
 	mov	r4, r0
 	cmp	r0, #0
-	beq	.L115
+	beq	.L117
 	ldr	r3, [r0, #16]
 	movs	r1, #5
 	ldr	r2, [r6, #8]	@ unaligned
 	strd	r3, r2, [sp, #20]
 	ldr	r3, [r6, #16]	@ unaligned
-	ldr	r2, .L121+12
+	ldr	r2, .L123+12
 	str	r3, [sp, #16]
 	ldr	r3, [r0, #448]
 	str	r7, [sp, #4]
 	strd	r0, r3, [sp, #8]
-	movw	r3, #491
+	mov	r3, #492
 	movs	r0, #23
 	str	r3, [sp]
-	ldr	r3, .L121+4
+	ldr	r3, .L123+4
 	bl	vlog
 	ldr	r6, [r6, #8]	@ unaligned
-	cbnz	r6, .L116
+	cbnz	r6, .L118
 	mov	r0, r5
 	add	r2, r5, #396
 	mov	r1, r4
@@ -1008,14 +1011,14 @@ aiisp_mb_release:
 	ldr	r0, [r5, #76]
 	add	r0, r4, r0, lsl #3
 	adds	r0, r0, #52
-.L120:
+.L122:
 	bl	list_del
-.L118:
+.L120:
 	movs	r0, #0
-	b	.L111
-.L116:
+	b	.L113
+.L118:
 	cmp	r6, #1
-	bne	.L117
+	bne	.L119
 	mov	r0, r5
 	add	r2, r5, #400
 	mov	r1, r4
@@ -1023,10 +1026,10 @@ aiisp_mb_release:
 	ldr	r0, [r5, #76]
 	add	r0, r4, r0, lsl #3
 	adds	r0, r0, #180
-	b	.L120
-.L117:
+	b	.L122
+.L119:
 	cmp	r6, #2
-	bne	.L118
+	bne	.L120
 	mov	r0, r5
 	movs	r2, #0
 	mov	r1, r4
@@ -1034,19 +1037,19 @@ aiisp_mb_release:
 	ldr	r0, [r5, #76]
 	add	r0, r4, r0, lsl #3
 	add	r0, r0, #308
-	b	.L120
-.L115:
-	movw	r3, #503
-	ldr	r2, .L121+16
+	b	.L122
+.L117:
+	mov	r3, #504
+	ldr	r2, .L123+16
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L121+4
+	ldr	r3, .L123+4
 	movs	r0, #23
 	bl	vlog
-	b	.L118
-.L122:
+	b	.L120
+.L124:
 	.align	2
-.L121:
+.L123:
 	.word	.LC19
 	.word	.LANCHOR0+125
 	.word	.LC15
@@ -1064,7 +1067,7 @@ aiisp_dev_open:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	ldr	r3, .L124
+	ldr	r3, .L126
 	push	{r0, r1, r2, lr}
 	.save {lr}
 	.pad #12
@@ -1073,20 +1076,20 @@ aiisp_dev_open:
 	movs	r2, #12
 	str	r2, [r3, #172]
 	bl	mpi_obj_ref
-	movw	r3, #603
-	ldr	r2, .L124+4
+	mov	r3, #604
+	ldr	r2, .L126+4
 	movs	r1, #4
 	movs	r0, #23
 	str	r3, [sp]
-	ldr	r3, .L124+8
+	ldr	r3, .L126+8
 	bl	vlog
 	movs	r0, #0
 	add	sp, sp, #12
 	@ sp needed
 	ldr	pc, [sp], #4
-.L125:
+.L127:
 	.align	2
-.L124:
+.L126:
 	.word	.LANCHOR1
 	.word	.LC27
 	.word	.LANCHOR0+142
@@ -1104,9 +1107,9 @@ aiisp_dev_destroy_ctx:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r3, lr}
 	.save {r3, lr}
-	cbz	r0, .L127
+	cbz	r0, .L129
 	bl	kfree
-.L127:
+.L129:
 	movs	r0, #0
 	pop	{r3, pc}
 	.fnend
@@ -1127,20 +1130,20 @@ aiisp_node_exist:
 	.pad #12
 	ldr	r3, [r1]	@ unaligned
 	cmp	r3, #32
-	beq	.L132
-	mov	r3, #344
-	ldr	r2, .L134
+	beq	.L134
+	movw	r3, #345
+	ldr	r2, .L136
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L134+4
+	ldr	r3, .L136+4
 	movs	r0, #23
 	bl	vlog
 	mov	r0, #-1
-.L131:
+.L133:
 	add	sp, sp, #12
 	@ sp needed
 	ldr	pc, [sp], #4
-.L132:
+.L134:
 	ldr	r2, [r1, #4]	@ unaligned
 	movs	r0, #23
 	movs	r1, #0
@@ -1148,10 +1151,10 @@ aiisp_node_exist:
 	clz	r0, r0
 	lsrs	r0, r0, #5
 	rsbs	r0, r0, #0
-	b	.L131
-.L135:
+	b	.L133
+.L137:
 	.align	2
-.L134:
+.L136:
 	.word	.LC3
 	.word	.LANCHOR0+157
 	.fnend
@@ -1173,57 +1176,57 @@ aiisp_pool_attach:
 	mov	r4, r1
 	ldr	r3, [r1]	@ unaligned
 	cmp	r3, #32
-	beq	.L137
-	movw	r3, #515
-	ldr	r2, .L146
+	beq	.L139
+	mov	r3, #516
+	ldr	r2, .L148
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L146+4
+	ldr	r3, .L148+4
 	movs	r0, #23
 	bl	vlog
-.L141:
+.L143:
 	mov	r0, #-1
-	b	.L136
-.L137:
+	b	.L138
+.L139:
 	ldr	r2, [r1, #4]	@ unaligned
 	movs	r0, #23
 	movs	r1, #0
 	bl	vsys_get_node_from_map
 	mov	r5, r0
 	cmp	r0, #0
-	beq	.L141
+	beq	.L143
 	ldr	r3, [r4, #24]	@ unaligned
 	cmp	r3, #3
-	beq	.L139
-.L145:
+	beq	.L141
+.L147:
 	movs	r0, #0
-.L136:
+.L138:
 	add	sp, sp, #16
 	@ sp needed
 	pop	{r4, r5, r6, pc}
-.L139:
+.L141:
 	ldr	r0, [r4, #28]	@ unaligned
 	bl	vsys_get_pool
 	mov	r6, r0
 	cmp	r0, #0
-	beq	.L145
+	beq	.L147
 	mov	r1, r5
 	bl	mpi_buf_pool_add_user
 	ldr	r3, [r4, #28]	@ unaligned
-	ldr	r2, .L146+8
+	ldr	r2, .L148+8
 	movs	r1, #4
 	movs	r0, #23
 	strd	r6, r3, [sp, #8]
 	ldr	r3, [r4, #4]	@ unaligned
 	str	r3, [sp, #4]
-	movw	r3, #530
+	movw	r3, #531
 	str	r3, [sp]
-	ldr	r3, .L146+4
+	ldr	r3, .L148+4
 	bl	vlog
-	b	.L145
-.L147:
+	b	.L147
+.L149:
 	.align	2
-.L146:
+.L148:
 	.word	.LC3
 	.word	.LANCHOR0+174
 	.word	.LC28
@@ -1246,61 +1249,61 @@ aiisp_node_start:
 	mov	r4, r1
 	ldr	r3, [r1]	@ unaligned
 	cmp	r3, #32
-	beq	.L149
-	movs	r3, #246
-	ldr	r2, .L153
+	beq	.L151
+	movs	r3, #247
+	ldr	r2, .L155
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L153+4
+	ldr	r3, .L155+4
 	movs	r0, #23
 	bl	vlog
-.L152:
+.L154:
 	mov	r0, #-1
-.L148:
+.L150:
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, pc}
-.L149:
+.L151:
 	ldr	r2, [r1, #4]	@ unaligned
 	movs	r0, #23
 	movs	r1, #0
 	bl	vsys_get_node_from_map
-	cbnz	r0, .L151
+	cbnz	r0, .L153
 	ldr	r3, [r4, #4]	@ unaligned
 	movs	r1, #2
-	ldr	r2, .L153+8
+	ldr	r2, .L155+8
 	movs	r0, #23
 	str	r3, [sp, #4]
-	movs	r3, #253
+	movs	r3, #254
 	str	r3, [sp]
-	ldr	r3, .L153+4
+	ldr	r3, .L155+4
 	bl	vlog
-	b	.L152
-.L151:
+	b	.L154
+.L153:
 	bl	mpi_node_streamon
 	ldr	r3, [r4, #4]	@ unaligned
-	ldr	r2, .L153+12
+	ldr	r2, .L155+12
 	movs	r1, #4
 	movs	r0, #23
 	str	r3, [sp, #4]
-	mov	r3, #262
+	movw	r3, #263
 	str	r3, [sp]
-	ldr	r3, .L153+4
+	ldr	r3, .L155+4
 	bl	vlog
 	ldr	r3, [r4, #4]	@ unaligned
-	ldr	r2, .L153+16
+	ldr	r2, .L155+16
 	movs	r1, #4
 	movs	r0, #23
 	str	r3, [sp, #4]
-	movw	r3, #265
+	mov	r3, #266
 	str	r3, [sp]
-	ldr	r3, .L153+4
+	ldr	r3, .L155+4
 	bl	vlog
 	movs	r0, #0
-	b	.L148
-.L154:
+	b	.L150
+.L156:
 	.align	2
-.L153:
+.L155:
 	.word	.LC3
 	.word	.LANCHOR0+192
 	.word	.LC15
@@ -1325,52 +1328,52 @@ aiisp_node_stop:
 	mov	r4, r1
 	ldr	r3, [r1]	@ unaligned
 	cmp	r3, #32
-	beq	.L156
-	movw	r3, #281
-	ldr	r2, .L162
+	beq	.L158
+	mov	r3, #282
+	ldr	r2, .L164
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L162+4
+	ldr	r3, .L164+4
 	movs	r0, #23
 	bl	vlog
 	mov	r0, #-1
-.L155:
+.L157:
 	add	sp, sp, #16
 	@ sp needed
 	pop	{r4, pc}
-.L156:
+.L158:
 	ldr	r2, [r1, #4]	@ unaligned
 	movs	r0, #23
 	movs	r1, #0
 	bl	vsys_get_node_from_map
-	cbz	r0, .L158
+	cbz	r0, .L160
 	bl	mpi_node_streamoff
 	movs	r3, #0
-	ldr	r2, .L162+8
+	ldr	r2, .L164+8
 	movs	r1, #4
 	movs	r0, #23
 	str	r3, [sp, #8]
 	ldr	r3, [r4, #4]	@ unaligned
 	str	r3, [sp, #4]
-	movw	r3, #289
+	mov	r3, #290
 	str	r3, [sp]
-	ldr	r3, .L162+4
+	ldr	r3, .L164+4
 	bl	vlog
-.L158:
+.L160:
 	ldr	r3, [r4, #4]	@ unaligned
 	movs	r1, #4
-	ldr	r2, .L162+12
+	ldr	r2, .L164+12
 	movs	r0, #23
 	str	r3, [sp, #4]
-	mov	r3, #292
+	movw	r3, #293
 	str	r3, [sp]
-	ldr	r3, .L162+4
+	ldr	r3, .L164+4
 	bl	vlog
 	movs	r0, #0
-	b	.L155
-.L163:
+	b	.L157
+.L165:
 	.align	2
-.L162:
+.L164:
 	.word	.LC3
 	.word	.LANCHOR0+209
 	.word	.LC31
@@ -1392,7 +1395,7 @@ aiisp_dev_ioctl:
 	.pad #16
 	uxtb	r4, r1
 	ldr	r8, [r0, #128]
-	movw	r3, #566
+	movw	r3, #567
 	mov	r5, r0
 	str	r3, [sp]
 	mov	r6, r1
@@ -1401,29 +1404,29 @@ aiisp_dev_ioctl:
 	strd	r4, r8, [sp, #8]
 	str	r4, [sp, #4]
 	movs	r0, #23
-	ldr	r3, .L168
-	ldr	r2, .L168+4
+	ldr	r3, .L170
+	ldr	r2, .L170+4
 	bl	vlog
 	ldr	r1, [r8, #168]
 	cmp	r1, r4
-	bhi	.L165
-	movw	r3, #569
+	bhi	.L167
+	movw	r3, #570
 	str	r4, [sp, #4]
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L168
+	ldr	r3, .L170
 	movs	r0, #23
-	ldr	r2, .L168+8
+	ldr	r2, .L170+8
 	bl	vlog
+.L168:
 .L166:
-.L164:
 	mvn	r0, #21
 	add	sp, sp, #16
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, pc}
-.L165:
+.L167:
 	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
+@ 87 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
 	cmp	r4, r1
 	sbc	r1, r4, r4
 .inst.w 0xf3af8014
@@ -1434,16 +1437,16 @@ aiisp_dev_ioctl:
 	ldr	r1, [r8, #164]
 	movs	r3, #20
 	mla	r1, r3, r4, r1
-	cbnz	r1, .L167
-	mov	r3, #576
-	ldr	r2, .L168+12
+	cbnz	r1, .L169
+	movw	r3, #577
+	ldr	r2, .L170+12
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L168
+	ldr	r3, .L170
 	movs	r0, #23
 	bl	vlog
-	b	.L164
-.L167:
+	b	.L166
+.L169:
 	mov	r3, r7
 	mov	r2, r6
 	mov	r0, r5
@@ -1451,9 +1454,9 @@ aiisp_dev_ioctl:
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, lr}
 	b	mpi_ioctl_kernel
-.L169:
+.L171:
 	.align	2
-.L168:
+.L170:
 	.word	.LANCHOR0+225
 	.word	.LC33
 	.word	.LC34
@@ -1473,10 +1476,10 @@ aiisp_dev_create_ctx:
 	push	{r3, lr}
 	.save {r3, lr}
 	mov	r1, #3520
-	ldr	r3, .L175
+	ldr	r3, .L177
 	ldr	r0, [r3, #20]
 	bl	kmem_cache_alloc
-	cbz	r0, .L170
+	cbz	r0, .L172
 	add	r3, r0, #8
 	str	r0, [r0]
 	str	r3, [r0, #12]
@@ -1484,11 +1487,11 @@ aiisp_dev_create_ctx:
 	movs	r3, #0
 	str	r0, [r0, #4]
 	strd	r3, r3, [r0, #16]
-.L170:
+.L172:
 	pop	{r3, pc}
-.L176:
+.L178:
 	.align	2
-.L175:
+.L177:
 	.word	kmalloc_caches
 	.fnend
 	.size	aiisp_dev_create_ctx, .-aiisp_dev_create_ctx
@@ -1511,28 +1514,28 @@ aiisp_dev_release:
 	bl	mpi_obj_unref
 	ldr	r3, [r4, #16]
 	cmp	r3, #1
-	bne	.L178
-	ldr	r7, .L203
+	bne	.L180
+	ldr	r7, .L207
 	movs	r5, #0
 	mov	r6, #256
-.L192:
+.L196:
 	mov	r2, r5
 	movs	r1, #0
 	movs	r0, #23
 	bl	vsys_get_node_from_map
 	mov	r4, r0
-	cbz	r0, .L179
+	cbz	r0, .L181
 	ldr	r9, [r0, #60]
 	ldr	r8, [r0, #288]
 	cmp	r9, #0
-	beq	.L180
+	beq	.L182
 	ldr	r3, [r9]
 	movs	r1, #4
 	str	r5, [sp, #4]
 	movs	r0, #23
-	ldr	r2, .L203+4
+	ldr	r2, .L207+4
 	strd	r9, r3, [sp, #8]
-	movw	r3, #634
+	movw	r3, #635
 	str	r3, [sp]
 	mov	r3, r7
 	bl	vlog
@@ -1540,48 +1543,51 @@ aiisp_dev_release:
 	mov	r0, r9
 	bl	mpi_buf_pool_del_user
 	cmp	r8, #0
-	bne	.L181
-.L185:
+	bne	.L183
+.L189:
 	mov	r2, r5
 	movs	r1, #0
 	movs	r0, #23
 	bl	vsys_remove_node_from_map
+	ldr	r3, [r4, #324]
+	cbz	r3, .L185
 	mov	r0, r4
 	bl	mpi_node_del_in_watcher
+.L185:
 	mov	r0, r4
 	bl	mpi_node_destroy
-	mov	r3, #660
-	ldr	r2, .L203+8
+	movw	r3, #663
+	ldr	r2, .L207+8
 	movs	r1, #4
 	movs	r0, #23
 	str	r3, [sp]
 	mov	r3, r7
 	str	r5, [sp, #4]
 	bl	vlog
-.L179:
+.L181:
 	adds	r5, r5, #1
 	cmp	r5, #64
-	bne	.L192
-	mov	r3, #664
-	ldr	r2, .L203+12
+	bne	.L196
+	movw	r3, #667
+	ldr	r2, .L207+12
 	str	r3, [sp]
 	movs	r1, #4
-	ldr	r3, .L203
+	ldr	r3, .L207
 	movs	r0, #23
 	bl	vlog
-.L178:
+.L180:
 	movs	r0, #0
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L181:
+.L183:
 	ldr	r3, [r8, #20]
 	cmp	r3, #2
-	bne	.L183
+	bne	.L187
 	movs	r1, #1
 	mov	r0, r9
 	bl	mpi_buf_pool_destroy
-.L183:
+.L187:
 	ldr	r2, [r4, #76]
 	mvn	r10, #43
 	ldr	r0, [r8]
@@ -1592,12 +1598,12 @@ aiisp_dev_release:
 	add	r2, r0, r2, lsl #3
 	ldr	r2, [r2, #52]
 	add	r9, r2, r3
-.L186:
+.L190:
 	ldr	r3, [r4, #76]
 	add	r2, r0, r3, lsl #3
 	adds	r2, r2, #52
 	cmp	r8, r2
-	bne	.L188
+	bne	.L192
 	add	r1, r3, #33
 	ldr	r0, [r8, #8]!
 	mvn	r2, #43
@@ -1607,20 +1613,20 @@ aiisp_dev_release:
 	add	r3, r0, r3, lsl #3
 	ldr	r3, [r3, #308]
 	add	r9, r3, r2
-.L189:
+.L193:
 	ldr	r3, [r4, #76]
 	add	r2, r0, r3, lsl #3
 	add	r2, r2, #308
 	cmp	r2, r8
-	beq	.L185
-	cbz	r0, .L190
+	beq	.L189
+	cbz	r0, .L194
 	add	r3, r0, r3, lsl #3
 	ldrd	r1, r2, [r3, #308]
 	str	r2, [r1, #4]
 	str	r1, [r2]
 	strd	r6, r10, [r3, #308]
 	bl	mpi_obj_unref
-.L190:
+.L194:
 	ldr	r3, [r4, #76]
 	mvn	r2, #43
 	mov	r0, r9
@@ -1629,20 +1635,20 @@ aiisp_dev_release:
 	sub	r2, r2, r1, lsl #3
 	ldr	r3, [r3, #308]
 	add	r9, r3, r2
-	b	.L189
-.L180:
+	b	.L193
+.L182:
 	cmp	r8, #0
-	beq	.L185
-	b	.L183
-.L188:
-	cbz	r0, .L187
+	beq	.L189
+	b	.L187
+.L192:
+	cbz	r0, .L191
 	add	r3, r0, r3, lsl #3
 	ldrd	r1, r2, [r3, #52]
 	str	r2, [r1, #4]
 	str	r1, [r2]
 	strd	r6, fp, [r3, #52]
 	bl	mpi_obj_unref
-.L187:
+.L191:
 	ldr	r3, [r4, #76]
 	mov	r0, r9
 	adds	r2, r3, #1
@@ -1650,10 +1656,10 @@ aiisp_dev_release:
 	sub	r2, r10, r2, lsl #3
 	ldr	r3, [r3, #52]
 	add	r9, r3, r2
-	b	.L186
-.L204:
+	b	.L190
+.L208:
 	.align	2
-.L203:
+.L207:
 	.word	.LANCHOR0+241
 	.word	.LC36
 	.word	.LC12
@@ -1674,10 +1680,10 @@ aiisp_dev_probe:
 	push	{r4, r5, r6, lr}
 	.save {r4, r5, r6, lr}
 	movs	r2, #184
-	ldr	r4, .L206
+	ldr	r4, .L210
 	mov	r6, r0
 	movs	r1, #0
-	ldr	r5, .L206+4
+	ldr	r5, .L210+4
 	mov	r0, r4
 	bl	memset
 	mov	r1, #3264
@@ -1690,14 +1696,14 @@ aiisp_dev_probe:
 	movs	r3, #12
 	str	r3, [r4, #172]
 	mov	r2, r6
-	ldr	r3, .L206+8
+	ldr	r3, .L210+8
 	movs	r1, #8
 	str	r4, [r4, #164]
 	adds	r4, r4, #4
 	str	r3, [r4, #68]
-	ldr	r3, .L206+12
+	ldr	r3, .L210+12
 	str	r3, [r4, #76]
-	ldr	r3, .L206+16
+	ldr	r3, .L210+16
 	str	r3, [r4, #80]
 	str	r0, [r4, #172]
 	mov	r0, r4
@@ -1707,9 +1713,9 @@ aiisp_dev_probe:
 	movs	r2, #0
 	pop	{r4, r5, r6, lr}
 	b	mpi_sysfs_dev_add
-.L207:
+.L211:
 	.align	2
-.L206:
+.L210:
 	.word	.LANCHOR1
 	.word	.LANCHOR0
 	.word	aiisp_dev_create_ctx
@@ -1731,16 +1737,16 @@ aiisp_dev_shutdown:
 	push	{r4, lr}
 	.save {r4, lr}
 	movs	r3, #1
-	ldr	r4, .L209
+	ldr	r4, .L213
 	ldr	r0, [r4, #176]
 	str	r3, [r4]
 	bl	kfree
 	adds	r0, r4, #4
 	pop	{r4, lr}
 	b	mpi_dev_unregister
-.L210:
+.L214:
 	.align	2
-.L209:
+.L213:
 	.word	.LANCHOR1
 	.fnend
 	.size	aiisp_dev_shutdown, .-aiisp_dev_shutdown
@@ -1758,13 +1764,13 @@ aiisp_init:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r3, lr}
 	.save {r3, lr}
-	ldr	r0, .L212
+	ldr	r0, .L216
 	bl	aiisp_dev_probe
 	movs	r0, #0
 	pop	{r3, pc}
-.L213:
+.L217:
 	.align	2
-.L212:
+.L216:
 	.word	.LC9
 	.fnend
 	.size	aiisp_init, .-aiisp_init
@@ -1788,65 +1794,65 @@ aiisp_exit:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__func__.37694, %object
-	.size	__func__.37694, 17
-__func__.37694:
+	.type	__func__.35955, %object
+	.size	__func__.35955, 17
+__func__.35955:
 	.ascii	"aiisp_node_reset\000"
-	.type	__func__.37624, %object
-	.size	__func__.37624, 18
-__func__.37624:
+	.type	__func__.35885, %object
+	.size	__func__.35885, 18
+__func__.35885:
 	.ascii	"aiisp_node_create\000"
-	.type	__func__.37637, %object
-	.size	__func__.37637, 19
-__func__.37637:
+	.type	__func__.35898, %object
+	.size	__func__.35898, 19
+__func__.35898:
 	.ascii	"aiisp_node_destroy\000"
-	.type	__func__.37702, %object
-	.size	__func__.37702, 18
-__func__.37702:
+	.type	__func__.35963, %object
+	.size	__func__.35963, 18
+__func__.35963:
 	.ascii	"aiisp_node_bypass\000"
-	.type	__func__.37719, %object
-	.size	__func__.37719, 13
-__func__.37719:
+	.type	__func__.35980, %object
+	.size	__func__.35980, 13
+__func__.35980:
 	.ascii	"aiisp_mb_get\000"
-	.type	__func__.37736, %object
-	.size	__func__.37736, 14
-__func__.37736:
+	.type	__func__.35997, %object
+	.size	__func__.35997, 14
+__func__.35997:
 	.ascii	"aiisp_mb_send\000"
-	.type	__func__.37875, %object
-	.size	__func__.37875, 26
-__func__.37875:
+	.type	__func__.36136, %object
+	.size	__func__.36136, 26
+__func__.36136:
 	.ascii	"aiisp_handle_node_message\000"
-	.type	__func__.37749, %object
-	.size	__func__.37749, 17
-__func__.37749:
+	.type	__func__.36010, %object
+	.size	__func__.36010, 17
+__func__.36010:
 	.ascii	"aiisp_mb_release\000"
-	.type	__func__.37806, %object
-	.size	__func__.37806, 15
-__func__.37806:
+	.type	__func__.36067, %object
+	.size	__func__.36067, 15
+__func__.36067:
 	.ascii	"aiisp_dev_open\000"
-	.type	__func__.37709, %object
-	.size	__func__.37709, 17
-__func__.37709:
+	.type	__func__.35970, %object
+	.size	__func__.35970, 17
+__func__.35970:
 	.ascii	"aiisp_node_exist\000"
-	.type	__func__.37761, %object
-	.size	__func__.37761, 18
-__func__.37761:
+	.type	__func__.36022, %object
+	.size	__func__.36022, 18
+__func__.36022:
 	.ascii	"aiisp_pool_attach\000"
-	.type	__func__.37680, %object
-	.size	__func__.37680, 17
-__func__.37680:
+	.type	__func__.35941, %object
+	.size	__func__.35941, 17
+__func__.35941:
 	.ascii	"aiisp_node_start\000"
-	.type	__func__.37688, %object
-	.size	__func__.37688, 16
-__func__.37688:
+	.type	__func__.35949, %object
+	.size	__func__.35949, 16
+__func__.35949:
 	.ascii	"aiisp_node_stop\000"
-	.type	__func__.37779, %object
-	.size	__func__.37779, 16
-__func__.37779:
+	.type	__func__.36040, %object
+	.size	__func__.36040, 16
+__func__.36040:
 	.ascii	"aiisp_dev_ioctl\000"
-	.type	__func__.37822, %object
-	.size	__func__.37822, 18
-__func__.37822:
+	.type	__func__.36083, %object
+	.size	__func__.36083, 18
+__func__.36083:
 	.ascii	"aiisp_dev_release\000"
 	.space	1
 	.type	aiisp_ioctls, %object
@@ -1937,10 +1943,10 @@ g_aiisp_dev:
 	.space	184
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:
-	.ascii	"-2024-01-22-17:02:23\000"
+	.ascii	"-2024-05-24-16:21:01\000"
 .LC1:
-	.ascii	"vmpi:a9dd19f6acbf3ae9d621a285aa64278d958f9b03-v1.4."
-	.ascii	"67\000"
+	.ascii	"vmpi:28ee389dbc33c2c7db812cd08e54fd3a0f2f992b-v1.4."
+	.ascii	"81\000"
 .LC2:
 	.ascii	"\033[1;32mAIISP Dev %d reset node done!\033[0m\000"
 .LC3:

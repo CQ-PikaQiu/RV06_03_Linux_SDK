@@ -14,8 +14,14 @@ PKG_BIN ?= out
 
 COMM_DIR := $(CURRENT_DIR)/common
 COMM_SRC := $(wildcard $(COMM_DIR)/*.c)
-COMM_SRC += $(wildcard $(COMM_DIR)/isp3.x/*.c)
-COMM_SRC += $(wildcard $(COMM_DIR)/aov/*.c)
+$(info "---------------- RK_CHIP $(RK_CHIP) -----------------")
+ifeq ($(RK_CHIP),rv1126)
+	COMM_SRC += $(wildcard $(COMM_DIR)/isp2.x/*.c)
+	COMM_SRC += $(wildcard $(COMM_DIR)/aov/sample_comm_aov_rv1126.c)
+else
+	COMM_SRC += $(wildcard $(COMM_DIR)/isp3.x/*.c)
+	COMM_SRC += $(wildcard $(COMM_DIR)/aov/sample_comm_aov_rv1106.c)
+endif
 COMM_OBJ := $(COMM_SRC:%.c=%.o)
 
 RK_APP_CFLAGS = -I $(RK_APP_MEDIA_INCLUDE_PATH) \
@@ -32,8 +38,14 @@ RK_APP_CFLAGS = -I $(RK_APP_MEDIA_INCLUDE_PATH) \
 				-I $(RK_APP_OUTPUT)/include \
 				-I $(RK_APP_OUTPUT)/include/freetype2 \
 				-I $(COMM_DIR) \
-				-I $(COMM_DIR)/isp3.x \
 				-I $(COMM_DIR)/aov
+ifeq ($(RK_CHIP),rv1126)
+	RK_APP_CFLAGS += -I $(COMM_DIR)/isp2.x
+	SAMPLE_AOV_LD_FLAGS += -DRV1126
+else
+	RK_APP_CFLAGS += -I $(COMM_DIR)/isp3.x
+	SAMPLE_AOV_LD_FLAGS += -DRV1106
+endif
 
 RK_APP_LDFLAGS = -L $(RK_APP_MEDIA_LIBS_PATH) -L$(RK_APP_OUTPUT)/lib
 
@@ -44,16 +56,20 @@ SAMPLE_AOV_LD_FLAGS += $(RK_APP_OPTS) \
 					   $(RK_APP_LDFLAGS) $(RK_APP_CFLAGS) \
 					   -L$(RK_APP_OUTPUT)/lib -pthread \
 					   -Wl,-Bstatic \
+					   -laec_bf_process \
+					   -lrkaudio_detect \
 					   -lrockit \
 					   -lrkaiq \
 					   -lrockiva \
 					   -lrknnmrt \
 					   -lrockchip_mpp \
+					   -lrkaudio\
 					   -lrga \
-					   -lrkaudio_detect -laec_bf_process -lrkaudio_common \
+					   -lrkaudio_common \
 					   -Wl,-Bdynamic \
 					   -lrtsp \
 					   -O2 -mthumb -mthumb-interwork \
+					   -lrkmuxer \
 					   -Wl,--gc-sections -Wl,--as-needed \
 					   -lstdc++ -lm \
 					   -lfreetype
@@ -63,8 +79,8 @@ SAMPLE_AOV_LD_FLAGS += $(RK_APP_OPTS) \
 	$(RK_APP_LDFLAGS) $(RK_APP_CFLAGS) \
 	-L$(RK_APP_OUTPUT)/lib -pthread -lrockit -lrtsp \
 	-O2 -mthumb -mthumb-interwork \
-	-lrockchip_mpp -lrockiva \
-	-lrkaudio_detect -laec_bf_process \
+	-lrockchip_mpp -lrockiva -lrkmuxer -lrkaudio\
+	-lrkaudio_detect -laec_bf_process -lrkaudio_common\
 	-lrga -Wl,-Bdynamic \
 	-Wl,--gc-sections -Wl,--as-needed \
 	-lrkaiq -lstdc++ -lm \
@@ -81,10 +97,12 @@ endif
 
 ifeq ($(RK_ENABLE_AOV),y)
 ifneq (, $(filter RK_SAMPLE_AOV, $(RK_APP_TYPE)))
-PKG_TARGET := thirdlibs-build sample_aov-build
+PKG_TARGET := sample_aov-build
 endif
 RK_APP_OPTS += -DRK_ENABLE_AOV=1
 endif
+
+sample_aov_build_objs := sample_aov_vi sample_aov_vi_venc sample_aov_vi_iva_venc sample_aov_aiisp_iva_venc sample_aov_bind_test sample_aov_npu_test sample_aov_multi_vi sample_aov_multi_vi_venc sample_aov_multi_vi_iva_venc
 
 ifeq ($(PKG_BIN),)
 $(error ### $(CURRENT_DIR): PKG_BIN is NULL, Please Check !!!)
@@ -93,24 +111,44 @@ endif
 all: $(PKG_TARGET)
 	@echo "build $(PKG_NAME) done"
 
-sample_aov-build:
-	rm -rf $(PKG_BIN); \
+sample_aov-build: $(sample_aov_build_objs)
+	cp $(CURRENT_DIR)/RkLunch.sh $(PKG_BIN)/bin/RkLunch.sh
+	cp $(CURRENT_DIR)/resume_suspend_test_2.sh $(PKG_BIN)/bin/resume_suspend_test.sh
+	cp -fr $(CURRENT_DIR)/resource/* $(PKG_BIN)/usr/share/
+	-cp hooks/pre-commit .git/hooks/pre-commit
+	$(call MAROC_COPY_PKG_TO_APP_OUTPUT, $(RK_APP_OUTPUT), $(PKG_BIN))
+
+sample_aov_vi: sample_aov-build-prepare
+	$(RK_APP_CROSS)-gcc sample_aov_vi.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_vi $(SAMPLE_AOV_LD_FLAGS)
+
+sample_aov_vi_venc: sample_aov-build-prepare
+	$(RK_APP_CROSS)-gcc sample_aov_vi_venc.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_vi_venc $(SAMPLE_AOV_LD_FLAGS)
+
+sample_aov_vi_iva_venc: sample_aov-build-prepare
+	$(RK_APP_CROSS)-gcc sample_aov_vi_iva_venc.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_vi_iva_venc $(SAMPLE_AOV_LD_FLAGS)
+
+sample_aov_aiisp_iva_venc: sample_aov-build-prepare
+	$(RK_APP_CROSS)-gcc sample_aov_aiisp_iva_venc.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_aiisp_iva_venc $(SAMPLE_AOV_LD_FLAGS)
+
+sample_aov_bind_test: sample_aov-build-prepare
+	$(RK_APP_CROSS)-gcc sample_aov_bind_test.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_bind_test $(SAMPLE_AOV_LD_FLAGS)
+
+sample_aov_npu_test: sample_aov-build-prepare
+	$(RK_APP_CROSS)-gcc sample_aov_npu_test.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_npu_test $(SAMPLE_AOV_LD_FLAGS)
+
+sample_aov_multi_vi: sample_aov-build-prepare
+	$(RK_APP_CROSS)-gcc sample_aov_multi_vi.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_multi_vi $(SAMPLE_AOV_LD_FLAGS)
+
+sample_aov_multi_vi_venc: sample_aov-build-prepare
+	$(RK_APP_CROSS)-gcc sample_aov_multi_vi_venc.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_multi_vi_venc $(SAMPLE_AOV_LD_FLAGS)
+
+sample_aov_multi_vi_iva_venc: sample_aov-build-prepare
+	$(RK_APP_CROSS)-gcc sample_aov_multi_vi_iva_venc.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_multi_vi_iva_venc $(SAMPLE_AOV_LD_FLAGS)
+
+sample_aov-build-prepare: thirdlibs-build
+	rm -rf $(PKG_BIN);
 	mkdir -p $(PKG_BIN)/bin;
 	mkdir -p $(PKG_BIN)/usr/share;
-	$(RK_APP_CROSS)-gcc sample_aov_vi.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_vi $(SAMPLE_AOV_LD_FLAGS)
-	$(RK_APP_CROSS)-gcc sample_aov_vi_venc.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_vi_venc $(SAMPLE_AOV_LD_FLAGS)
-	$(RK_APP_CROSS)-gcc sample_aov_vi_iva_venc.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_vi_iva_venc $(SAMPLE_AOV_LD_FLAGS)
-	$(RK_APP_CROSS)-gcc sample_aov_aiisp_iva_venc.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_aiisp_iva_venc $(SAMPLE_AOV_LD_FLAGS)
-	$(RK_APP_CROSS)-gcc sample_aov_bind_test.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_bind_test $(SAMPLE_AOV_LD_FLAGS)
-	$(RK_APP_CROSS)-gcc sample_aov_npu_test.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_npu_test $(SAMPLE_AOV_LD_FLAGS)
-	$(RK_APP_CROSS)-gcc sample_aov_multi_vi.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_multi_vi $(SAMPLE_AOV_LD_FLAGS)
-	$(RK_APP_CROSS)-gcc sample_aov_multi_vi_venc.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_multi_vi_venc $(SAMPLE_AOV_LD_FLAGS)
-	$(RK_APP_CROSS)-gcc sample_aov_multi_vi_iva_venc.c $(COMM_SRC) -o $(PKG_BIN)/bin/sample_aov_multi_vi_iva_venc $(SAMPLE_AOV_LD_FLAGS)
-	cp ./RkLunch.sh $(PKG_BIN)/bin/RkLunch.sh
-	cp ./resume_suspend_test_2.sh $(PKG_BIN)/bin/resume_suspend_test.sh
-	cp ./resource/* $(PKG_BIN)/usr/share/
-	cp hooks/pre-commit .git/hooks/pre-commit
-	$(call MAROC_COPY_PKG_TO_APP_OUTPUT, $(RK_APP_OUTPUT), $(PKG_BIN))
 
 thirdlibs-build:
 	@test ! -d $(RK_APP_COMPONENT)/third_libs || make -C $(RK_APP_COMPONENT)/third_libs

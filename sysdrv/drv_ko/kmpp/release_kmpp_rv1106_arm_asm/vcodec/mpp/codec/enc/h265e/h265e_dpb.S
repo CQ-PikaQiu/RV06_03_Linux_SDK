@@ -2142,105 +2142,105 @@ h265e_dpb_build_list:
 	.size	h265e_dpb_build_list, .-h265e_dpb_build_list
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__func__.9759, %object
-	.size	__func__.9759, 21
-__func__.9759:
+	.type	__func__.9772, %object
+	.size	__func__.9772, 21
+__func__.9772:
 	.ascii	"h265e_find_cpb_frame\000"
-	.type	__FUNCTION__.9762, %object
-	.size	__FUNCTION__.9762, 21
-__FUNCTION__.9762:
+	.type	__FUNCTION__.9775, %object
+	.size	__FUNCTION__.9775, 21
+__FUNCTION__.9775:
 	.ascii	"h265e_find_cpb_frame\000"
-	.type	__func__.9559, %object
-	.size	__func__.9559, 23
-__func__.9559:
+	.type	__func__.9572, %object
+	.size	__func__.9572, 23
+__func__.9572:
 	.ascii	"h265e_dpb_set_ref_list\000"
-	.type	__func__.9573, %object
-	.size	__func__.9573, 20
-__func__.9573:
+	.type	__func__.9586, %object
+	.size	__func__.9586, 20
+__func__.9586:
 	.ascii	"h265e_dpb_init_curr\000"
-	.type	__FUNCTION__.9574, %object
-	.size	__FUNCTION__.9574, 20
-__FUNCTION__.9574:
+	.type	__FUNCTION__.9587, %object
+	.size	__FUNCTION__.9587, 20
+__FUNCTION__.9587:
 	.ascii	"h265e_dpb_init_curr\000"
-	.type	__func__.9581, %object
-	.size	__func__.9581, 19
-__func__.9581:
+	.type	__func__.9594, %object
+	.size	__func__.9594, 19
+__func__.9594:
 	.ascii	"h265e_dpb_get_curr\000"
-	.type	__FUNCTION__.9588, %object
-	.size	__FUNCTION__.9588, 21
-__FUNCTION__.9588:
+	.type	__FUNCTION__.9601, %object
+	.size	__FUNCTION__.9601, 21
+__FUNCTION__.9601:
 	.ascii	"h265e_dpb_frm_deinit\000"
-	.type	__func__.9589, %object
-	.size	__func__.9589, 21
-__func__.9589:
+	.type	__func__.9602, %object
+	.size	__func__.9602, 21
+__func__.9602:
 	.ascii	"h265e_dpb_frm_deinit\000"
-	.type	__func__.9597, %object
-	.size	__func__.9597, 15
-__func__.9597:
+	.type	__func__.9610, %object
+	.size	__func__.9610, 15
+__func__.9610:
 	.ascii	"h265e_dpb_init\000"
-	.type	__FUNCTION__.9598, %object
-	.size	__FUNCTION__.9598, 15
-__FUNCTION__.9598:
+	.type	__FUNCTION__.9611, %object
+	.size	__FUNCTION__.9611, 15
+__FUNCTION__.9611:
 	.ascii	"h265e_dpb_init\000"
-	.type	__func__.9608, %object
-	.size	__func__.9608, 17
-__func__.9608:
+	.type	__func__.9621, %object
+	.size	__func__.9621, 17
+__func__.9621:
 	.ascii	"h265e_dpb_deinit\000"
-	.type	__FUNCTION__.9612, %object
-	.size	__FUNCTION__.9612, 17
-__FUNCTION__.9612:
+	.type	__FUNCTION__.9625, %object
+	.size	__FUNCTION__.9625, 17
+__FUNCTION__.9625:
 	.ascii	"h265e_dpb_deinit\000"
-	.type	__func__.9617, %object
-	.size	__func__.9617, 18
-__func__.9617:
+	.type	__func__.9630, %object
+	.size	__func__.9630, 18
+__func__.9630:
 	.ascii	"get_nal_unit_type\000"
-	.type	__func__.9654, %object
-	.size	__func__.9654, 20
-__func__.9654:
+	.type	__func__.9667, %object
+	.size	__func__.9667, 20
+__func__.9667:
 	.ascii	"h265e_dpb_apply_rps\000"
-	.type	__func__.9671, %object
-	.size	__func__.9671, 30
-__func__.9671:
+	.type	__func__.9684, %object
+	.size	__func__.9684, 30
+__func__.9684:
 	.ascii	"h265e_dpb_dec_refresh_marking\000"
-	.type	__func__.9702, %object
-	.size	__func__.9702, 25
-__func__.9702:
+	.type	__func__.9715, %object
+	.size	__func__.9715, 25
+__func__.9715:
 	.ascii	"h265e_dpb_arrange_lt_rps\000"
-	.type	__FUNCTION__.9706, %object
-	.size	__FUNCTION__.9706, 25
-__FUNCTION__.9706:
+	.type	__FUNCTION__.9719, %object
+	.size	__FUNCTION__.9719, 25
+__FUNCTION__.9719:
 	.ascii	"h265e_dpb_arrange_lt_rps\000"
-	.type	__func__.9807, %object
-	.size	__func__.9807, 18
-__func__.9807:
+	.type	__func__.9820, %object
+	.size	__func__.9820, 18
+__func__.9820:
 	.ascii	"h265e_dpb_cpb2rps\000"
-	.type	__FUNCTION__.9811, %object
-	.size	__FUNCTION__.9811, 18
-__FUNCTION__.9811:
+	.type	__FUNCTION__.9824, %object
+	.size	__FUNCTION__.9824, 18
+__FUNCTION__.9824:
 	.ascii	"h265e_dpb_cpb2rps\000"
-	.type	__func__.9832, %object
-	.size	__func__.9832, 21
-__func__.9832:
+	.type	__func__.9845, %object
+	.size	__func__.9845, 21
+__func__.9845:
 	.ascii	"h265e_dpb_free_unsed\000"
-	.type	__func__.9783, %object
-	.size	__func__.9783, 22
-__func__.9783:
+	.type	__func__.9796, %object
+	.size	__func__.9796, 22
+__func__.9796:
 	.ascii	"h265e_check_frame_cpb\000"
-	.type	__FUNCTION__.9857, %object
-	.size	__FUNCTION__.9857, 19
-__FUNCTION__.9857:
+	.type	__FUNCTION__.9870, %object
+	.size	__FUNCTION__.9870, 19
+__FUNCTION__.9870:
 	.ascii	"h265e_dpb_proc_cpb\000"
-	.type	__func__.9860, %object
-	.size	__func__.9860, 19
-__func__.9860:
+	.type	__func__.9873, %object
+	.size	__func__.9873, 19
+__func__.9873:
 	.ascii	"h265e_dpb_proc_cpb\000"
-	.type	__func__.9746, %object
-	.size	__func__.9746, 22
-__func__.9746:
+	.type	__func__.9759, %object
+	.size	__func__.9759, 22
+__func__.9759:
 	.ascii	"h265e_find_cpb_in_dpb\000"
-	.type	__func__.9878, %object
-	.size	__func__.9878, 21
-__func__.9878:
+	.type	__func__.9891, %object
+	.size	__func__.9891, 21
+__func__.9891:
 	.ascii	"h265e_dpb_build_list\000"
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:

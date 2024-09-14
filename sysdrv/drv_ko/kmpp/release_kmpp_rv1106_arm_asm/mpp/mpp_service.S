@@ -131,7 +131,7 @@ mpp_show_support_device:
 	lsls	r3, r3, #31
 	bpl	.L27
 	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
+@ 87 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
 	cmp	r4, #29
 	sbc	r3, r4, r4
 .inst.w 0xf3af8014
@@ -747,7 +747,7 @@ mpp_service_probe:
 	.word	.LC41
 	.word	.LC42
 	.word	.LC43
-	.word	.LANCHOR0+84
+	.word	.LANCHOR0+1
 	.word	.LC44
 	.word	.LC49
 	.word	rockchip_rkvenc540c_driver
@@ -775,14 +775,14 @@ mpp_service_probe:
 	.align	2
 	.set	.LANCHOR0,. + 0
 	.type	mpp_version, %object
-	.size	mpp_version, 84
+	.size	mpp_version, 1
 mpp_version:
-	.ascii	"67a7527e author: Yandong Lin 2024-01-17 [h264e_sps]"
-	.ascii	": fix constraint_set value issue\000"
-	.type	__func__.37348, %object
-	.size	__func__.37348, 16
-__func__.37348:
+	.space	1
+	.type	__func__.37271, %object
+	.size	__func__.37271, 16
+__func__.37271:
 	.ascii	"mpp_procfs_init\000"
+	.space	3
 	.type	mpp_dt_ids, %object
 	.size	mpp_dt_ids, 392
 mpp_dt_ids:
@@ -811,18 +811,18 @@ mpp_service_driver:
 	.bss
 	.align	2
 	.set	.LANCHOR1,. + 0
-	.type	__key.37362, %object
-	.size	__key.37362, 0
-__key.37362:
-	.type	__key.37365, %object
-	.size	__key.37365, 0
-__key.37365:
-	.type	__key.37374, %object
-	.size	__key.37374, 0
-__key.37374:
-	.type	__key.37379, %object
-	.size	__key.37379, 0
-__key.37379:
+	.type	__key.37285, %object
+	.size	__key.37285, 0
+__key.37285:
+	.type	__key.37288, %object
+	.size	__key.37288, 0
+__key.37288:
+	.type	__key.37297, %object
+	.size	__key.37297, 0
+__key.37297:
+	.type	__key.37302, %object
+	.size	__key.37302, 0
+__key.37302:
 	.type	mpp_dev_debug, %object
 	.size	mpp_dev_debug, 4
 mpp_dev_debug:

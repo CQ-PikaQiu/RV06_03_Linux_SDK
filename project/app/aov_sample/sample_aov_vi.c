@@ -43,9 +43,29 @@ typedef struct _rkMpiCtx {
 	SAMPLE_VI_CTX_S vi;
 } SAMPLE_MPI_CTX_S;
 
+enum ISP_MODE {
+	SINGLE_FRAME_MODE,
+	MULTI_FRAME_MODE,
+};
+
 static bool quit = false;
 static RK_U32 g_u32BootFrame = 60;
 static RK_S32 g_s32AovLoopCount = -1;
+static RK_BOOL g_bEnableDummyFrame = RK_TRUE;
+static RK_U32 g_u32DummyFrameCnt = 3;
+static RK_S32 g_exit_result = RK_SUCCESS;
+
+static void program_handle_error(const char *func, RK_U32 line) {
+	RK_LOGE("func: <%s> line: <%d> error exit!", func, line);
+	g_exit_result = RK_FAILURE;
+	quit = RK_TRUE;
+}
+
+static void program_normal_exit(const char *func, RK_U32 line) {
+	RK_LOGE("func: <%s> line: <%d> normal exit!", func, line);
+	g_exit_result = RK_SUCCESS;
+	quit = RK_TRUE;
+}
 
 static void sigterm_handler(int sig) {
 	fprintf(stderr, "signal %d\n", sig);
@@ -68,6 +88,8 @@ static const struct option long_options[] = {
     {"aov_loop_count", required_argument, NULL, 'a' + 'm' + 'c'},
     {"suspend_time", required_argument, NULL, 's' + 't'},
     {"boot_frame", required_argument, NULL, 'b' + 'f'},
+    {"enable_dummy_frame", required_argument, NULL, 'e' + 'd' + 'f'},
+    {"dummy_frame_cnt", required_argument, NULL, 'd' + 'f' + 'c'},
     {"help", optional_argument, NULL, '?'},
     {NULL, 0, NULL, 0},
 };
@@ -103,6 +125,10 @@ static void print_usage(const RK_CHAR *name) {
 	printf("\t--suspend_time: set aov suspend time, Default: 1000ms\n");
 	printf("\t--boot_frame: How long will it take to enter AOV mode after boot, Default: "
 	       "60 frames\n");
+	printf("\t--enable_dummy_frame: Enable fetch dummy frame in single frame mode"
+	       ", Default: 1\n");
+	printf("\t--dummy_frame_cnt: Dummy frame count in single frame mode"
+	       ", Default: 3\n");
 }
 
 /******************************************************************************
@@ -117,7 +143,8 @@ static void *vi_get_multi_stream(void *pArgs) {
 	RK_S32 loopCount = 0;
 	RK_S32 waitTime = -1;
 	RK_S32 wakeup_multi_fps = 20;
-	RK_S32 wakeup_current_mode = 1;
+	enum ISP_MODE wakeup_current_mode = MULTI_FRAME_MODE;
+	RK_U32 size = 0;
 
 	if (ctx->dstFilePath) {
 		snprintf(name, sizeof(name), "/%s/vi_%d.bin", ctx->dstFilePath, ctx->s32DevId);
@@ -134,15 +161,16 @@ static void *vi_get_multi_stream(void *pArgs) {
 		s32Ret = SAMPLE_COMM_VI_GetChnFrame(ctx, &pData);
 		if (s32Ret == RK_SUCCESS) {
 
+			size = ctx->stViFrame.stVFrame.u32VirWidth *
+			       ctx->stViFrame.stVFrame.u32VirHeight * 3 / 2;
 			if (fp) {
-				fwrite(pData, 1, ctx->stViFrame.stVFrame.u64PrivateData, fp);
+				fwrite(pData, 1, size, fp);
 				fflush(fp);
 			}
 			RK_LOGI(
-			    "SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%llu loop:%d seq:%d "
+			    "SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%u loop:%d seq:%d "
 			    "pts:%lld ms\n",
-			    ctx->s32DevId, pData, ctx->stViFrame.stVFrame.u64PrivateData, loopCount,
-			    ctx->stViFrame.stVFrame.u32TimeRef,
+			    ctx->s32DevId, pData, size, loopCount, ctx->stViFrame.stVFrame.u32TimeRef,
 			    ctx->stViFrame.stVFrame.u64PTS / 1000);
 			SAMPLE_COMM_VI_ReleaseChnFrame(ctx);
 			loopCount++;
@@ -152,22 +180,44 @@ static void *vi_get_multi_stream(void *pArgs) {
 	while (!quit) {
 		s32Ret = SAMPLE_COMM_VI_GetChnFrame(ctx, &pData);
 		if (s32Ret == RK_SUCCESS) {
+			size = ctx->stViFrame.stVFrame.u32VirWidth *
+			       ctx->stViFrame.stVFrame.u32VirHeight * 3 / 2;
 			if (fp) {
-				fwrite(pData, 1, ctx->stViFrame.stVFrame.u64PrivateData, fp);
+				fwrite(pData, 1, size, fp);
 				fflush(fp);
 			}
 
 			RK_LOGI(
-			    "SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%llu loop:%d seq:%d "
+			    "SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%u loop:%d seq:%d "
 			    "pts:%lld ms\n",
-			    ctx->s32DevId, pData, ctx->stViFrame.stVFrame.u64PrivateData, loopCount,
-			    ctx->stViFrame.stVFrame.u32TimeRef,
+			    ctx->s32DevId, pData, size, loopCount, ctx->stViFrame.stVFrame.u32TimeRef,
 			    ctx->stViFrame.stVFrame.u64PTS / 1000);
 			SAMPLE_COMM_VI_ReleaseChnFrame(ctx);
 
-			if (wakeup_current_mode == 1) {
+#if defined(RV1106)
+			if (g_bEnableDummyFrame && wakeup_current_mode == SINGLE_FRAME_MODE) {
+				for (int i = 0; i != g_u32DummyFrameCnt; ++i) {
+					RK_MPI_VI_DevEnableSinglelFrame(ctx->s32DevId, 1);
+					s32Ret = RK_MPI_VI_GetChnFrame(ctx->u32PipeId, ctx->s32ChnId,
+					                               &ctx->stViFrame, 1000);
+					if (s32Ret == RK_SUCCESS) {
+						RK_LOGD("get dummy frame DevId %d seq:%d pts:%lld ms\n",
+						        ctx->s32DevId, ctx->stViFrame.stVFrame.u32TimeRef,
+						        ctx->stViFrame.stVFrame.u64PTS / 1000);
+						RK_MPI_VI_ReleaseChnFrame(ctx->u32PipeId, ctx->s32ChnId,
+						                          &ctx->stViFrame);
+					} else {
+						RK_LOGE("RK_MPI_VI_GetChnFrame failed %#X", s32Ret);
+						program_handle_error(__FUNCTION__, __LINE__);
+						break;
+					}
+				}
+			}
+#endif
+
+			if (wakeup_current_mode == MULTI_FRAME_MODE) {
 				RK_LOGI("#Pause isp, Enter single frame\n");
-				SAMPLE_COMM_ISP_SingleFrame(0);
+				SAMPLE_COMM_ISP_SingleFrame(ctx->s32DevId);
 				// drop frame
 				VIDEO_FRAME_INFO_S stViFrame_tmp;
 				while (RK_MPI_VI_GetChnFrame(ctx->s32DevId, ctx->s32ChnId, &stViFrame_tmp,
@@ -175,12 +225,12 @@ static void *vi_get_multi_stream(void *pArgs) {
 					RK_MPI_VI_ReleaseChnFrame(ctx->s32DevId, ctx->s32ChnId,
 					                          &stViFrame_tmp);
 				}
-				wakeup_current_mode = 0;
+				wakeup_current_mode = SINGLE_FRAME_MODE;
 			}
 
 			if (loopCount % 5 == 0) {
 				RK_LOGI("#Resume isp, Enter multi frame\n");
-				SAMPLE_COMM_ISP_MultiFrame(0);
+				SAMPLE_COMM_ISP_MultiFrame(ctx->s32DevId);
 
 				// drop frame
 				RK_LOGI("#Resume isp, Enter multi frame\n");
@@ -203,10 +253,10 @@ static void *vi_get_multi_stream(void *pArgs) {
 					}
 				}
 
-				wakeup_current_mode = 1;
+				wakeup_current_mode = MULTI_FRAME_MODE;
 			}
 
-			if (g_s32AovLoopCount != 0 && wakeup_current_mode == 0) {
+			if (g_s32AovLoopCount != 0 && wakeup_current_mode == SINGLE_FRAME_MODE) {
 				if (g_s32AovLoopCount > 0)
 					--g_s32AovLoopCount;
 				SAMPLE_COMM_AOV_EnterSleep();
@@ -219,8 +269,8 @@ static void *vi_get_multi_stream(void *pArgs) {
 		}
 	}
 
-	if (wakeup_current_mode == 1)
-		SAMPLE_COMM_ISP_MultiFrame(0);
+	if (wakeup_current_mode == SINGLE_FRAME_MODE)
+		SAMPLE_COMM_ISP_MultiFrame(ctx->s32DevId);
 
 	if (fp)
 		fclose(fp);
@@ -239,6 +289,7 @@ static void *vi_get_stream(void *pArgs) {
 	void *pData = RK_NULL;
 	RK_S32 loopCount = 0;
 	RK_S32 waitTime = -1;
+	RK_U32 size = 0;
 
 	if (ctx->dstFilePath) {
 		snprintf(name, sizeof(name), "/%s/vi_%d.bin", ctx->dstFilePath, ctx->s32DevId);
@@ -255,15 +306,16 @@ static void *vi_get_stream(void *pArgs) {
 		s32Ret = SAMPLE_COMM_VI_GetChnFrame(ctx, &pData);
 		if (s32Ret == RK_SUCCESS) {
 
+			size = ctx->stViFrame.stVFrame.u32VirWidth *
+			       ctx->stViFrame.stVFrame.u32VirHeight * 3 / 2;
 			if (fp) {
-				fwrite(pData, 1, ctx->stViFrame.stVFrame.u64PrivateData, fp);
+				fwrite(pData, 1, size, fp);
 				fflush(fp);
 			}
 			RK_LOGI(
-			    "SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%llu loop:%d seq:%d "
+			    "SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%u loop:%d seq:%d "
 			    "pts:%lld ms\n",
-			    ctx->s32DevId, pData, ctx->stViFrame.stVFrame.u64PrivateData, loopCount,
-			    ctx->stViFrame.stVFrame.u32TimeRef,
+			    ctx->s32DevId, pData, size, loopCount, ctx->stViFrame.stVFrame.u32TimeRef,
 			    ctx->stViFrame.stVFrame.u64PTS / 1000);
 			SAMPLE_COMM_VI_ReleaseChnFrame(ctx);
 			loopCount++;
@@ -274,7 +326,8 @@ static void *vi_get_stream(void *pArgs) {
 
 	// When booting, the default is multi-frame mode, so you need to pause the
 	// stream and pick up the remaining frames
-	SAMPLE_COMM_ISP_SingleFrame(0);
+	SAMPLE_COMM_ISP_SingleFrame(ctx->s32DevId);
+	SAMPLE_COMM_AOV_DisableNonBootCPUs();
 	// drop frame
 	VIDEO_FRAME_INFO_S stViFrame_tmp;
 	while (RK_MPI_VI_GetChnFrame(ctx->s32DevId, ctx->s32ChnId, &stViFrame_tmp, 1000) ==
@@ -286,18 +339,40 @@ static void *vi_get_stream(void *pArgs) {
 	while (!quit) {
 		s32Ret = SAMPLE_COMM_VI_GetChnFrame(ctx, &pData);
 		if (s32Ret == RK_SUCCESS) {
+			size = ctx->stViFrame.stVFrame.u32VirWidth *
+			       ctx->stViFrame.stVFrame.u32VirHeight * 3 / 2;
 			if (fp) {
-				fwrite(pData, 1, ctx->stViFrame.stVFrame.u64PrivateData, fp);
+				fwrite(pData, 1, size, fp);
 				fflush(fp);
 			}
 
 			RK_LOGI(
-			    "SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%llu loop:%d seq:%d "
+			    "SAMPLE_COMM_VI_GetChnFrame DevId %d ok:data %p size:%u loop:%d seq:%d "
 			    "pts:%lld ms\n",
-			    ctx->s32DevId, pData, ctx->stViFrame.stVFrame.u64PrivateData, loopCount,
-			    ctx->stViFrame.stVFrame.u32TimeRef,
+			    ctx->s32DevId, pData, size, loopCount, ctx->stViFrame.stVFrame.u32TimeRef,
 			    ctx->stViFrame.stVFrame.u64PTS / 1000);
 			SAMPLE_COMM_VI_ReleaseChnFrame(ctx);
+
+#if defined(RV1106)
+			if (g_bEnableDummyFrame) {
+				for (int i = 0; i != g_u32DummyFrameCnt; ++i) {
+					RK_MPI_VI_DevEnableSinglelFrame(ctx->s32DevId, 1);
+					s32Ret = RK_MPI_VI_GetChnFrame(ctx->u32PipeId, ctx->s32ChnId,
+					                               &ctx->stViFrame, 1000);
+					if (s32Ret == RK_SUCCESS) {
+						RK_LOGD("get dummy frame DevId %d seq:%d pts:%lld ms\n",
+						        ctx->s32DevId, ctx->stViFrame.stVFrame.u32TimeRef,
+						        ctx->stViFrame.stVFrame.u64PTS / 1000);
+						RK_MPI_VI_ReleaseChnFrame(ctx->u32PipeId, ctx->s32ChnId,
+						                          &ctx->stViFrame);
+					} else {
+						RK_LOGE("RK_MPI_VI_GetChnFrame failed %#X", s32Ret);
+						program_handle_error(__FUNCTION__, __LINE__);
+						break;
+					}
+				}
+			}
+#endif
 
 			if (g_s32AovLoopCount != 0) {
 				if (g_s32AovLoopCount > 0)
@@ -313,7 +388,8 @@ static void *vi_get_stream(void *pArgs) {
 			RK_LOGI("get vi frame failed");
 		}
 	}
-	SAMPLE_COMM_ISP_MultiFrame(0);
+	SAMPLE_COMM_ISP_MultiFrame(ctx->s32DevId);
+	SAMPLE_COMM_AOV_EnableNonBootCPUs();
 
 	if (fp)
 		fclose(fp);
@@ -341,6 +417,8 @@ int main(int argc, char *argv[]) {
 	rk_aiq_working_mode_t hdr_mode = RK_AIQ_WORKING_MODE_NORMAL;
 	RK_S32 s32Ret;
 	pthread_t vi_thread_id;
+	g_bEnableDummyFrame = RK_TRUE;
+	g_u32DummyFrameCnt = 3;
 
 	if (argc < 2) {
 		print_usage(argv[0]);
@@ -441,6 +519,12 @@ int main(int argc, char *argv[]) {
 		case 'b' + 'f':
 			g_u32BootFrame = atoi(optarg);
 			break;
+		case 'e' + 'd' + 'f':
+			g_bEnableDummyFrame = atoi(optarg) ? RK_TRUE : RK_FALSE;
+			break;
+		case 'd' + 'f' + 'c':
+			g_u32DummyFrameCnt = atoi(optarg);
+			break;
 		case '?':
 		default:
 			print_usage(argv[0]);
@@ -520,7 +604,7 @@ __FAILED2:
 		ctx = RK_NULL;
 	}
 
-	return 0;
+	return g_exit_result;
 }
 
 #ifdef __cplusplus

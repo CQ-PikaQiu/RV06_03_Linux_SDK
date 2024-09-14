@@ -69,7 +69,7 @@ rockit_rkcif_buf_que:
 	cmp	r0, #0
 	beq	.L4
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r9, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -94,7 +94,7 @@ rockit_rkcif_buf_que:
 	ldr	r3, [r6, #44]
 	ldr	r3, [r3, #44]
 	str	r3, [sp, #4]
-	movs	r3, #208
+	movs	r3, #210
 	str	r3, [sp]
 	ldr	r3, .L23+4
 	bl	vlog
@@ -112,19 +112,19 @@ rockit_rkcif_buf_que:
 	movs	r2, #1
 	strb	r2, [r10, #8]
 	ldr	r1, [r6, #56]
-	strd	r6, r4, [r5, #76]
-	strb	r2, [r5, #48]
-	str	r1, [r5, #64]
+	strd	r6, r4, [r5, #196]
+	strb	r2, [r5, #168]
+	str	r1, [r5, #184]
 	ldr	r2, [r4]
-	str	r2, [r5, #60]
+	str	r2, [r5, #180]
 	ldr	r2, [r4, #448]
-	str	r2, [r5, #108]
+	str	r2, [r5, #228]
 	ldr	r2, [r6, #44]
 	ldr	r2, [r2, #44]
-	str	r2, [r5, #52]
+	str	r2, [r5, #172]
 	ldr	r2, [fp]
 	cbz	r2, .L10
-	add	r0, r5, #48
+	add	r0, r5, #168
 	blx	r2
 	cmp	r0, #0
 	bge	.L10
@@ -135,7 +135,7 @@ rockit_rkcif_buf_que:
 	bl	mpi_obj_unref
 .L11:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r9	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -153,7 +153,7 @@ rockit_rkcif_buf_que:
 	b	.L7
 .L22:
 	adds	r3, r3, #1
-	cmp	r3, #5
+	cmp	r3, #20
 	bne	.L9
 	b	.L7
 .L10:
@@ -202,25 +202,22 @@ rockit_rkcif_handle_message:
 	push	{r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, lr}
 	.save {r4, r5, r6, r7, r8, r9, r10, lr}
 	.pad #16
-	mov	r5, r0
-	ldr	r3, [r0, #8]
-	cmp	r3, #1
-	bne	.L27
+	mov	r6, r0
+	ldr	r2, [r0, #8]
+	mov	r5, r1
+	cmp	r2, #1
+	bne	.L53
 	cbnz	r0, .L28
-	mov	r3, #266
-	ldr	r2, .L53
+	movw	r3, #269
+	ldr	r2, .L56
 	str	r3, [sp]
-	ldr	r3, .L53+4
-.L51:
+	ldr	r3, .L56+4
+.L55:
 	movs	r1, #2
-.L52:
+.L54:
 	movs	r0, #8
 	bl	vlog
-.L27:
-	movs	r0, #0
-	add	sp, sp, #16
-	@ sp needed
-	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
+	b	.L53
 .L28:
 	ldr	r4, [r0, #288]
 	cbz	r4, .L29
@@ -228,99 +225,106 @@ rockit_rkcif_handle_message:
 	beq	.L30
 	cmp	r1, #6
 	beq	.L31
-	cmp	r1, #0
-	bne	.L27
-	ldrb	r2, [r4]	@ zero_extendqisi2
-	cmp	r2, #0
-	beq	.L27
-	ldrb	r2, [r4, #1]	@ zero_extendqisi2
-	cmp	r2, #0
-	beq	.L27
-	mov	r1, r3
-	bl	rockit_rkcif_buf_que
+	cbz	r1, .L32
+.L53:
+	movs	r5, #0
 	b	.L27
 .L29:
-	mov	r3, #274
-	ldr	r2, .L53+8
+	movw	r3, #277
+	ldr	r2, .L56+8
 	str	r3, [sp]
-	ldr	r3, .L53+4
-	b	.L51
+	ldr	r3, .L56+4
+	b	.L55
+.L32:
+	ldrb	r3, [r4]	@ zero_extendqisi2
+	cbz	r3, .L27
+	ldrb	r3, [r4, #1]	@ zero_extendqisi2
+	cbz	r3, .L27
+	mov	r1, r2
+	bl	rockit_rkcif_buf_que
+.L27:
+	mov	r0, r5
+	add	sp, sp, #16
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
 .L30:
-	ldr	r2, [r0, #80]
-	ldrd	r7, r8, [r2, #4]
-	ldr	r6, [r2, #24]
-	ldr	r2, [r0, #44]
+	ldr	r3, [r0, #80]
+	cmp	r3, #0
+	beq	.L38
+	ldrd	r8, r9, [r3, #28]
+	ldr	r7, [r3, #40]
+	ldr	r3, [r0, #44]
 	movs	r0, #8
-	ldr	r2, [r2, #44]
-	str	r2, [r4, #52]
-	strb	r3, [r4], #48
-	mov	r3, #294
-	ldr	r2, .L53+12
+	ldr	r3, [r3, #44]
+	str	r3, [r4, #172]
+	mov	r3, #300
+	strb	r2, [r4], #168
 	str	r3, [sp]
-	ldr	r3, .L53+4
+	ldr	r2, .L56+12
+	ldr	r3, .L56+4
 	bl	vlog
-	ldr	r2, .L53+16
+	ldr	r2, .L56+16
 	movs	r3, #0
 .L34:
 	add	r1, r2, r3, lsl #3
 	ldr	r1, [r1, #4]
-	cmp	r6, r1
+	cmp	r7, r1
 	beq	.L33
 	adds	r3, r3, #1
 	cmp	r3, #24
 	bne	.L34
 .L33:
-	ldr	r9, .L53+44
-	mov	r2, r8
-	mov	r1, r7
+	ldr	r5, .L56+20
+	mov	r2, r9
+	mov	r1, r8
 	mov	r0, r4
-	add	r3, r9, r3, lsl #3
+	add	r3, r5, r3, lsl #3
 	ldr	r10, [r3, #48]
 	mov	r3, r10
 	bl	rkcif_rockit_config_stream
-	mov	r3, #296
-	ldr	r2, .L53+20
+	mov	r3, #302
+	ldr	r2, .L56+24
 	movs	r1, #5
 	movs	r0, #8
 	str	r3, [sp]
-	add	r3, r9, #21
-	strd	r6, r10, [sp, #4]
+	add	r3, r5, #21
+	strd	r7, r10, [sp, #4]
 	bl	vlog
-	ldr	r2, .L53+24
-	movw	r3, #297
+	ldr	r2, .L56+28
+	movw	r3, #303
 	movs	r1, #5
 	movs	r0, #8
 	str	r3, [sp]
-	add	r3, r9, #21
+	add	r3, r5, #21
 	bl	vlog
-	movs	r1, #5
-	mov	r0, r5
+	movs	r1, #20
+	mov	r0, r6
 	bl	rockit_rkcif_buf_que
-	ldr	r2, .L53+28
+	ldr	r2, .L56+32
 	movs	r1, #5
-	movw	r3, #299
+	movw	r3, #305
 	movs	r0, #8
 	str	r3, [sp]
-	add	r3, r9, #21
+	add	r3, r5, #21
 	bl	vlog
 	mov	r0, r4
 	bl	rkcif_rockit_resume_stream
-	movw	r3, #301
-	ldr	r2, .L53+32
+	movw	r3, #307
+	ldr	r2, .L56+36
 	movs	r1, #5
 	str	r3, [sp]
-	add	r3, r9, #21
-	b	.L52
+	add	r3, r5, #21
+	b	.L54
 .L31:
-	mov	r3, #306
+	mov	r3, #312
 	movs	r6, #0
-	ldr	r2, .L53+36
+	ldr	r2, .L56+40
 	movs	r1, #5
 	strb	r6, [r4]
 	movs	r0, #8
 	str	r3, [sp]
-	add	r7, r4, #40
-	ldr	r3, .L53+4
+	add	r7, r4, #160
+	ldr	r3, .L56+4
 	mov	r5, r4
 	bl	vlog
 .L36:
@@ -334,31 +338,34 @@ rockit_rkcif_handle_message:
 	adds	r5, r5, #8
 	cmp	r5, r7
 	bne	.L36
-	mov	r3, #314
-	ldr	r2, .L53+40
+	mov	r3, #320
+	ldr	r2, .L56+44
 	str	r3, [sp]
 	movs	r1, #4
-	ldr	r3, .L53+4
+	ldr	r3, .L56+4
 	movs	r0, #8
 	bl	vlog
-	add	r0, r4, #48
+	add	r0, r4, #168
 	bl	rkcif_rockit_pause_stream
+	b	.L53
+.L38:
+	mvn	r5, #21
 	b	.L27
-.L54:
+.L57:
 	.align	2
-.L53:
+.L56:
 	.word	.LC1
 	.word	.LANCHOR0+21
 	.word	.LC2
 	.word	.LC3
 	.word	.LANCHOR0+48
+	.word	.LANCHOR0
 	.word	.LC4
 	.word	.LC5
 	.word	.LC6
 	.word	.LC7
 	.word	.LC8
 	.word	.LC9
-	.word	.LANCHOR0
 	.fnend
 	.size	rockit_rkcif_handle_message, .-rockit_rkcif_handle_message
 	.align	1
@@ -392,72 +399,72 @@ rockit_rkcif_mpibuf_done:
 	mov	r4, r0
 	.pad #44
 	sub	sp, sp, #44
-	cbnz	r0, .L57
-	movs	r3, #102
-	ldr	r2, .L87
+	cbnz	r0, .L60
+	movs	r3, #104
+	ldr	r2, .L90
 	str	r3, [sp]
-	ldr	r3, .L87+4
-.L86:
+	ldr	r3, .L90+4
+.L89:
 	movs	r1, #2
 	movs	r0, #8
 	bl	vlog
-.L78:
+.L81:
 	movs	r0, #0
 	add	sp, sp, #44
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L57:
+.L60:
 	ldr	r7, [r0, #28]
-	cbnz	r7, .L59
-	movs	r3, #107
-	ldr	r2, .L87+8
+	cbnz	r7, .L62
+	movs	r3, #109
+	ldr	r2, .L90+8
 	str	r3, [sp]
-	ldr	r3, .L87+4
-	b	.L86
-.L59:
+	ldr	r3, .L90+4
+	b	.L89
+.L62:
 	ldr	r8, [r7, #288]
 	cmp	r8, #0
-	bne	.L60
-	movs	r3, #115
-	ldr	r2, .L87+12
+	bne	.L63
+	movs	r3, #117
+	ldr	r2, .L90+12
 	str	r3, [sp]
-	ldr	r3, .L87+4
-	b	.L86
-.L60:
+	ldr	r3, .L90+4
+	b	.L89
+.L63:
 	ldrb	r6, [r0, #2]	@ zero_extendqisi2
-	cbz	r6, .L61
+	cbz	r6, .L64
 	movs	r1, #1
 	mov	r0, r7
 	bl	rockit_rkcif_buf_que
 	movs	r3, #0
 	strb	r3, [r4, #2]
-	b	.L78
-.L61:
+	b	.L81
+.L64:
 	ldr	r5, [r0, #32]
 	cmp	r5, #0
-	beq	.L78
+	beq	.L81
 	ldr	r3, [r0, #72]
 	str	r3, [r5, #624]
 	ldr	r3, [r0, #68]
 	str	r3, [r5, #620]
-	ldr	r3, .L87+16
+	ldr	r3, .L90+16
 	ldr	r2, [r0, #88]
 	sub	r9, r3, #48
-.L63:
+.L66:
 	ldr	r1, [r3, r6, lsl #3]
 	cmp	r2, r1
-	beq	.L62
+	beq	.L65
 	adds	r6, r6, #1
 	cmp	r6, #24
-	bne	.L63
-	movs	r3, #137
-	ldr	r2, .L87+20
+	bne	.L66
+	movs	r3, #139
+	ldr	r2, .L90+20
 	str	r3, [sp]
 	movs	r1, #2
-	ldr	r3, .L87+4
+	ldr	r3, .L90+4
 	movs	r0, #8
 	bl	vlog
-.L62:
+.L65:
 	add	r6, r9, r6, lsl #3
 	mov	r2, #1000
 	ldr	r3, [r6, #52]
@@ -470,7 +477,7 @@ rockit_rkcif_mpibuf_done:
 	add	r3, sp, #36
 	ldrd	r0, [r4, #112]
 	bl	div_s64_rem
-	ldr	r2, .L87+24
+	ldr	r2, .L90+24
 	strd	r0, [r5, #672]
 	ldr	r3, [r4, #108]
 	str	r3, [r5, #668]
@@ -484,9 +491,9 @@ rockit_rkcif_mpibuf_done:
 	str	r3, [sp, #8]
 	ldr	r3, [r4, #76]
 	str	r3, [sp, #4]
-	movs	r3, #149
+	movs	r3, #151
 	str	r3, [sp]
-	ldr	r3, .L87+4
+	ldr	r3, .L90+4
 	bl	vlog
 	str	r6, [r5, #608]
 	mov	r2, r6
@@ -494,58 +501,58 @@ rockit_rkcif_mpibuf_done:
 	mov	r0, r7
 	bl	mpi_node_buffer_out
 	ldr	r3, [r5, #448]
-	cbnz	r3, .L65
+	cbnz	r3, .L68
 	mov	r0, r5
 	bl	mpi_obj_unref
-	b	.L78
-.L65:
-	ldr	r10, .L87+4
-	mov	r9, r8
-	ldr	fp, .L87+28
+	b	.L81
 .L68:
+	ldr	r10, .L90+4
+	mov	r9, r8
+	ldr	fp, .L90+28
+.L71:
 	ldr	r3, [r9, #4]
 	mov	r2, fp
 	movs	r1, #5
 	movs	r0, #8
 	strd	r6, r3, [sp, #4]
-	movs	r3, #160
+	movs	r3, #162
 	str	r3, [sp]
 	mov	r3, r10
 	bl	vlog
 	ldr	r3, [r9, #4]
-	cbz	r3, .L66
+	cbz	r3, .L69
 	ldr	r2, [r5]
 	ldr	r3, [r3]
 	cmp	r2, r3
-	bne	.L66
+	bne	.L69
 	add	r6, r8, r6, lsl #3
 	movs	r3, #0
 	strb	r3, [r6, #8]
-.L67:
+.L70:
 	mov	r0, r5
 	bl	mpi_obj_unref
 	ldrb	r3, [r4, #1]	@ zero_extendqisi2
-	cbz	r3, .L69
+	cbz	r3, .L72
 	movs	r1, #1
 	mov	r0, r7
 	bl	rockit_rkcif_buf_que
-	cbz	r0, .L69
+	cbz	r0, .L72
 	movs	r3, #0
 	strb	r3, [r4, #1]
-	b	.L78
-.L66:
+	b	.L81
+.L69:
 	adds	r6, r6, #1
 	add	r9, r9, #8
-	cmp	r6, #5
-	bne	.L68
-	b	.L67
-.L69:
+	cmp	r6, #20
+	bne	.L71
+	b	.L70
+.L72:
 	ldrb	r3, [r4, #1]	@ zero_extendqisi2
 	strb	r3, [r8, #1]
-	b	.L78
-.L88:
+	b	.L81
+.L91:
 	.align	2
-.L87:
+.L90:
 	.word	.LC10
 	.word	.LANCHOR0+240
 	.word	.LC11
@@ -567,14 +574,10 @@ cif_create_ctx:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
-	ldr	r3, .L90
+	movs	r2, #2
 	mov	r1, #3520
-	ldr	r0, [r3, #52]
-	b	kmem_cache_alloc
-.L91:
-	.align	2
-.L90:
-	.word	kmalloc_caches
+	movw	r0, #14184
+	b	kmalloc_order
 	.fnend
 	.size	cif_create_ctx, .-cif_create_ctx
 	.align	1
@@ -592,7 +595,7 @@ rockit_rkcif_dev_register:
 	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	.pad #12
 	mov	r8, r0
-	ldr	r5, .L109
+	ldr	r5, .L110
 	mov	r1, #3264
 	movs	r6, #1
 	mov	fp, #0
@@ -604,8 +607,8 @@ rockit_rkcif_dev_register:
 	movs	r1, #0
 	mov	r4, r0
 	bl	memset
-	movw	r3, #357
-	ldr	r2, .L109+4
+	movw	r3, #363
+	ldr	r2, .L110+4
 	movs	r1, #5
 	movs	r0, #8
 	add	r7, r4, #60
@@ -613,30 +616,30 @@ rockit_rkcif_dev_register:
 	str	r7, [r4, #64]
 	str	r3, [sp]
 	str	r8, [sp, #4]
-	ldr	r3, .L109+8
+	ldr	r3, .L110+8
 	bl	vlog
-	ldr	r3, .L109+12
+	ldr	r3, .L110+12
 	str	r3, [r4, #68]
-	ldr	r3, .L109+16
+	ldr	r3, .L110+16
 	str	r3, [r4, #76]
 	movs	r3, #2
 	strd	r3, r6, [r4, #48]
 	ldr	r3, [r4, #56]
 	orr	r3, r3, #3
 	str	r3, [r4, #56]
-.L93:
+.L94:
 	ldr	r2, [r4, #52]
 	ldr	r0, [r9, #20]
 	cmp	r2, r10
-	bgt	.L97
+	bgt	.L98
 	ldr	r3, [r4, #48]
 	add	fp, fp, #1
 	cmp	r3, fp
-	bgt	.L102
+	bgt	.L103
 	mov	r1, #3520
 	bl	kmem_cache_alloc
 	mov	r5, r0
-	cbz	r0, .L100
+	cbz	r0, .L101
 	mov	r3, #-1
 	movs	r1, #2
 	str	r3, [r0, #16]
@@ -645,7 +648,7 @@ rockit_rkcif_dev_register:
 	ldr	r0, [r9, #20]
 	bl	kmem_cache_alloc
 	str	r0, [r5, #20]
-	cbz	r0, .L100
+	cbz	r0, .L101
 	movs	r3, #16
 	movs	r2, #1
 	strd	r3, r3, [r0, #8]
@@ -655,40 +658,40 @@ rockit_rkcif_dev_register:
 	str	r5, [r4, #64]
 	strd	r7, r3, [r5]
 	str	r5, [r3]
-.L100:
+.L101:
 	mov	r2, r8
 	movs	r1, #8
 	mov	r0, r4
 	bl	mpi_dev_register
-	ldr	r3, .L109+20
+	ldr	r3, .L110+20
 	movs	r2, #0
-	ldr	r1, .L109+24
+	ldr	r1, .L110+24
 	mov	r0, r4
 	str	r3, [r4, #80]
 	bl	mpi_sysfs_dev_add
-	mov	r3, #434
-	ldr	r2, .L109+28
+	mov	r3, #440
+	ldr	r2, .L110+28
 	movs	r1, #5
 	movs	r0, #8
 	str	r3, [sp]
-	ldr	r3, .L109+8
+	ldr	r3, .L110+8
 	bl	vlog
 	add	sp, sp, #12
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L97:
+.L98:
 	mov	r1, #3520
 	bl	kmem_cache_alloc
 	mov	r5, r0
 	cmp	r0, #0
-	beq	.L95
+	beq	.L96
 	strd	r6, fp, [r0, #8]
 	mov	r1, #3520
 	str	r10, [r0, #16]
 	ldr	r0, [r9, #4]
 	bl	kmem_cache_alloc
 	str	r0, [r5, #20]
-	cbz	r0, .L95
+	cbz	r0, .L96
 	mov	r2, #2160
 	mov	r3, #3840
 	strd	r3, r2, [r0, #8]
@@ -718,15 +721,15 @@ rockit_rkcif_dev_register:
 	str	r5, [r4, #64]
 	strd	r7, r2, [r5]
 	str	r5, [r2]
-.L95:
+.L96:
 	add	r10, r10, #1
-	b	.L93
-.L102:
+	b	.L94
+.L103:
 	mov	r10, #0
-	b	.L93
-.L110:
+	b	.L94
+.L111:
 	.align	2
-.L109:
+.L110:
 	.word	kmalloc_caches
 	.word	.LC16
 	.word	.LANCHOR0+265
@@ -752,27 +755,27 @@ rockit_rkcif_init:
 	push	{r4, r5, r6, r7, r8, lr}
 	.save {r4, r5, r6, r7, r8, lr}
 	movs	r4, #0
-	ldr	r5, .L118
+	ldr	r5, .L119
 	.pad #32
 	sub	sp, sp, #32
 	mov	r1, r4
-	ldr	r7, .L118+4
+	ldr	r7, .L119+4
 	strd	r4, r4, [sp, #20]
-	movw	r6, #449
+	movw	r6, #455
 	ldr	r0, [r5]
 	str	r4, [sp, #28]
 	bl	rkcif_rockit_function_register
 	movs	r1, #1
-	ldr	r8, .L118+12
+	ldr	r8, .L119+12
 	str	r0, [r5]
-	ldr	r0, .L118+8
+	ldr	r0, .L119+8
 	bl	rkcif_rockit_function_register
 	add	r0, sp, #20
 	bl	rkcif_rockit_get_cifdev
 	add	r5, sp, #20
-.L113:
+.L114:
 	ldr	r0, [r5], #4
-	cbz	r0, .L112
+	cbz	r0, .L113
 	bl	rockit_rkcif_dev_register
 	ldr	r3, [r5, #-4]
 	mov	r2, r8
@@ -782,17 +785,17 @@ rockit_rkcif_init:
 	mov	r3, r7
 	str	r6, [sp]
 	bl	vlog
-.L112:
+.L113:
 	adds	r4, r4, #1
 	cmp	r4, #3
-	bne	.L113
+	bne	.L114
 	movs	r0, #0
 	add	sp, sp, #32
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, pc}
-.L119:
+.L120:
 	.align	2
-.L118:
+.L119:
 	.word	.LANCHOR1
 	.word	.LANCHOR0+420
 	.word	rockit_rkcif_mpibuf_done
@@ -821,19 +824,19 @@ rockit_rkcif_exit:
 	str	r3, [sp, #12]
 	bl	rkcif_rockit_get_cifdev
 	mov	r5, r0
-	cbnz	r0, .L120
+	cbnz	r0, .L121
 	add	r4, sp, #4
-.L125:
+.L126:
 	ldr	r0, [r4], #4
-	cbz	r0, .L123
+	cbz	r0, .L124
 	bl	mpi_dev_find_by_name
-	cbz	r0, .L123
+	cbz	r0, .L124
 	bl	mpi_dev_unregister
-.L123:
+.L124:
 	adds	r5, r5, #1
 	cmp	r5, #3
-	bne	.L125
-.L120:
+	bne	.L126
+.L121:
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, pc}
@@ -843,13 +846,13 @@ rockit_rkcif_exit:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__func__.41926, %object
-	.size	__func__.41926, 21
-__func__.41926:
+	.type	__func__.40299, %object
+	.size	__func__.40299, 21
+__func__.40299:
 	.ascii	"rockit_rkcif_buf_que\000"
-	.type	__func__.41960, %object
-	.size	__func__.41960, 26
-__func__.41960:
+	.type	__func__.40334, %object
+	.size	__func__.40334, 26
+__func__.40334:
 	.ascii	"rockit_rkcif_node_message\000"
 	.space	1
 	.type	v4l2_rockit_fmt, %object
@@ -902,14 +905,14 @@ v4l2_rockit_fmt:
 	.word	842090322
 	.word	131083
 	.word	844257602
-	.word	131085
-	.type	__func__.41908, %object
-	.size	__func__.41908, 25
-__func__.41908:
+	.word	131084
+	.type	__func__.40281, %object
+	.size	__func__.40281, 25
+__func__.40281:
 	.ascii	"rockit_rkcif_mpibuf_done\000"
-	.type	__func__.41998, %object
-	.size	__func__.41998, 26
-__func__.41998:
+	.type	__func__.40372, %object
+	.size	__func__.40372, 26
+__func__.40372:
 	.ascii	"rockit_rkcif_dev_register\000"
 	.space	1
 	.type	rockit_rkcif_driver_fops, %object
@@ -928,9 +931,9 @@ rockit_rkcif_driver_fops:
 	.space	4
 	.word	0
 	.space	60
-	.type	__func__.42010, %object
-	.size	__func__.42010, 18
-__func__.42010:
+	.type	__func__.40384, %object
+	.size	__func__.40384, 18
+__func__.40384:
 	.ascii	"rockit_rkcif_init\000"
 	.bss
 	.align	2

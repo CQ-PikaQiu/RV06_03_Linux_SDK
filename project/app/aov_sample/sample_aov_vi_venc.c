@@ -111,7 +111,7 @@ static void print_usage(const RK_CHAR *name) {
 	printf("\t-w | --width: camera with, Default 1920\n");
 	printf("\t-h | --height: camera height, Default 1080\n");
 	printf("\t-r | --wrap : wrap for mainStream, 0: close 1: open, Default: 0\n");
-	printf("\t-e | --encode: encode type, Default:h264cbr, Value:h264cbr, "
+	printf("\t-e | --encode: encode type, Default:h265vbr, Value:h264cbr, "
 	       "h264vbr, h264avbr "
 	       "h265cbr, h265vbr, h265avbr, mjpegcbr, mjpegvbr\n");
 	printf("\t-b | --bitrate: encode bitrate, Default 4096\n");
@@ -161,9 +161,9 @@ static void *venc_get_stream(void *pArgs) {
 				memcpy(venc_data + venc_data_size, pData, ctx->stFrame.pstPack->u32Len);
 				venc_data_size += ctx->stFrame.pstPack->u32Len;
 			} else {
-				SAMPLE_COMM_AOV_CopyStreamToSdcard(ctx->s32ChnId, venc_data,
-				                                   venc_data_size, pData,
-				                                   ctx->stFrame.pstPack->u32Len);
+				SAMPLE_COMM_AOV_CopyRawStreamToSdcard(ctx->s32ChnId, venc_data,
+				                                      venc_data_size, pData,
+				                                      ctx->stFrame.pstPack->u32Len);
 				venc_data_size = 0;
 				RK_MPI_VENC_RequestIDR(ctx->s32ChnId, RK_FALSE);
 			}
@@ -213,9 +213,9 @@ static void *venc_get_stream(void *pArgs) {
 					}
 				} else {
 					RK_MPI_VENC_RequestIDR(ctx->s32ChnId, RK_FALSE);
-					SAMPLE_COMM_AOV_CopyStreamToSdcard(ctx->s32ChnId, venc_data,
-					                                   venc_data_size, pData,
-					                                   ctx->stFrame.pstPack->u32Len);
+					SAMPLE_COMM_AOV_CopyRawStreamToSdcard(ctx->s32ChnId, venc_data,
+					                                      venc_data_size, pData,
+					                                      ctx->stFrame.pstPack->u32Len);
 					venc_data_size = 0;
 					aov_got_idr = 0;
 				}
@@ -258,8 +258,8 @@ static void *venc_get_stream(void *pArgs) {
 
 	SAMPLE_COMM_ISP_MultiFrame(0);
 	if (g_enable_save_sd && venc_data && venc_data_size > 0) {
-		SAMPLE_COMM_AOV_CopyStreamToSdcard(ctx->s32ChnId, venc_data, venc_data_size, NULL,
-		                                   0);
+		SAMPLE_COMM_AOV_CopyRawStreamToSdcard(ctx->s32ChnId, venc_data, venc_data_size,
+		                                      NULL, 0);
 		venc_data_size = 0;
 	}
 	if (venc_data)
@@ -279,8 +279,8 @@ int main(int argc, char *argv[]) {
 	RK_CHAR *pDeviceName = NULL;
 	RK_CHAR *pInPathBmp = NULL;
 	RK_CHAR *pOutPathVenc = NULL;
-	CODEC_TYPE_E enCodecType = RK_CODEC_TYPE_H264;
-	VENC_RC_MODE_E enRcMode = VENC_RC_MODE_H264CBR;
+	CODEC_TYPE_E enCodecType = RK_CODEC_TYPE_H265;
+	VENC_RC_MODE_E enRcMode = VENC_RC_MODE_H265VBR;
 	RK_CHAR *pCodecName = "H264";
 	RK_S32 s32CamId = 0;
 	RK_S32 s32DisId = -1;
@@ -460,6 +460,10 @@ int main(int argc, char *argv[]) {
 
 	// Init VI[0]
 	ctx->vi.bIfQuickStart = u32QuickStart;
+#if defined(RV1126)
+	// RV1126 not support RK_MPI_VI_EnableChnExt
+	ctx->vi.bIfQuickStart = true;
+#endif
 	ctx->vi.u32Width = video_width;
 	ctx->vi.u32Height = video_height;
 	ctx->vi.s32DevId = s32CamId;

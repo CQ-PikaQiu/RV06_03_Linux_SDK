@@ -1942,7 +1942,7 @@ avs_dev_ioctl:
 	pop	{r4, r5, r6, r7, r8, pc}
 .L268:
 	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
+@ 87 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
 	cmp	r4, r1
 	sbc	r1, r4, r4
 .inst.w 0xf3af8014
@@ -2149,49 +2149,49 @@ avs_exit:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__func__.37866, %object
-	.size	__func__.37866, 15
-__func__.37866:
+	.type	__func__.36018, %object
+	.size	__func__.36018, 15
+__func__.36018:
 	.ascii	"avs_node_reset\000"
-	.type	__func__.37732, %object
-	.size	__func__.37732, 16
-__func__.37732:
+	.type	__func__.35884, %object
+	.size	__func__.35884, 16
+__func__.35884:
 	.ascii	"avs_node_create\000"
-	.type	__func__.37831, %object
-	.size	__func__.37831, 15
-__func__.37831:
+	.type	__func__.35983, %object
+	.size	__func__.35983, 15
+__func__.35983:
 	.ascii	"avs_node_start\000"
-	.type	__func__.37878, %object
-	.size	__func__.37878, 11
-__func__.37878:
+	.type	__func__.36030, %object
+	.size	__func__.36030, 11
+__func__.36030:
 	.ascii	"avs_mb_get\000"
-	.type	__func__.37901, %object
-	.size	__func__.37901, 12
-__func__.37901:
+	.type	__func__.36053, %object
+	.size	__func__.36053, 12
+__func__.36053:
 	.ascii	"avs_mb_send\000"
-	.type	__func__.37916, %object
-	.size	__func__.37916, 15
-__func__.37916:
+	.type	__func__.36068, %object
+	.size	__func__.36068, 15
+__func__.36068:
 	.ascii	"avs_mb_release\000"
-	.type	__func__.37965, %object
-	.size	__func__.37965, 13
-__func__.37965:
+	.type	__func__.36117, %object
+	.size	__func__.36117, 13
+__func__.36117:
 	.ascii	"avs_dev_open\000"
-	.type	__func__.37758, %object
-	.size	__func__.37758, 17
-__func__.37758:
+	.type	__func__.35910, %object
+	.size	__func__.35910, 17
+__func__.35910:
 	.ascii	"avs_node_destroy\000"
-	.type	__func__.37983, %object
-	.size	__func__.37983, 16
-__func__.37983:
+	.type	__func__.36135, %object
+	.size	__func__.36135, 16
+__func__.36135:
 	.ascii	"avs_dev_release\000"
-	.type	__func__.37854, %object
-	.size	__func__.37854, 14
-__func__.37854:
+	.type	__func__.36006, %object
+	.size	__func__.36006, 14
+__func__.36006:
 	.ascii	"avs_node_stop\000"
-	.type	__func__.37938, %object
-	.size	__func__.37938, 14
-__func__.37938:
+	.type	__func__.36090, %object
+	.size	__func__.36090, 14
+__func__.36090:
 	.ascii	"avs_dev_ioctl\000"
 	.space	2
 	.type	avs_ioctls, %object
@@ -2267,10 +2267,10 @@ g_avs_dev:
 	.space	184
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:
-	.ascii	"-2024-01-22-17:02:23\000"
+	.ascii	"-2024-05-24-16:21:01\000"
 .LC1:
-	.ascii	"vmpi:a9dd19f6acbf3ae9d621a285aa64278d958f9b03-v1.4."
-	.ascii	"67\000"
+	.ascii	"vmpi:28ee389dbc33c2c7db812cd08e54fd3a0f2f992b-v1.4."
+	.ascii	"81\000"
 .LC2:
 	.ascii	"\033[1;32mAVS Grp %d reset node done!\033[0m\000"
 .LC3:

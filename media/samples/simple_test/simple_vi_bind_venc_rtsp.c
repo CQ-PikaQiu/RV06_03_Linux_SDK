@@ -115,13 +115,23 @@ static RK_S32 test_venc_init(int chnId, int width, int height, RK_CODEC_ID_E enT
 	VENC_CHN_ATTR_S stAttr;
 	memset(&stAttr, 0, sizeof(VENC_CHN_ATTR_S));
 
-	stAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
-	stAttr.stRcAttr.stH264Cbr.u32BitRate = g_u32Bitrate;
-	stAttr.stRcAttr.stH264Cbr.u32Gop = 60;
+	if (enType == RK_VIDEO_ID_AVC) {
+		stAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+		stAttr.stRcAttr.stH264Cbr.u32BitRate = g_u32Bitrate;
+		stAttr.stRcAttr.stH264Cbr.u32Gop = 60;
+	} else if (enType == RK_VIDEO_ID_HEVC) {
+		stAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265CBR;
+		stAttr.stRcAttr.stH265Cbr.u32BitRate = g_u32Bitrate;
+		stAttr.stRcAttr.stH265Cbr.u32Gop = 60;
+	} else if (enType == RK_VIDEO_ID_MJPEG) {
+		stAttr.stRcAttr.enRcMode = VENC_RC_MODE_MJPEGCBR;
+		stAttr.stRcAttr.stMjpegCbr.u32BitRate = g_u32Bitrate;
+	}
 
 	stAttr.stVencAttr.enType = enType;
 	stAttr.stVencAttr.enPixelFormat = RK_FMT_YUV420SP;
-	stAttr.stVencAttr.u32Profile = H264E_PROFILE_HIGH;
+	if (enType == RK_VIDEO_ID_AVC)
+		stAttr.stVencAttr.u32Profile = H264E_PROFILE_HIGH;
 	stAttr.stVencAttr.u32PicWidth = width;
 	stAttr.stVencAttr.u32PicHeight = height;
 	stAttr.stVencAttr.u32VirWidth = width;
@@ -171,7 +181,7 @@ int vi_dev_init() {
 			return -1;
 		}
 		// 1-3.bind dev/pipe
-		stBindPipe.u32Num = pipeId;
+		stBindPipe.u32Num = 1;
 		stBindPipe.PipeId[0] = pipeId;
 		ret = RK_MPI_VI_SetDevBindPipe(devId, &stBindPipe);
 		if (ret != RK_SUCCESS) {
@@ -338,7 +348,7 @@ static void print_usage(const RK_CHAR *name) {
 	printf("\t-w | --width: VI width, Default:1920\n");
 	printf("\t-h | --heght: VI height, Default:1080\n");
 	printf("\t-a | --aiq: iq file path, Default:/etc/iqfiles\n");
-	printf("\t-c | --frame_cnt: frame number of output, Default:150\n");
+	printf("\t-c | --frame_cnt: frame number of output, Default:-1\n");
 	printf("\t-I | --camid: camera ctx id, Default 0. "
 	       "0:rkisp_mainpath,1:rkisp_selfpath,2:rkisp_bypasspath\n");
 	printf("\t-e | --encode: encode type, Default:h264, Value:h264, h265\n");
@@ -355,6 +365,7 @@ int main(int argc, char *argv[]) {
 	RK_S32 s32chnlId = 0;
 	char *iq_dir = "/etc/iqfiles";
 	int c;
+	int ret = -1;
 
 	while ((c = getopt(argc, argv, optstr)) != -1) {
 		switch (c) {
@@ -383,7 +394,7 @@ int main(int argc, char *argv[]) {
 				pCodecName = "H265";
 			} else {
 				printf("ERROR: Invalid encoder type.\n");
-				return 0;
+				return -1;
 			}
 			break;
 		case 'b':
@@ -392,7 +403,7 @@ int main(int argc, char *argv[]) {
 		case '?':
 		default:
 			print_usage(argv[0]);
-			return 0;
+			return -1;
 		}
 	}
 
@@ -483,7 +494,7 @@ int main(int argc, char *argv[]) {
 
 	s32Ret = RK_MPI_VI_DisableDev(0);
 	RK_LOGE("RK_MPI_VI_DisableDev %x", s32Ret);
-
+	ret = 0;
 __FAILED:
 	RK_LOGE("test running exit:%d", s32Ret);
 	RK_MPI_SYS_Exit();
@@ -492,5 +503,5 @@ __FAILED:
 	SIMPLE_COMM_ISP_Stop(0);
 #endif
 
-	return 0;
+	return ret;
 }

@@ -26,7 +26,7 @@ RKAIQ_BEGIN_DECLARE
 
 ///////////////////////////postisp v1//////////////////////////////////////
 typedef struct CalibDbV2_PostIspV1_T_ISO_s {
-    // M4_NUMBER_MARK_DESC("iso", "f32", M4_RANGE(50, 409600), "50", M4_DIGIT(1), "index2")
+    // M4_NUMBER_MARK_DESC("iso", "f32", M4_RANGE(50, 409600), "50", M4_DIGIT(1), "index1")
     float iso;
     // M4_NUMBER_DESC("gain", "f32", M4_RANGE(1.0, 8192.0), "1.0", M4_DIGIT(2))
     float gain;
@@ -36,7 +36,7 @@ typedef struct CalibDbV2_PostIspV1_T_ISO_s {
     float shade;
     // M4_NUMBER_DESC("sharp", "f32", M4_RANGE(0.0, 4.0), "1.0", M4_DIGIT(2))
     float sharp;
-    // M4_NUMBER_DESC("min_luma", "f32", M4_RANGE(0.0, 256.0), "0.0", M4_DIGIT(2))
+    // M4_NUMBER_DESC("min_luma", "f32", M4_RANGE(0.0, 128.0), "0.0", M4_DIGIT(2))
     float min_luma;
     // M4_NUMBER_DESC("sat_scale", "f32", M4_RANGE(1.0, 3.0), "1", M4_DIGIT(2))
     float sat_scale;
@@ -69,7 +69,7 @@ typedef struct CalibDbV2_PostIspV1_Tunning_s {
     float dynamicSw[2];
     // M4_ARRAY_DESC("luma_point", "u16", M4_SIZE(1,6), M4_RANGE(0,1024), "[0, 16, 64, 128, 196, 256]", M4_DIGIT(1), M4_DYNAMIC(0))
     uint16_t luma_point[6];
-    // M4_STRUCT_LIST_DESC("Tuning_ISO", M4_SIZE_DYNAMIC, "double_indx_list")
+    // M4_STRUCT_LIST_DESC("Tuning_ISO", M4_SIZE_DYNAMIC, "normal_ui_style")
     CalibDbV2_PostIspV1_T_ISO_t* Tuning_ISO;
     int Tuning_ISO_len;
 } CalibDbV2_PostIspV1_Tunning_t;

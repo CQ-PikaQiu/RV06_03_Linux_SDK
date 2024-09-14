@@ -16,7 +16,7 @@ export RK_BOOT_MEDIUM=spi_nor
 export RK_UBOOT_DEFCONFIG=rv1106-spi-nor_defconfig
 
 # Uboot defconfig fragment
-export RK_UBOOT_DEFCONFIG_FRAGMENT="rv1106-spi-nor-wakeup.config rk-sfc.config"
+export RK_UBOOT_DEFCONFIG_FRAGMENT="rk-sfc.config"
 
 # Uboot Loader ini overlay
 #export RK_UBOOT_RKBIN_INI_OVERLAY=RKBOOT/RV1106MINIALL_TB_SC3336_SC3338.ini
@@ -44,7 +44,7 @@ export RK_BOOTARGS_CMA_SIZE="40M"
 #       <partdef> := <size>[@<offset>](part-name)
 # Note:
 #   If the first partition offset is not 0x0, it must be added. Otherwise, it needn't adding.
-export RK_PARTITION_CMD_IN_ENV="64K(env),256K@64K(idblock),512K(uboot),2M(boot),1792K(rootfs),9M(oem),-(userdata)"
+export RK_PARTITION_CMD_IN_ENV="64K(env),256K@64K(idblock),512K(uboot),2M(boot),1792K(rootfs),11M(oem),-(userdata)"
 
 # config partition's filesystem type (squashfs is readonly)
 # emmc:    squashfs/ext4
@@ -89,9 +89,11 @@ export RK_BUILD_APP_TO_OEM_PARTITION=y
 
 export RK_PRE_BUILD_OEM_SCRIPT=rv1106-spi_nor-post.sh
 
-export RK_META_SIZE=393216
+# config AUDIO model
+export RK_AUDIO_MODEL=NONE
 
-export RK_META_PARAM=" \
- --rk_cam_mirror_flip=3 \
- --rk_cam_fps=10 \
-"
+# config AI-ISP model
+export RK_AIISP_MODEL=rkmodel_1080_1920.aiisp
+
+# config NPU model
+export RK_NPU_MODEL="object_detection_pfp_896x512.data"

@@ -26,6 +26,7 @@ typedef struct {
     uint32_t detObjectType;                      /* 配置要返回的检测目标 */
     RockIvaAreas roiAreas;                       /* 配置有效检测区域（仅影响检测结果）*/
     uint8_t scores[ROCKIVA_OBJECT_TYPE_MAX];     /* 各类别过滤分数阈值，0为内部自动 */
+    uint8_t min_det_count;                       /* 检测目标稳定检测帧数大于该数值后再上报，过滤一些小概率误检 */
 } RockIvaDetTaskParams;
 
 /**

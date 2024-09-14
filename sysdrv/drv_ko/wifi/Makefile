@@ -3,12 +3,18 @@ ifeq ($(SYSDRV_PARAM), )
 	include $(SYSDRV_PARAM)
 endif
 
+ifneq ($(SYSDRV_KERNEL_OBJS_OUTPUT_DIR),)
+WIFI_BUILD_KERNEL_OBJ_DIR=$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR)
+else
+WIFI_BUILD_KERNEL_OBJ_DIR=$(KERNEL_DIR)
+endif
+
 ifeq ($(ENABLE_WIFI),y)
 
-WIFI_USB = $(shell grep -o "CONFIG_USB=y" $(KERNEL_DIR)/.config)
-WIFI_SDIO = $(shell grep -o "CONFIG_MMC=y" $(KERNEL_DIR)/.config)
-WIFI_RFKILL = $(shell grep -o "CONFIG_RFKILL=y" $(KERNEL_DIR)/.config)
-export WIFI_RFKILL
+WIFI_USB = $(shell grep -o "CONFIG_USB=y" $(WIFI_BUILD_KERNEL_OBJ_DIR)/.config)
+WIFI_SDIO = $(shell grep -o "CONFIG_MMC=y" $(WIFI_BUILD_KERNEL_OBJ_DIR)/.config)
+WIFI_RFKILL = $(shell grep -o "CONFIG_RFKILL=y" $(WIFI_BUILD_KERNEL_OBJ_DIR)/.config)
+export WIFI_RFKILL WIFI_BUILD_KERNEL_OBJ_DIR
 
 ifneq ($(WIFI_USB),)
 	PKG_TARGET := build-usb

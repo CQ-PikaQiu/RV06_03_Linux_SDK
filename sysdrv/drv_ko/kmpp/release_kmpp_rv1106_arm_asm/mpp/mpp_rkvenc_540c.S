@@ -27,7 +27,7 @@ ____atomic_set_bit:
 	push	{r4, lr}
 	.save {r4, lr}
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -39,7 +39,7 @@ ____atomic_set_bit:
 	orrs	r3, r3, r4
 	str	r3, [r1]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -79,7 +79,7 @@ rkvenc_invalid_class_msg:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
-	ldr	r3, [r0, #2324]
+	ldr	r3, [r0, #2340]
 	movs	r2, #12
 	ldr	r3, [r3, #24]
 	mla	r3, r2, r3, r0
@@ -90,15 +90,55 @@ rkvenc_invalid_class_msg:
 	movs	r0, #0
 	bx	lr
 .L6:
-	ldr	r1, [r0, #2332]
+	ldr	r1, [r0, #2348]
 	cbz	r1, .L5
-	str	r2, [r0, #2332]
-	str	r2, [r0, #2328]
+	str	r2, [r0, #2348]
+	str	r2, [r0, #2344]
 .L5:
 	adds	r0, r0, #12
 	b	.L4
 	.fnend
 	.size	rkvenc_invalid_class_msg, .-rkvenc_invalid_class_msg
+	.align	1
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	rkvenc_get_class_reg, %function
+rkvenc_get_class_reg:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r4, r5, r6, lr}
+	.save {r4, r5, r6, lr}
+	movs	r3, #0
+	ldr	r2, [r0, #2340]
+	ldr	r5, [r2, #24]
+.L11:
+	cmp	r3, r5
+	bne	.L14
+	movs	r0, #0
+	b	.L10
+.L14:
+	ldr	r4, [r2, #28]
+	cmp	r4, r1
+	bhi	.L12
+	ldr	r6, [r2, #32]
+	cmp	r6, r1
+	bls	.L12
+	movs	r2, #12
+	subs	r1, r1, r4
+	mla	r3, r2, r3, r0
+	ldr	r0, [r3, #2348]
+	add	r0, r0, r1
+.L10:
+	pop	{r4, r5, r6, pc}
+.L12:
+	adds	r3, r3, #1
+	adds	r2, r2, #20
+	b	.L11
+	.fnend
+	.size	rkvenc_get_class_reg, .-rkvenc_get_class_reg
 	.align	1
 	.syntax unified
 	.thumb
@@ -115,28 +155,28 @@ mpp_read:
 	ldr	r3, [r0, #60]
 	add	r3, r3, r1
 	.syntax unified
-@ 113 "./arch/arm/include/asm/io.h" 1
+@ 113 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/io.h" 1
 	ldr r4, [r3]
 @ 0 "" 2
-@ 732 "drivers/kmpp/mpp/mpp_common.h" 1
+@ 747 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_common.h" 1
 	dsb 
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r3, .L15
+	ldr	r3, .L20
 	ldr	r3, [r3]
 	lsls	r3, r3, #18
-	bpl	.L10
+	bpl	.L15
 	mov	r3, r4
 	lsrs	r1, r1, #2
-	ldr	r0, .L15+4
+	ldr	r0, .L20+4
 	bl	printk
-.L10:
+.L15:
 	mov	r0, r4
 	pop	{r4, pc}
-.L16:
+.L21:
 	.align	2
-.L15:
+.L20:
 	.word	mpp_dev_debug
 	.word	.LC0
 	.fnend
@@ -157,25 +197,25 @@ mpp_read_relaxed:
 	ldr	r3, [r0, #60]
 	add	r3, r3, r1
 	.syntax unified
-@ 113 "./arch/arm/include/asm/io.h" 1
+@ 113 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/io.h" 1
 	ldr r4, [r3]
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r3, .L22
+	ldr	r3, .L27
 	ldr	r3, [r3]
 	lsls	r3, r3, #18
-	bpl	.L17
+	bpl	.L22
 	mov	r3, r4
 	lsrs	r1, r1, #2
-	ldr	r0, .L22+4
+	ldr	r0, .L27+4
 	bl	printk
-.L17:
+.L22:
 	mov	r0, r4
 	pop	{r4, pc}
-.L23:
+.L28:
 	.align	2
-.L22:
+.L27:
 	.word	mpp_dev_debug
 	.word	.LC1
 	.fnend
@@ -190,7 +230,7 @@ mpp_write_relaxed:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	ldr	r3, .L29
+	ldr	r3, .L34
 	push	{r4, r5, r6, lr}
 	.save {r4, r5, r6, lr}
 	mov	r6, r0
@@ -198,26 +238,26 @@ mpp_write_relaxed:
 	mov	r4, r1
 	mov	r5, r2
 	lsls	r3, r3, #19
-	bpl	.L25
+	bpl	.L30
 	mov	r3, r2
-	ldr	r0, .L29+4
+	ldr	r0, .L34+4
 	mov	r2, r1
 	lsrs	r1, r1, #2
 	bl	printk
-.L25:
+.L30:
 	ldr	r1, [r6, #60]
 	add	r1, r1, r4
 	.syntax unified
-@ 95 "./arch/arm/include/asm/io.h" 1
+@ 95 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/io.h" 1
 	str r5, [r1]
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	movs	r0, #0
 	pop	{r4, r5, r6, pc}
-.L30:
+.L35:
 	.align	2
-.L29:
+.L34:
 	.word	mpp_dev_debug
 	.word	.LC2
 	.fnend
@@ -235,7 +275,7 @@ rkvenc_update_req:
 	push	{r0, r1, r4, r5, r6, lr}
 	.save {r4, r5, r6, lr}
 	.pad #8
-	ldr	r4, [r0, #2324]
+	ldr	r4, [r0, #2340]
 	movs	r0, #20
 	mla	r1, r0, r1, r4
 	ldrd	r5, r6, [r1, #28]
@@ -260,24 +300,24 @@ rkvenc_update_req:
 	str	r1, [r3, #16]
 	ldr	r3, [r2, #12]
 	cmp	r3, r5
-	bcc	.L32
+	bcc	.L37
 	cmp	r6, r0
-	bcs	.L33
-.L32:
+	bcs	.L38
+.L37:
 	ldr	r2, [r2, #8]
-	ldr	r1, .L34
-	ldr	r0, .L34+4
+	ldr	r1, .L39
+	ldr	r0, .L39+4
 	str	r2, [sp]
-	movw	r2, #529
+	movw	r2, #530
 	bl	printk
-.L33:
+.L38:
 	movs	r0, #0
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, pc}
-.L35:
+.L40:
 	.align	2
-.L34:
+.L39:
 	.word	.LANCHOR0
 	.word	.LC3
 	.fnend
@@ -292,7 +332,7 @@ mpp_write:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	ldr	r3, .L41
+	ldr	r3, .L46
 	push	{r4, r5, r6, lr}
 	.save {r4, r5, r6, lr}
 	mov	r6, r0
@@ -300,15 +340,15 @@ mpp_write:
 	mov	r4, r1
 	mov	r5, r2
 	lsls	r3, r3, #19
-	bpl	.L37
+	bpl	.L42
 	mov	r3, r2
-	ldr	r0, .L41+4
+	ldr	r0, .L46+4
 	mov	r2, r1
 	lsrs	r1, r1, #2
 	bl	printk
-.L37:
+.L42:
 	.syntax unified
-@ 711 "drivers/kmpp/mpp/mpp_common.h" 1
+@ 726 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_common.h" 1
 	dsb st
 @ 0 "" 2
 	.thumb
@@ -317,16 +357,16 @@ mpp_write:
 	ldr	r1, [r6, #60]
 	add	r1, r1, r4
 	.syntax unified
-@ 95 "./arch/arm/include/asm/io.h" 1
+@ 95 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/io.h" 1
 	str r5, [r1]
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	movs	r0, #0
 	pop	{r4, r5, r6, pc}
-.L42:
+.L47:
 	.align	2
-.L41:
+.L46:
 	.word	mpp_dev_debug
 	.word	.LC2
 	.fnend
@@ -347,12 +387,12 @@ rkvenc_check_bs_overflow:
 	mov	r4, r0
 	ldr	r3, [r0, #52]
 	lsls	r5, r3, #31
-	bmi	.L52
+	bmi	.L57
 	ldr	r7, [r0, #88]
 	ands	r3, r3, #8192
 	ldr	r2, [r7]
 	ldr	r5, [r2, #184]
-	beq	.L53
+	beq	.L58
 	movw	r1, #1036
 	bl	mpp_read
 	mov	r1, #1024
@@ -363,22 +403,22 @@ rkvenc_check_bs_overflow:
 	mov	r8, r0
 	mov	r0, r4
 	bl	mpp_read
-	strd	r8, r0, [r5, #212]
+	strd	r8, r0, [r5, #216]
 	mov	r3, r0
 	ldr	r2, [r4, #308]
-	strd	r2, r6, [r5, #220]
-	ldr	r2, .L63
+	strd	r2, r6, [r5, #224]
+	ldr	r2, .L68
 	ldr	r2, [r2]
 	lsls	r0, r2, #13
-	bpl	.L46
+	bpl	.L51
 	ldr	r2, [r4, #308]
 	str	r6, [sp, #4]
-	ldr	r0, .L63+4
+	ldr	r0, .L68+4
 	str	r2, [sp]
 	mov	r2, r8
 	ldr	r1, [r7, #2276]
 	bl	printk
-.L46:
+.L51:
 	ldr	r3, [r4, #308]
 	cmp	r3, r6
 	itt	eq
@@ -386,12 +426,12 @@ rkvenc_check_bs_overflow:
 	streq	r3, [r4, #308]
 	ldr	r3, [r4, #308]
 	cmp	r3, r8
-	bcc	.L48
+	bcc	.L53
 	movw	r1, #1028
 	mov	r0, r4
 	bl	mpp_read
 	str	r0, [r4, #308]
-.L48:
+.L53:
 	ldr	r2, [r4, #308]
 	movw	r1, #1036
 	mov	r0, r4
@@ -403,10 +443,10 @@ rkvenc_check_bs_overflow:
 	ldr	r3, [r4, #52]
 	movs	r0, #1
 	str	r3, [r4, #56]
-.L45:
+.L50:
 	ldr	r3, [r4, #52]
 	lsls	r1, r3, #27
-	bpl	.L43
+	bpl	.L48
 	mov	r1, #700
 	mov	r0, r4
 	bl	mpp_read
@@ -418,22 +458,22 @@ rkvenc_check_bs_overflow:
 	mov	r8, r0
 	mov	r0, r4
 	bl	mpp_read
-	strd	r8, r0, [r5, #212]
+	strd	r8, r0, [r5, #216]
 	mov	r3, r0
 	ldr	r2, [r4, #304]
-	strd	r2, r6, [r5, #220]
-	ldr	r2, .L63
+	strd	r2, r6, [r5, #224]
+	ldr	r2, .L68
 	ldr	r2, [r2]
 	lsls	r2, r2, #13
-	bpl	.L49
+	bpl	.L54
 	ldr	r2, [r4, #304]
 	str	r6, [sp, #4]
-	ldr	r0, .L63+8
+	ldr	r0, .L68+8
 	str	r2, [sp]
 	mov	r2, r8
 	ldr	r1, [r7, #2276]
 	bl	printk
-.L49:
+.L54:
 	ldr	r3, [r4, #304]
 	cmp	r3, r6
 	itt	eq
@@ -441,12 +481,12 @@ rkvenc_check_bs_overflow:
 	streq	r3, [r4, #304]
 	ldr	r3, [r4, #304]
 	cmp	r3, r8
-	bcc	.L51
+	bcc	.L56
 	mov	r1, #692
 	mov	r0, r4
 	bl	mpp_read
 	str	r0, [r4, #304]
-.L51:
+.L56:
 	ldr	r2, [r4, #304]
 	mov	r1, #696
 	mov	r0, r4
@@ -458,19 +498,19 @@ rkvenc_check_bs_overflow:
 	ldr	r3, [r4, #52]
 	movs	r0, #1
 	str	r3, [r4, #56]
-.L43:
+.L48:
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, pc}
-.L53:
+.L58:
 	mov	r0, r3
-	b	.L45
-.L52:
+	b	.L50
+.L57:
 	movs	r0, #0
-	b	.L43
-.L64:
+	b	.L48
+.L69:
 	.align	2
-.L63:
+.L68:
 	.word	mpp_dev_debug
 	.word	.LC4
 	.word	.LC5
@@ -505,16 +545,16 @@ rkvenc_clear_dvbm_info:
 	bl	mpp_read
 	orrs	r3, r5, r0
 	mov	r2, r0
-	beq	.L65
+	beq	.L70
 	mov	r1, r5
-	ldr	r0, .L67
+	ldr	r0, .L72
 	pop	{r3, r4, r5, lr}
 	b	printk
-.L65:
+.L70:
 	pop	{r3, r4, r5, pc}
-.L68:
+.L73:
 	.align	2
-.L67:
+.L72:
 	.word	.LC6
 	.fnend
 	.size	rkvenc_clear_dvbm_info, .-rkvenc_clear_dvbm_info
@@ -531,16 +571,16 @@ rkvenc_reset:
 	push	{r4, r5, r6, lr}
 	.save {r4, r5, r6, lr}
 	mov	r4, r0
-	ldr	r6, .L78
+	ldr	r6, .L83
 	ldr	r5, [r0, #152]
 	ldr	r2, [r6]
 	lsls	r2, r2, #26
-	bpl	.L70
-	movw	r2, #2243
-	ldr	r1, .L78+4
-	ldr	r0, .L78+8
+	bpl	.L75
+	movw	r2, #2247
+	ldr	r1, .L83+4
+	ldr	r0, .L83+8
 	bl	printk
-.L70:
+.L75:
 	movw	r2, #1023
 	ldr	r1, [r5, #256]
 	mov	r0, r4
@@ -549,8 +589,8 @@ rkvenc_reset:
 	ldr	r1, [r5, #248]
 	mov	r0, r4
 	bl	mpp_write
-	ldr	r3, .L78+12
-	ldr	r0, .L78+16
+	ldr	r3, .L83+12
+	ldr	r0, .L83+16
 	ldr	r3, [r3, #4]
 	blx	r3
 	movs	r2, #3
@@ -573,17 +613,17 @@ rkvenc_reset:
 	bl	rkvenc_clear_dvbm_info
 	ldr	r3, [r6]
 	lsls	r3, r3, #26
-	bpl	.L71
-	movw	r2, #2255
-	ldr	r1, .L78+4
-	ldr	r0, .L78+20
+	bpl	.L76
+	movw	r2, #2259
+	ldr	r1, .L83+4
+	ldr	r0, .L83+20
 	bl	printk
-.L71:
+.L76:
 	movs	r0, #0
 	pop	{r4, r5, r6, pc}
-.L79:
+.L84:
 	.align	2
-.L78:
+.L83:
 	.word	mpp_dev_debug
 	.word	.LANCHOR0+18
 	.word	.LC7
@@ -605,21 +645,21 @@ rkvenc_irq:
 	push	{r4, r5, r6, lr}
 	.save {r4, r5, r6, lr}
 	mov	r4, r0
-	ldr	r5, .L90
+	ldr	r5, .L95
 	ldr	r6, [r0, #152]
 	ldr	r2, [r5]
 	lsls	r2, r2, #26
-	bpl	.L81
-	movw	r2, #1332
-	ldr	r1, .L90+4
-	ldr	r0, .L90+8
+	bpl	.L86
+	movw	r2, #1339
+	ldr	r1, .L95+4
+	ldr	r0, .L95+8
 	bl	printk
-.L81:
+.L86:
 	ldr	r1, [r6, #264]
 	mov	r0, r4
 	bl	mpp_read
 	str	r0, [r4, #52]
-	cbz	r0, .L80
+	cbz	r0, .L85
 	mov	r2, #256
 	ldr	r1, [r6, #256]
 	mov	r0, r4
@@ -634,16 +674,16 @@ rkvenc_irq:
 	bl	mpp_write
 	ldr	r3, [r4, #52]
 	cmp	r3, #32768
-	bne	.L83
-.L84:
+	bne	.L88
+.L89:
 	movs	r0, #1
-.L80:
+.L85:
 	pop	{r4, r5, r6, pc}
-.L83:
+.L88:
 	mov	r0, r4
 	bl	rkvenc_check_bs_overflow
 	cmp	r0, #0
-	bne	.L84
+	bne	.L89
 	movs	r1, #24
 	mov	r0, r4
 	bl	mpp_read
@@ -653,17 +693,17 @@ rkvenc_irq:
 	bl	rkvenc_clear_dvbm_info
 	ldr	r3, [r5]
 	lsls	r3, r3, #26
-	bpl	.L86
-	movw	r2, #1348
-	ldr	r1, .L90+4
-	ldr	r0, .L90+12
+	bpl	.L91
+	movw	r2, #1355
+	ldr	r1, .L95+4
+	ldr	r0, .L95+12
 	bl	printk
-.L86:
-	movs	r0, #2
-	b	.L80
 .L91:
+	movs	r0, #2
+	b	.L85
+.L96:
 	.align	2
-.L90:
+.L95:
 	.word	mpp_dev_debug
 	.word	.LANCHOR0+31
 	.word	.LC7
@@ -685,36 +725,36 @@ rkvenc_run_start_link:
 	mov	r6, r0
 	ldr	r5, [r0, #152]
 	mov	r8, r1
-	ldr	r9, [r1, #2332]
+	ldr	r9, [r1, #2348]
 	ldr	r4, [r5, #28]
 	ldr	r3, [r5, #32]
 	lsrs	r4, r4, #2
 	lsrs	r7, r3, #2
-.L93:
+.L98:
 	cmp	r4, r7
-	bls	.L95
+	bls	.L100
 	ldr	r1, [r5, #252]
 	movw	r2, #65535
 	mov	r0, r6
 	bl	mpp_write
-	ldr	r3, [r8, #3576]
+	ldr	r3, [r8, #3592]
 	ldr	r1, [r5, #288]
 	mov	r0, r6
 	ldr	r2, [r3, #32]
 	bl	mpp_write
 	movs	r0, #0
 	pop	{r3, r4, r5, r6, r7, r8, r9, pc}
-.L95:
+.L100:
 	ldr	r3, [r5, #20]
 	cmp	r3, r4
-	beq	.L94
+	beq	.L99
 	ldr	r2, [r9, r4, lsl #2]
 	lsls	r1, r4, #2
 	mov	r0, r6
 	bl	mpp_write
-.L94:
+.L99:
 	adds	r4, r4, #1
-	b	.L93
+	b	.L98
 	.fnend
 	.size	rkvenc_run_start_link, .-rkvenc_run_start_link
 	.align	1
@@ -727,98 +767,103 @@ rkvenc_dump_session:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, lr}
+	push	{r4, r5, r6, r7, r8, r9, r10, lr}
 	.save {r4, r5, r6, r7, r8, r9, r10, lr}
-	.pad #16
 	mov	r4, r1
 	ldr	r5, [r0, #184]
+	.pad #24
+	sub	sp, sp, #24
 	mov	r7, r0
-	ldr	r9, .L117+92
-	movs	r6, #0
-	ldr	r10, .L117+12
+	ldr	r9, .L122+96
+	ldr	r10, .L122+12
 	add	r8, r5, #24
 	mov	r0, r5
+	movs	r6, #0
 	bl	down_read
-	ldr	r1, .L117
+	ldr	r1, .L122
 	mov	r0, r4
 	bl	seq_puts
-	ldr	r1, .L117+4
+	ldr	r1, .L122+4
 	mov	r0, r4
 	bl	seq_puts
-	ldr	r2, .L117+8
-	ldr	r1, .L117+12
+	ldr	r2, .L122+8
+	ldr	r1, .L122+12
 	mov	r0, r4
 	bl	seq_printf
-	ldr	r2, .L117+16
-	ldr	r1, .L117+12
+	ldr	r2, .L122+16
+	ldr	r1, .L122+12
 	mov	r0, r4
 	bl	seq_printf
-.L98:
+.L103:
 	lsls	r3, r6, #4
 	ldr	r3, [r8, r3]
-	cbz	r3, .L97
+	cbz	r3, .L102
 	ldr	r2, [r9, r6, lsl #2]
 	mov	r1, r10
 	mov	r0, r4
 	bl	seq_printf
-.L97:
+.L102:
 	adds	r6, r6, #1
 	cmp	r6, #11
-	bne	.L98
-	ldr	r3, .L117+20
+	bne	.L103
+	ldr	r3, .L122+20
 	mov	r0, r4
-	ldr	r2, .L117+24
+	ldr	r2, .L122+24
 	add	r6, r5, #32
-	ldr	r1, .L117+28
+	ldr	r1, .L122+28
 	add	r8, r5, #208
+	str	r3, [sp, #16]
+	ldr	r3, .L122+32
+	ldr	r9, .L122+100
+	ldr	r10, .L122+56
 	str	r3, [sp, #12]
-	ldr	r3, .L117+32
-	ldr	r9, .L117+96
-	ldr	r10, .L117+52
+	ldr	r3, .L122+36
 	str	r3, [sp, #8]
-	ldr	r3, .L117+36
+	ldr	r3, .L122+40
 	str	r3, [sp, #4]
-	ldr	r3, .L117+40
+	ldr	r3, .L122+44
 	str	r3, [sp]
-	ldr	r3, .L117+44
+	ldr	r3, .L122+48
 	bl	seq_printf
-	ldr	r1, .L117+48
+	ldr	r1, .L122+52
 	mov	r0, r4
 	bl	seq_puts
 	ldr	r2, [r7, #196]
-	ldr	r1, .L117+52
+	ldr	r1, .L122+56
 	mov	r0, r4
 	bl	seq_printf
 	ldr	r2, [r7]
-	ldr	r3, .L117+56
+	ldr	r3, .L122+60
 	mov	r0, r4
-	ldr	r1, .L117+12
-	ldr	r7, .L117+12
+	ldr	r1, .L122+12
+	ldr	r7, .L122+12
 	ldr	r2, [r3, r2, lsl #2]
 	bl	seq_printf
-.L102:
+.L107:
 	ldr	r3, [r6, #-8]
-	cbz	r3, .L99
+	cbz	r3, .L104
 	cmp	r3, #1
-	bne	.L100
+	bne	.L105
 	ldr	r2, [r6]
 	mov	r1, r10
-.L115:
+.L120:
 	mov	r0, r4
 	bl	seq_printf
-.L99:
+.L104:
 	adds	r6, r6, #16
 	cmp	r6, r8
-	bne	.L102
-	ldr	r2, [r5, #232]
+	bne	.L107
+	ldr	r2, [r5, #236]
 	mov	r0, r4
 	ldr	r3, [r5, #16]
-	ldr	r1, .L117+60
-	str	r2, [sp, #12]
+	ldr	r1, .L122+64
+	str	r2, [sp, #16]
 	adds	r3, r3, #0
-	ldr	r2, [r5, #228]
+	ldr	r2, [r5, #232]
 	it	ne
 	movne	r3, #1
+	str	r2, [sp, #12]
+	ldr	r2, [r5, #212]
 	str	r2, [sp, #8]
 	ldr	r2, [r5, #208]
 	str	r2, [sp, #4]
@@ -826,51 +871,51 @@ rkvenc_dump_session:
 	str	r2, [sp]
 	ldr	r2, [r5, #200]
 	bl	seq_printf
-	ldr	r1, .L117+48
+	ldr	r1, .L122+52
 	mov	r0, r4
 	bl	seq_puts
 	ldr	r3, [r5, #208]
-	cbz	r3, .L103
-	ldr	r1, .L117+64
+	cbz	r3, .L108
+	ldr	r1, .L122+68
 	mov	r0, r4
 	bl	seq_puts
-	ldr	r1, .L117+4
+	ldr	r1, .L122+4
 	mov	r0, r4
 	bl	seq_puts
-	ldr	r3, .L117+68
-	ldr	r2, .L117+72
+	ldr	r3, .L122+72
+	ldr	r2, .L122+76
 	mov	r0, r4
-	ldr	r1, .L117+76
+	ldr	r1, .L122+80
 	str	r3, [sp, #4]
-	ldr	r3, .L117+80
+	ldr	r3, .L122+84
 	str	r3, [sp]
-	ldr	r3, .L117+84
+	ldr	r3, .L122+88
 	bl	seq_printf
+	ldr	r3, [r5, #228]
+	ldr	r1, .L122+92
+	mov	r0, r4
+	str	r3, [sp, #4]
 	ldr	r3, [r5, #224]
-	ldr	r1, .L117+88
-	mov	r0, r4
-	str	r3, [sp, #4]
-	ldr	r3, [r5, #220]
 	str	r3, [sp]
-	ldrd	r2, r3, [r5, #212]
+	ldrd	r2, r3, [r5, #216]
 	bl	seq_printf
-.L103:
+.L108:
 	mov	r0, r5
 	bl	up_read
 	movs	r0, #0
-	add	sp, sp, #16
+	add	sp, sp, #24
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
-.L100:
+.L105:
 	cmp	r3, #2
 	mov	r1, r7
 	ite	eq
 	moveq	r2, r6
 	movne	r2, r9
-	b	.L115
-.L118:
+	b	.L120
+.L123:
 	.align	2
-.L117:
+.L122:
 	.word	.LC9
 	.word	.LC10
 	.word	.LC11
@@ -882,20 +927,21 @@ rkvenc_dump_session:
 	.word	.LC18
 	.word	.LC19
 	.word	.LC20
-	.word	.LC14
 	.word	.LC21
+	.word	.LC14
 	.word	.LC22
-	.word	mpp_device_name
-	.word	.LC24
-	.word	.LC25
-	.word	.LC29
-	.word	.LC27
-	.word	.LC28
-	.word	.LC30
-	.word	.LC26
-	.word	.LC31
-	.word	enc_info_item_name
 	.word	.LC23
+	.word	mpp_device_name
+	.word	.LC25
+	.word	.LC26
+	.word	.LC30
+	.word	.LC28
+	.word	.LC29
+	.word	.LC31
+	.word	.LC27
+	.word	.LC32
+	.word	enc_info_item_name
+	.word	.LC24
 	.fnend
 	.size	rkvenc_dump_session, .-rkvenc_dump_session
 	.align	1
@@ -911,42 +957,34 @@ rkvenc_free_session:
 	push	{r3, r4, r5, lr}
 	.save {r3, r4, r5, lr}
 	mov	r4, r0
-	cbz	r0, .L140
+	cbz	r0, .L141
 	ldr	r5, [r0, #188]
-	cbz	r5, .L122
+	cbz	r5, .L127
 	mov	r0, r5
 	bl	rkvenc_invalid_class_msg
 	mov	r0, r5
 	bl	kfree
-.L122:
+.L127:
 	ldr	r5, [r4, #192]
-	cbz	r5, .L123
+	cbz	r5, .L128
 	mov	r0, r5
 	bl	rkvenc_invalid_class_msg
 	mov	r0, r5
 	bl	kfree
-.L123:
-	ldr	r5, [r4, #184]
-	ldr	r3, [r5, #20]
-	cbz	r3, .L124
-	ldr	r3, [r4, #12]
-	ldr	r0, [r3, #264]
-	bl	rk_dvbm_unlink
-	movs	r3, #0
-	str	r3, [r5, #20]
-.L124:
-	ldr	r3, [r5, #16]
-	cbz	r3, .L125
+.L128:
+	ldr	r3, [r4, #184]
+	ldr	r3, [r3, #16]
+	cbz	r3, .L129
 	ldr	r3, [r4, #12]
 	movs	r2, #0
 	str	r2, [r3, #128]
-.L125:
+.L129:
 	ldr	r0, [r4, #184]
-	cbz	r0, .L140
+	cbz	r0, .L141
 	bl	kfree
 	movs	r3, #0
 	str	r3, [r4, #184]
-.L140:
+.L141:
 	movs	r0, #0
 	pop	{r3, r4, r5, pc}
 	.fnend
@@ -984,125 +1022,129 @@ rkvenc_result:
 	push	{r4, r5, r6, r7, r8, r9, r10, lr}
 	.save {r4, r5, r6, r7, r8, r9, r10, lr}
 	mov	r7, r0
-	ldr	r6, .L173
+	ldr	r6, .L175
 	mov	r4, r1
 	ldr	r3, [r6]
 	mov	r10, r6
 	tst	r3, #32
-	beq	.L143
-	movw	r2, #1748
-	ldr	r1, .L173+4
-	ldr	r0, .L173+8
+	beq	.L144
+	movw	r2, #1754
+	ldr	r1, .L175+4
+	ldr	r0, .L175+8
 	bl	printk
-.L143:
+.L144:
 	ldr	r3, [r7, #292]
 	cmp	r3, #1
-	beq	.L144
-	cbz	r3, .L145
+	beq	.L145
+	cbz	r3, .L146
 	cmp	r3, #2
-	bne	.L146
-.L145:
+	bne	.L147
+.L146:
 	ldr	r3, [r4, #2200]
-	lsls	r3, r3, #25
-	bpl	.L146
+	lsls	r2, r3, #25
+	bmi	.L162
+	ldr	r3, [r4, #2200]
+	lsls	r3, r3, #22
+	bpl	.L147
+.L162:
 	mov	r0, #-1
-	b	.L142
-.L144:
-	ldr	r8, .L173+20
+	b	.L143
+.L145:
+	ldr	r8, .L175+20
 	mov	r5, r4
 	mov	r9, #0
-.L147:
-	ldr	r3, [r4, #3252]
+.L148:
+	ldr	r3, [r4, #3268]
 	cmp	r3, r9
-	bhi	.L158
-.L146:
+	bhi	.L159
+.L147:
 	ldr	r0, [r10]
 	ands	r0, r0, #32
-	beq	.L142
-	movw	r2, #1779
-	ldr	r1, .L173+4
-	ldr	r0, .L173+12
+	beq	.L143
+	movw	r2, #1786
+	ldr	r1, .L175+4
+	ldr	r0, .L175+12
 	bl	printk
 	movs	r0, #0
-	b	.L142
-.L158:
-	ldr	r3, [r4, #2324]
+	b	.L143
+.L159:
+	ldr	r3, [r4, #2340]
 	movs	r2, #0
 	ldr	r1, [r7, #288]
-	ldr	ip, [r5, #3268]
+	ldr	ip, [r5, #3284]
 	ldr	r0, [r3, #24]
-.L149:
+.L150:
 	cmp	r0, r2
-	beq	.L161
+	beq	.L163
 	ldr	lr, [r3, #28]
 	cmp	ip, lr
-	bcc	.L150
+	bcc	.L151
 	ldr	r6, [r3, #32]
 	cmp	ip, r6
-	bcs	.L150
+	bcs	.L151
 	add	r2, r1, r2, lsl #2
-	ldr	r3, [r4, #3576]
+	ldr	r3, [r4, #3592]
 	ldr	r1, [r2, #12]
 	ldr	r3, [r3, #40]
 	sub	r1, r1, lr
 	add	r1, r1, ip
 	adds	r1, r3, r1
-	bne	.L172
-.L161:
+	bne	.L174
+.L163:
 	mvn	r0, #21
-	b	.L142
-.L150:
+	b	.L143
+.L151:
 	adds	r2, r2, #1
 	adds	r3, r3, #20
-	b	.L149
-.L172:
+	b	.L150
+.L174:
 	ldr	r3, [r4]
-	ldr	r0, [r5, #3272]
-	ldr	r2, [r5, #3264]
+	ldr	r0, [r5, #3288]
+	ldr	r2, [r5, #3280]
 	ldr	r3, [r3, #200]
-	cbnz	r3, .L153
+	cbnz	r3, .L154
 	cmp	r2, #0
-	bge	.L154
-.L156:
-	mov	r2, #1768
-	ldr	r1, .L173+4
-	ldr	r0, .L173+16
+	bge	.L155
+.L157:
+	movw	r2, #1775
+	ldr	r1, .L175+4
+	ldr	r0, .L175+16
 	bl	printk
 	mvn	r0, #4
-.L142:
+.L143:
 	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
-.L154:
+.L155:
 	mov	r3, sp
 	and	r3, r3, r8
 	ldr	r3, [r3, #8]
 	.syntax unified
-@ 177 "./include/linux/uaccess.h" 1
+@ 177 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/include/linux/uaccess.h" 1
 	.syntax unified
 adds ip, r0, r2; sbcscc ip, ip, r3; movcc r3, #0
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	cbnz	r3, .L155
+	cbnz	r3, .L156
 	bl	arm_copy_to_user
 	mov	r2, r0
-.L155:
+.L156:
 	cmp	r2, #0
-	bne	.L156
-.L157:
+	bne	.L157
+.L158:
 	add	r9, r9, #1
 	adds	r5, r5, #20
-	b	.L147
-.L153:
+	b	.L148
+.L154:
 	bl	memcpy
-	b	.L157
-.L174:
+	b	.L158
+.L176:
 	.align	2
-.L173:
+.L175:
 	.word	mpp_dev_debug
 	.word	.LANCHOR0+42
 	.word	.LC7
 	.word	.LC8
-	.word	.LC32
+	.word	.LC33
 	.word	-8192
 	.fnend
 	.size	rkvenc_result, .-rkvenc_result
@@ -1127,32 +1169,32 @@ rkvenc_show_session_info:
 	ldr	r0, [r3, #712]
 	ldr	r4, [r0], #-176
 	subs	r4, r4, #176
-.L176:
+.L178:
 	ldr	r2, [r5, #104]
 	add	r3, r0, #176
 	add	r1, r2, #712
 	cmp	r3, r1
-	bne	.L178
+	bne	.L180
 	add	r0, r2, #700
 	bl	mutex_unlock
 	movs	r0, #0
 	pop	{r4, r5, r6, pc}
-.L178:
+.L180:
 	ldr	r3, [r0]
 	cmp	r3, #16
-	bne	.L177
+	bne	.L179
 	ldr	r3, [r0, #184]
-	cbz	r3, .L177
+	cbz	r3, .L179
 	ldr	r3, [r5, #12]
 	ldr	r3, [r3, #60]
-	cbz	r3, .L177
+	cbz	r3, .L179
 	mov	r1, r6
 	blx	r3
-.L177:
+.L179:
 	ldr	r3, [r4, #176]
 	mov	r0, r4
 	sub	r4, r3, #176
-	b	.L176
+	b	.L178
 	.fnend
 	.size	rkvenc_show_session_info, .-rkvenc_show_session_info
 	.align	1
@@ -1163,79 +1205,65 @@ rkvenc_show_session_info:
 	.type	rkvenc_link_fill_table, %function
 rkvenc_link_fill_table:
 	.fnstart
-	@ args = 0, pretend = 0, frame = 8
+	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r2, r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	.pad #12
+	push	{r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	.save {r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	mov	r7, r2
 	ldr	r4, [r2, #40]
+	add	fp, r0, #12
+	ldr	r10, [r1, #2340]
 	mov	r8, r0
-	ldr	r3, [r1]
 	mov	r5, r1
-	ldr	fp, [r1, #2324]
-	mov	r10, r1
 	mov	r9, #0
-	str	r3, [sp]
 	ldrb	r3, [r4]	@ zero_extendqisi2
-	mov	r6, fp
+	mov	r6, r10
 	orr	r3, r3, #4
 	strb	r3, [r4]
 	ldrb	r3, [r4, #4]	@ zero_extendqisi2
-	ldr	r2, [r1, #2340]
+	ldr	r2, [r1, #2356]
 	bfi	r3, r2, #0, #1
 	strb	r3, [r4, #4]
 	ldrb	r3, [r4, #8]	@ zero_extendqisi2
-	ldr	r2, [r1, #2352]
+	ldr	r2, [r1, #2368]
 	bfi	r3, r2, #0, #1
 	strb	r3, [r4, #8]
 	ldrb	r3, [r4, #12]	@ zero_extendqisi2
-	ldr	r2, [r1, #2364]
+	ldr	r2, [r1, #2380]
 	bfi	r3, r2, #0, #1
 	strb	r3, [r4, #12]
 	ldrb	r3, [r4, #16]	@ zero_extendqisi2
-	ldr	r2, [r1, #2376]
+	ldr	r2, [r1, #2392]
 	bfi	r3, r2, #0, #1
 	strb	r3, [r4, #16]
 	ldrb	r3, [r4, #20]	@ zero_extendqisi2
-	ldr	r2, [r1, #2388]
+	ldr	r2, [r1, #2404]
 	bfi	r3, r2, #0, #1
 	strb	r3, [r4, #20]
 	ldrb	r3, [r4, #24]	@ zero_extendqisi2
-	ldr	r2, [r1, #2400]
+	ldr	r2, [r1, #2416]
 	bfi	r3, r2, #0, #1
 	strb	r3, [r4, #24]
 	ldrb	r3, [r4, #28]	@ zero_extendqisi2
-	ldr	r2, [r1, #2412]
+	ldr	r2, [r1, #2428]
 	bfi	r3, r2, #0, #1
 	strb	r3, [r4, #28]
 	ldrb	r3, [r4, #32]	@ zero_extendqisi2
 	orr	r3, r3, #1
 	strb	r3, [r4, #32]
-	add	r3, r0, #12
-	str	r3, [sp, #4]
-.L186:
-	ldr	r2, [fp, #24]
-	cmp	r2, r9
-	bhi	.L190
+.L188:
+	ldr	r3, [r10, #24]
+	cmp	r3, r9
+	bhi	.L192
 	ldr	r0, [r8, #40]
 	movs	r1, #0
-	ldr	r2, [fp, #184]
+	ldr	r2, [r10, #184]
 	bic	r0, r0, #3
 	add	r0, r0, r4
 	bl	memset
-	ldr	r3, [r5, #2332]
-	ldr	r3, [r3, #96]
-	cbz	r3, .L191
-	ldr	r2, [r8]
-	ldr	r1, [sp]
-	str	r3, [r1, #16]
-	ldr	r0, [r2, #264]
-	bl	rk_dvbm_link
-.L191:
 	ldr	r0, [r8]
-	movs	r3, #2
 	ldrd	r1, r2, [r7, #32]
+	movs	r3, #2
 	ldr	r0, [r0]
 	bl	dma_sync_single_for_device
 	ldr	r0, [r8]
@@ -1244,39 +1272,36 @@ rkvenc_link_fill_table:
 	ldr	r0, [r0]
 	bl	dma_sync_single_for_cpu
 	movs	r0, #0
-	add	sp, sp, #12
-	@ sp needed
-	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L190:
-	ldr	r2, [r6, #44]
-	cbz	r2, .L187
-	ldr	r2, [r10, #2328]
-	cbz	r2, .L187
-	ldr	r3, [sp, #4]
+	pop	{r3, r4, r5, r6, r7, r8, r9, r10, fp, pc}
+.L192:
+	ldr	r3, [r6, #44]
+	cbz	r3, .L189
+	ldr	r3, [r5, #2344]
+	cbz	r3, .L189
 	ldr	r2, [r6, #40]
 	ldr	r1, [r6, #36]
-	ldr	r0, [r3, r9, lsl #2]
 	ldr	r3, [r6, #28]
+	ldr	r0, [fp, r9, lsl #2]
 	cmp	r1, #0
 	it	eq
 	moveq	r1, r3
-	cbnz	r2, .L189
+	cbnz	r2, .L191
 	ldr	r2, [r6, #32]
-.L189:
+.L191:
 	rsb	ip, r1, #4
 	subs	r1, r1, r3
-	ldr	r3, [r10, #2332]
+	ldr	r3, [r5, #2348]
 	bic	r0, r0, #3
 	bic	r1, r1, #3
 	add	r2, r2, ip
 	add	r1, r1, r3
 	add	r0, r0, r4
 	bl	memcpy
-.L187:
+.L189:
 	add	r9, r9, #1
 	adds	r6, r6, #20
-	add	r10, r10, #12
-	b	.L186
+	adds	r5, r5, #12
+	b	.L188
 	.fnend
 	.size	rkvenc_link_fill_table, .-rkvenc_link_fill_table
 	.align	1
@@ -1292,47 +1317,47 @@ rkvenc_prepare:
 	push	{r3, r4, r5, r6, r7, r8, r9, lr}
 	.save {r3, r4, r5, r6, r7, r8, r9, lr}
 	mov	r6, r0
-	ldr	r7, .L236
+	ldr	r7, .L234
 	mov	r5, r1
 	ldr	r4, [r0, #96]
 	ldr	r3, [r7]
 	lsls	r2, r3, #26
-	bpl	.L203
-	movw	r2, #1026
-	ldr	r1, .L236+4
-	ldr	r0, .L236+8
+	bpl	.L201
+	movw	r2, #1028
+	ldr	r1, .L234+4
+	ldr	r0, .L234+8
 	bl	printk
-.L203:
+.L201:
 	ldr	r3, [r6, #72]
 	cmp	r3, #0
-	ble	.L204
-.L233:
+	ble	.L202
+.L231:
 	movs	r4, #0
-.L205:
+.L203:
 	ldr	r3, [r7]
 	lsls	r3, r3, #26
-	bpl	.L202
-	movw	r2, #1094
-	ldr	r1, .L236+4
-	ldr	r0, .L236+12
+	bpl	.L200
+	mov	r2, #1096
+	ldr	r1, .L234+4
+	ldr	r0, .L234+12
 	bl	printk
-.L202:
+.L200:
 	mov	r0, r4
 	pop	{r3, r4, r5, r6, r7, r8, r9, pc}
-.L204:
+.L202:
 	ldr	r3, [r5]
 	ldr	r3, [r3, #36]
 	cmp	r3, #0
-	bgt	.L233
+	bgt	.L231
 	ldr	r3, [r6, #292]
 	cmp	r3, #1
-	beq	.L207
-	cbz	r3, .L208
+	beq	.L205
+	cbz	r3, .L206
 	cmp	r3, #2
-	bne	.L233
+	bne	.L231
 	ldr	r8, [r6, #288]
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r3, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -1344,21 +1369,21 @@ rkvenc_prepare:
 	moveq	r4, r5
 	movne	r4, #0
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r3	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	cmp	r4, #0
-	beq	.L233
+	beq	.L231
 	add	r9, r8, #64
 	mov	r0, r9
 	bl	mutex_lock
 	mov	r3, r8
 	ldr	r6, [r3, #56]!
 	cmp	r6, r3
-	beq	.L214
-	cbz	r6, .L214
+	beq	.L212
+	cbz	r6, .L212
 	mov	r2, r6
 	mov	r1, r5
 	mov	r0, r8
@@ -1366,16 +1391,16 @@ rkvenc_prepare:
 	add	r1, r8, #48
 	mov	r0, r6
 	bl	list_move_tail
-	str	r6, [r5, #3576]
-.L235:
+	str	r6, [r5, #3592]
+.L233:
 	mov	r4, r5
-.L214:
+.L212:
 	mov	r0, r9
 	bl	mutex_unlock
-	b	.L205
-.L208:
+	b	.L203
+.L206:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r3, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -1386,35 +1411,35 @@ rkvenc_prepare:
 	it	ne
 	movne	r5, #0
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r3	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-.L234:
+.L232:
 	mov	r4, r5
-	b	.L205
-.L207:
+	b	.L203
+.L205:
 	ldr	r8, [r6, #288]
 	ldr	r6, [r5, #2200]
 	ubfx	r6, r6, #12, #1
-	cbz	r6, .L213
+	cbz	r6, .L211
 	ldr	r3, [r5, #2200]
-	movw	r2, #1071
-	ldr	r1, .L236+4
-	ldr	r0, .L236+16
+	movw	r2, #1073
+	ldr	r1, .L234+4
+	ldr	r0, .L234+16
 	bl	printk
-	b	.L234
-.L213:
+	b	.L232
+.L211:
 	add	r9, r8, #64
 	mov	r0, r9
 	bl	mutex_lock
 	mov	r3, r8
 	ldr	r4, [r3, #56]!
 	cmp	r4, r3
-	beq	.L217
+	beq	.L215
 	cmp	r4, #0
-	beq	.L214
+	beq	.L212
 	mov	r2, r4
 	mov	r1, r5
 	mov	r0, r8
@@ -1422,22 +1447,22 @@ rkvenc_prepare:
 	add	r1, r8, #48
 	mov	r0, r4
 	bl	list_move_tail
-	str	r4, [r5, #3576]
+	str	r4, [r5, #3592]
 	addw	r1, r5, #2200
 	movs	r0, #12
 	bl	____atomic_set_bit
-	b	.L235
-.L217:
+	b	.L233
+.L215:
 	mov	r4, r6
-	b	.L214
-.L237:
+	b	.L212
+.L235:
 	.align	2
-.L236:
+.L234:
 	.word	mpp_dev_debug
 	.word	.LANCHOR0+56
 	.word	.LC7
 	.word	.LC8
-	.word	.LC33
+	.word	.LC34
 	.fnend
 	.size	rkvenc_prepare, .-rkvenc_prepare
 	.align	1
@@ -1455,9 +1480,9 @@ rkvenc_set_freq:
 	mov	r4, r0
 	mov	r5, r1
 	adds	r0, r0, #156
-	ldr	r1, [r1, #2920]
+	ldr	r1, [r1, #2936]
 	bl	mpp_clk_set_rate
-	ldr	r1, [r5, #2920]
+	ldr	r1, [r5, #2936]
 	add	r0, r4, #212
 	bl	mpp_clk_set_rate
 	movs	r0, #0
@@ -1479,18 +1504,237 @@ clk_prepare_enable:
 	mov	r5, r0
 	bl	clk_prepare
 	mov	r4, r0
-	cbnz	r0, .L239
+	cbnz	r0, .L237
 	mov	r0, r5
 	bl	clk_enable
 	mov	r4, r0
-	cbz	r0, .L239
+	cbz	r0, .L237
 	mov	r0, r5
 	bl	clk_unprepare
-.L239:
+.L237:
 	mov	r0, r4
 	pop	{r3, r4, r5, pc}
 	.fnend
 	.size	clk_prepare_enable, .-clk_prepare_enable
+	.align	1
+	.global	rkvenc_dump_dbg
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	rkvenc_dump_dbg, %function
+rkvenc_dump_dbg:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r3, r4, r5, r6, r7, r8, r9, lr}
+	.save {r3, r4, r5, r6, r7, r8, r9, lr}
+	movs	r1, #96
+	mov	r4, r0
+	bl	mpp_read
+	and	r1, r0, #1
+	ldr	r0, .L253
+	bl	printk
+	mov	r1, #768
+	mov	r0, r4
+	bl	mpp_read
+	and	r1, r0, #3
+	ldr	r0, .L253+4
+	bl	printk
+	movw	r1, #1148
+	mov	r0, r4
+	bl	mpp_read
+	lsrs	r1, r0, #31
+	ldr	r0, .L253+8
+	bl	printk
+	movs	r1, #24
+	mov	r0, r4
+	bl	mpp_read
+	mov	r1, r0
+	ldr	r0, .L253+12
+	bl	printk
+	mov	r1, #20480
+	mov	r0, r4
+	bl	mpp_read
+	mov	r1, r0
+	ldr	r0, .L253+16
+	bl	printk
+	movw	r1, #20484
+	mov	r0, r4
+	bl	mpp_read
+	mov	r1, r0
+	ldr	r0, .L253+20
+	bl	printk
+	movw	r1, #20488
+	mov	r0, r4
+	bl	mpp_read
+	mov	r1, r0
+	ldr	r0, .L253+24
+	bl	printk
+	movw	r1, #20492
+	mov	r0, r4
+	bl	mpp_read
+	mov	r1, r0
+	ldr	r0, .L253+28
+	bl	printk
+	mov	r1, #20992
+	mov	r0, r4
+	bl	mpp_read
+	mov	r1, r0
+	ldr	r0, .L253+32
+	bl	printk
+	ldr	r3, .L253+36
+	ldr	r3, [r3]
+	lsls	r3, r3, #21
+	bpl	.L243
+	ldr	r1, .L253+40
+	mvn	r7, #1
+	ldr	r0, .L253+44
+	bl	printk
+	ldr	r6, .L253+48
+	ldr	r9, .L253+52
+.L245:
+	cmp	r7, #4
+	bhi	.L244
+.L248:
+	adds	r7, r7, #1
+	adds	r6, r6, #20
+	cmp	r7, #7
+	bne	.L245
+.L243:
+	movs	r0, #0
+	pop	{r3, r4, r5, r6, r7, r8, r9, pc}
+.L244:
+	ldrd	r5, r8, [r6, #28]
+.L246:
+	cmp	r8, r5
+	bcc	.L248
+	mov	r1, r5
+	mov	r0, r4
+	bl	mpp_read
+	mov	r1, r5
+	adds	r5, r5, #4
+	mov	r2, r0
+	mov	r0, r9
+	bl	printk
+	b	.L246
+.L254:
+	.align	2
+.L253:
+	.word	.LC35
+	.word	.LC36
+	.word	.LC37
+	.word	.LC38
+	.word	.LC39
+	.word	.LC40
+	.word	.LC41
+	.word	.LC42
+	.word	.LC43
+	.word	mpp_dev_debug
+	.word	.LANCHOR0+71
+	.word	.LC44
+	.word	.LANCHOR1
+	.word	.LC45
+	.fnend
+	.size	rkvenc_dump_dbg, .-rkvenc_dump_dbg
+	.align	1
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	rkvenc_finish, %function
+rkvenc_finish:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	.save {r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	mov	r5, r0
+	ldr	r3, .L282
+	mov	r4, r1
+	ldr	r2, [r3]
+	mov	r8, r3
+	tst	r2, #32
+	beq	.L256
+	movw	r2, #1687
+	ldr	r1, .L282+4
+	ldr	r0, .L282+8
+	bl	printk
+.L256:
+	ldr	r3, [r5, #292]
+	cbz	r3, .L257
+	cmp	r3, #2
+	bne	.L258
+.L257:
+	ldr	r3, [r5, #52]
+	lsls	r2, r3, #23
+	bmi	.L259
+	ldr	r3, [r5, #120]
+	cbz	r3, .L260
+.L259:
+	mov	r0, r5
+	bl	rkvenc_dump_dbg
+.L260:
+	mov	r7, r4
+	mov	r10, #0
+.L261:
+	ldr	r3, [r4, #3268]
+	cmp	r3, r10
+	bhi	.L265
+	ldr	r3, [r4, #2340]
+	mov	r0, r4
+	ldr	r1, [r3, #264]
+	bl	rkvenc_get_class_reg
+	cbz	r0, .L258
+	ldr	r3, [r4, #2940]
+	str	r3, [r0]
+.L258:
+	movs	r3, #0
+	str	r3, [r5, #260]
+	ldr	r3, [r8]
+	lsls	r3, r3, #26
+	bpl	.L266
+	movw	r2, #1721
+	ldr	r1, .L282+4
+	ldr	r0, .L282+12
+	bl	printk
+.L266:
+	movs	r0, #0
+	pop	{r3, r4, r5, r6, r7, r8, r9, r10, fp, pc}
+.L265:
+	ldr	fp, [r7, #3288]
+	movs	r6, #0
+.L262:
+	ldr	r3, [r7, #3280]
+	cmp	r6, r3, lsr #2
+	bcc	.L264
+	add	r10, r10, #1
+	adds	r7, r7, #20
+	b	.L261
+.L264:
+	ldr	r3, [r7, #3284]
+	mov	r0, r5
+	add	r9, r3, r6, lsl #2
+	mov	r1, r9
+	bl	mpp_read_relaxed
+	str	r0, [fp, r6, lsl #2]
+	ldr	r3, [r4, #2340]
+	ldr	r3, [r3, #264]
+	cmp	r3, r9
+	itt	eq
+	ldreq	r3, [r4, #2940]
+	streq	r3, [fp, r6, lsl #2]
+	adds	r6, r6, #1
+	b	.L262
+.L283:
+	.align	2
+.L282:
+	.word	mpp_dev_debug
+	.word	.LANCHOR0+87
+	.word	.LC7
+	.word	.LC8
+	.fnend
+	.size	rkvenc_finish, .-rkvenc_finish
 	.align	1
 	.syntax unified
 	.thumb
@@ -1509,111 +1753,111 @@ rkvenc_init:
 	add	r7, r4, #156
 	bl	mpp_dev_of_node
 	ldr	r3, [r4, #104]
-	ldr	r2, .L260
+	ldr	r2, .L300
 	mov	r1, r7
 	adds	r3, r3, #172
 	str	r3, [r4, #64]
 	mov	r8, r0
 	mov	r0, r4
 	bl	mpp_get_clk_info
-	cbz	r0, .L245
-	movw	r2, #2209
-	ldr	r1, .L260+4
-	ldr	r0, .L260+8
+	cbz	r0, .L285
+	movw	r2, #2213
+	ldr	r1, .L300+4
+	ldr	r0, .L300+8
 	bl	printk
-.L245:
-	ldr	r2, .L260+12
+.L285:
+	ldr	r2, .L300+12
 	add	r1, r4, #184
 	mov	r0, r4
 	bl	mpp_get_clk_info
-	cbz	r0, .L246
-	movw	r2, #2212
-	ldr	r1, .L260+4
-	ldr	r0, .L260+16
+	cbz	r0, .L286
+	movw	r2, #2216
+	ldr	r1, .L300+4
+	ldr	r0, .L300+16
 	bl	printk
-.L246:
+.L286:
 	add	r6, r4, #212
-	ldr	r2, .L260+20
+	ldr	r2, .L300+20
 	mov	r0, r4
 	mov	r1, r6
 	bl	mpp_get_clk_info
-	cbz	r0, .L247
-	movw	r2, #2215
-	ldr	r1, .L260+4
-	ldr	r0, .L260+24
+	cbz	r0, .L287
+	movw	r2, #2219
+	ldr	r1, .L300+4
+	ldr	r0, .L300+24
 	bl	printk
-.L247:
+.L287:
 	movs	r5, #0
 	movs	r3, #1
 	add	r2, r4, #240
-	ldr	r1, .L260+28
+	ldr	r1, .L300+28
 	str	r5, [sp]
 	mov	r0, r8
 	bl	of_property_read_variable_u32_array
-	ldr	r2, .L260+32
+	ldr	r2, .L300+32
 	mov	r1, r5
 	mov	r0, r7
 	bl	mpp_set_clk_info_rate_hz
-	ldr	r2, .L260+36
+	ldr	r2, .L300+36
 	mov	r1, r5
 	mov	r0, r6
 	bl	mpp_set_clk_info_rate_hz
-	ldr	r2, .L260+40
+	ldr	r2, .L300+40
 	mov	r1, r5
 	mov	r0, r4
 	bl	mpp_reset_control_get
 	str	r0, [r4, #248]
-	cbnz	r0, .L248
-	movw	r2, #2227
-	ldr	r1, .L260+4
-	ldr	r0, .L260+44
+	cbnz	r0, .L288
+	movw	r2, #2231
+	ldr	r1, .L300+4
+	ldr	r0, .L300+44
 	bl	printk
-.L248:
-	ldr	r2, .L260+48
+.L288:
+	ldr	r2, .L300+48
 	movs	r1, #1
 	mov	r0, r4
 	bl	mpp_reset_control_get
 	str	r0, [r4, #252]
-	cbnz	r0, .L249
-	movw	r2, #2230
-	ldr	r1, .L260+4
-	ldr	r0, .L260+52
+	cbnz	r0, .L289
+	movw	r2, #2234
+	ldr	r1, .L300+4
+	ldr	r0, .L300+52
 	bl	printk
-.L249:
-	ldr	r2, .L260+56
+.L289:
+	ldr	r2, .L300+56
 	movs	r1, #4
 	mov	r0, r4
 	bl	mpp_reset_control_get
 	str	r0, [r4, #256]
-	cbnz	r0, .L250
-	movw	r2, #2233
-	ldr	r1, .L260+4
-	ldr	r0, .L260+60
+	cbnz	r0, .L290
+	movw	r2, #2237
+	ldr	r1, .L300+4
+	ldr	r0, .L300+60
 	bl	printk
-.L250:
+.L290:
 	movs	r0, #0
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, pc}
-.L261:
+.L301:
 	.align	2
-.L260:
-	.word	.LC34
-	.word	.LANCHOR0+71
-	.word	.LC35
-	.word	.LC36
-	.word	.LC37
-	.word	.LC38
-	.word	.LC39
-	.word	.LC40
+.L300:
+	.word	.LC46
+	.word	.LANCHOR0+101
+	.word	.LC47
+	.word	.LC48
+	.word	.LC49
+	.word	.LC50
+	.word	.LC51
+	.word	.LC52
 	.word	300000000
 	.word	600000000
-	.word	.LC41
-	.word	.LC42
-	.word	.LC43
-	.word	.LC44
-	.word	.LC45
-	.word	.LC46
+	.word	.LC53
+	.word	.LC54
+	.word	.LC55
+	.word	.LC56
+	.word	.LC57
+	.word	.LC58
 	.fnend
 	.size	rkvenc_init, .-rkvenc_init
 	.align	1
@@ -1621,15 +1865,15 @@ rkvenc_init:
 	.thumb
 	.thumb_func
 	.fpu softvfp
-	.type	atomic_add.constprop.18, %function
-atomic_add.constprop.18:
+	.type	atomic_add.constprop.15, %function
+atomic_add.constprop.15:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
 	pld	[r0]
 	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
+@ 223 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_add
 1:	ldrex	r3, [r0]
 	add	r3, r3, #1
@@ -1641,7 +1885,7 @@ atomic_add.constprop.18:
 	.syntax unified
 	bx	lr
 	.fnend
-	.size	atomic_add.constprop.18, .-atomic_add.constprop.18
+	.size	atomic_add.constprop.15, .-atomic_add.constprop.15
 	.section	.text.unlikely,"ax",%progbits
 	.align	1
 	.syntax unified
@@ -1657,111 +1901,49 @@ rkvenc_shutdown:
 	.save {r3, r4, r5, r6, r7, lr}
 	add	r4, r0, #16
 	ldr	r5, [r0, #80]
-	ldr	r1, .L274
+	ldr	r1, .L314
 	mov	r0, r4
 	bl	_dev_info
 	ldr	r0, [r5, #104]
 	adds	r0, r0, #84
-	bl	atomic_add.constprop.18
+	bl	atomic_add.constprop.15
 	bl	ktime_get
-	ldr	r3, .L274+4
+	ldr	r3, .L314+4
 	adds	r6, r0, r3
 	mov	r3, #0
 	adc	r7, r1, r3
-.L269:
+.L309:
 	ldr	r3, [r5, #80]
-	cbz	r3, .L265
+	cbz	r3, .L305
 	bl	ktime_get
 	cmp	r6, r0
 	sbcs	r3, r7, r1
-	bge	.L266
+	bge	.L306
 	ldr	r3, [r5, #80]
-	cbz	r3, .L265
-	ldr	r1, .L274+8
+	cbz	r3, .L305
+	ldr	r1, .L314+8
 	mov	r0, r4
 	bl	_dev_err
-.L265:
+.L305:
 	mov	r0, r4
-	ldr	r1, .L274+12
+	ldr	r1, .L314+12
 	pop	{r3, r4, r5, r6, r7, lr}
 	b	_dev_info
-.L266:
+.L306:
 	mov	r1, #1000
 	movs	r0, #251
 	bl	usleep_range
-	b	.L269
-.L275:
+	b	.L309
+.L315:
 	.align	2
-.L274:
-	.word	.LC47
+.L314:
+	.word	.LC59
 	.word	200000000
-	.word	.LC48
-	.word	.LC49
+	.word	.LC60
+	.word	.LC61
 	.fnend
 	.size	rkvenc_shutdown, .-rkvenc_shutdown
 	.text
-	.align	1
-	.syntax unified
-	.thumb
-	.thumb_func
-	.fpu softvfp
-	.type	rkvenc_runtime_resume, %function
-rkvenc_runtime_resume:
-	.fnstart
-	@ args = 0, pretend = 0, frame = 0
-	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, lr}
-	.save {r4, r5, r6, lr}
-	mov	r4, r0
-	ldr	r5, .L291
-	ldr	r6, [r0, #64]
-	ldr	r2, [r5]
-	lsls	r2, r2, #31
-	bpl	.L277
-	ldr	r1, [r0, #44]
-	cbnz	r1, .L278
-	ldr	r1, [r0]
-.L278:
-	ldr	r0, .L291+4
-	bl	printk
-.L277:
-	add	r3, r6, #148
-	movs	r2, #0
-	pld	[r3]
-	.syntax unified
-@ 66 "./arch/arm/include/asm/cmpxchg.h" 1
-	@	__xchg4
-1:	ldrex	r1, [r3]
-	strex	r0, r2, [r3]
-	teq	r0, #0
-	bne	1b
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	cbz	r1, .L279
-	add	r0, r6, #132
-	bl	up_write
-.L279:
-	ldr	r3, [r5]
-	lsls	r3, r3, #31
-	bpl	.L280
-	ldr	r1, [r4, #44]
-	cbnz	r1, .L281
-	ldr	r1, [r4]
-.L281:
-	ldr	r0, .L291+8
-	bl	printk
-.L280:
-	movs	r0, #0
-	pop	{r4, r5, r6, pc}
-.L292:
-	.align	2
-.L291:
-	.word	mpp_dev_debug
-	.word	.LC50
-	.word	.LC51
-	.fnend
-	.size	rkvenc_runtime_resume, .-rkvenc_runtime_resume
 	.align	1
 	.global	mpp_rkvenc_irq
 	.syntax unified
@@ -1780,21 +1962,21 @@ mpp_rkvenc_irq:
 	ldr	r0, [r1, #96]
 	ldr	r6, [r1, #152]
 	bl	mpp_taskqueue_get_running_task
-	ldr	r7, .L345
+	ldr	r7, .L374
 	ldr	r3, [r7]
 	lsls	r2, r3, #26
 	mov	r5, r0
-	bpl	.L294
-	movw	r2, #1363
-	ldr	r1, .L345+4
-	ldr	r0, .L345+8
+	bpl	.L317
+	movw	r2, #1370
+	ldr	r1, .L374+4
+	ldr	r0, .L374+8
 	bl	printk
-.L294:
+.L317:
 	ldr	r1, [r6, #264]
 	mov	r0, r4
 	bl	mpp_read
 	str	r0, [r4, #52]
-	cbz	r0, .L293
+	cbz	r0, .L316
 	mov	r2, #256
 	ldr	r1, [r6, #256]
 	mov	r0, r4
@@ -1809,29 +1991,29 @@ mpp_rkvenc_irq:
 	bl	mpp_write
 	ldr	r3, [r4, #52]
 	cmp	r3, #32768
-	bne	.L296
-.L344:
+	bne	.L319
+.L373:
 	movs	r0, #1
-.L293:
+.L316:
 	add	sp, sp, #12
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, pc}
-.L296:
+.L319:
 	mov	r0, r4
 	bl	rkvenc_check_bs_overflow
 	cmp	r0, #0
-	bne	.L344
-	cbnz	r5, .L298
-	ldr	r1, .L345+12
+	bne	.L373
+	cbnz	r5, .L321
+	ldr	r1, .L374+12
 	ldr	r0, [r4]
 	bl	_dev_err
-	b	.L344
-.L298:
+	b	.L373
+.L321:
 	ldr	r8, [r5]
 	addw	r9, r5, #2200
 	ldr	r6, [r8, #184]
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -1841,22 +2023,22 @@ mpp_rkvenc_irq:
 	orr	r1, r3, #8
 	str	r1, [r5, #2200]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	lsls	r3, r3, #28
-	bpl	.L299
+	bpl	.L322
 	ldr	r3, [r5, #2200]
-	movw	r2, #1391
-	ldr	r1, .L345+4
-	ldr	r0, .L345+16
+	movw	r2, #1398
+	ldr	r1, .L374+4
+	ldr	r0, .L374+16
 	str	r3, [sp]
 	ldr	r3, [r5, #2276]
 	bl	printk
-	b	.L344
-.L299:
+	b	.L373
+.L322:
 	add	r0, r5, #2208
 	bl	cancel_delayed_work
 	mov	r1, r9
@@ -1870,17 +2052,33 @@ mpp_rkvenc_irq:
 	mov	r0, r4
 	bl	rkvenc_clear_dvbm_info
 	ldr	r3, [r6, #16]
-	cbz	r3, .L301
+	cbz	r3, .L324
 	ldr	r2, [r4, #272]
 	movw	r3, #16383
 	cmp	r2, r3
-	bne	.L302
+	bne	.L325
 	ldr	r3, [r7]
 	movs	r2, #1
 	str	r2, [r4, #268]
 	lsls	r0, r3, #13
-	bmi	.L303
-.L304:
+	bpl	.L326
+	ldr	r0, .L374+20
+	bl	printk
+.L325:
+	ldr	r2, [r4, #272]
+	movw	r3, #16382
+	cmp	r2, r3
+	bne	.L327
+	ldr	r3, [r4, #52]
+	orr	r3, r3, #65536
+	str	r3, [r4, #52]
+	ldr	r3, [r6, #212]
+	adds	r3, r3, #1
+	str	r3, [r6, #212]
+.L327:
+	ldr	r3, [r4, #268]
+	cbz	r3, .L324
+.L326:
 	ldr	r3, [r4, #52]
 	orr	r3, r3, #64
 	str	r3, [r4, #52]
@@ -1889,26 +2087,26 @@ mpp_rkvenc_irq:
 	ldr	r3, [r6, #204]
 	adds	r3, r3, #1
 	str	r3, [r6, #204]
-.L301:
+.L324:
 	ldr	r3, [r4, #56]
-	cbz	r3, .L306
+	cbz	r3, .L329
 	ldr	r3, [r6, #208]
 	adds	r3, r3, #1
 	str	r3, [r6, #208]
-.L306:
+.L329:
 	ldrd	r3, r2, [r4, #52]
 	orrs	r3, r3, r2
 	ldr	r2, [r7]
-	str	r3, [r5, #2924]
+	str	r3, [r5, #2940]
 	lsls	r1, r2, #29
-	bpl	.L307
+	bpl	.L330
 	str	r3, [sp]
-	ldr	r0, .L345+20
+	ldr	r0, .L374+24
 	ldr	r3, [r6, #16]
-	ldr	r2, [r5, #2320]
+	ldr	r2, [r5, #2336]
 	ldr	r1, [r5, #2276]
 	bl	printk
-.L307:
+.L330:
 	mov	r0, r5
 	bl	mpp_time_diff
 	mov	r1, r9
@@ -1919,38 +2117,38 @@ mpp_rkvenc_irq:
 	bl	mpp_taskqueue_pop_running
 	ldr	r3, [r4, #12]
 	ldr	r3, [r3, #36]
-	cbz	r3, .L308
+	cbz	r3, .L331
 	mov	r1, r5
 	mov	r0, r4
 	blx	r3
-.L308:
+.L331:
 	ldr	r3, [r4, #152]
 	ldr	r2, [r3, #272]
 	ldr	r3, [r4, #52]
 	tst	r2, r3
-	beq	.L310
+	beq	.L333
 	ldr	r3, [r7]
 	lsls	r2, r3, #13
-	bpl	.L311
-	ldr	r3, [r5, #2924]
-	ldr	r0, .L345+20
+	bpl	.L334
+	ldr	r3, [r5, #2940]
+	ldr	r0, .L374+24
 	str	r3, [sp]
 	ldr	r3, [r6, #16]
-	ldr	r2, [r5, #2320]
+	ldr	r2, [r5, #2336]
 	ldr	r1, [r5, #2276]
 	bl	printk
-.L311:
-	ldr	r3, [r5, #2924]
-	str	r3, [r6, #232]
-	ldr	r3, [r6, #228]
+.L334:
+	ldr	r3, [r5, #2940]
+	str	r3, [r6, #236]
+	ldr	r3, [r6, #232]
 	adds	r3, r3, #1
-	str	r3, [r6, #228]
+	str	r3, [r6, #232]
 	ldr	r3, [r4, #8]
 	ldr	r3, [r3, #28]
-	cbz	r3, .L310
+	cbz	r3, .L333
 	mov	r0, r4
 	blx	r3
-.L310:
+.L333:
 	movs	r3, #0
 	movs	r2, #1
 	str	r3, [r6, #200]
@@ -1961,43 +2159,252 @@ mpp_rkvenc_irq:
 	mov	r0, r4
 	bl	mpp_taskqueue_trigger_work
 	ldr	r3, [r8, #240]
-	cbz	r3, .L313
+	cbz	r3, .L336
 	ldr	r2, [r5, #2308]
-	cbz	r2, .L313
+	cbz	r2, .L336
 	ldr	r0, [r8, #196]
 	blx	r3
-.L313:
+.L336:
 	add	r0, r4, #132
 	bl	up_read
 	ldr	r3, [r7]
 	lsls	r3, r3, #26
-	bpl	.L344
-	movw	r2, #1446
-	ldr	r1, .L345+4
-	ldr	r0, .L345+24
+	bpl	.L373
+	movw	r2, #1463
+	ldr	r1, .L374+4
+	ldr	r0, .L374+28
 	bl	printk
-	b	.L344
-.L303:
-	ldr	r0, .L345+28
-	bl	printk
-.L302:
-	ldr	r3, [r4, #268]
-	cmp	r3, #0
-	beq	.L301
-	b	.L304
-.L346:
+	b	.L373
+.L375:
 	.align	2
-.L345:
+.L374:
 	.word	mpp_dev_debug
-	.word	.LANCHOR0+83
+	.word	.LANCHOR0+113
 	.word	.LC7
-	.word	.LC52
-	.word	.LC53
-	.word	.LC55
+	.word	.LC62
+	.word	.LC63
+	.word	.LC64
+	.word	.LC65
 	.word	.LC8
-	.word	.LC54
 	.fnend
 	.size	mpp_rkvenc_irq, .-mpp_rkvenc_irq
+	.align	1
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	rkvenc_callback, %function
+rkvenc_callback:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 8
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r4, r5, r6, r7, r8, r9, r10, lr}
+	.save {r4, r5, r6, r7, r8, r9, r10, lr}
+	mov	r5, r2
+	.pad #24
+	sub	sp, sp, #24
+	mov	r4, r0
+	cbz	r0, .L378
+	subs	r1, r1, #18
+	cmp	r1, #4
+	bhi	.L378
+	tbb	[pc, r1]
+.L380:
+	.byte	(.L384-.L380)/2
+	.byte	(.L383-.L380)/2
+	.byte	(.L382-.L380)/2
+	.byte	(.L381-.L380)/2
+	.byte	(.L379-.L380)/2
+	.p2align 1
+.L383:
+	movs	r1, #24
+	ldr	r5, [r2]
+	bl	mpp_read
+	str	r0, [sp, #20]
+	cbnz	r5, .L385
+	.syntax unified
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r2, cpsr	@ arch_local_irq_save
+	cpsid	i
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	ldr	r3, [sp, #20]
+	bic	r3, r3, #16777216
+	str	r3, [sp, #20]
+	.syntax unified
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r2	@ local_irq_restore
+@ 0 "" 2
+	.thumb
+	.syntax unified
+.L385:
+	ldr	r2, [sp, #20]
+	movs	r1, #24
+	mov	r0, r4
+	bl	mpp_write
+.L378:
+	movs	r0, #0
+	add	sp, sp, #24
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
+.L382:
+	ldr	r3, [r2]
+	str	r3, [r0, #276]
+	b	.L378
+.L381:
+	ldr	r3, [r2]
+	str	r3, [r0, #280]
+	b	.L378
+.L379:
+	movs	r1, #24
+	bl	mpp_read
+	movw	r1, #20488
+	ubfx	r7, r0, #14, #8
+	mov	r6, r0
+	ubfx	r8, r0, #0, #14
+	mov	r0, r4
+	bl	mpp_read
+	movw	r1, #20492
+	mov	r9, r0
+	mov	r0, r4
+	bl	mpp_read
+	movw	r1, #20484
+	mov	r10, r0
+	mov	r0, r4
+	bl	mpp_read
+	lsr	r2, r9, #16
+	lsr	r9, r10, #16
+	ldr	r1, [r5]
+	cmp	r9, r2
+	ldr	r3, [r5, #4]
+	it	cc
+	movcc	r9, r2
+	cmp	r7, r1
+	lsl	r2, r9, #4
+	bne	.L386
+	cmp	r8, r3
+	bcc	.L387
+.L386:
+	cbz	r3, .L388
+	cmp	r7, r1
+	beq	.L388
+	ldr	r0, [r5, #8]
+	cmp	r3, r0
+	bcc	.L389
+	strd	r1, r3, [sp]
+	mov	r3, r8
+	mov	r1, r7
+	ldr	r0, .L403
+	bl	printk
+	movs	r3, #1
+	str	r3, [r4, #268]
+.L389:
+	mov	r0, r4
+	bl	rkvenc_dump_dbg
+.L388:
+	ldr	r3, [r5, #12]
+	cmp	r8, r3
+	bcs	.L378
+	movs	r1, #24
+	mov	r0, r4
+	bl	mpp_read
+	ldr	r2, [r5, #12]
+	movs	r1, #24
+	bic	r0, r0, #16320
+	bic	r0, r0, #63
+	orrs	r2, r2, r0
+	mov	r0, r4
+	bl	mpp_write
+	.syntax unified
+@ 772 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_rkvenc_540c.c" 1
+	dsb st
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	bl	arm_heavy_mb
+	ldr	r3, [r5, #4]
+	mov	r2, r7
+	ldr	r0, .L403+4
+	str	r3, [sp, #4]
+	ldr	r3, [r5]
+	str	r3, [sp]
+	mov	r3, r8
+	ldr	r1, [r5, #12]
+	bl	printk
+	b	.L378
+.L387:
+	ldr	ip, [r4, #260]
+	ldr	r1, [r5, #8]
+	cmp	ip, #0
+	beq	.L391
+	sub	ip, r3, r2
+	cmp	r1, ip
+.L402:
+	bcs	.L392
+	strd	r3, r0, [sp, #4]
+	mov	r1, r7
+	mov	r3, r8
+	str	r7, [sp]
+	ldr	r0, .L403+8
+	bl	printk
+	movs	r3, #1
+	str	r3, [r4, #268]
+.L392:
+	ldr	r3, [r5, #4]
+	bic	r6, r6, #16320
+	bic	r6, r6, #63
+	movs	r1, #24
+	orrs	r6, r6, r3
+	mov	r0, r4
+	str	r3, [r4, #272]
+	mov	r2, r6
+	bl	mpp_write
+	.syntax unified
+@ 840 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_rkvenc_540c.c" 1
+	dsb st
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	bl	arm_heavy_mb
+	ldr	r3, .L403+12
+	ldr	r3, [r3]
+	lsls	r3, r3, #15
+	bpl	.L393
+	ldrd	r1, r2, [r5]
+	ldr	r0, .L403+16
+	bl	printk
+.L393:
+	movs	r1, #24
+	mov	r0, r4
+	bl	mpp_read
+	cmp	r0, r6
+	beq	.L378
+	ldr	r3, [r5, #4]
+	mov	r2, r8
+	mov	r1, r7
+	ldr	r0, .L403+20
+	str	r3, [sp]
+	ldr	r3, [r5]
+	bl	printk
+	b	.L378
+.L391:
+	cmp	r1, r3
+	b	.L402
+.L384:
+	bl	rkvenc_dump_dbg
+	b	.L378
+.L404:
+	.align	2
+.L403:
+	.word	.LC66
+	.word	.LC67
+	.word	.LC68
+	.word	mpp_dev_debug
+	.word	.LC69
+	.word	.LC70
+	.fnend
+	.size	rkvenc_callback, .-rkvenc_callback
 	.align	1
 	.syntax unified
 	.thumb
@@ -2016,92 +2423,92 @@ rkvenc_control:
 	sub	sp, sp, #24
 	mov	r7, r1
 	cmp	r3, r2
-	beq	.L348
+	beq	.L406
 	movw	r2, #1028
 	cmp	r3, r2
-	beq	.L349
-	movw	r2, #1855
-	ldr	r1, .L374
-	ldr	r0, .L374+4
+	beq	.L407
+	movw	r2, #1862
+	ldr	r1, .L432
+	ldr	r0, .L432+4
 	bl	printk
-	b	.L373
-.L348:
-	cbz	r0, .L351
+	b	.L431
+.L406:
+	cbz	r0, .L409
 	ldr	r6, [r0, #184]
-	cbnz	r6, .L352
-.L351:
-	movw	r2, #1827
-	ldr	r1, .L374
-	ldr	r0, .L374+8
+	cbnz	r6, .L410
+.L409:
+	movw	r2, #1834
+	ldr	r1, .L432
+	ldr	r0, .L432+8
 	bl	printk
 	mvn	r0, #21
-.L347:
+.L405:
 	add	sp, sp, #24
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
-.L352:
+.L410:
 	ldr	r4, [r1, #8]
-	ldr	r3, .L374+12
+	ldr	r3, .L432+12
 	lsrs	r4, r4, #4
 	cmp	r4, #11
 	ldr	r3, [r3]
 	it	ge
 	movge	r4, #11
 	lsls	r2, r3, #27
-	bpl	.L354
+	bpl	.L412
 	mov	r1, r4
-	ldr	r0, .L374+16
+	ldr	r0, .L432+16
 	bl	printk
-.L354:
-	ldr	r9, .L374+24
+.L412:
+	ldr	r9, .L432+24
 	movs	r5, #0
-	ldr	r8, .L374
-	ldr	r10, .L374+28
-.L355:
+	ldr	r8, .L432
+	ldr	r10, .L432+28
+.L413:
 	cmp	r4, r5
-	bne	.L360
-.L373:
+	bne	.L418
+.L431:
 	movs	r0, #0
-	b	.L347
-.L360:
+	b	.L405
+.L418:
 	ldr	r1, [r7, #16]
 	mov	r3, sp
 	and	r3, r3, r9
 	add	r1, r1, r5, lsl #4
 	ldr	r3, [r3, #8]
 	.syntax unified
-@ 157 "./include/linux/uaccess.h" 1
+@ 157 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/include/linux/uaccess.h" 1
 	.syntax unified
 adds r2, r1, #16; sbcscc r2, r2, r3; movcc r3, #0
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	movs	r2, #16
-	cbnz	r3, .L356
+	cbnz	r3, .L414
 	add	r0, sp, #8
 	bl	arm_copy_from_user
 	mov	r2, r0
 	cmp	r0, #0
-	beq	.L357
-.L356:
+	beq	.L415
+.L414:
 	rsb	r0, r2, #16
 	add	r3, sp, #8
 	movs	r1, #0
 	add	r0, r0, r3
 	bl	memset
-	movw	r2, #1837
+	movw	r2, #1844
 	mov	r1, r8
 	mov	r0, r10
 	bl	printk
-.L358:
+.L416:
 	adds	r5, r5, #1
-	b	.L355
-.L364:
+	b	.L413
+.L422:
 	subs	r1, r2, #1
 	cmp	r1, #1
-	bhi	.L359
+	bhi	.L417
 	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
+@ 87 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
 	cmp	r3, #11
 	sbc	r1, r3, r3
 .inst.w 0xf3af8014
@@ -2114,78 +2521,397 @@ adds r2, r1, #16; sbcscc r2, r2, r3; movcc r3, #0
 	str	r2, [r1, #24]
 	ldrd	r2, [sp, #16]
 	strd	r2, [r1, #32]
-	b	.L358
-.L349:
+	b	.L416
+.L407:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r7, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r8, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	mov	r4, r0
-	ldr	r9, .L374+32
+	ldr	r9, .L432+32
 	ldr	r6, [r4, #20]!
 	mov	r10, #1
 	ldr	r5, [r6], #-4
 	subs	r5, r5, #4
-.L361:
+.L419:
 	adds	r3, r6, #4
 	cmp	r3, r4
-	bne	.L363
+	bne	.L421
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r8	@ local_irq_restore
 @ 0 "" 2
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r7	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	b	.L373
-.L363:
+	b	.L431
+.L421:
 	ldr	r3, [r6, #2200]
 	lsls	r3, r3, #30
-	bmi	.L362
+	bmi	.L420
 	ldr	r1, [r6, #2276]
 	mov	r0, r9
 	bl	printk
 	str	r10, [r6, #2312]
-.L362:
+.L420:
 	ldr	r3, [r5, #4]
 	mov	r6, r5
 	subs	r5, r3, #4
-	b	.L361
-.L357:
+	b	.L419
+.L415:
 	ldrd	r3, r2, [sp, #8]
 	subs	r1, r3, #1
 	cmp	r1, #9
-	bls	.L364
-.L359:
+	bls	.L422
+.L417:
 	str	r2, [sp]
 	mov	r1, r8
-	movw	r2, #1847
-	ldr	r0, .L374+20
+	movw	r2, #1854
+	ldr	r0, .L432+20
 	bl	printk
-	b	.L358
-.L375:
+	b	.L416
+.L433:
 	.align	2
-.L374:
-	.word	.LANCHOR0+98
-	.word	.LC61
-	.word	.LC56
+.L432:
+	.word	.LANCHOR0+128
+	.word	.LC76
+	.word	.LC71
 	.word	mpp_dev_debug
-	.word	.LC57
-	.word	.LC59
+	.word	.LC72
+	.word	.LC74
 	.word	-8192
-	.word	.LC58
-	.word	.LC60
+	.word	.LC73
+	.word	.LC75
 	.fnend
 	.size	rkvenc_control, .-rkvenc_control
+	.align	1
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	rkvenc_isr, %function
+rkvenc_isr:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 16
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	mov	r4, r0
+	ldr	r6, .L502
+	.pad #28
+	sub	sp, sp, #28
+	ldr	r3, [r6]
+	lsls	r0, r3, #26
+	bpl	.L435
+	movw	r2, #1590
+	ldr	r1, .L502+4
+	ldr	r0, .L502+8
+	bl	printk
+.L435:
+	ldr	r7, [r4, #292]
+	cmp	r7, #1
+	beq	.L436
+	cbz	r7, .L437
+	cmp	r7, #2
+	beq	.L438
+.L439:
+	ldr	r3, [r6]
+	lsls	r3, r3, #26
+	bpl	.L441
+	movw	r2, #1676
+	ldr	r1, .L502+4
+	ldr	r0, .L502+12
+	bl	printk
+	b	.L441
+.L437:
+	ldr	r5, [r4, #88]
+	cmp	r5, #0
+	beq	.L441
+	ldr	r3, [r5]
+	mov	r0, r5
+	ldr	r8, [r3, #184]
+	bl	mpp_time_diff
+	str	r7, [r4, #88]
+	ldr	r3, [r8, #16]
+	cbz	r3, .L443
+	ldr	r2, [r4, #272]
+	movw	r3, #16383
+	cmp	r2, r3
+	bne	.L444
+	movs	r3, #1
+	ldr	r1, .L502+16
+	str	r3, [r4, #268]
+	ldr	r0, [r4]
+	bl	_dev_err
+.L444:
+	ldr	r3, [r4, #268]
+	cbz	r3, .L443
+	ldr	r3, [r4, #52]
+	orr	r3, r3, #64
+	str	r3, [r4, #52]
+	movs	r3, #0
+	str	r3, [r4, #268]
+.L443:
+	ldrd	r3, r2, [r4, #52]
+	orrs	r3, r3, r2
+	str	r3, [r5, #2940]
+	movs	r3, #0
+	str	r3, [r4, #56]
+	ldr	r3, [r6]
+	lsls	r1, r3, #29
+	bpl	.L446
+	ldr	r3, [r5, #2940]
+	ldr	r0, .L502+20
+	str	r3, [sp]
+	ldr	r3, [r8, #16]
+	ldr	r2, [r5, #2336]
+	ldr	r1, [r5, #2276]
+	bl	printk
+.L446:
+	ldr	r3, [r4, #152]
+	ldr	r2, [r3, #272]
+	ldr	r3, [r4, #52]
+	tst	r2, r3
+	beq	.L448
+	ldr	r3, [r5, #2940]
+	mov	r7, r4
+	ldr	r1, .L502+24
+	str	r3, [sp, #4]
+	ldr	r3, [r8, #16]
+	str	r3, [sp]
+	ldr	r0, [r7], #72
+	ldr	r3, [r5, #2336]
+	ldr	r2, [r5, #2276]
+	bl	_dev_err
+	mov	r0, r7
+	bl	atomic_add.constprop.15
+	ldr	r3, [r6]
+	lsls	r2, r3, #21
+	bpl	.L448
+	ldr	r1, [r5, #2940]
+	ldr	r0, .L502+28
+	bl	printk
+	mov	r0, r4
+	bl	rkvenc_dump_dbg
+.L448:
+	mov	r1, r5
+	ldr	r0, [r5]
+	bl	mpp_task_finish
+	b	.L439
+.L438:
+	ldr	r5, [r4, #88]
+	cbnz	r5, .L450
+	ldr	r1, .L502+32
+	ldr	r0, [r4]
+	bl	_dev_err
+.L441:
+	movs	r0, #1
+	add	sp, sp, #28
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
+.L450:
+	mov	r0, r5
+	bl	mpp_time_diff
+	movs	r3, #0
+	str	r3, [r4, #88]
+	ldr	r3, [r6]
+	ldr	r1, [r4, #52]
+	lsls	r3, r3, #29
+	str	r1, [r5, #2940]
+	bpl	.L451
+	ldr	r0, .L502+28
+	bl	printk
+.L451:
+	ldr	r3, [r4, #152]
+	ldr	r2, [r3, #272]
+	ldr	r3, [r5, #2940]
+	tst	r2, r3
+	beq	.L453
+	add	r0, r4, #72
+	bl	atomic_add.constprop.15
+	ldr	r3, [r6]
+	lsls	r7, r3, #21
+	bpl	.L453
+	ldr	r1, [r5, #2940]
+	ldr	r0, .L502+28
+	bl	printk
+.L453:
+	mov	r1, r5
+	ldr	r0, [r5]
+	bl	mpp_task_finish
+	ldr	r0, [r4, #288]
+	adds	r0, r0, #64
+	bl	mutex_lock
+	ldr	r1, [r4, #288]
+	ldr	r0, [r5, #3592]
+	adds	r1, r1, #56
+	bl	list_move_tail
+	ldr	r0, [r4, #288]
+	adds	r0, r0, #64
+	bl	mutex_unlock
+	b	.L439
+.L436:
+	ldr	r3, [r4, #52]
+	lsls	r5, r3, #23
+	bmi	.L455
+	ldr	r3, [r4, #120]
+	cbz	r3, .L456
+.L455:
+	mov	r0, r4
+	bl	rkvenc_dump_dbg
+.L456:
+	ldr	r10, [r4, #152]
+	movs	r3, #0
+	ldr	r3, [r3]
+	mov	r0, r4
+	ldr	r9, [r4, #288]
+	ldr	r1, [r10, #292]
+	str	r3, [sp, #12]
+	bl	mpp_read_relaxed
+	ldr	r3, [r4, #96]
+	ldr	r5, [r3, #60]
+	ldr	r7, [r5], #-20
+	subs	r7, r7, #20
+	lsrs	r3, r0, #24
+	str	r3, [sp, #16]
+.L457:
+	ldr	r1, [r4, #96]
+	add	r8, r5, #20
+	add	r2, r1, #60
+	cmp	r8, r2
+	bne	.L463
+.L458:
+	ldr	r3, [r1, #60]
+	cmp	r2, r3
+	bne	.L464
+	ldr	r3, [sp, #12]
+	ldr	r3, [r3, #16]
+	cbz	r3, .L464
+	ldr	r2, [r4, #52]
+	ldr	r3, [r10, #272]
+	tst	r2, r3
+	beq	.L464
+	mov	r0, r4
+	bl	rkvenc_reset
+.L464:
+	ldr	r3, [r6]
+	lsls	r2, r3, #26
+	bpl	.L439
+	movw	r2, #1581
+	ldr	r1, .L502+36
+	ldr	r0, .L502+12
+	bl	printk
+	b	.L439
+.L463:
+	ldr	r3, [r5, #3596]
+	ldr	r0, [sp, #16]
+	subs	r3, r3, r0
+	tst	r3, #255
+	bne	.L458
+	add	r0, r5, #2208
+	bl	cancel_delayed_work
+	mov	r0, r5
+	bl	mpp_time_diff
+	ldr	r3, [r6]
+	ldr	r1, [r4, #52]
+	lsls	r0, r3, #29
+	str	r1, [r5, #2940]
+	bpl	.L459
+	ldr	r0, .L502+40
+	bl	printk
+.L459:
+	ldr	r3, [r5, #2340]
+	addw	fp, r5, #2200
+	ldr	r1, [r5, #3592]
+	ldr	r0, [r9, #12]
+	ldr	r3, [r3, #264]
+	ldr	r2, [r5, #2940]
+	add	r3, r3, r0
+	ldr	r1, [r1, #40]
+	bic	r3, r3, #3
+	str	r2, [r1, r3]
+	ldr	r3, [r5, #2204]
+	cbnz	r3, .L460
+	mov	r1, fp
+	movs	r0, #7
+	str	r3, [sp, #20]
+	bl	____atomic_set_bit
+	movs	r2, #1
+	movs	r1, #3
+	addw	r0, r5, #2284
+	ldr	r3, [sp, #20]
+	bl	__wake_up
+.L460:
+	add	r3, r9, #64
+	str	r3, [sp, #20]
+	mov	r0, r3
+	bl	mutex_lock
+	add	r1, r9, #56
+	ldr	r0, [r5, #3592]
+	bl	list_move_tail
+	ldr	r3, [sp, #20]
+	mov	r0, r3
+	bl	mutex_unlock
+	mov	r1, fp
+	movs	r0, #5
+	bl	____atomic_set_bit
+	ldrd	r2, r3, [r5, #20]
+	addw	r0, r5, #2252
+	str	r3, [r2, #4]
+	str	r2, [r3]
+	str	r8, [r5, #20]
+	str	r8, [r5, #24]
+	pld	[r0]
+	.syntax unified
+@ 224 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
+	@ atomic_fetch_sub
+1:	ldrex	r3, [r0]
+	sub	r2, r3, #1
+	strex	r1, r2, [r0]
+	teq	r1, #0
+	bne	1b
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	cmp	r3, #1
+	bne	.L461
+	bl	mpp_free_task
+.L462:
+	ldr	r3, [r7, #20]
+	mov	r5, r7
+	sub	r7, r3, #20
+	b	.L457
+.L461:
+	cmp	r3, #0
+	bgt	.L462
+	movs	r1, #3
+	bl	refcount_warn_saturate
+	b	.L462
+.L503:
+	.align	2
+.L502:
+	.word	mpp_dev_debug
+	.word	.LANCHOR0+143
+	.word	.LC7
+	.word	.LC8
+	.word	.LC77
+	.word	.LC65
+	.word	.LC78
+	.word	.LC79
+	.word	.LC80
+	.word	.LANCHOR0+154
+	.word	.LC81
+	.fnend
+	.size	rkvenc_isr, .-rkvenc_isr
 	.align	1
 	.syntax unified
 	.thumb
@@ -2199,93 +2925,93 @@ rkvenc_init_session:
 	push	{r3, r4, r5, r6, r7, r8, r9, lr}
 	.save {r3, r4, r5, r6, r7, r8, r9, lr}
 	mov	r4, r0
-	cbnz	r0, .L377
-	mov	r2, #1904
-	ldr	r1, .L399
-	ldr	r0, .L399+4
+	cbnz	r0, .L505
+	movw	r2, #1906
+	ldr	r1, .L527
+	ldr	r0, .L527+4
 	bl	printk
 	mvn	r0, #21
-.L376:
+.L504:
 	pop	{r3, r4, r5, r6, r7, r8, r9, pc}
-.L377:
-	ldr	r5, .L399+8
+.L505:
+	ldr	r5, .L527+8
 	mov	r1, #3520
 	ldr	r8, [r0, #12]
 	ldr	r0, [r5, #32]
 	bl	kmem_cache_alloc
 	mov	r6, r0
-	cbnz	r0, .L379
-.L398:
+	cbnz	r0, .L507
+.L526:
 	mvn	r0, #11
-	b	.L376
-.L379:
-	ldr	r2, .L399+12
+	b	.L504
+.L507:
+	ldr	r2, .L527+12
 	add	r7, r4, #196
-	ldr	r1, .L399+16
+	ldr	r1, .L527+16
 	bl	__init_rwsem
 	str	r6, [r4, #184]
 	add	r6, r4, #188
-.L384:
+.L512:
 	mov	r1, #3520
 	ldr	r0, [r5, #48]
 	bl	kmem_cache_alloc
-	cbz	r0, .L380
+	cbz	r0, .L508
 	ldr	r3, [r8, #4]
 	mov	ip, r0
 	mov	lr, #0
 	ldr	r9, [r3, #4]
 	mov	r2, r9
-	str	r9, [r0, #2324]
-.L381:
+	str	r9, [r0, #2340]
+.L509:
 	ldr	r3, [r9, #24]
 	cmp	r3, lr
-	bhi	.L383
+	bhi	.L511
 	str	r0, [r6], #4
 	cmp	r6, r7
-	bne	.L384
+	bne	.L512
 	movs	r0, #0
-	b	.L376
-.L383:
-	ldr	r3, [ip, #2332]
-	cbnz	r3, .L382
+	b	.L504
+.L511:
+	ldr	r3, [ip, #2348]
+	cbnz	r3, .L510
 	ldr	r3, [r2, #32]
 	ldr	r1, [r2, #28]
 	adds	r3, r3, #4
 	subs	r1, r3, r1
-	str	r1, [ip, #2336]
-.L382:
+	str	r1, [ip, #2352]
+.L510:
 	add	lr, lr, #1
 	adds	r2, r2, #20
 	add	ip, ip, #12
-	b	.L381
-.L380:
+	b	.L509
+.L508:
 	ldr	r0, [r4, #184]
-	cbz	r0, .L385
+	cbz	r0, .L513
 	bl	kfree
-.L385:
+.L513:
 	ldr	r5, [r4, #188]
-	cbz	r5, .L386
+	cbz	r5, .L514
 	mov	r0, r5
 	bl	rkvenc_invalid_class_msg
 	mov	r0, r5
 	bl	kfree
-.L386:
+.L514:
 	ldr	r4, [r4, #192]
 	cmp	r4, #0
-	beq	.L398
+	beq	.L526
 	mov	r0, r4
 	bl	rkvenc_invalid_class_msg
 	mov	r0, r4
 	bl	kfree
-	b	.L398
-.L400:
+	b	.L526
+.L528:
 	.align	2
-.L399:
-	.word	.LANCHOR0+113
-	.word	.LC62
+.L527:
+	.word	.LANCHOR0+170
+	.word	.LC82
 	.word	kmalloc_caches
-	.word	.LANCHOR1
-	.word	.LC63
+	.word	.LANCHOR2
+	.word	.LC83
 	.fnend
 	.size	rkvenc_init_session, .-rkvenc_init_session
 	.section	.text.unlikely
@@ -2294,55 +3020,55 @@ rkvenc_init_session:
 	.thumb
 	.thumb_func
 	.fpu softvfp
-	.type	rkvenc_link_remove.constprop.6, %function
-rkvenc_link_remove.constprop.6:
+	.type	rkvenc_link_remove.constprop.3, %function
+rkvenc_link_remove.constprop.3:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r5, r6, r7, r8, lr}
 	.save {r4, r5, r6, r7, r8, lr}
 	mov	r4, r0
-	ldr	r5, .L416
+	ldr	r5, .L544
 	ldr	r3, [r5]
 	lsls	r2, r3, #26
-	bpl	.L402
-	movw	r2, #2335
-	ldr	r1, .L416+4
-	ldr	r0, .L416+8
+	bpl	.L530
+	movw	r2, #2340
+	ldr	r1, .L544+4
+	ldr	r0, .L544+8
 	bl	printk
-	cbz	r4, .L403
-.L410:
+	cbz	r4, .L531
+.L538:
 	add	r8, r4, #64
 	mov	r6, r4
 	mov	r0, r8
 	bl	mutex_lock
 	ldr	r0, [r6, #48]!
 	ldr	r7, [r0]
-.L404:
+.L532:
 	cmp	r0, r6
-	bne	.L405
+	bne	.L533
 	mov	r6, r4
 	ldr	r0, [r6, #56]!
 	ldr	r7, [r0]
-.L406:
+.L534:
 	cmp	r0, r6
-	bne	.L407
+	bne	.L535
 	mov	r0, r8
 	bl	mutex_unlock
 	movs	r3, #0
 	str	r3, [r4, #4]
-.L403:
+.L531:
 	ldr	r3, [r5]
 	lsls	r3, r3, #26
-	bpl	.L415
-	movw	r2, #2353
-	ldr	r1, .L416+4
-	ldr	r0, .L416+12
+	bpl	.L543
+	movw	r2, #2358
+	ldr	r1, .L544+4
+	ldr	r0, .L544+12
 	bl	printk
-.L415:
+.L543:
 	movs	r0, #0
 	pop	{r4, r5, r6, r7, r8, pc}
-.L405:
+.L533:
 	ldrd	r2, r3, [r0]
 	str	r3, [r2, #4]
 	str	r2, [r3]
@@ -2351,8 +3077,8 @@ rkvenc_link_remove.constprop.6:
 	bl	mpp_dma_free
 	mov	r0, r7
 	ldr	r7, [r7]
-	b	.L404
-.L407:
+	b	.L532
+.L535:
 	ldrd	r2, r3, [r0]
 	str	r3, [r2, #4]
 	str	r2, [r3]
@@ -2361,20 +3087,20 @@ rkvenc_link_remove.constprop.6:
 	bl	mpp_dma_free
 	mov	r0, r7
 	ldr	r7, [r7]
-	b	.L406
-.L402:
+	b	.L534
+.L530:
 	cmp	r0, #0
-	bne	.L410
-	b	.L415
-.L417:
+	bne	.L538
+	b	.L543
+.L545:
 	.align	2
-.L416:
+.L544:
 	.word	mpp_dev_debug
-	.word	.LANCHOR0+133
+	.word	.LANCHOR0+190
 	.word	.LC7
 	.word	.LC8
 	.fnend
-	.size	rkvenc_link_remove.constprop.6, .-rkvenc_link_remove.constprop.6
+	.size	rkvenc_link_remove.constprop.3, .-rkvenc_link_remove.constprop.3
 	.align	1
 	.syntax unified
 	.thumb
@@ -2389,30 +3115,30 @@ rkvenc_remove:
 	.save {r4, lr}
 	adds	r0, r0, #16
 	ldr	r4, [r0, #64]
-	ldr	r1, .L427
+	ldr	r1, .L555
 	bl	_dev_info
 	ldr	r0, [r4, #264]
-	cbz	r0, .L419
+	cbz	r0, .L547
 	bl	rk_dvbm_put
 	movs	r3, #0
 	str	r3, [r4, #264]
-.L419:
+.L547:
 	mov	r0, r4
 	bl	mpp_dev_remove
 	ldr	r0, [r4, #244]
-	cbz	r0, .L420
+	cbz	r0, .L548
 	bl	proc_remove
 	movs	r3, #0
 	str	r3, [r4, #244]
-.L420:
+.L548:
 	ldr	r0, [r4, #288]
-	bl	rkvenc_link_remove.constprop.6
+	bl	rkvenc_link_remove.constprop.3
 	movs	r0, #0
 	pop	{r4, pc}
-.L428:
+.L556:
 	.align	2
-.L427:
-	.word	.LC64
+.L555:
+	.word	.LC84
 	.fnend
 	.size	rkvenc_remove, .-rkvenc_remove
 	.text
@@ -2430,17 +3156,17 @@ rkvenc_clk_on:
 	.save {r4, lr}
 	mov	r4, r0
 	ldr	r0, [r0, #156]
-	cbz	r0, .L430
+	cbz	r0, .L558
 	bl	clk_prepare_enable
-.L430:
+.L558:
 	ldr	r0, [r4, #184]
-	cbz	r0, .L431
+	cbz	r0, .L559
 	bl	clk_prepare_enable
-.L431:
+.L559:
 	ldr	r0, [r4, #212]
-	cbz	r0, .L432
+	cbz	r0, .L560
 	bl	clk_prepare_enable
-.L432:
+.L560:
 	movs	r0, #0
 	pop	{r4, pc}
 	.fnend
@@ -2477,68 +3203,6 @@ rkvenc_clk_off:
 	pop	{r3, r4, r5, pc}
 	.fnend
 	.size	rkvenc_clk_off, .-rkvenc_clk_off
-	.align	1
-	.syntax unified
-	.thumb
-	.thumb_func
-	.fpu softvfp
-	.type	rkvenc_runtime_suspend, %function
-rkvenc_runtime_suspend:
-	.fnstart
-	@ args = 0, pretend = 0, frame = 0
-	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, lr}
-	.save {r4, r5, r6, lr}
-	mov	r4, r0
-	ldr	r5, .L455
-	ldr	r6, [r0, #64]
-	ldr	r2, [r5]
-	lsls	r2, r2, #31
-	bpl	.L444
-	ldr	r1, [r0, #44]
-	cbnz	r1, .L445
-	ldr	r1, [r0]
-.L445:
-	ldr	r0, .L455+4
-	bl	printk
-.L444:
-	add	r3, r6, #148
-	movs	r2, #1
-	pld	[r3]
-	.syntax unified
-@ 66 "./arch/arm/include/asm/cmpxchg.h" 1
-	@	__xchg4
-1:	ldrex	r1, [r3]
-	strex	r0, r2, [r3]
-	teq	r0, #0
-	bne	1b
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	cbnz	r1, .L446
-	add	r0, r6, #132
-	bl	down_write
-.L446:
-	ldr	r3, [r5]
-	lsls	r3, r3, #31
-	bpl	.L447
-	ldr	r1, [r4, #44]
-	cbnz	r1, .L448
-	ldr	r1, [r4]
-.L448:
-	ldr	r0, .L455+8
-	bl	printk
-.L447:
-	movs	r0, #0
-	pop	{r4, r5, r6, pc}
-.L456:
-	.align	2
-.L455:
-	.word	mpp_dev_debug
-	.word	.LC65
-	.word	.LC66
-	.fnend
-	.size	rkvenc_runtime_suspend, .-rkvenc_runtime_suspend
 	.section	.text.unlikely
 	.align	1
 	.syntax unified
@@ -2553,10 +3217,10 @@ rkvenc_probe:
 	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	add	r7, r0, #16
-	ldr	r6, .L529
+	ldr	r6, .L643
 	.pad #84
 	sub	sp, sp, #84
-	ldr	r1, .L529+4
+	ldr	r1, .L643+4
 	mov	r5, r0
 	mov	r0, r7
 	ldr	r3, [r6]
@@ -2569,92 +3233,92 @@ rkvenc_probe:
 	mov	r4, r0
 	str	r6, [sp, #28]
 	cmp	r0, #0
-	beq	.L488
+	beq	.L602
 	str	r0, [r5, #80]
 	mov	r0, r7
 	bl	mpp_dev_of_node
-	cbz	r0, .L459
+	cbz	r0, .L573
 	mov	r1, r7
-	ldr	r0, .L529+8
+	ldr	r0, .L643+8
 	bl	of_match_device
-	cbnz	r0, .L460
-	ldr	r1, .L529+12
+	cbnz	r0, .L574
+	ldr	r1, .L643+12
 	mov	r0, r7
 	bl	_dev_err
 	mvn	r9, #18
-.L458:
+.L572:
 	mov	r0, r7
-	ldr	r1, .L529+16
+	ldr	r1, .L643+16
 	bl	_dev_info
 	mov	r0, r9
 	ldr	r3, [sp, #28]
 	ldr	r2, [sp, #76]
 	ldr	r3, [r3]
 	cmp	r2, r3
-	beq	.L487
+	beq	.L601
 	bl	__stack_chk_fail
-.L460:
+.L574:
 	ldr	r3, [r0, #192]
 	str	r3, [r4, #4]
-.L459:
+.L573:
 	mov	r1, r5
 	mov	r0, r4
 	bl	mpp_dev_probe
 	mov	r9, r0
 	cmp	r0, #0
-	bne	.L458
+	bne	.L572
 	add	r3, r4, #16
 	mov	r1, r0
 	movs	r2, #20
 	mov	r0, r3
 	bl	memset
-	ldr	r3, .L529+20
+	ldr	r3, .L643+20
 	str	r3, [r4, #24]
 	ldr	r3, [r5, #60]
 	str	r0, [r4, #16]
 	str	r0, [r4, #20]
-	cbnz	r3, .L461
+	cbnz	r3, .L575
 	ldr	r3, [r5, #16]
-.L461:
+.L575:
 	strd	r3, r4, [sp, #4]
 	mov	r0, r7
 	movs	r3, #128
-	ldr	r2, .L529+24
+	ldr	r2, .L643+24
 	str	r3, [sp]
 	movs	r3, #0
 	ldr	r1, [r4, #48]
 	bl	devm_request_threaded_irq
 	mov	r9, r0
-	cbz	r0, .L462
+	cbz	r0, .L576
 	mov	r0, r7
-	ldr	r1, .L529+28
+	ldr	r1, .L643+28
 	bl	_dev_err
 	mov	r0, r4
 	bl	mpp_dev_remove
-	b	.L458
-.L462:
+	b	.L572
+.L576:
 	movs	r3, #40
 	str	r3, [r4, #92]
 	ldr	r3, [r4, #4]
 	ldr	r0, [r4]
 	ldr	r3, [r3, #4]
 	str	r3, [r4, #152]
-	cbz	r0, .L464
+	cbz	r0, .L578
 	bl	mpp_dev_of_node
-	cbz	r0, .L464
+	cbz	r0, .L578
 	ldr	r3, [r4, #104]
-	cbz	r3, .L464
+	cbz	r3, .L578
 	ldr	r3, [r3, #76]
-	cbz	r3, .L464
+	cbz	r3, .L578
 	ldr	r0, [r4]
 	bl	mpp_dev_of_node
 	ldr	r3, [r0]
-	cbz	r3, .L464
+	cbz	r3, .L578
 	ldr	r2, [r4, #116]
 	movs	r1, #31
 	add	r0, sp, #44
 	str	r2, [sp]
-	ldr	r2, .L529+32
+	ldr	r2, .L643+32
 	bl	snprintf
 	ldr	r3, [r4, #104]
 	ldr	r1, [r3, #76]
@@ -2662,163 +3326,163 @@ rkvenc_probe:
 	bl	proc_mkdir
 	mov	r2, r0
 	str	r0, [r4, #244]
-	cbz	r0, .L466
+	cbz	r0, .L580
 	cmn	r0, #4096
-	bls	.L467
-.L466:
-	movw	r2, #2159
-	ldr	r1, .L529+36
-	ldr	r0, .L529+40
+	bls	.L581
+.L580:
+	movw	r2, #2163
+	ldr	r1, .L643+36
+	ldr	r0, .L643+40
 	bl	printk
 	movs	r3, #0
 	str	r3, [r4, #244]
-.L464:
+.L578:
 	ldr	r1, [r4, #104]
 	mov	r0, r4
 	bl	mpp_dev_register_srv
 	mov	r0, r7
 	bl	mpp_dev_of_node
 	movs	r2, #0
-	ldr	r1, .L529+44
+	ldr	r1, .L643+44
 	bl	of_parse_phandle
 	mov	r5, r0
 	cmp	r0, #0
-	bne	.L468
-.L470:
-	movw	r2, #2525
-	ldr	r1, .L529+48
-	ldr	r0, .L529+52
+	bne	.L582
+.L584:
+	movw	r2, #2530
+	ldr	r1, .L643+48
+	ldr	r0, .L643+52
 	bl	printk
-.L469:
+.L583:
 	movs	r3, #0
 	mov	r0, r7
 	str	r3, [r4, #292]
 	bl	mpp_dev_of_node
-	ldr	r3, .L529+56
+	ldr	r3, .L643+56
 	ldr	r2, [r3]
 	mov	r10, r3
 	tst	r2, #32
 	mov	r6, r0
-	beq	.L471
-	movw	r2, #2438
-	ldr	r1, .L529+60
-	ldr	r0, .L529+64
+	beq	.L585
+	movw	r2, #2443
+	ldr	r1, .L643+60
+	ldr	r0, .L643+64
 	bl	printk
-.L471:
+.L585:
 	movs	r5, #0
 	movs	r3, #1
 	str	r5, [sp]
 	add	r2, r4, #284
-	ldr	r1, .L529+68
+	ldr	r1, .L643+68
 	mov	r0, r6
 	bl	of_property_read_variable_u32_array
 	cmp	r0, r5
-	bge	.L472
+	bge	.L586
 	str	r5, [r4, #292]
-.L473:
+.L587:
 	movs	r3, #1
 	str	r3, [r4, #300]
-	b	.L458
-.L467:
+	b	.L572
+.L581:
 	add	r3, r4, #160
 	mov	r1, #420
-	ldr	r0, .L529+72
+	ldr	r0, .L643+72
 	bl	mpp_procfs_create_u32
 	add	r3, r4, #216
 	ldr	r2, [r4, #244]
 	mov	r1, #420
-	ldr	r0, .L529+76
+	ldr	r0, .L643+76
 	bl	mpp_procfs_create_u32
 	add	r3, r4, #92
 	ldr	r2, [r4, #244]
 	mov	r1, #420
-	ldr	r0, .L529+80
+	ldr	r0, .L643+80
 	bl	mpp_procfs_create_u32
 	add	r3, r4, #120
 	ldr	r2, [r4, #244]
 	mov	r1, #420
-	ldr	r0, .L529+84
+	ldr	r0, .L643+84
 	bl	mpp_procfs_create_u32
-	ldr	r3, .L529+88
+	ldr	r3, .L643+88
 	mov	r1, #292
-	ldr	r0, .L529+92
+	ldr	r0, .L643+92
 	str	r4, [sp]
 	ldr	r2, [r4, #244]
 	bl	proc_create_single_data
 	add	r3, r4, #292
 	ldr	r2, [r4, #244]
 	mov	r1, #420
-	ldr	r0, .L529+96
+	ldr	r0, .L643+96
 	bl	mpp_procfs_create_u32
-	b	.L464
-.L468:
+	b	.L578
+.L582:
 	bl	of_device_is_available
 	cmp	r0, #0
-	beq	.L470
+	beq	.L584
 	mov	r0, r5
 	bl	of_find_device_by_node
 	movs	r1, #1
 	bl	rk_dvbm_get_port
 	str	r0, [r4, #264]
 	cmp	r0, #0
-	beq	.L469
-	ldr	r3, .L529+100
+	beq	.L583
+	ldr	r3, .L643+100
 	add	r1, sp, #32
 	strd	r3, r4, [sp, #32]
 	bl	rk_dvbm_set_cb
-	b	.L469
-.L530:
+	b	.L583
+.L644:
 	.align	2
-.L529:
+.L643:
 	.word	__stack_chk_guard
-	.word	.LC67
-	.word	.LANCHOR0+152
-	.word	.LC68
-	.word	.LC83
+	.word	.LC85
+	.word	.LANCHOR0+212
+	.word	.LC86
+	.word	.LC101
 	.word	mpp_rkvenc_worker
 	.word	mpp_rkvenc_irq
-	.word	.LC69
-	.word	.LC70
-	.word	.LANCHOR0+544
-	.word	.LC71
-	.word	.LC77
-	.word	.LANCHOR0+563
-	.word	.LC78
+	.word	.LC87
+	.word	.LC88
+	.word	.LANCHOR0+604
+	.word	.LC89
+	.word	.LC95
+	.word	.LANCHOR0+623
+	.word	.LC96
 	.word	mpp_dev_debug
-	.word	.LANCHOR0+584
+	.word	.LANCHOR0+644
 	.word	.LC7
-	.word	.LC79
-	.word	.LC72
-	.word	.LC38
-	.word	.LC73
-	.word	.LC74
+	.word	.LC97
+	.word	.LC90
+	.word	.LC50
+	.word	.LC91
+	.word	.LC92
 	.word	rkvenc_show_session_info
-	.word	.LC75
-	.word	.LC76
+	.word	.LC93
+	.word	.LC94
 	.word	rkvenc_callback
-.L472:
+.L586:
 	ldr	r2, [r4, #284]
 	movs	r3, #1
 	cmp	r2, #1
-	bls	.L474
+	bls	.L588
 	str	r3, [r4, #292]
 	mov	r0, r7
-	ldr	r1, .L531
+	ldr	r1, .L645
 	bl	_dev_info
-.L475:
+.L589:
 	mov	r2, #3520
 	movs	r1, #76
 	mov	r0, r7
 	bl	devm_kmalloc
 	mov	r5, r0
 	cmp	r0, #0
-	beq	.L473
+	beq	.L587
 	add	fp, r0, #64
 	movs	r3, #0
-	ldr	r1, .L531+4
+	ldr	r1, .L645+4
 	str	r3, [r4, #296]
 	mov	r0, fp
-	ldr	r2, .L531+8
+	ldr	r2, .L645+8
 	bl	__mutex_init
 	add	r3, r5, #48
 	str	r3, [r5, #48]
@@ -2830,12 +3494,12 @@ rkvenc_probe:
 	str	r3, [sp, #20]
 	ldr	r3, [r10]
 	lsls	r1, r3, #26
-	bpl	.L477
-	movw	r2, #2369
-	ldr	r1, .L531+12
-	ldr	r0, .L531+16
+	bpl	.L591
+	movw	r2, #2374
+	ldr	r1, .L645+12
+	ldr	r0, .L645+16
 	bl	printk
-.L477:
+.L591:
 	add	r3, r5, #12
 	movs	r1, #0
 	movs	r2, #36
@@ -2845,19 +3509,19 @@ rkvenc_probe:
 	movs	r1, #0
 	mov	r3, r0
 	mov	r0, r6
-.L478:
+.L592:
 	ldr	r2, [r6, #24]
 	cmp	r1, r2
-	bcc	.L480
+	bcc	.L594
 	ldr	r3, [r4, #284]
 	str	r3, [r5, #4]
 	movs	r3, #0
-.L528:
+.L642:
 	str	r3, [sp, #24]
 	ldr	r2, [sp, #24]
 	ldr	r3, [r5, #4]
 	cmp	r3, r2
-	bhi	.L484
+	bhi	.L598
 	mov	r0, fp
 	bl	mutex_lock
 	ldrd	r1, r3, [r5, #56]
@@ -2871,52 +3535,52 @@ rkvenc_probe:
 	bl	mutex_unlock
 	ldr	r3, [r10]
 	lsls	r2, r3, #26
-	bpl	.L485
-	movw	r2, #2421
-	ldr	r1, .L531+12
-	ldr	r0, .L531+20
+	bpl	.L599
+	movw	r2, #2426
+	ldr	r1, .L645+12
+	ldr	r0, .L645+20
 	bl	printk
-.L485:
+.L599:
 	ldr	r3, [r10]
 	str	r5, [r4, #288]
 	lsls	r3, r3, #26
 	str	r4, [r5]
-	bpl	.L473
-	movw	r2, #2471
-	ldr	r1, .L531+24
-	ldr	r0, .L531+20
+	bpl	.L587
+	movw	r2, #2476
+	ldr	r1, .L645+24
+	ldr	r0, .L645+20
 	bl	printk
-	b	.L473
-.L474:
+	b	.L587
+.L588:
 	str	r3, [r4, #284]
 	movs	r3, #2
 	str	r3, [r4, #292]
-	b	.L475
-.L480:
+	b	.L589
+.L594:
 	ldr	r2, [r0, #44]
-	cbz	r2, .L479
+	cbz	r2, .L593
 	str	r8, [r3, r1, lsl #2]
 	ldr	r2, [r0, #44]
 	adds	r2, r2, #127
 	bic	r2, r2, #127
 	add	r8, r8, r2
-.L479:
+.L593:
 	adds	r1, r1, #1
 	adds	r0, r0, #20
-	b	.L478
-.L484:
+	b	.L592
+.L598:
 	mov	r1, r8
 	ldr	r0, [r4]
 	bl	mpp_dma_alloc
 	mov	r6, r0
-	cbnz	r0, .L482
+	cbnz	r0, .L596
 	ldr	r0, [r4]
-	ldr	r1, .L531+28
+	ldr	r1, .L645+28
 	bl	_dev_err
 	mov	r0, r5
-	bl	rkvenc_link_remove.constprop.6
-	b	.L473
-.L482:
+	bl	rkvenc_link_remove.constprop.3
+	b	.L587
+.L596:
 	ldr	r3, [r0, #40]
 	ldr	r2, [r0, #32]
 	ldr	r1, [r5, #16]
@@ -2953,7 +3617,7 @@ rkvenc_probe:
 	ldr	r3, [r5, #56]
 	ldr	r2, [sp, #20]
 	cmp	r2, r3
-	beq	.L483
+	beq	.L597
 	ldr	r3, [r5, #60]
 	ldr	r3, [r3, #40]
 	ldrb	r2, [r3, #32]	@ zero_extendqisi2
@@ -2961,7 +3625,7 @@ rkvenc_probe:
 	strb	r2, [r3, #32]
 	ldr	r2, [r6, #32]
 	str	r2, [r3, #32]
-.L483:
+.L597:
 	ldr	r3, [r5, #60]
 	mov	r0, fp
 	ldr	r2, [sp, #20]
@@ -2971,25 +3635,25 @@ rkvenc_probe:
 	bl	mutex_unlock
 	ldr	r3, [sp, #24]
 	adds	r3, r3, #1
-	b	.L528
-.L488:
+	b	.L642
+.L602:
 	mvn	r9, #11
-	b	.L458
-.L487:
+	b	.L572
+.L601:
 	add	sp, sp, #84
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L532:
+.L646:
 	.align	2
-.L531:
-	.word	.LC80
-	.word	.LC81
-	.word	.LANCHOR1
-	.word	.LANCHOR0+601
+.L645:
+	.word	.LC98
+	.word	.LC99
+	.word	.LANCHOR2
+	.word	.LANCHOR0+661
 	.word	.LC7
 	.word	.LC8
-	.word	.LANCHOR0+584
-	.word	.LC82
+	.word	.LANCHOR0+644
+	.word	.LC100
 	.fnend
 	.size	rkvenc_probe, .-rkvenc_probe
 	.text
@@ -3007,39 +3671,39 @@ rkvenc_alloc_task:
 	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	.pad #20
 	sub	sp, sp, #20
-	ldr	r6, .L588
+	ldr	r6, .L702
 	mov	r7, r0
 	str	r1, [sp, #8]
 	ldr	r8, [r0, #12]
 	ldr	r3, [r6]
 	lsls	r4, r3, #26
-	bpl	.L534
-	movw	r2, #890
-	ldr	r1, .L588+4
-	ldr	r0, .L588+8
+	bpl	.L648
+	movw	r2, #901
+	ldr	r1, .L702+4
+	ldr	r0, .L702+8
 	bl	printk
-.L534:
+.L648:
 	ldr	r4, [r7, #188]
 	ldr	r3, [r4, #2200]
-	cbz	r3, .L535
+	cbz	r3, .L649
 	ldr	r4, [r7, #192]
 	ldr	r3, [r4, #2200]
 	cmp	r3, #0
-	bne	.L536
-.L535:
+	bne	.L650
+.L649:
 	add	r2, r4, #108
 	mov	r3, r4
 	movs	r5, #0
-.L537:
-	str	r5, [r3, #2328]
+.L651:
+	str	r5, [r3, #2344]
 	adds	r3, r3, #12
 	cmp	r2, r3
-	bne	.L537
-	str	r5, [r4, #2924]
+	bne	.L651
+	str	r5, [r4, #2940]
 	mov	r1, r4
-	str	r5, [r4, #2928]
+	str	r5, [r4, #2944]
 	mov	r0, r7
-	str	r5, [r4, #3252]
+	str	r5, [r4, #3268]
 	str	r4, [sp, #4]
 	bl	mpp_task_init
 	ldr	r3, [r8, #4]
@@ -3050,52 +3714,52 @@ rkvenc_alloc_task:
 	str	r9, [r4, #2272]
 	lsls	r0, r3, #26
 	str	r5, [r4, #2312]
-	str	r9, [r4, #2324]
-	bpl	.L539
-	movw	r2, #607
-	ldr	r1, .L588+12
-	ldr	r0, .L588+8
+	str	r9, [r4, #2340]
+	bpl	.L653
+	mov	r2, #608
+	ldr	r1, .L702+12
+	ldr	r0, .L702+8
 	bl	printk
-.L539:
+.L653:
 	ldr	r3, [sp, #8]
 	mov	r8, #20
 	add	r5, r3, #60
 	movs	r3, #0
 	str	r3, [sp]
-.L540:
+.L654:
 	ldr	r3, [sp, #8]
 	ldr	r2, [sp]
 	ldr	r3, [r3, #48]
 	cmp	r2, r3
-	bcc	.L555
+	bcc	.L669
 	ldr	r3, [r6]
 	lsls	r1, r3, #22
-	bpl	.L556
-	ldr	r2, [r4, #3252]
-	ldr	r1, [r4, #2928]
-	ldr	r0, .L588+16
+	bpl	.L670
+	ldr	r2, [r4, #3268]
+	ldr	r1, [r4, #2944]
+	ldr	r0, .L702+16
 	bl	printk
-.L556:
+.L670:
 	ldr	r3, [r6]
 	lsls	r2, r3, #26
-	bpl	.L557
-	movw	r2, #653
-	ldr	r1, .L588+12
-	ldr	r0, .L588+8
+	bpl	.L671
+	movw	r2, #654
+	ldr	r1, .L702+12
+	ldr	r0, .L702+8
 	bl	printk
-.L557:
-	ldr	r3, [r4, #2332]
+.L671:
+	ldr	r3, [r4, #2348]
 	movs	r1, #12
-	ldr	r2, [r4, #2324]
+	ldr	r2, [r4, #2340]
 	str	r3, [r4, #2280]
 	ldr	r3, [r2, #228]
 	mla	r1, r1, r3, r4
-	ldr	r0, [r1, #2332]
+	ldr	r0, [r1, #2348]
 	cmp	r0, #0
-	beq	.L558
-	ldr	r1, [r1, #2336]
+	beq	.L672
+	ldr	r1, [r1, #2352]
 	cmp	r1, #0
-	beq	.L558
+	beq	.L672
 	movs	r1, #20
 	mla	r1, r1, r3, r2
 	ldr	r3, [r2, #232]
@@ -3104,1281 +3768,197 @@ rkvenc_alloc_task:
 	ldr	r1, [r2, #236]
 	bic	r3, r3, #3
 	ldr	r3, [r0, r3]
+	mov	r0, r4
 	lsrs	r3, r3, r1
 	ldr	r1, [r2, #240]
 	movs	r2, #1
 	lsls	r2, r2, r1
+	mov	r1, #784
 	subs	r2, r2, #1
 	ands	r3, r3, r2
-	str	r3, [r4, #2320]
-	ldr	r3, [r4, #2344]
+	str	r3, [r4, #2336]
+	ldr	r3, [r4, #2360]
 	ldr	r3, [r3, #144]
 	cmp	r3, #0
 	itt	lt
 	movlt	r3, #0
 	strlt	r3, [r4, #2308]
+	bl	rkvenc_get_class_reg
+	ldr	r3, [r0]
+	ubfx	r3, r3, #0, #11
+	adds	r3, r3, #1
+	lsls	r3, r3, #3
+	str	r3, [r4, #2324]
+	ldrh	r3, [r0, #2]
+	adds	r3, r3, #1
+	lsls	r3, r3, #3
+	str	r3, [r4, #2328]
 	movs	r3, #3
-	str	r3, [r4, #2920]
+	str	r3, [r4, #2936]
 	ldr	r3, [r6]
 	lsls	r3, r3, #26
-	bpl	.L533
-	movw	r2, #930
-	ldr	r1, .L588+4
-	ldr	r0, .L588+20
+	bpl	.L647
+	mov	r2, #948
+	ldr	r1, .L702+4
+	ldr	r0, .L702+20
 	bl	printk
-.L533:
+.L647:
 	ldr	r0, [sp, #4]
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L536:
-	mov	r2, #900
-	ldr	r1, .L588+4
-	ldr	r0, .L588+24
+.L650:
+	movw	r2, #911
+	ldr	r1, .L702+4
+	ldr	r0, .L702+24
 	bl	printk
-.L587:
+.L701:
 	movs	r3, #0
 	str	r3, [sp, #4]
-	b	.L533
-.L555:
+	b	.L647
+.L669:
 	ldr	r3, [r5, #8]
 	cmp	r3, #0
-	beq	.L542
+	beq	.L656
 	ldr	r3, [r5]
 	movw	r2, #513
 	cmp	r3, r2
-	beq	.L560
+	beq	.L674
 	movw	r2, #514
 	cmp	r3, r2
-	beq	.L544
+	beq	.L658
 	cmp	r3, #512
-	bne	.L542
-	addw	r3, r4, #2328
+	bne	.L656
+	addw	r3, r4, #2344
 	movs	r7, #0
 	str	r3, [sp, #12]
-	b	.L545
-.L551:
-	ldr	r2, [r4, #2324]
+	b	.L659
+.L665:
+	ldr	r2, [r4, #2340]
 	ldr	r3, [r5, #12]
 	mla	r2, r8, r7, r2
 	ldr	r1, [r2, #32]
 	cmp	r1, r3
-	bcc	.L546
+	bcc	.L660
 	ldr	r1, [r5, #8]
 	ldr	r2, [r2, #28]
 	add	r3, r3, r1
 	subs	r3, r3, #4
 	cmp	r2, r3
-	bhi	.L546
-	ldr	fp, [r4, #2928]
+	bhi	.L660
+	ldr	fp, [r4, #2944]
 	mov	r2, r5
 	mov	r1, r7
 	mov	r0, r4
 	mul	r10, r8, fp
-	addw	r3, r10, #2932
+	addw	r3, r10, #2948
 	add	r10, r10, r4
 	add	r3, r3, r4
 	bl	rkvenc_update_req
-	ldr	r2, [r4, #2324]
-	ldr	r1, [r10, #2944]
+	ldr	r2, [r4, #2340]
+	ldr	r1, [r10, #2960]
 	movs	r3, #0
 	ldr	lr, [r2, #24]
-.L547:
+.L661:
 	cmp	lr, r3
-	beq	.L549
+	beq	.L663
 	ldr	ip, [r2, #28]
 	cmp	r1, ip
-	bcc	.L548
+	bcc	.L662
 	ldr	r0, [r2, #32]
 	cmp	r1, r0
-	bcs	.L548
+	bcs	.L662
 	cmp	r1, ip
-	bne	.L549
+	bne	.L663
 	mla	fp, r8, fp, r4
 	movs	r2, #12
 	mla	r3, r2, r3, r4
-	ldr	r2, [fp, #2948]
-	str	r2, [r3, #2332]
-.L549:
+	ldr	r2, [fp, #2964]
+	str	r2, [r3, #2348]
+.L663:
 	movs	r3, #12
 	ldr	r1, [sp, #12]
 	muls	r3, r7, r3
 	movs	r2, #1
 	str	r2, [r1, r3]
-	ldr	r3, [r4, #2928]
+	ldr	r3, [r4, #2944]
 	add	r3, r3, r2
-	str	r3, [r4, #2928]
-.L546:
+	str	r3, [r4, #2944]
+.L660:
 	adds	r7, r7, #1
-.L545:
+.L659:
 	ldr	r3, [r9, #24]
 	cmp	r7, r3
-	bcc	.L551
-.L542:
+	bcc	.L665
+.L656:
 	ldr	r3, [sp]
 	adds	r5, r5, #20
 	adds	r3, r3, #1
 	str	r3, [sp]
-	b	.L540
-.L548:
+	b	.L654
+.L662:
 	adds	r3, r3, #1
 	adds	r2, r2, #20
-	b	.L547
-.L554:
-	ldr	r2, [r4, #2324]
+	b	.L661
+.L668:
+	ldr	r2, [r4, #2340]
 	ldr	r3, [r5, #12]
 	mla	r2, r8, r7, r2
 	ldr	r1, [r2, #32]
 	cmp	r1, r3
-	bcc	.L553
+	bcc	.L667
 	ldr	r1, [r5, #8]
 	ldr	r2, [r2, #28]
 	add	r3, r3, r1
 	subs	r3, r3, #4
 	cmp	r2, r3
-	bhi	.L553
-	ldr	r3, [r4, #3252]
+	bhi	.L667
+	ldr	r3, [r4, #3268]
 	mov	r2, r5
 	mov	r1, r7
 	mov	r0, r4
 	mla	r3, r8, r3, r4
-	addw	r3, r3, #3256
+	addw	r3, r3, #3272
 	bl	rkvenc_update_req
 	mul	r3, fp, r7
 	movs	r2, #1
 	str	r2, [r10, r3]
-	ldr	r3, [r4, #3252]
+	ldr	r3, [r4, #3268]
 	add	r3, r3, r2
-	str	r3, [r4, #3252]
-.L553:
+	str	r3, [r4, #3268]
+.L667:
 	adds	r7, r7, #1
-.L543:
+.L657:
 	ldr	r3, [r9, #24]
 	cmp	r7, r3
-	bcc	.L554
-	b	.L542
-.L560:
+	bcc	.L668
+	b	.L656
+.L674:
 	movs	r7, #0
-	addw	r10, r4, #2328
+	addw	r10, r4, #2344
 	mov	fp, #12
-	b	.L543
-.L544:
+	b	.L657
+.L658:
 	mov	r1, r5
-	addw	r0, r4, #2436
+	addw	r0, r4, #2452
 	bl	mpp_extract_reg_offset_info
-	b	.L542
-.L558:
+	b	.L656
+.L672:
 	mov	r0, r4
 	bl	kfree
-	b	.L587
-.L589:
+	b	.L701
+.L703:
 	.align	2
-.L588:
+.L702:
 	.word	mpp_dev_debug
-	.word	.LANCHOR0+625
+	.word	.LANCHOR0+685
 	.word	.LC7
-	.word	.LANCHOR0+643
-	.word	.LC85
+	.word	.LANCHOR0+703
+	.word	.LC103
 	.word	.LC8
-	.word	.LC84
+	.word	.LC102
 	.fnend
 	.size	rkvenc_alloc_task, .-rkvenc_alloc_task
-	.align	1
-	.syntax unified
-	.thumb
-	.thumb_func
-	.fpu softvfp
-	.type	rkvenc_run, %function
-rkvenc_run:
-	.fnstart
-	@ args = 0, pretend = 0, frame = 72
-	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	.pad #92
-	sub	sp, sp, #92
-	ldr	r3, [r1]
-	mov	r4, r0
-	ldr	r7, [r0, #152]
-	mov	r5, r1
-	ldr	r3, [r3, #184]
-	str	r3, [sp, #24]
-	ldr	r3, .L649
-	ldr	r3, [r3]
-	lsls	r0, r3, #26
-	bpl	.L591
-	movw	r2, #1137
-	ldr	r1, .L649+4
-	ldr	r0, .L649+8
-	bl	printk
-.L591:
-	ldr	r8, [r4, #292]
-	movs	r3, #0
-	str	r3, [r4, #272]
-	cmp	r8, #1
-	beq	.L592
-	cmp	r8, #0
-	beq	.L593
-	cmp	r8, #2
-	beq	.L594
-.L595:
-	ldr	r3, .L649
-	ldr	r0, [r3]
-	ands	r0, r0, #32
-	beq	.L590
-	movw	r2, #1255
-	ldr	r1, .L649+4
-	ldr	r0, .L649+12
-	bl	printk
-	movs	r0, #0
-	b	.L590
-.L593:
-	mov	fp, r5
-	mov	r9, r8
-	str	r8, [sp, #20]
-.L596:
-	ldr	r2, [r5, #2928]
-	ldr	r3, [sp, #20]
-	cmp	r2, r3
-	bhi	.L607
-	ldr	r3, .L649
-	str	r5, [r4, #88]
-	ldr	r3, [r3]
-	lsls	r1, r3, #24
-	bpl	.L608
-	ldr	r3, [r5]
-	movw	r1, #1148
-	mov	r0, r4
-	ldr	r10, [r5, #2276]
-	ldr	fp, [r5, #2320]
-	ldr	r6, [r3, #4]
-	bl	mpp_read
-	mov	r3, r10
-	ldr	r1, .L649+4
-	mov	r2, r6
-	lsrs	r0, r0, #31
-	str	r9, [sp, #8]
-	strd	fp, r0, [sp]
-	ldr	r0, .L649+16
-	bl	printk
-.L608:
-	movw	r1, #20484
-	mov	r0, r4
-	bl	mpp_read
-	lsls	r2, r0, #21
-	mov	r3, r0
-	bpl	.L609
-	movw	r2, #1193
-	ldr	r1, .L649+4
-	ldr	r0, .L649+20
-	bl	printk
-.L609:
-	cmp	r9, #0
-	beq	.L610
-	movs	r6, #0
-	ldr	r0, [r4, #264]
-	str	r6, [r4, #268]
-	bl	rk_dvbm_link
-	movs	r1, #19
-	mov	r0, r6
-	add	r2, sp, #52
-	bl	rk_dvbm_ctrl
-	ldr	r3, [sp, #56]
-	cbz	r3, .L611
-	ldr	r3, [sp, #68]
-	cbnz	r3, .L612
-.L611:
-	ldr	r1, .L649+24
-	ldr	r0, [r4]
-	bl	_dev_err
-.L612:
-	ldr	r2, [sp, #52]
-	mov	r1, #624
-	mov	r0, r4
-	bl	mpp_write
-	mov	r1, #628
-	mov	r0, r4
-	ldr	r2, [sp, #64]
-	bl	mpp_write
-	mov	r1, #632
-	mov	r0, r4
-	ldr	r2, [sp, #56]
-	bl	mpp_write
-	mov	r1, #636
-	mov	r0, r4
-	ldr	r2, [sp, #68]
-	bl	mpp_write
-	mov	r1, #640
-	mov	r0, r4
-	ldr	r2, [sp, #60]
-	bl	mpp_write
-	mov	r1, #644
-	mov	r0, r4
-	ldr	r2, [sp, #72]
-	bl	mpp_write
-	mov	r1, #648
-	mov	r0, r4
-	ldr	r2, [sp, #72]
-	bl	mpp_write
-	movw	r1, #1148
-	mov	r0, r4
-	bl	mpp_read
-	cmp	r0, #0
-	bge	.L613
-	ldr	r2, [sp, #56]
-	mov	r1, #1040
-	mov	r0, r4
-	bl	mpp_write
-	movw	r1, #1044
-	mov	r0, r4
-	ldr	r2, [sp, #68]
-	bl	mpp_write
-	mov	r1, #1048
-	mov	r0, r4
-	ldr	r2, [sp, #52]
-	bl	mpp_write
-	movw	r1, #1052
-	mov	r0, r4
-	ldr	r2, [sp, #64]
-	bl	mpp_write
-	mov	r1, #1056
-	mov	r0, r4
-	ldr	r2, [sp, #60]
-	bl	mpp_write
-	movw	r1, #1060
-	mov	r0, r4
-	ldr	r2, [sp, #72]
-	bl	mpp_write
-	mov	r1, #1064
-	mov	r0, r4
-	ldr	r2, [sp, #72]
-	bl	mpp_write
-.L613:
-	ldr	r3, [sp, #24]
-	movs	r6, #1
-	mov	r2, r9
-	mov	r0, r4
-	str	r6, [r3, #20]
-	ldr	r1, [r7, #280]
-	bl	mpp_write_relaxed
-	str	r6, [r4, #128]
-.L610:
-	ldr	r3, [sp, #24]
-	movs	r6, #1
-	str	r9, [r3, #16]
-	str	r6, [r3, #200]
-	.syntax unified
-@ 1208 "drivers/kmpp/mpp/mpp_rkvenc_540c.c" 1
-	dsb st
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	bl	arm_heavy_mb
-	mvn	r3, #31
-	str	r3, [r5, #2208]
-	addw	r3, r5, #2212
-	str	r3, [r5, #2212]
-	str	r3, [r5, #2216]
-	mov	r2, #2097152
-	ldr	r3, .L649+28
-	add	r0, r5, #2224
-	ldr	r1, .L649+32
-	str	r3, [r5, #2220]
-	movs	r3, #0
-	str	r3, [sp]
-	bl	init_timer_key
-	ldr	r1, .L649+36
-	movs	r3, #20
-	add	r2, r5, #2208
-	mov	r0, r6
-	ldr	r1, [r1]
-	bl	queue_delayed_work_on
-	addw	r1, r5, #2200
-	mov	r0, r6
-	bl	____atomic_set_bit
-	cmp	r9, #0
-	bne	.L614
-	mov	r2, r8
-	ldr	r1, [r7, #244]
-	mov	r0, r4
-	bl	mpp_write
-.L614:
-	movs	r3, #1
-	str	r3, [r4, #260]
-	b	.L595
-.L607:
-	ldr	r10, [r5, #2324]
-	movs	r2, #20
-	movs	r1, #0
-	add	r0, sp, #32
-	ldr	r6, [fp, #2944]
-	bl	memset
-	ldr	r3, [r10, #24]
-	movs	r0, #0
-.L597:
-	cmp	r3, r0
-	bne	.L600
-	mvn	r0, #21
-.L590:
-	add	sp, sp, #92
-	@ sp needed
-	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L600:
-	ldr	r2, [r10, #28]
-	cmp	r6, r2
-	bcc	.L598
-	ldr	r1, [r10, #32]
-	cmp	r6, r1
-	bcs	.L598
-	movs	r1, #12
-	subs	r6, r6, r2
-	mla	r0, r1, r0, r5
-	str	r2, [sp, #44]
-	ldr	r2, [fp, #2940]
-	lsrs	r6, r6, #2
-	add	r3, r6, r2, lsr #2
-	str	r3, [sp, #28]
-	ldr	r1, [r0, #2336]
-	ldr	r10, [r0, #2332]
-	str	r1, [sp, #40]
-	str	r10, [sp, #48]
-.L599:
-	ldr	r3, [sp, #28]
-	cmp	r6, r3
-	bcc	.L606
-	ldr	r3, [sp, #20]
-	add	fp, fp, #20
-	adds	r3, r3, #1
-	str	r3, [sp, #20]
-	b	.L596
-.L598:
-	adds	r0, r0, #1
-	add	r10, r10, #20
-	b	.L597
-.L606:
-	ldr	r1, [sp, #44]
-	ldr	r0, [r7, #244]
-	add	r1, r1, r6, lsl #2
-	ldr	r2, [r10, r6, lsl #2]
-	cmp	r0, r1
-	beq	.L618
-	cmp	r1, #696
-	bne	.L603
-	str	r2, [r4, #304]
-.L604:
-	ldr	r0, [r7, #280]
-	ldr	r2, [r10, r6, lsl #2]
-	cmp	r0, r1
-	beq	.L619
-	ldr	r0, [r5, #2312]
-	cbz	r0, .L605
-	movw	r3, #1148
-	cmp	r1, r3
-	itt	eq
-	biceq	r2, r2, #-2147483648
-	streq	r2, [r10, r6, lsl #2]
-.L605:
-	ldr	r2, [r10, r6, lsl #2]
-	mov	r0, r4
-	bl	mpp_write_relaxed
-.L602:
-	adds	r6, r6, #1
-	b	.L599
-.L603:
-	movw	r3, #1036
-	cmp	r1, r3
-	it	eq
-	streq	r2, [r4, #308]
-	b	.L604
-.L618:
-	mov	r8, r2
-	b	.L602
-.L619:
-	mov	r9, r2
-	b	.L602
-.L650:
-	.align	2
-.L649:
-	.word	mpp_dev_debug
-	.word	.LANCHOR0+667
-	.word	.LC7
-	.word	.LC8
-	.word	.LC86
-	.word	.LC87
-	.word	.LC88
-	.word	rkvenc_task_timeout
-	.word	delayed_work_timer_fn
-	.word	system_wq
-.L594:
-	str	r3, [r4, #296]
-	mov	r1, r5
-	mov	r0, r4
-	bl	rkvenc_run_start_link
-	add	r3, r4, #296
-	pld	[r3]
-	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
-	@ atomic_add_return
-1:	ldrex	r2, [r3]
-	add	r2, r2, #1
-	strex	r1, r2, [r3]
-	teq	r1, #0
-	bne	1b
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	str	r2, [r5, #3580]
-	str	r5, [r4, #88]
-.L648:
-	.syntax unified
-@ 1239 "drivers/kmpp/mpp/mpp_rkvenc_540c.c" 1
-	dsb st
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	bl	arm_heavy_mb
-	ldr	r3, [r4, #300]
-	cmp	r3, #0
-	beq	.L595
-	movw	r2, #513
-.L645:
-	ldr	r1, [r7, #244]
-	mov	r0, r4
-	bl	mpp_write
-	b	.L595
-.L592:
-	ldr	r1, [r7, #292]
-	mov	r0, r4
-	bl	mpp_read
-	add	r6, r4, #296
-	cbnz	r0, .L616
-	str	r0, [r4, #296]
-	mov	r1, r5
-	mov	r0, r4
-	bl	rkvenc_run_start_link
-	pld	[r6]
-	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
-	@ atomic_add_return
-1:	ldrex	r3, [r6]
-	add	r3, r3, #1
-	strex	r2, r3, [r6]
-	teq	r2, #0
-	bne	1b
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	str	r3, [r5, #3580]
-	b	.L648
-.L616:
-	pld	[r6]
-	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
-	@ atomic_add_return
-1:	ldrex	r3, [r6]
-	add	r3, r3, #1
-	strex	r2, r3, [r6]
-	teq	r2, #0
-	bne	1b
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	str	r3, [r5, #3580]
-	.syntax unified
-@ 1245 "drivers/kmpp/mpp/mpp_rkvenc_540c.c" 1
-	dsb st
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	bl	arm_heavy_mb
-	ldr	r3, [r4, #300]
-	cmp	r3, #0
-	beq	.L595
-	movw	r2, #769
-	b	.L645
-	.fnend
-	.size	rkvenc_run, .-rkvenc_run
-	.align	1
-	.syntax unified
-	.thumb
-	.thumb_func
-	.fpu softvfp
-	.type	mpp_rkvenc_worker, %function
-mpp_rkvenc_worker:
-	.fnstart
-	@ args = 0, pretend = 0, frame = 0
-	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r3, r4, r5, r6, r7, r8, r9, lr}
-	.save {r3, r4, r5, r6, r7, r8, r9, lr}
-	mov	r4, r0
-	ldr	r3, .L667
-	sub	r7, r0, #16
-	ldr	r5, [r0, #80]
-	ldr	r3, [r3]
-	lsls	r3, r3, #26
-	bpl	.L652
-	movw	r2, #2007
-	ldr	r1, .L667+4
-	ldr	r0, .L667+8
-	bl	printk
-.L652:
-	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	r6, cpsr	@ arch_local_irq_save
-	cpsid	i
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	ldr	r3, [r4, #56]
-	add	r8, r5, #60
-	cbz	r3, .L653
-	ldr	r3, [r5, #60]
-	cmp	r8, r3
-	beq	.L653
-	ldr	r0, [r4, #32]
-	bl	disable_irq
-	mov	r0, r7
-	bl	mpp_dev_reset
-	ldr	r0, [r4, #32]
-	bl	enable_irq
-.L653:
-	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, r6	@ local_irq_restore
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	mov	r0, r7
-	bl	mpp_power_on
-	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	r9, cpsr	@ arch_local_irq_save
-	cpsid	i
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	ldr	r3, [r5, #60]
-	cmp	r8, r3
-	bne	.L655
-	ldr	r3, [r4, #132]
-	cbnz	r3, .L655
-	mov	r0, r5
-	bl	mpp_taskqueue_get_pending_task
-	mov	r6, r0
-	cbz	r0, .L655
-	add	r0, r4, #116
-	bl	down_read
-	mov	r1, r8
-	add	r0, r6, #20
-	bl	list_move_tail
-	mov	r0, r6
-	bl	mpp_time_record
-	addw	r1, r6, #2200
-	movs	r0, #2
-	bl	____atomic_set_bit
-	mov	r1, r6
-	mov	r0, r7
-	bl	rkvenc_run
-.L655:
-	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, r9	@ local_irq_restore
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	ldr	r3, [r5, #60]
-	cmp	r8, r3
-	bne	.L657
-	mov	r0, r7
-	bl	mpp_power_off
-.L657:
-	mov	r0, r5
-	pop	{r3, r4, r5, r6, r7, r8, r9, lr}
-	b	mpp_session_clean_detach
-.L668:
-	.align	2
-.L667:
-	.word	mpp_dev_debug
-	.word	.LANCHOR0+678
-	.word	.LC7
-	.fnend
-	.size	mpp_rkvenc_worker, .-mpp_rkvenc_worker
-	.align	1
-	.global	rkvenc_dump_dbg
-	.syntax unified
-	.thumb
-	.thumb_func
-	.fpu softvfp
-	.type	rkvenc_dump_dbg, %function
-rkvenc_dump_dbg:
-	.fnstart
-	@ args = 0, pretend = 0, frame = 0
-	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r3, r4, r5, r6, r7, r8, r9, lr}
-	.save {r3, r4, r5, r6, r7, r8, r9, lr}
-	movs	r1, #96
-	mov	r4, r0
-	bl	mpp_read
-	and	r1, r0, #1
-	ldr	r0, .L679
-	bl	printk
-	mov	r1, #768
-	mov	r0, r4
-	bl	mpp_read
-	and	r1, r0, #3
-	ldr	r0, .L679+4
-	bl	printk
-	movw	r1, #1148
-	mov	r0, r4
-	bl	mpp_read
-	lsrs	r1, r0, #31
-	ldr	r0, .L679+8
-	bl	printk
-	movs	r1, #24
-	mov	r0, r4
-	bl	mpp_read
-	mov	r1, r0
-	ldr	r0, .L679+12
-	bl	printk
-	mov	r1, #20480
-	mov	r0, r4
-	bl	mpp_read
-	mov	r1, r0
-	ldr	r0, .L679+16
-	bl	printk
-	movw	r1, #20484
-	mov	r0, r4
-	bl	mpp_read
-	mov	r1, r0
-	ldr	r0, .L679+20
-	bl	printk
-	movw	r1, #20488
-	mov	r0, r4
-	bl	mpp_read
-	mov	r1, r0
-	ldr	r0, .L679+24
-	bl	printk
-	movw	r1, #20492
-	mov	r0, r4
-	bl	mpp_read
-	mov	r1, r0
-	ldr	r0, .L679+28
-	bl	printk
-	mov	r1, #20992
-	mov	r0, r4
-	bl	mpp_read
-	mov	r1, r0
-	ldr	r0, .L679+32
-	bl	printk
-	ldr	r3, .L679+36
-	ldr	r3, [r3]
-	lsls	r3, r3, #21
-	bpl	.L669
-	ldr	r1, .L679+40
-	mvn	r7, #1
-	ldr	r0, .L679+44
-	bl	printk
-	ldr	r6, .L679+48
-	ldr	r9, .L679+52
-.L672:
-	cmp	r7, #4
-	bhi	.L671
-.L676:
-	adds	r7, r7, #1
-	adds	r6, r6, #20
-	cmp	r7, #7
-	bne	.L672
-	ldr	r1, .L679+40
-	ldr	r0, .L679+44
-	pop	{r3, r4, r5, r6, r7, r8, r9, lr}
-	b	printk
-.L671:
-	ldrd	r5, r8, [r6, #28]
-.L674:
-	cmp	r8, r5
-	bcc	.L676
-	mov	r1, r5
-	mov	r0, r4
-	bl	mpp_read
-	mov	r1, r5
-	adds	r5, r5, #4
-	mov	r2, r0
-	mov	r0, r9
-	bl	printk
-	b	.L674
-.L669:
-	pop	{r3, r4, r5, r6, r7, r8, r9, pc}
-.L680:
-	.align	2
-.L679:
-	.word	.LC89
-	.word	.LC90
-	.word	.LC91
-	.word	.LC92
-	.word	.LC93
-	.word	.LC94
-	.word	.LC95
-	.word	.LC96
-	.word	.LC97
-	.word	mpp_dev_debug
-	.word	.LANCHOR0+696
-	.word	.LC98
-	.word	.LANCHOR2
-	.word	.LC99
-	.fnend
-	.size	rkvenc_dump_dbg, .-rkvenc_dump_dbg
-	.align	1
-	.syntax unified
-	.thumb
-	.thumb_func
-	.fpu softvfp
-	.type	rkvenc_finish, %function
-rkvenc_finish:
-	.fnstart
-	@ args = 0, pretend = 0, frame = 8
-	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r0, r1, r2, r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	.pad #12
-	mov	r5, r0
-	ldr	r6, .L713
-	mov	r4, r1
-	ldr	r3, [r6]
-	str	r6, [sp]
-	tst	r3, #32
-	beq	.L682
-	movw	r2, #1673
-	ldr	r1, .L713+4
-	ldr	r0, .L713+8
-	bl	printk
-.L682:
-	ldr	r3, [r5, #292]
-	cbz	r3, .L683
-	cmp	r3, #2
-	bne	.L684
-.L683:
-	ldr	r3, [r5, #52]
-	ldr	r7, [r4]
-	lsls	r2, r3, #23
-	bmi	.L685
-	ldr	r3, [r5, #120]
-	cbz	r3, .L686
-.L685:
-	mov	r0, r5
-	bl	rkvenc_dump_dbg
-.L686:
-	mov	r9, r4
-	mov	fp, #0
-.L687:
-	ldr	r3, [r4, #3252]
-	cmp	r3, fp
-	bhi	.L691
-	ldr	r3, [r4, #2324]
-	movs	r1, #0
-	ldr	r2, [r3, #264]
-	ldr	r0, [r3, #24]
-.L692:
-	cmp	r1, r0
-	beq	.L695
-	ldr	ip, [r3, #28]
-	cmp	r2, ip
-	bcc	.L693
-	ldr	r6, [r3, #32]
-	cmp	r2, r6
-	bcs	.L693
-	movs	r3, #12
-	sub	r2, r2, ip
-	mla	r1, r3, r1, r4
-	ldr	r3, [r1, #2332]
-	cmn	r3, r2
-	bne	.L694
-.L695:
-	ldr	r3, [r7, #184]
-	ldr	r3, [r3, #16]
-	cbz	r3, .L684
-	ldr	r0, [r5, #264]
-	bl	rk_dvbm_unlink
-.L684:
-	movs	r3, #0
-	str	r3, [r5, #260]
-	ldr	r3, [sp]
-	ldr	r3, [r3]
-	lsls	r3, r3, #26
-	bpl	.L697
-	movw	r2, #1715
-	ldr	r1, .L713+4
-	ldr	r0, .L713+12
-	bl	printk
-.L697:
-	movs	r0, #0
-	add	sp, sp, #12
-	@ sp needed
-	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L691:
-	ldr	r3, [r9, #3272]
-	mov	r8, #0
-.L688:
-	ldr	r2, [r9, #3264]
-	cmp	r8, r2, lsr #2
-	bcc	.L690
-	add	fp, fp, #1
-	add	r9, r9, #20
-	b	.L687
-.L690:
-	ldr	r2, [r9, #3268]
-	mov	r0, r5
-	str	r3, [sp, #4]
-	add	r10, r2, r8, lsl #2
-	mov	r1, r10
-	bl	mpp_read_relaxed
-	ldr	r3, [sp, #4]
-	str	r0, [r3, r8, lsl #2]
-	ldr	r2, [r4, #2324]
-	ldr	r2, [r2, #264]
-	cmp	r2, r10
-	itt	eq
-	ldreq	r2, [r4, #2924]
-	streq	r2, [r3, r8, lsl #2]
-	add	r8, r8, #1
-	b	.L688
-.L693:
-	adds	r1, r1, #1
-	adds	r3, r3, #20
-	b	.L692
-.L694:
-	ldr	r1, [r4, #2924]
-	str	r1, [r3, r2]
-	b	.L695
-.L714:
-	.align	2
-.L713:
-	.word	mpp_dev_debug
-	.word	.LANCHOR0+712
-	.word	.LC7
-	.word	.LC8
-	.fnend
-	.size	rkvenc_finish, .-rkvenc_finish
-	.align	1
-	.syntax unified
-	.thumb
-	.thumb_func
-	.fpu softvfp
-	.type	rkvenc_isr, %function
-rkvenc_isr:
-	.fnstart
-	@ args = 0, pretend = 0, frame = 16
-	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	mov	r4, r0
-	ldr	r6, .L785
-	.pad #28
-	sub	sp, sp, #28
-	ldr	r3, [r6]
-	lsls	r0, r3, #26
-	bpl	.L716
-	mov	r2, #1576
-	ldr	r1, .L785+4
-	ldr	r0, .L785+8
-	bl	printk
-.L716:
-	ldr	r7, [r4, #292]
-	cmp	r7, #1
-	beq	.L717
-	cbz	r7, .L718
-	cmp	r7, #2
-	beq	.L719
-.L720:
-	ldr	r3, [r6]
-	lsls	r3, r3, #26
-	bpl	.L722
-	movw	r2, #1662
-	ldr	r1, .L785+4
-	ldr	r0, .L785+12
-	bl	printk
-	b	.L722
-.L718:
-	ldr	r5, [r4, #88]
-	cmp	r5, #0
-	beq	.L722
-	ldr	r3, [r5]
-	mov	r0, r5
-	ldr	r8, [r3, #184]
-	bl	mpp_time_diff
-	str	r7, [r4, #88]
-	ldr	r3, [r8, #16]
-	cbz	r3, .L724
-	ldr	r2, [r4, #272]
-	movw	r3, #16383
-	cmp	r2, r3
-	bne	.L725
-	movs	r3, #1
-	ldr	r1, .L785+16
-	str	r3, [r4, #268]
-	ldr	r0, [r4]
-	bl	_dev_err
-.L725:
-	ldr	r3, [r4, #268]
-	cbz	r3, .L724
-	ldr	r3, [r4, #52]
-	orr	r3, r3, #64
-	str	r3, [r4, #52]
-	movs	r3, #0
-	str	r3, [r4, #268]
-.L724:
-	ldrd	r3, r2, [r4, #52]
-	orrs	r3, r3, r2
-	str	r3, [r5, #2924]
-	movs	r3, #0
-	str	r3, [r4, #56]
-	ldr	r3, [r6]
-	lsls	r1, r3, #29
-	bpl	.L727
-	ldr	r3, [r5, #2924]
-	ldr	r0, .L785+20
-	str	r3, [sp]
-	ldr	r3, [r8, #16]
-	ldr	r2, [r5, #2320]
-	ldr	r1, [r5, #2276]
-	bl	printk
-.L727:
-	ldr	r3, [r4, #152]
-	ldr	r2, [r3, #272]
-	ldr	r3, [r4, #52]
-	tst	r2, r3
-	beq	.L729
-	ldr	r3, [r5, #2924]
-	mov	r7, r4
-	ldr	r1, .L785+24
-	str	r3, [sp, #4]
-	ldr	r3, [r8, #16]
-	str	r3, [sp]
-	ldr	r0, [r7], #72
-	ldr	r3, [r5, #2320]
-	ldr	r2, [r5, #2276]
-	bl	_dev_err
-	mov	r0, r7
-	bl	atomic_add.constprop.18
-	ldr	r3, [r6]
-	lsls	r2, r3, #21
-	bpl	.L729
-	ldr	r1, [r5, #2924]
-	ldr	r0, .L785+28
-	bl	printk
-	mov	r0, r4
-	bl	rkvenc_dump_dbg
-.L729:
-	mov	r1, r5
-	ldr	r0, [r5]
-	bl	mpp_task_finish
-	b	.L720
-.L719:
-	ldr	r5, [r4, #88]
-	cbnz	r5, .L731
-	ldr	r1, .L785+32
-	ldr	r0, [r4]
-	bl	_dev_err
-.L722:
-	movs	r0, #1
-	add	sp, sp, #28
-	@ sp needed
-	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L731:
-	mov	r0, r5
-	bl	mpp_time_diff
-	movs	r3, #0
-	str	r3, [r4, #88]
-	ldr	r3, [r6]
-	ldr	r1, [r4, #52]
-	lsls	r3, r3, #29
-	str	r1, [r5, #2924]
-	bpl	.L732
-	ldr	r0, .L785+28
-	bl	printk
-.L732:
-	ldr	r3, [r4, #152]
-	ldr	r2, [r3, #272]
-	ldr	r3, [r5, #2924]
-	tst	r2, r3
-	beq	.L734
-	add	r0, r4, #72
-	bl	atomic_add.constprop.18
-	ldr	r3, [r6]
-	lsls	r7, r3, #21
-	bpl	.L734
-	ldr	r1, [r5, #2924]
-	ldr	r0, .L785+28
-	bl	printk
-.L734:
-	mov	r1, r5
-	ldr	r0, [r5]
-	bl	mpp_task_finish
-	ldr	r0, [r4, #288]
-	adds	r0, r0, #64
-	bl	mutex_lock
-	ldr	r1, [r4, #288]
-	ldr	r0, [r5, #3576]
-	adds	r1, r1, #56
-	bl	list_move_tail
-	ldr	r0, [r4, #288]
-	adds	r0, r0, #64
-	bl	mutex_unlock
-	b	.L720
-.L717:
-	ldr	r3, [r4, #52]
-	lsls	r5, r3, #23
-	bmi	.L736
-	ldr	r3, [r4, #120]
-	cbz	r3, .L737
-.L736:
-	mov	r0, r4
-	bl	rkvenc_dump_dbg
-.L737:
-	ldr	r10, [r4, #152]
-	movs	r3, #0
-	ldr	r3, [r3]
-	mov	r0, r4
-	ldr	r9, [r4, #288]
-	ldr	r1, [r10, #292]
-	str	r3, [sp, #12]
-	bl	mpp_read_relaxed
-	ldr	r3, [r4, #96]
-	ldr	r5, [r3, #60]
-	ldr	r7, [r5], #-20
-	subs	r7, r7, #20
-	lsrs	r3, r0, #24
-	str	r3, [sp, #16]
-.L738:
-	ldr	r1, [r4, #96]
-	add	r8, r5, #20
-	add	r2, r1, #60
-	cmp	r8, r2
-	bne	.L744
-.L739:
-	ldr	r3, [r1, #60]
-	cmp	r2, r3
-	bne	.L746
-	ldr	r3, [sp, #12]
-	ldr	r3, [r3, #16]
-	cbz	r3, .L746
-	ldr	r0, [r4, #264]
-	bl	rk_dvbm_unlink
-	ldr	r2, [r4, #52]
-	ldr	r3, [r10, #272]
-	tst	r2, r3
-	beq	.L746
-	mov	r0, r4
-	bl	rkvenc_reset
-.L746:
-	ldr	r3, [r6]
-	lsls	r2, r3, #26
-	bpl	.L720
-	movw	r2, #1567
-	ldr	r1, .L785+36
-	ldr	r0, .L785+12
-	bl	printk
-	b	.L720
-.L744:
-	ldr	r3, [r5, #3580]
-	ldr	r0, [sp, #16]
-	subs	r3, r3, r0
-	tst	r3, #255
-	bne	.L739
-	add	r0, r5, #2208
-	bl	cancel_delayed_work
-	mov	r0, r5
-	bl	mpp_time_diff
-	ldr	r3, [r6]
-	ldr	r1, [r4, #52]
-	lsls	r0, r3, #29
-	str	r1, [r5, #2924]
-	bpl	.L740
-	ldr	r0, .L785+40
-	bl	printk
-.L740:
-	ldr	r3, [r5, #2324]
-	addw	fp, r5, #2200
-	ldr	r1, [r5, #3576]
-	ldr	r0, [r9, #12]
-	ldr	r3, [r3, #264]
-	ldr	r2, [r5, #2924]
-	add	r3, r3, r0
-	ldr	r1, [r1, #40]
-	bic	r3, r3, #3
-	str	r2, [r1, r3]
-	ldr	r3, [r5, #2204]
-	cbnz	r3, .L741
-	mov	r1, fp
-	movs	r0, #7
-	str	r3, [sp, #20]
-	bl	____atomic_set_bit
-	movs	r2, #1
-	movs	r1, #3
-	addw	r0, r5, #2284
-	ldr	r3, [sp, #20]
-	bl	__wake_up
-.L741:
-	add	r3, r9, #64
-	str	r3, [sp, #20]
-	mov	r0, r3
-	bl	mutex_lock
-	add	r1, r9, #56
-	ldr	r0, [r5, #3576]
-	bl	list_move_tail
-	ldr	r3, [sp, #20]
-	mov	r0, r3
-	bl	mutex_unlock
-	mov	r1, fp
-	movs	r0, #5
-	bl	____atomic_set_bit
-	ldrd	r2, r3, [r5, #20]
-	addw	r0, r5, #2252
-	str	r3, [r2, #4]
-	str	r2, [r3]
-	str	r8, [r5, #20]
-	str	r8, [r5, #24]
-	pld	[r0]
-	.syntax unified
-@ 224 "./arch/arm/include/asm/atomic.h" 1
-	@ atomic_fetch_sub
-1:	ldrex	r3, [r0]
-	sub	r2, r3, #1
-	strex	r1, r2, [r0]
-	teq	r1, #0
-	bne	1b
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	cmp	r3, #1
-	bne	.L742
-	bl	mpp_free_task
-.L743:
-	ldr	r3, [r7, #20]
-	mov	r5, r7
-	sub	r7, r3, #20
-	b	.L738
-.L742:
-	cmp	r3, #0
-	bgt	.L743
-	movs	r1, #3
-	bl	refcount_warn_saturate
-	b	.L743
-.L786:
-	.align	2
-.L785:
-	.word	mpp_dev_debug
-	.word	.LANCHOR0+726
-	.word	.LC7
-	.word	.LC8
-	.word	.LC100
-	.word	.LC55
-	.word	.LC101
-	.word	.LC102
-	.word	.LC103
-	.word	.LANCHOR0+737
-	.word	.LC104
-	.fnend
-	.size	rkvenc_isr, .-rkvenc_isr
 	.align	1
 	.syntax unified
 	.thumb
@@ -4395,62 +3975,62 @@ rkvenc_task_timeout:
 	sub	r5, r0, #2208
 	mov	r6, r0
 	ldr	r8, [r5, #2308]
+	ldr	r7, [r5]
+	cbnz	r7, .L705
+	ldr	r1, .L720
+	mov	r3, r5
+	ldr	r0, .L720+4
+	movw	r2, #1965
+.L719:
+	add	sp, sp, #8
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, lr}
+	b	printk
+.L705:
+	ldr	r4, [r7, #12]
+	cbnz	r4, .L706
+	mov	r3, r7
+	movw	r2, #1971
+	ldr	r1, .L720
+	ldr	r0, .L720+8
+	b	.L719
+.L706:
+	ldr	r0, [r4, #48]
+	bl	disable_irq
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r3, [r0, #-8]
+	ldr	r3, [r6, #-8]
 	orr	r1, r3, #8
-	str	r1, [r0, #-8]
+	str	r1, [r6, #-8]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	lsls	r3, r3, #28
-	bpl	.L788
-	movw	r2, #1962
-	ldr	r1, .L803
-	ldr	r0, .L803+4
+	bpl	.L707
+	movw	r2, #1980
+	ldr	r1, .L720
+	ldr	r0, .L720+12
 	add	sp, sp, #8
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, lr}
 	b	printk
-.L788:
+.L707:
 	ldr	r3, [r5, #2200]
-	movw	r2, #1967
-	ldr	r1, .L803
-	ldr	r0, .L803+8
+	movw	r2, #1985
+	ldr	r1, .L720
+	subs	r6, r6, #8
+	ldr	r0, .L720+16
 	str	r3, [sp]
 	ldr	r3, [r5, #2276]
 	bl	printk
-	ldr	r7, [r5]
-	cbnz	r7, .L789
-	ldr	r1, .L803
-	mov	r3, r5
-	ldr	r0, .L803+12
-	movw	r2, #1970
-.L802:
-	add	sp, sp, #8
-	@ sp needed
-	pop	{r4, r5, r6, r7, r8, lr}
-	b	printk
-.L789:
-	ldr	r4, [r7, #12]
-	cbnz	r4, .L790
-	mov	r3, r7
-	mov	r2, #1976
-	ldr	r1, .L803
-	ldr	r0, .L803+16
-	b	.L802
-.L790:
-	subs	r6, r6, #8
-	ldr	r0, [r4, #48]
-	bl	disable_irq
 	mov	r0, r4
 	bl	rkvenc_dump_dbg
 	mov	r1, r6
@@ -4465,18 +4045,18 @@ rkvenc_task_timeout:
 	ldr	r0, [r4, #96]
 	bl	mpp_taskqueue_pop_running
 	ldr	r3, [r7, #240]
-	cbz	r3, .L791
+	cbz	r3, .L708
 	cmp	r8, #0
-	beq	.L791
+	beq	.L708
 	ldr	r0, [r7, #196]
 	blx	r3
-.L791:
+.L708:
 	ldr	r3, [r4, #8]
 	ldr	r3, [r3, #28]
-	cbz	r3, .L792
+	cbz	r3, .L709
 	mov	r0, r4
 	blx	r3
-.L792:
+.L709:
 	mov	r0, r4
 	bl	mpp_taskqueue_trigger_work
 	add	r0, r4, #132
@@ -4486,14 +4066,14 @@ rkvenc_task_timeout:
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, lr}
 	b	enable_irq
-.L804:
+.L721:
 	.align	2
-.L803:
-	.word	.LANCHOR0+753
+.L720:
+	.word	.LANCHOR0+727
+	.word	.LC104
 	.word	.LC105
 	.word	.LC106
 	.word	.LC107
-	.word	.LC108
 	.fnend
 	.size	rkvenc_task_timeout, .-rkvenc_task_timeout
 	.align	1
@@ -4501,262 +4081,610 @@ rkvenc_task_timeout:
 	.thumb
 	.thumb_func
 	.fpu softvfp
-	.type	rkvenc_callback, %function
-rkvenc_callback:
+	.type	rkvenc_run, %function
+rkvenc_run:
 	.fnstart
-	@ args = 0, pretend = 0, frame = 8
+	@ args = 0, pretend = 0, frame = 80
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, r7, r8, r9, r10, lr}
-	.save {r4, r5, r6, r7, r8, r9, r10, lr}
-	mov	r5, r2
-	.pad #24
-	sub	sp, sp, #24
+	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	.pad #108
+	sub	sp, sp, #108
+	ldr	r3, [r1]
 	mov	r4, r0
-	cbz	r0, .L807
-	subs	r1, r1, #18
-	cmp	r1, #4
-	bhi	.L807
-	tbb	[pc, r1]
-.L809:
-	.byte	(.L813-.L809)/2
-	.byte	(.L812-.L809)/2
-	.byte	(.L811-.L809)/2
-	.byte	(.L810-.L809)/2
-	.byte	(.L808-.L809)/2
-	.p2align 1
-.L812:
-	movs	r1, #24
-	ldr	r5, [r2]
+	ldr	r7, [r0, #152]
+	mov	r5, r1
+	ldr	r3, [r3, #184]
+	str	r3, [sp, #32]
+	ldr	r3, .L781
+	ldr	r3, [r3]
+	lsls	r0, r3, #26
+	bpl	.L723
+	movw	r2, #1139
+	ldr	r1, .L781+4
+	ldr	r0, .L781+8
+	bl	printk
+.L723:
+	ldr	r8, [r4, #292]
+	movs	r3, #0
+	str	r3, [r4, #272]
+	cmp	r8, #1
+	beq	.L724
+	cmp	r8, #0
+	beq	.L725
+	cmp	r8, #2
+	beq	.L726
+.L727:
+	ldr	r3, .L781
+	ldr	r0, [r3]
+	ands	r0, r0, #32
+	beq	.L722
+	movw	r2, #1262
+	ldr	r1, .L781+4
+	ldr	r0, .L781+12
+	bl	printk
+	movs	r0, #0
+	b	.L722
+.L725:
+	mov	fp, r5
+	mov	r9, r8
+	str	r8, [sp, #28]
+.L728:
+	ldr	r2, [r5, #2944]
+	ldr	r3, [sp, #28]
+	cmp	r2, r3
+	bhi	.L739
+	mov	r1, #784
+	str	r5, [r4, #88]
+	mov	r0, r4
 	bl	mpp_read
-	str	r0, [sp, #20]
-	cbnz	r5, .L814
+	ldr	r3, .L781
+	ldr	r3, [r3]
+	lsls	r1, r3, #24
+	mov	r6, r0
+	bpl	.L740
+	ldr	r3, [r5]
+	movw	r1, #1148
+	mov	r0, r4
+	ldr	fp, [r5, #2276]
+	ldr	r10, [r3, #4]
+	ldr	r3, [r5, #2336]
+	str	r3, [sp, #28]
+	bl	mpp_read
+	lsrs	r2, r6, #16
+	ubfx	r6, r6, #0, #11
+	adds	r2, r2, #1
+	adds	r6, r6, #1
+	ldr	r1, .L781+4
+	lsls	r2, r2, #3
+	lsls	r6, r6, #3
+	ldr	r3, [sp, #28]
+	lsrs	r0, r0, #31
+	str	r2, [sp, #16]
+	mov	r2, r10
+	str	r0, [sp, #4]
+	str	r3, [sp]
+	mov	r3, fp
+	strd	r9, r6, [sp, #8]
+	ldr	r0, .L781+16
+	bl	printk
+.L740:
+	movw	r1, #20484
+	mov	r0, r4
+	bl	mpp_read
+	lsls	r2, r0, #21
+	mov	r3, r0
+	bpl	.L741
+	mov	r2, #1200
+	ldr	r1, .L781+4
+	ldr	r0, .L781+20
+	bl	printk
+.L741:
+	cmp	r9, #0
+	beq	.L742
+	movs	r0, #0
+	str	r0, [r4, #268]
+	ldr	r6, [r5, #2316]
+	add	r2, sp, #64
+	movs	r1, #19
+	str	r6, [sp, #100]
+	bl	rk_dvbm_ctrl
+	ldr	r3, [sp, #68]
+	cbz	r3, .L743
+	ldr	r3, [sp, #80]
+	cbnz	r3, .L744
+.L743:
+	ldr	r1, .L781+24
+	ldr	r0, [r4]
+	bl	_dev_err
+.L744:
+	mov	r1, #776
+	mov	r0, r4
+	bl	mpp_read_relaxed
+	mov	r1, #776
+	bic	r2, r0, #255
+	mov	r0, r4
+	orrs	r2, r2, r6
+	bl	mpp_write_relaxed
+	mov	r1, #624
+	mov	r0, r4
+	ldr	r2, [sp, #64]
+	bl	mpp_write_relaxed
+	mov	r1, #628
+	mov	r0, r4
+	ldr	r2, [sp, #76]
+	bl	mpp_write_relaxed
+	mov	r1, #632
+	mov	r0, r4
+	ldr	r2, [sp, #68]
+	bl	mpp_write_relaxed
+	mov	r1, #636
+	mov	r0, r4
+	ldr	r2, [sp, #80]
+	bl	mpp_write_relaxed
+	mov	r1, #640
+	mov	r0, r4
+	ldr	r2, [sp, #72]
+	bl	mpp_write_relaxed
+	mov	r1, #644
+	mov	r0, r4
+	ldr	r2, [sp, #84]
+	bl	mpp_write_relaxed
+	mov	r1, #648
+	mov	r0, r4
+	ldr	r2, [sp, #84]
+	bl	mpp_write_relaxed
+	movw	r1, #1148
+	mov	r0, r4
+	bl	mpp_read_relaxed
+	cmp	r0, #0
+	bge	.L745
+	ldr	r2, [sp, #68]
+	mov	r1, #1040
+	mov	r0, r4
+	bl	mpp_write_relaxed
+	movw	r1, #1044
+	mov	r0, r4
+	ldr	r2, [sp, #80]
+	bl	mpp_write_relaxed
+	mov	r1, #1048
+	mov	r0, r4
+	ldr	r2, [sp, #64]
+	bl	mpp_write_relaxed
+	movw	r1, #1052
+	mov	r0, r4
+	ldr	r2, [sp, #76]
+	bl	mpp_write_relaxed
+	mov	r1, #1056
+	mov	r0, r4
+	ldr	r2, [sp, #72]
+	bl	mpp_write_relaxed
+	movw	r1, #1060
+	mov	r0, r4
+	ldr	r2, [sp, #84]
+	bl	mpp_write_relaxed
+	mov	r1, #1064
+	mov	r0, r4
+	ldr	r2, [sp, #84]
+	bl	mpp_write_relaxed
+.L745:
+	ldr	r3, [sp, #32]
+	movs	r6, #1
+	str	r6, [r3, #20]
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	r2, cpsr	@ arch_local_irq_save
+@ 1207 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_rkvenc_540c.c" 1
+	dsb st
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	bl	arm_heavy_mb
+	mov	r2, r9
+	ldr	r1, [r7, #280]
+	mov	r0, r4
+	bl	mpp_write_relaxed
+	str	r6, [r4, #128]
+.L742:
+	ldr	r3, [sp, #32]
+	movs	r6, #1
+	str	r9, [r3, #16]
+	str	r6, [r3, #200]
+	.syntax unified
+@ 1215 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_rkvenc_540c.c" 1
+	dsb st
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	bl	arm_heavy_mb
+	mvn	r3, #31
+	str	r3, [r5, #2208]
+	addw	r3, r5, #2212
+	str	r3, [r5, #2212]
+	str	r3, [r5, #2216]
+	mov	r2, #2097152
+	ldr	r3, .L781+28
+	add	r0, r5, #2224
+	ldr	r1, .L781+32
+	str	r3, [r5, #2220]
+	movs	r3, #0
+	str	r3, [sp]
+	bl	init_timer_key
+	ldr	r1, .L781+36
+	movs	r3, #20
+	add	r2, r5, #2208
+	mov	r0, r6
+	ldr	r1, [r1]
+	bl	queue_delayed_work_on
+	addw	r1, r5, #2200
+	mov	r0, r6
+	bl	____atomic_set_bit
+	cmp	r9, #0
+	bne	.L746
+	mov	r2, r8
+	ldr	r1, [r7, #244]
+	mov	r0, r4
+	bl	mpp_write
+.L746:
+	movs	r3, #1
+	str	r3, [r4, #260]
+	b	.L727
+.L739:
+	ldr	r10, [r5, #2340]
+	movs	r2, #20
+	movs	r1, #0
+	add	r0, sp, #44
+	ldr	r6, [fp, #2960]
+	bl	memset
+	ldr	r3, [r10, #24]
+	movs	r0, #0
+.L729:
+	cmp	r3, r0
+	bne	.L732
+	mvn	r0, #21
+.L722:
+	add	sp, sp, #108
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
+.L732:
+	ldr	r2, [r10, #28]
+	cmp	r6, r2
+	bcc	.L730
+	ldr	r1, [r10, #32]
+	cmp	r6, r1
+	bcs	.L730
+	movs	r1, #12
+	subs	r6, r6, r2
+	mla	r0, r1, r0, r5
+	str	r2, [sp, #56]
+	ldr	r2, [fp, #2956]
+	lsrs	r6, r6, #2
+	add	r3, r6, r2, lsr #2
+	str	r3, [sp, #36]
+	ldr	r1, [r0, #2352]
+	ldr	r10, [r0, #2348]
+	str	r1, [sp, #52]
+	str	r10, [sp, #60]
+.L731:
+	ldr	r3, [sp, #36]
+	cmp	r6, r3
+	bcc	.L738
+	ldr	r3, [sp, #28]
+	add	fp, fp, #20
+	adds	r3, r3, #1
+	str	r3, [sp, #28]
+	b	.L728
+.L730:
+	adds	r0, r0, #1
+	add	r10, r10, #20
+	b	.L729
+.L738:
+	ldr	r1, [sp, #56]
+	ldr	r0, [r7, #244]
+	add	r1, r1, r6, lsl #2
+	ldr	r2, [r10, r6, lsl #2]
+	cmp	r0, r1
+	beq	.L750
+	cmp	r1, #696
+	bne	.L735
+	str	r2, [r4, #304]
+.L736:
+	ldr	r0, [r7, #280]
+	ldr	r2, [r10, r6, lsl #2]
+	cmp	r0, r1
+	beq	.L751
+	ldr	r0, [r5, #2312]
+	cbz	r0, .L737
+	movw	r3, #1148
+	cmp	r1, r3
+	itt	eq
+	biceq	r2, r2, #-2147483648
+	streq	r2, [r10, r6, lsl #2]
+.L737:
+	ldr	r2, [r10, r6, lsl #2]
+	mov	r0, r4
+	bl	mpp_write_relaxed
+.L734:
+	adds	r6, r6, #1
+	b	.L731
+.L735:
+	movw	r3, #1036
+	cmp	r1, r3
+	it	eq
+	streq	r2, [r4, #308]
+	b	.L736
+.L750:
+	mov	r8, r2
+	b	.L734
+.L751:
+	mov	r9, r2
+	b	.L734
+.L782:
+	.align	2
+.L781:
+	.word	mpp_dev_debug
+	.word	.LANCHOR0+747
+	.word	.LC7
+	.word	.LC8
+	.word	.LC108
+	.word	.LC109
+	.word	.LC110
+	.word	rkvenc_task_timeout
+	.word	delayed_work_timer_fn
+	.word	system_wq
+.L726:
+	str	r3, [r4, #296]
+	mov	r1, r5
+	mov	r0, r4
+	bl	rkvenc_run_start_link
+	add	r3, r4, #296
+	pld	[r3]
+	.syntax unified
+@ 223 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
+	@ atomic_add_return
+1:	ldrex	r2, [r3]
+	add	r2, r2, #1
+	strex	r1, r2, [r3]
+	teq	r1, #0
+	bne	1b
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	str	r2, [r5, #3596]
+	str	r5, [r4, #88]
+.L780:
+	.syntax unified
+@ 1246 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_rkvenc_540c.c" 1
+	dsb st
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	bl	arm_heavy_mb
+	ldr	r3, [r4, #300]
+	cmp	r3, #0
+	beq	.L727
+	movw	r2, #513
+.L777:
+	ldr	r1, [r7, #244]
+	mov	r0, r4
+	bl	mpp_write
+	b	.L727
+.L724:
+	ldr	r1, [r7, #292]
+	mov	r0, r4
+	bl	mpp_read
+	add	r6, r4, #296
+	cbnz	r0, .L748
+	str	r0, [r4, #296]
+	mov	r1, r5
+	mov	r0, r4
+	bl	rkvenc_run_start_link
+	pld	[r6]
+	.syntax unified
+@ 223 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
+	@ atomic_add_return
+1:	ldrex	r3, [r6]
+	add	r3, r3, #1
+	strex	r2, r3, [r6]
+	teq	r2, #0
+	bne	1b
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	str	r3, [r5, #3596]
+	b	.L780
+.L748:
+	pld	[r6]
+	.syntax unified
+@ 223 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
+	@ atomic_add_return
+1:	ldrex	r3, [r6]
+	add	r3, r3, #1
+	strex	r2, r3, [r6]
+	teq	r2, #0
+	bne	1b
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	str	r3, [r5, #3596]
+	.syntax unified
+@ 1252 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_rkvenc_540c.c" 1
+	dsb st
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	bl	arm_heavy_mb
+	ldr	r3, [r4, #300]
+	cmp	r3, #0
+	beq	.L727
+	movw	r2, #769
+	b	.L777
+	.fnend
+	.size	rkvenc_run, .-rkvenc_run
+	.align	1
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu softvfp
+	.type	mpp_rkvenc_worker, %function
+mpp_rkvenc_worker:
+	.fnstart
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r3, r4, r5, r6, r7, r8, r9, lr}
+	.save {r3, r4, r5, r6, r7, r8, r9, lr}
+	mov	r4, r0
+	ldr	r3, .L799
+	sub	r7, r0, #16
+	ldr	r5, [r0, #80]
+	ldr	r3, [r3]
+	lsls	r3, r3, #26
+	bpl	.L784
+	movw	r2, #2011
+	ldr	r1, .L799+4
+	ldr	r0, .L799+8
+	bl	printk
+.L784:
+	.syntax unified
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r6, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r3, [sp, #20]
-	bic	r3, r3, #16777216
-	str	r3, [sp, #20]
+	ldr	r3, [r4, #56]
+	add	r8, r5, #60
+	cbz	r3, .L785
+	ldr	r3, [r5, #60]
+	cmp	r8, r3
+	beq	.L785
+	ldr	r0, [r4, #32]
+	bl	disable_irq
+	mov	r0, r7
+	bl	mpp_dev_reset
+	ldr	r0, [r4, #32]
+	bl	enable_irq
+.L785:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, r2	@ local_irq_restore
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r6	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-.L814:
-	ldr	r2, [sp, #20]
-	movs	r1, #24
-	mov	r0, r4
-	bl	mpp_write
-.L807:
-	movs	r0, #0
-	add	sp, sp, #24
-	@ sp needed
-	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
-.L811:
-	ldr	r3, [r2]
-	str	r3, [r0, #276]
-	b	.L807
-.L810:
-	ldr	r3, [r2]
-	str	r3, [r0, #280]
-	b	.L807
-.L808:
-	movs	r1, #24
-	bl	mpp_read
-	movw	r1, #20488
-	ubfx	r7, r0, #14, #8
+	mov	r0, r7
+	bl	mpp_power_on
+	.syntax unified
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	r9, cpsr	@ arch_local_irq_save
+	cpsid	i
+@ 0 "" 2
+	.thumb
+	.syntax unified
+	ldr	r3, [r5, #60]
+	cmp	r8, r3
+	bne	.L787
+	ldr	r3, [r4, #132]
+	cbnz	r3, .L787
+	mov	r0, r5
+	bl	mpp_taskqueue_get_pending_task
 	mov	r6, r0
-	ubfx	r8, r0, #0, #14
-	mov	r0, r4
-	bl	mpp_read
-	movw	r1, #20492
-	mov	r9, r0
-	mov	r0, r4
-	bl	mpp_read
-	movw	r1, #20484
-	mov	r10, r0
-	mov	r0, r4
-	bl	mpp_read
-	lsr	r2, r9, #16
-	lsr	r9, r10, #16
-	ldr	r1, [r5]
-	cmp	r9, r2
-	ldr	r3, [r5, #4]
-	it	cc
-	movcc	r9, r2
-	cmp	r7, r1
-	lsl	r2, r9, #4
-	bne	.L815
-	cmp	r8, r3
-	bcc	.L816
-.L815:
-	cbz	r3, .L817
-	cmp	r7, r1
-	beq	.L817
-	ldr	r0, [r5, #8]
-	cmp	r3, r0
-	bcc	.L818
-	strd	r1, r3, [sp]
-	mov	r3, r8
-	mov	r1, r7
-	ldr	r0, .L832
-	bl	printk
-	movs	r3, #1
-	str	r3, [r4, #268]
-.L818:
-	mov	r0, r4
-	bl	rkvenc_dump_dbg
-.L817:
-	ldr	r3, [r5, #12]
-	cmp	r8, r3
-	bcs	.L807
-	movs	r1, #24
-	mov	r0, r4
-	bl	mpp_read
-	ldr	r2, [r5, #12]
-	movs	r1, #24
-	bic	r0, r0, #16320
-	bic	r0, r0, #63
-	orrs	r2, r2, r0
-	mov	r0, r4
-	bl	mpp_write
+	cbz	r0, .L787
+	add	r0, r4, #116
+	bl	down_read
+	mov	r1, r8
+	add	r0, r6, #20
+	bl	list_move_tail
+	mov	r0, r6
+	bl	mpp_time_record
+	addw	r1, r6, #2200
+	movs	r0, #2
+	bl	____atomic_set_bit
+	mov	r1, r6
+	mov	r0, r7
+	bl	rkvenc_run
+.L787:
 	.syntax unified
-@ 770 "drivers/kmpp/mpp/mpp_rkvenc_540c.c" 1
-	dsb st
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, r9	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	bl	arm_heavy_mb
-	ldr	r3, [r5, #4]
-	mov	r2, r7
-	ldr	r0, .L832+4
-	str	r3, [sp, #4]
-	ldr	r3, [r5]
-	str	r3, [sp]
-	mov	r3, r8
-	ldr	r1, [r5, #12]
-	bl	printk
-	b	.L807
-.L816:
-	ldr	ip, [r4, #260]
-	ldr	r1, [r5, #8]
-	cmp	ip, #0
-	beq	.L820
-	sub	ip, r3, r2
-	cmp	r1, ip
-.L831:
-	bcs	.L821
-	strd	r3, r0, [sp, #4]
-	mov	r1, r7
-	mov	r3, r8
-	str	r7, [sp]
-	ldr	r0, .L832+8
-	bl	printk
-	movs	r3, #1
-	str	r3, [r4, #268]
-.L821:
-	ldr	r3, [r5, #4]
-	bic	r6, r6, #16320
-	bic	r6, r6, #63
-	movs	r1, #24
-	orrs	r6, r6, r3
-	mov	r0, r4
-	str	r3, [r4, #272]
-	mov	r2, r6
-	bl	mpp_write
-	.syntax unified
-@ 838 "drivers/kmpp/mpp/mpp_rkvenc_540c.c" 1
-	dsb st
-@ 0 "" 2
-	.thumb
-	.syntax unified
-	bl	arm_heavy_mb
-	ldr	r3, .L832+12
-	ldr	r3, [r3]
-	lsls	r3, r3, #15
-	bpl	.L822
-	ldrd	r1, r2, [r5]
-	ldr	r0, .L832+16
-	bl	printk
-.L822:
-	movs	r1, #24
-	mov	r0, r4
-	bl	mpp_read
-	cmp	r0, r6
-	beq	.L807
-	ldr	r3, [r5, #4]
-	mov	r2, r8
-	mov	r1, r7
-	ldr	r0, .L832+20
-	str	r3, [sp]
-	ldr	r3, [r5]
-	bl	printk
-	b	.L807
-.L820:
-	cmp	r1, r3
-	b	.L831
-.L813:
-	bl	rkvenc_dump_dbg
-	b	.L807
-.L833:
+	ldr	r3, [r5, #60]
+	cmp	r8, r3
+	bne	.L789
+	mov	r0, r7
+	bl	mpp_power_off
+.L789:
+	mov	r0, r5
+	pop	{r3, r4, r5, r6, r7, r8, r9, lr}
+	b	mpp_session_clean_detach
+.L800:
 	.align	2
-.L832:
-	.word	.LC109
-	.word	.LC110
-	.word	.LC111
+.L799:
 	.word	mpp_dev_debug
-	.word	.LC112
-	.word	.LC113
+	.word	.LANCHOR0+758
+	.word	.LC7
 	.fnend
-	.size	rkvenc_callback, .-rkvenc_callback
+	.size	mpp_rkvenc_worker, .-mpp_rkvenc_worker
 	.global	rockchip_rkvenc540c_driver
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__func__.49128, %object
-	.size	__func__.49128, 18
-__func__.49128:
+	.type	__func__.48984, %object
+	.size	__func__.48984, 18
+__func__.48984:
 	.ascii	"rkvenc_update_req\000"
-	.type	__func__.49944, %object
-	.size	__func__.49944, 13
-__func__.49944:
+	.type	__func__.49798, %object
+	.size	__func__.49798, 13
+__func__.49798:
 	.ascii	"rkvenc_reset\000"
-	.type	__func__.49510, %object
-	.size	__func__.49510, 11
-__func__.49510:
+	.type	__func__.49372, %object
+	.size	__func__.49372, 11
+__func__.49372:
 	.ascii	"rkvenc_irq\000"
-	.type	__func__.49679, %object
-	.size	__func__.49679, 14
-__func__.49679:
+	.type	__func__.49539, %object
+	.size	__func__.49539, 14
+__func__.49539:
 	.ascii	"rkvenc_result\000"
-	.type	__func__.49348, %object
-	.size	__func__.49348, 15
-__func__.49348:
+	.type	__func__.49207, %object
+	.size	__func__.49207, 15
+__func__.49207:
 	.ascii	"rkvenc_prepare\000"
-	.type	__func__.49933, %object
-	.size	__func__.49933, 12
-__func__.49933:
+	.type	__func__.49079, %object
+	.size	__func__.49079, 16
+__func__.49079:
+	.ascii	"rkvenc_dump_dbg\000"
+	.type	__func__.49489, %object
+	.size	__func__.49489, 14
+__func__.49489:
+	.ascii	"rkvenc_finish\000"
+	.type	__func__.49787, %object
+	.size	__func__.49787, 12
+__func__.49787:
 	.ascii	"rkvenc_init\000"
-	.type	__func__.49527, %object
-	.size	__func__.49527, 15
-__func__.49527:
+	.type	__func__.49389, %object
+	.size	__func__.49389, 15
+__func__.49389:
 	.ascii	"mpp_rkvenc_irq\000"
-	.type	__func__.49750, %object
-	.size	__func__.49750, 15
-__func__.49750:
+	.type	__func__.49610, %object
+	.size	__func__.49610, 15
+__func__.49610:
 	.ascii	"rkvenc_control\000"
-	.type	__func__.49792, %object
-	.size	__func__.49792, 20
-__func__.49792:
+	.type	__func__.49454, %object
+	.size	__func__.49454, 11
+__func__.49454:
+	.ascii	"rkvenc_isr\000"
+	.type	__func__.49443, %object
+	.size	__func__.49443, 16
+__func__.49443:
+	.ascii	"rkvenc_link_isr\000"
+	.type	__func__.49646, %object
+	.size	__func__.49646, 20
+__func__.49646:
 	.ascii	"rkvenc_init_session\000"
-	.type	__func__.49987, %object
-	.size	__func__.49987, 19
-__func__.49987:
+	.type	__func__.49841, %object
+	.size	__func__.49841, 19
+__func__.49841:
 	.ascii	"rkvenc_link_remove\000"
+	.space	3
 	.type	mpp_rkvenc_dt_match, %object
 	.size	mpp_rkvenc_dt_match, 392
 mpp_rkvenc_dt_match:
@@ -4765,70 +4693,46 @@ mpp_rkvenc_dt_match:
 	.space	100
 	.word	rkvenc_rv1106_data
 	.space	196
-	.type	__func__.49921, %object
-	.size	__func__.49921, 19
-__func__.49921:
+	.type	__func__.49775, %object
+	.size	__func__.49775, 19
+__func__.49775:
 	.ascii	"rkvenc_procfs_init\000"
-	.type	__func__.50095, %object
-	.size	__func__.50095, 21
-__func__.50095:
+	.type	__func__.49949, %object
+	.size	__func__.49949, 21
+__func__.49949:
 	.ascii	"rkvenc_probe_default\000"
-	.type	__func__.50074, %object
-	.size	__func__.50074, 17
-__func__.50074:
+	.type	__func__.49928, %object
+	.size	__func__.49928, 17
+__func__.49928:
 	.ascii	"rkvenc_link_init\000"
-	.type	__func__.50038, %object
-	.size	__func__.50038, 24
-__func__.50038:
+	.type	__func__.49892, %object
+	.size	__func__.49892, 24
+__func__.49892:
 	.ascii	"rkvenc_link_alloc_table\000"
-	.type	__func__.49296, %object
-	.size	__func__.49296, 18
-__func__.49296:
+	.type	__func__.49157, %object
+	.size	__func__.49157, 18
+__func__.49157:
 	.ascii	"rkvenc_alloc_task\000"
-	.type	__func__.49176, %object
-	.size	__func__.49176, 24
-__func__.49176:
+	.type	__func__.49032, %object
+	.size	__func__.49032, 24
+__func__.49032:
 	.ascii	"rkvenc_extract_task_msg\000"
-	.type	__func__.49444, %object
-	.size	__func__.49444, 11
-__func__.49444:
-	.ascii	"rkvenc_run\000"
-	.type	__func__.49836, %object
-	.size	__func__.49836, 18
-__func__.49836:
-	.ascii	"mpp_rkvenc_worker\000"
-	.type	__func__.49223, %object
-	.size	__func__.49223, 16
-__func__.49223:
-	.ascii	"rkvenc_dump_dbg\000"
-	.type	__func__.49627, %object
-	.size	__func__.49627, 14
-__func__.49627:
-	.ascii	"rkvenc_finish\000"
-	.type	__func__.49592, %object
-	.size	__func__.49592, 11
-__func__.49592:
-	.ascii	"rkvenc_isr\000"
-	.type	__func__.49581, %object
-	.size	__func__.49581, 16
-__func__.49581:
-	.ascii	"rkvenc_link_isr\000"
-	.type	__func__.49823, %object
-	.size	__func__.49823, 20
-__func__.49823:
+	.type	__func__.49677, %object
+	.size	__func__.49677, 20
+__func__.49677:
 	.ascii	"rkvenc_task_timeout\000"
-	.space	3
+	.type	__func__.49303, %object
+	.size	__func__.49303, 11
+__func__.49303:
+	.ascii	"rkvenc_run\000"
+	.type	__func__.49690, %object
+	.size	__func__.49690, 18
+__func__.49690:
+	.ascii	"mpp_rkvenc_worker\000"
 	.type	rkvenc_pm_ops, %object
 	.size	rkvenc_pm_ops, 92
 rkvenc_pm_ops:
-	.space	8
-	.word	rkvenc_runtime_suspend
-	.word	rkvenc_runtime_resume
-	.word	rkvenc_runtime_suspend
-	.word	rkvenc_runtime_resume
-	.word	rkvenc_runtime_suspend
-	.word	rkvenc_runtime_resume
-	.space	60
+	.space	92
 	.type	rkvenc_rv1106_data, %object
 	.size	rkvenc_rv1106_data, 20
 rkvenc_rv1106_data:
@@ -4951,7 +4855,7 @@ trans_tbl_h264e_rv1106:
 	.short	103
 	.data
 	.align	2
-	.set	.LANCHOR2,. + 0
+	.set	.LANCHOR1,. + 0
 	.type	rkvenc_rv1106_hw_info, %object
 	.size	rkvenc_rv1106_hw_info, 300
 rkvenc_rv1106_hw_info:
@@ -5026,7 +4930,7 @@ rockchip_rkvenc540c_driver:
 	.word	rkvenc_remove
 	.word	rkvenc_shutdown
 	.space	8
-	.word	.LC114
+	.word	.LC111
 	.space	20
 	.word	mpp_rkvenc_dt_match
 	.space	36
@@ -5049,7 +4953,7 @@ rkvenc_dev_ops_v2:
 	.word	rkvenc_init_session
 	.word	rkvenc_free_session
 	.word	rkvenc_dump_session
-	.space	4
+	.word	rkvenc_dump_dbg
 	.type	rkvenc_hw_ops, %object
 	.size	rkvenc_hw_ops, 36
 rkvenc_hw_ops:
@@ -5078,13 +4982,13 @@ trans_rkvenc_rv1106:
 	.word	16
 	.word	trans_tbl_jpege_osd_rv1106
 	.bss
-	.set	.LANCHOR1,. + 0
-	.type	__key.49793, %object
-	.size	__key.49793, 0
-__key.49793:
-	.type	__key.50078, %object
-	.size	__key.50078, 0
-__key.50078:
+	.set	.LANCHOR2,. + 0
+	.type	__key.49647, %object
+	.size	__key.49647, 0
+__key.49647:
+	.type	__key.49932, %object
+	.size	__key.49932, 0
+__key.49932:
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:
 	.ascii	"\0016rkvenc_540c: read reg[%03d]: %04x: 0x%08x\012\000"
@@ -5125,223 +5029,217 @@ __key.50078:
 .LC15:
 	.ascii	"hw_running\000"
 .LC16:
-	.ascii	"%15s|%10s|%12s|%10s|%13s|%13s\000"
+	.ascii	"%15s|%10s|%12s|%10s|%15s|%13s|%13s\000"
 .LC17:
 	.ascii	"enc_err_st\000"
 .LC18:
 	.ascii	"enc_err_cnt\000"
 .LC19:
-	.ascii	"bs_ovfl\000"
+	.ascii	"wrap_src_mis\000"
 .LC20:
-	.ascii	"wrap_ovfl\000"
+	.ascii	"bs_ovfl\000"
 .LC21:
-	.ascii	"\012\000"
+	.ascii	"wrap_ovfl\000"
 .LC22:
-	.ascii	"%8d|\000"
+	.ascii	"\012\000"
 .LC23:
-	.ascii	"null\000"
+	.ascii	"%8d|\000"
 .LC24:
-	.ascii	"%15d|%10d|%12d|%10d|%13d|%13x\000"
+	.ascii	"null\000"
 .LC25:
-	.ascii	"\012--------bitstream buffer addr\000"
+	.ascii	"%15d|%10d|%12d|%10d|%15d|%13d|%13x\000"
 .LC26:
-	.ascii	"bot\000"
+	.ascii	"\012--------bitstream buffer addr\000"
 .LC27:
-	.ascii	"top\000"
+	.ascii	"bot\000"
 .LC28:
-	.ascii	"%10s|%10s|%10s|%10s|\012\000"
+	.ascii	"top\000"
 .LC29:
-	.ascii	"rd\000"
+	.ascii	"%10s|%10s|%10s|%10s|\012\000"
 .LC30:
-	.ascii	"wr\000"
+	.ascii	"rd\000"
 .LC31:
-	.ascii	"%10x|%10x|%10x|%10x|\012\000"
+	.ascii	"wr\000"
 .LC32:
-	.ascii	"\0013rkvenc_540c: %s:%d: copy_to_user reg fail\012\000"
+	.ascii	"%10x|%10x|%10x|%10x|\012\000"
 .LC33:
+	.ascii	"\0013rkvenc_540c: %s:%d: copy_to_user reg fail\012\000"
+.LC34:
 	.ascii	"\0013rkvenc_540c: %s:%d: xxxx task filled, mpp_stat"
 	.ascii	"e=%lx\012\000"
-.LC34:
-	.ascii	"aclk_vcodec\000"
 .LC35:
+	.ascii	"\0013rkvenc_540c: dvbm_en     -   %d\012\000"
+.LC36:
+	.ascii	"\0013rkvenc_540c: fmt         -   %d\012\000"
+.LC37:
+	.ascii	"\0013rkvenc_540c: jpg_en      -   %d\012\000"
+.LC38:
+	.ascii	"\0013rkvenc_540c: vsldy       -   0x%08x\012\000"
+.LC39:
+	.ascii	"\0013rkvenc_540c: st_wdg      -   0x%08x\012\000"
+.LC40:
+	.ascii	"\0013rkvenc_540c: st_ppl      -   0x%08x\012\000"
+.LC41:
+	.ascii	"\0013rkvenc_540c: st_vsp0     -   0x%08x\012\000"
+.LC42:
+	.ascii	"\0013rkvenc_540c: st_vsp1     -   0x%08x\012\000"
+.LC43:
+	.ascii	"\0013rkvenc_540c: vepu_cycle  -   0x%08x\012\000"
+.LC44:
+	.ascii	"\0016rkvenc_540c: === %s ===\012\000"
+.LC45:
+	.ascii	"\0016rkvenc_540c: reg[0x%0x] = 0x%08x\012\000"
+.LC46:
+	.ascii	"aclk_vcodec\000"
+.LC47:
 	.ascii	"\0013rkvenc_540c: %s:%d: failed on clk_get aclk_vco"
 	.ascii	"dec\012\000"
-.LC36:
+.LC48:
 	.ascii	"hclk_vcodec\000"
-.LC37:
+.LC49:
 	.ascii	"\0013rkvenc_540c: %s:%d: failed on clk_get hclk_vco"
 	.ascii	"dec\012\000"
-.LC38:
+.LC50:
 	.ascii	"clk_core\000"
-.LC39:
+.LC51:
 	.ascii	"\0013rkvenc_540c: %s:%d: failed on clk_get clk_core"
 	.ascii	"\012\000"
-.LC40:
+.LC52:
 	.ascii	"rockchip,default-max-load\000"
-.LC41:
+.LC53:
 	.ascii	"video_a\000"
-.LC42:
+.LC54:
 	.ascii	"\0013rkvenc_540c: %s:%d: No aclk reset resource def"
 	.ascii	"ine\012\000"
-.LC43:
+.LC55:
 	.ascii	"video_h\000"
-.LC44:
+.LC56:
 	.ascii	"\0013rkvenc_540c: %s:%d: No hclk reset resource def"
 	.ascii	"ine\012\000"
-.LC45:
+.LC57:
 	.ascii	"video_core\000"
-.LC46:
+.LC58:
 	.ascii	"\0013rkvenc_540c: %s:%d: No core reset resource def"
 	.ascii	"ine\012\000"
-.LC47:
+.LC59:
 	.ascii	"shutdown device\012\000"
-.LC48:
+.LC60:
 	.ascii	"wait total running time out\012\000"
-.LC49:
+.LC61:
 	.ascii	"shutdown success\012\000"
-.LC50:
-	.ascii	"\0016rkvenc_540c: %s resume device ++\012\000"
-.LC51:
-	.ascii	"\0016rkvenc_540c: %s resume device --\012\000"
-.LC52:
+.LC62:
 	.ascii	"found null task in irq\012\000"
-.LC53:
+.LC63:
 	.ascii	"\0013rkvenc_540c: %s:%d: task %d has been handled s"
 	.ascii	"tate %#lx\012\000"
-.LC54:
+.LC64:
 	.ascii	"\0016rkvenc_540c: current frame has overflow\012\000"
-.LC55:
+.LC65:
 	.ascii	"\0016rkvenc_540c: task %d fmt %d dvbm_en %d irq_sta"
 	.ascii	"tus 0x%08x\012\000"
-.LC56:
-	.ascii	"\0013rkvenc_540c: %s:%d: session info null\012\000"
-.LC57:
-	.ascii	"\0016rkvenc_540c: codec info count %d\012\000"
-.LC58:
-	.ascii	"\0013rkvenc_540c: %s:%d: copy_from_user failed\012\000"
-.LC59:
-	.ascii	"\0013rkvenc_540c: %s:%d: codec info invalid, type %"
-	.ascii	"d, flag %d\012\000"
-.LC60:
-	.ascii	"\0013rkvenc_540c: task %d disable_jpeg\012\000"
-.LC61:
-	.ascii	"\0013rkvenc_540c: %s:%d: unknown mpp ioctl cmd %x\012"
-	.ascii	"\000"
-.LC62:
-	.ascii	"\0013rkvenc_540c: %s:%d: session is null\012\000"
-.LC63:
-	.ascii	"&priv->rw_sem\000"
-.LC64:
-	.ascii	"remove device\012\000"
-.LC65:
-	.ascii	"\0016rkvenc_540c: %s suspend device ++\012\000"
 .LC66:
-	.ascii	"\0016rkvenc_540c: %s suspend device --\012\000"
-.LC67:
-	.ascii	"probing start\012\000"
-.LC68:
-	.ascii	"dt match failed!\012\000"
-.LC69:
-	.ascii	"register interrupter runtime failed\012\000"
-.LC70:
-	.ascii	"%s%d\000"
-.LC71:
-	.ascii	"\0013rkvenc_540c: %s:%d: failed on open procfs\012\000"
-.LC72:
-	.ascii	"aclk\000"
-.LC73:
-	.ascii	"session_buffers\000"
-.LC74:
-	.ascii	"dump_regs\000"
-.LC75:
-	.ascii	"sessions-info\000"
-.LC76:
-	.ascii	"link_mode\000"
-.LC77:
-	.ascii	"dvbm\000"
-.LC78:
-	.ascii	"\0013rkvenc_540c: %s:%d: failed to get device node\012"
-	.ascii	"\000"
-.LC79:
-	.ascii	"rockchip,task-capacity\000"
-.LC80:
-	.ascii	"%d task capacity link mode detected\012\000"
-.LC81:
-	.ascii	"&link->list_mutex\000"
-.LC82:
-	.ascii	"dma alloc failed\012\000"
-.LC83:
-	.ascii	"probing finish\012\000"
-.LC84:
-	.ascii	"\0013rkvenc_540c: %s:%d: can't found idle task\000"
-.LC85:
-	.ascii	"\0016rkvenc_540c: w_req_cnt=%d, r_req_cnt=%d\012\000"
-.LC86:
-	.ascii	"\0016rkvenc_540c: %s session %d task %d fmt %d jpeg"
-	.ascii	"_en %08x dvbm_en %d\012\000"
-.LC87:
-	.ascii	"\0013rkvenc_540c: %s:%d: enc started status %08x\012"
-	.ascii	"\000"
-.LC88:
-	.ascii	"the dvbm address do not ready!\012\000"
-.LC89:
-	.ascii	"\0013rkvenc_540c: dvbm_en     -   %d\012\000"
-.LC90:
-	.ascii	"\0013rkvenc_540c: fmt         -   %d\012\000"
-.LC91:
-	.ascii	"\0013rkvenc_540c: jpg_en      -   %d\012\000"
-.LC92:
-	.ascii	"\0013rkvenc_540c: vsldy       -   0x%08x\012\000"
-.LC93:
-	.ascii	"\0013rkvenc_540c: st_wdg      -   0x%08x\012\000"
-.LC94:
-	.ascii	"\0013rkvenc_540c: st_ppl      -   0x%08x\012\000"
-.LC95:
-	.ascii	"\0013rkvenc_540c: st_vsp0     -   0x%08x\012\000"
-.LC96:
-	.ascii	"\0013rkvenc_540c: st_vsp1     -   0x%08x\012\000"
-.LC97:
-	.ascii	"\0013rkvenc_540c: vepu_cycle  -   0x%08x\012\000"
-.LC98:
-	.ascii	"\0016rkvenc_540c: === %s ===\012\000"
-.LC99:
-	.ascii	"\0016rkvenc_540c: reg[0x%0x] = 0x%08x\012\000"
-.LC100:
-	.ascii	"current frame has overflow\012\000"
-.LC101:
-	.ascii	"task %d fmt %d dvbm_en %d irq_status 0x%08x\012\000"
-.LC102:
-	.ascii	"\0016rkvenc_540c: irq_status: %08x\012\000"
-.LC103:
-	.ascii	"no current task\012\000"
-.LC104:
-	.ascii	"\0016rkvenc_540c: link_irq_status: %08x\012\000"
-.LC105:
-	.ascii	"\0013rkvenc_540c: %s:%d: task has been handled\012\000"
-.LC106:
-	.ascii	"\0013rkvenc_540c: %s:%d: task %d state %#lx process"
-	.ascii	"ing time out!\012\000"
-.LC107:
-	.ascii	"\0013rkvenc_540c: %s:%d: task %p, task->session is "
-	.ascii	"null.\012\000"
-.LC108:
-	.ascii	"\0013rkvenc_540c: %s:%d: session %p, session->mpp i"
-	.ascii	"s null.\012\000"
-.LC109:
 	.ascii	"\0013rkvenc_540c: overflow vepu[frm: %d line: %d %d"
 	.ascii	"] isp[frm: %d line: %d]\012\000"
-.LC110:
+.LC67:
 	.ascii	"\0013rkvenc_540c: line cnt disorder set max %d [%d "
 	.ascii	"%d]->[%d %d]\012\000"
-.LC111:
+.LC68:
 	.ascii	"\0013rkvenc_540c: overflow vepu[frm: %d line: %d %d"
 	.ascii	"] isp[frm: %d line: %d] wrk 0x%08x\012\000"
-.LC112:
+.LC69:
 	.ascii	"\0016rkvenc_540c: frame cnt %d line cnt %d\012\000"
-.LC113:
+.LC70:
 	.ascii	"\0013rkvenc_540c: set frame info failed! [%d %d] ->"
 	.ascii	" [%d %d]\012\000"
-.LC114:
+.LC71:
+	.ascii	"\0013rkvenc_540c: %s:%d: session info null\012\000"
+.LC72:
+	.ascii	"\0016rkvenc_540c: codec info count %d\012\000"
+.LC73:
+	.ascii	"\0013rkvenc_540c: %s:%d: copy_from_user failed\012\000"
+.LC74:
+	.ascii	"\0013rkvenc_540c: %s:%d: codec info invalid, type %"
+	.ascii	"d, flag %d\012\000"
+.LC75:
+	.ascii	"\0013rkvenc_540c: task %d disable_jpeg\012\000"
+.LC76:
+	.ascii	"\0013rkvenc_540c: %s:%d: unknown mpp ioctl cmd %x\012"
+	.ascii	"\000"
+.LC77:
+	.ascii	"current frame has overflow\012\000"
+.LC78:
+	.ascii	"task %d fmt %d dvbm_en %d irq_status 0x%08x\012\000"
+.LC79:
+	.ascii	"\0016rkvenc_540c: irq_status: %08x\012\000"
+.LC80:
+	.ascii	"no current task\012\000"
+.LC81:
+	.ascii	"\0016rkvenc_540c: link_irq_status: %08x\012\000"
+.LC82:
+	.ascii	"\0013rkvenc_540c: %s:%d: session is null\012\000"
+.LC83:
+	.ascii	"&priv->rw_sem\000"
+.LC84:
+	.ascii	"remove device\012\000"
+.LC85:
+	.ascii	"probing start\012\000"
+.LC86:
+	.ascii	"dt match failed!\012\000"
+.LC87:
+	.ascii	"register interrupter runtime failed\012\000"
+.LC88:
+	.ascii	"%s%d\000"
+.LC89:
+	.ascii	"\0013rkvenc_540c: %s:%d: failed on open procfs\012\000"
+.LC90:
+	.ascii	"aclk\000"
+.LC91:
+	.ascii	"session_buffers\000"
+.LC92:
+	.ascii	"dump_regs\000"
+.LC93:
+	.ascii	"sessions-info\000"
+.LC94:
+	.ascii	"link_mode\000"
+.LC95:
+	.ascii	"dvbm\000"
+.LC96:
+	.ascii	"\0013rkvenc_540c: %s:%d: failed to get device node\012"
+	.ascii	"\000"
+.LC97:
+	.ascii	"rockchip,task-capacity\000"
+.LC98:
+	.ascii	"%d task capacity link mode detected\012\000"
+.LC99:
+	.ascii	"&link->list_mutex\000"
+.LC100:
+	.ascii	"dma alloc failed\012\000"
+.LC101:
+	.ascii	"probing finish\012\000"
+.LC102:
+	.ascii	"\0013rkvenc_540c: %s:%d: can't found idle task\000"
+.LC103:
+	.ascii	"\0016rkvenc_540c: w_req_cnt=%d, r_req_cnt=%d\012\000"
+.LC104:
+	.ascii	"\0013rkvenc_540c: %s:%d: task %p, task->session is "
+	.ascii	"null.\012\000"
+.LC105:
+	.ascii	"\0013rkvenc_540c: %s:%d: session %p, session->mpp i"
+	.ascii	"s null.\012\000"
+.LC106:
+	.ascii	"\0013rkvenc_540c: %s:%d: task has been handled\012\000"
+.LC107:
+	.ascii	"\0013rkvenc_540c: %s:%d: task %d state %#lx process"
+	.ascii	"ing time out!\012\000"
+.LC108:
+	.ascii	"\0016rkvenc_540c: %s session %d task %d fmt %d jpeg"
+	.ascii	"_en %08x dvbm_en %d w/h [%d %d]\012\000"
+.LC109:
+	.ascii	"\0013rkvenc_540c: %s:%d: enc started status %08x\012"
+	.ascii	"\000"
+.LC110:
+	.ascii	"the dvbm address do not ready!\012\000"
+.LC111:
 	.ascii	"mpp_rkvenc_540c\000"
 	.ident	"GCC: (crosstool-NG 1.24.0) 8.3.0"
 	.section	.note.GNU-stack,"",%progbits

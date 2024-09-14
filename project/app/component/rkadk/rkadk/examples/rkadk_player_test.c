@@ -17,7 +17,6 @@
 #include "rkadk_common.h"
 #include "rkadk_media_comm.h"
 #include "rkadk_log.h"
-#include "rkadk_param.h"
 #include "rkadk_player.h"
 #include "rkadk_demuxer.h"
 #include "rkdemuxer.h"
@@ -37,7 +36,7 @@
 extern int optind;
 extern char *optarg;
 static bool is_quit = false;
-static RKADK_CHAR optstr[] = "i:x:y:W:H:r:p:a:s:P:I:t:F:T:l:c:d:O:mfvbDh";
+static RKADK_CHAR optstr[] = "i:x:y:W:H:r:a:s:P:I:t:F:T:l:c:d:O:S:w:C:mfvbDh";
 
 static RKADK_VOID *mDemuxerCfg = NULL;
 static void print_usage(const RKADK_CHAR *name) {
@@ -51,7 +50,6 @@ static void print_usage(const RKADK_CHAR *name) {
   printf("\t-W: display width, Default: Physical screen width\n");
   printf("\t-H: display height, Default: Physical screen height\n");
   printf("\t-r: rotation, option: 0, 90, 180, 270, Default: 0\n");
-  printf("\t-p: param ini directory path, Default:/data/rkadk\n");
   printf("\t-m: mirror enable, Default: disable\n");
   printf("\t-f: flip enable, Default: disable\n");
   printf("\t-a: set audio enable/disable, option: 0, 1; Default: enable\n");
@@ -67,7 +65,10 @@ static void print_usage(const RKADK_CHAR *name) {
   printf("\t-c: loop play count, Default: 0\n");
   printf("\t-d: loop play once duration(second), Default: file duration\n");
   printf("\t-O: Vdec output buffer count, Default: 3\n");
+  printf("\t-S: Vdec stream(input) buffer count, Default: 3\n");
+  printf("\t-w: Vdec waterline(frames), Default: 0\n");
   printf("\t-D: enable third-party demuxer, Default: disable\n");
+  printf("\t-C: Ao sound card name, Default: RV1106/RV1103/RK3506 = hw:0,0, other chip = default\n");
   printf("\t-h: help\n");
 }
 
@@ -343,16 +344,20 @@ int main(int argc, char *argv[]) {
   RKADK_S64 seekTimeInMs = 0, maxSeekTimeInMs = (RKADK_S64)pow(2, 63) / 1000;
   pthread_t getPosition = 0;
   RKADK_U32 duration = 0;
-  const char *iniPath = NULL;
   int u32VoFormat = -1, u32SpliceMode = -1, u32IntfType = -1;
-  char path[RKADK_PATH_LEN];
-  char sensorPath[RKADK_MAX_SENSOR_CNT][RKADK_PATH_LEN];
   RKADK_PLAYER_CFG_S stPlayCfg;
   int loop_count = -1, loop_duration = 0;
   RKADK_PLAYER_STATE_E enState = RKADK_PLAYER_STATE_BUTT;
+  RKADK_U32 u32Waterline = 0;
 
   memset(&stPlayCfg, 0, sizeof(RKADK_PLAYER_CFG_S));
   param_init(&stPlayCfg.stFrmInfo);
+
+#if defined(RK3506) || defined(RV1106_1103)
+  stPlayCfg.stAudioCfg.pSoundCard = "hw:0,0";
+#else
+  stPlayCfg.stAudioCfg.pSoundCard = "default";
+#endif
 
   while ((c = getopt(argc, argv, optstr)) != -1) {
     switch (c) {
@@ -392,6 +397,12 @@ int main(int argc, char *argv[]) {
     case 'O':
       stPlayCfg.stVdecCfg.u32FrameBufCnt = atoi(optarg);
       break;
+    case 'S':
+      stPlayCfg.stVdecCfg.u32StreamBufCnt = atoi(optarg);
+      break;
+    case 'w':
+      u32Waterline = atoi(optarg);
+      break;
     case 'v':
       bVideoEnable = true;
       break;
@@ -419,13 +430,12 @@ int main(int argc, char *argv[]) {
     case 'd':
       loop_duration = atoi(optarg);
       break;
-    case 'p':
-      iniPath = optarg;
-      RKADK_LOGD("iniPath: %s", iniPath);
-      break;
     case 'D':
       stPlayCfg.bEnableThirdDemuxer = true;
       RKADK_LOGD("Enable third-party demuxer");
+      break;
+    case 'C':
+      stPlayCfg.stAudioCfg.pSoundCard = optarg;
       break;
     case 'h':
     default:
@@ -437,12 +447,14 @@ int main(int argc, char *argv[]) {
   optind = 0;
 
   RKADK_LOGD("#play file: %s, bVideoEnable: %d, bAudioEnable: %d",file, bVideoEnable, bAudioEnable);
-  RKADK_LOGD("#video display rect[%d, %d, %d, %d], u32SpliceMode: %d, u32VoFormat: %d,"
-              "transport: %d, fps: %d, u32IoTimeout: %d(us)",
+  RKADK_LOGD("#video display rect[%d, %d, %d, %d], u32SpliceMode: %d, u32VoFormat: %d, fps: %d",
               stPlayCfg.stFrmInfo.u32FrmInfoX, stPlayCfg.stFrmInfo.u32FrmInfoY,
               stPlayCfg.stFrmInfo.u32DispWidth, stPlayCfg.stFrmInfo.u32DispHeight,
-              u32SpliceMode, u32VoFormat, transport, stPlayCfg.stFrmInfo.stSyncInfo.u16FrameRate,
-              stPlayCfg.stRtspCfg.u32IoTimeout);
+              u32SpliceMode, u32VoFormat, stPlayCfg.stFrmInfo.stSyncInfo.u16FrameRate);
+  RKADK_LOGD("u32Waterline: %d, u32FrameBufCnt: %d, u32StreamBufCnt: %d",
+              u32Waterline, stPlayCfg.stVdecCfg.u32FrameBufCnt, stPlayCfg.stVdecCfg.u32StreamBufCnt);
+  RKADK_LOGD("transport: %d, u32IoTimeout: %d(us), pSoundCard: %s",
+              transport, stPlayCfg.stRtspCfg.u32IoTimeout, stPlayCfg.stAudioCfg.pSoundCard);
 
   if (u32SpliceMode == 1)
     stPlayCfg.stFrmInfo.enVoSpliceMode = SPLICE_MODE_GPU;
@@ -465,25 +477,6 @@ int main(int argc, char *argv[]) {
 
   RKADK_MPI_SYS_Init();
 
-  if (iniPath) {
-    memset(path, 0, RKADK_PATH_LEN);
-    memset(sensorPath, 0, RKADK_MAX_SENSOR_CNT * RKADK_PATH_LEN);
-    sprintf(path, "%s/rkadk_setting.ini", iniPath);
-    for (int i = 0; i < RKADK_MAX_SENSOR_CNT; i++)
-      sprintf(sensorPath[i], "%s/rkadk_setting_sensor_%d.ini", iniPath, i);
-
-    /*
-    lg:
-      char *sPath[] = {"/data/rkadk/rkadk_setting_sensor_0.ini",
-      "/data/rkadk/rkadk_setting_sensor_1.ini", NULL};
-    */
-    char *sPath[] = {sensorPath[0], sensorPath[1], NULL};
-
-    RKADK_PARAM_Init(path, sPath);
-  } else {
-    RKADK_PARAM_Init(NULL, NULL);
-  }
-
   if (bAudioEnable)
     stPlayCfg.bEnableAudio = true;
   if (bVideoEnable)
@@ -501,11 +494,15 @@ int main(int argc, char *argv[]) {
 
   stPlayCfg.stSnapshotCfg.u32VencChn = 15;
   stPlayCfg.stSnapshotCfg.pfnDataCallback = SnapshotDataRecv;
+  stPlayCfg.stAudioCfg.u32SpeakerVolume = 70;
 
   if (RKADK_PLAYER_Create(&pPlayer, &stPlayCfg)) {
     RKADK_LOGE("RKADK_PLAYER_Create failed");
     return -1;
   }
+
+  if (u32Waterline > 0)
+    RKADK_PLAYER_SetVdecWaterline(pPlayer, u32Waterline);
 
   if (stPlayCfg.bEnableThirdDemuxer) {
     ret = DemuxerSetDataParam(pPlayer, file, stPlayCfg);
@@ -528,6 +525,7 @@ int main(int argc, char *argv[]) {
   }
 
   RKADK_PLAYER_GetDuration(pPlayer, &duration);
+  RKADK_LOGD("file duration: %d ms", duration);
 
   if (loop_duration <= 0 || loop_duration > duration / 1000)
     loop_duration = duration / 1000 + 1; //ms to m

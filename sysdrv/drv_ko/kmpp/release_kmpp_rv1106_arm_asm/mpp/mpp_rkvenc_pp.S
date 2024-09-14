@@ -53,12 +53,12 @@ vepu_pp_result:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r3, r4, r5, r6, r7, lr}
 	.save {r3, r4, r5, r6, r7, lr}
-	addw	r4, r1, #3720
-	addw	r7, r1, #2872
+	addw	r4, r1, #3736
+	addw	r7, r1, #2888
 	mov	r6, r1
 	movs	r5, #0
 .L3:
-	ldr	r3, [r6, #3708]
+	ldr	r3, [r6, #3724]
 	adds	r4, r4, #20
 	cmp	r3, r5
 	bhi	.L4
@@ -89,10 +89,10 @@ mpp_read:
 	ldr	r3, [r0, #60]
 	add	r3, r3, r1
 	.syntax unified
-@ 113 "./arch/arm/include/asm/io.h" 1
+@ 113 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/io.h" 1
 	ldr r4, [r3]
 @ 0 "" 2
-@ 732 "drivers/kmpp/mpp/mpp_common.h" 1
+@ 747 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_common.h" 1
 	dsb 
 @ 0 "" 2
 	.thumb
@@ -143,7 +143,7 @@ mpp_write_relaxed:
 	ldr	r1, [r6, #60]
 	add	r1, r1, r4
 	.syntax unified
-@ 95 "./arch/arm/include/asm/io.h" 1
+@ 95 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/io.h" 1
 	str r5, [r1]
 @ 0 "" 2
 	.thumb
@@ -183,7 +183,7 @@ mpp_write:
 	bl	printk
 .L20:
 	.syntax unified
-@ 711 "drivers/kmpp/mpp/mpp_common.h" 1
+@ 726 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_common.h" 1
 	dsb st
 @ 0 "" 2
 	.thumb
@@ -192,7 +192,7 @@ mpp_write:
 	ldr	r1, [r6, #60]
 	add	r1, r1, r4
 	.syntax unified
-@ 95 "./arch/arm/include/asm/io.h" 1
+@ 95 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/io.h" 1
 	str r5, [r1]
 @ 0 "" 2
 	.thumb
@@ -247,7 +247,7 @@ vepu_pp_set_freq:
 	push	{r3, lr}
 	.save {r3, lr}
 	adds	r0, r0, #152
-	ldr	r1, [r1, #2324]
+	ldr	r1, [r1, #2340]
 	bl	mpp_clk_set_rate
 	movs	r0, #0
 	pop	{r3, pc}
@@ -504,7 +504,7 @@ vepu_pp_finish:
 	ldr	r0, .L77+8
 	bl	printk
 .L67:
-	addw	r6, r6, #2868
+	addw	r6, r6, #2884
 	mov	r5, #2048
 	movw	r7, #2072
 .L68:
@@ -587,115 +587,115 @@ vepu_pp_run:
 	movs	r1, #96
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2852]
+	ldr	r2, [r5, #2868]
 	mov	r1, #268
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2856]
+	ldr	r2, [r5, #2872]
 	mov	r1, #272
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2860]
+	ldr	r2, [r5, #2876]
 	mov	r1, #276
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2824]
+	ldr	r2, [r5, #2840]
 	movs	r1, #60
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2828]
+	ldr	r2, [r5, #2844]
 	movs	r1, #64
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2832]
+	ldr	r2, [r5, #2848]
 	movs	r1, #68
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2836]
+	ldr	r2, [r5, #2852]
 	movs	r1, #72
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2840]
+	ldr	r2, [r5, #2856]
 	movs	r1, #76
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2844]
+	ldr	r2, [r5, #2860]
 	movs	r1, #80
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2848]
+	ldr	r2, [r5, #2864]
 	movs	r1, #84
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2328]
+	ldr	r2, [r5, #2344]
 	movs	r1, #52
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2332]
+	ldr	r2, [r5, #2348]
 	movs	r1, #56
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2336]
+	ldr	r2, [r5, #2352]
 	mov	r1, #256
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2340]
+	ldr	r2, [r5, #2356]
 	mov	r1, #260
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2344]
+	ldr	r2, [r5, #2360]
 	mov	r1, #264
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2348]
+	ldr	r2, [r5, #2364]
 	mov	r1, #280
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2352]
+	ldr	r2, [r5, #2368]
 	mov	r1, #284
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r3, [r5, #2372]
+	ldr	r3, [r5, #2388]
 	lsls	r6, r3, #31
 	bmi	.L81
 .L85:
-	ldr	r3, [r5, #2428]
+	ldr	r3, [r5, #2444]
 	lsls	r0, r3, #31
 	bmi	.L82
 .L83:
-	ldr	r2, [r5, #2868]
+	ldr	r2, [r5, #2884]
 	mov	r1, #1024
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2456]
+	ldr	r2, [r5, #2472]
 	movw	r1, #1028
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2460]
+	ldr	r2, [r5, #2476]
 	mov	r1, #1032
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2464]
+	ldr	r2, [r5, #2480]
 	movw	r1, #1036
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2468]
+	ldr	r2, [r5, #2484]
 	lsls	r1, r2, #31
 	bpl	.L87
 	mov	r1, #1280
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2472]
+	ldr	r2, [r5, #2488]
 	movw	r1, #1284
 	mov	r0, r4
 	bl	mpp_write_relaxed
-	ldr	r2, [r5, #2476]
+	ldr	r2, [r5, #2492]
 	mov	r1, #1288
 	mov	r0, r4
 	bl	mpp_write_relaxed
 .L87:
 	.syntax unified
-@ 370 "drivers/kmpp/mpp/mpp_rkvenc_pp.c" 1
+@ 370 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_rkvenc_pp.c" 1
 	dsb st
 @ 0 "" 2
 	.thumb
@@ -716,10 +716,10 @@ vepu_pp_run:
 	movs	r0, #0
 	pop	{r4, r5, r6, r7, r8, pc}
 .L81:
-	ldr	r2, [r5, #2864]
+	ldr	r2, [r5, #2880]
 	mov	r1, #512
 	mov	r0, r4
-	add	r7, r5, #2368
+	add	r7, r5, #2384
 	bl	mpp_write_relaxed
 	mov	r6, #516
 .L84:
@@ -732,7 +732,7 @@ vepu_pp_run:
 	bne	.L84
 	b	.L85
 .L82:
-	addw	r7, r5, #2424
+	addw	r7, r5, #2440
 	mov	r6, #768
 .L88:
 	mov	r1, r6
@@ -796,13 +796,13 @@ vepu_pp_alloc_task:
 	ldr	r3, [r6]
 	lsls	r2, r3, #22
 	bpl	.L109
-	ldr	r2, [r4, #3708]
-	ldr	r1, [r4, #3384]
+	ldr	r2, [r4, #3724]
+	ldr	r1, [r4, #3400]
 	ldr	r0, .L125+16
 	bl	printk
 .L109:
 	movs	r3, #3
-	str	r3, [r4, #2324]
+	str	r3, [r4, #2340]
 	ldr	r3, [r6]
 	lsls	r3, r3, #26
 	bpl	.L100
@@ -824,20 +824,20 @@ vepu_pp_alloc_task:
 	cmp	r3, #512
 	bne	.L104
 	ldr	r1, [r5, #16]
-	addw	r0, r4, #2328
+	addw	r0, r4, #2344
 	bl	memcpy
 .L104:
 	add	fp, fp, #1
 	adds	r5, r5, #20
 	b	.L103
 .L105:
-	ldr	r3, [r4, #3708]
+	ldr	r3, [r4, #3724]
 	add	lr, r5, #16
 	adds	r2, r3, #1
-	str	r2, [r4, #3708]
+	str	r2, [r4, #3724]
 	mla	r3, r9, r3, r4
 	mov	r2, r5
-	add	r3, r3, #3712
+	add	r3, r3, #3728
 .L107:
 	ldr	r0, [r2]	@ unaligned
 	adds	r2, r2, #8
@@ -852,7 +852,7 @@ vepu_pp_alloc_task:
 	b	.L104
 .L106:
 	mov	r1, r5
-	add	r0, r4, #2896
+	add	r0, r4, #2912
 	bl	mpp_extract_reg_offset_info
 	b	.L104
 .L126:
@@ -888,7 +888,7 @@ vepu_pp_shutdown:
 	add	r2, r3, #84
 	pld	[r2]
 	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
+@ 223 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_add
 1:	ldrex	r1, [r2]
 	add	r1, r1, #1
@@ -1082,19 +1082,19 @@ vepu_pp_isr:
 	movs	r3, #0
 	str	r3, [r4, #88]
 	ldr	r2, [r6]
-	str	r1, [r5, #3380]
+	str	r1, [r5, #3396]
 	lsls	r2, r2, #29
 	bpl	.L200
 	ldr	r0, .L211+8
 	bl	printk
 .L200:
-	ldr	r3, [r5, #3380]
+	ldr	r3, [r5, #3396]
 	tst	r3, #28
 	beq	.L201
 	add	r3, r4, #72
 	pld	[r3]
 	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
+@ 223 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_add
 1:	ldrex	r2, [r3]
 	add	r2, r2, #1
@@ -1130,9 +1130,9 @@ vepu_pp_isr:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__func__.39164, %object
-	.size	__func__.39164, 13
-__func__.39164:
+	.type	__func__.39087, %object
+	.size	__func__.39087, 13
+__func__.39087:
 	.ascii	"vepu_pp_init\000"
 	.space	3
 	.type	mpp_vepu_pp_match, %object
@@ -1143,21 +1143,21 @@ mpp_vepu_pp_match:
 	.space	102
 	.word	vepu_pp_data
 	.space	196
-	.type	__func__.39118, %object
-	.size	__func__.39118, 15
-__func__.39118:
+	.type	__func__.39041, %object
+	.size	__func__.39041, 15
+__func__.39041:
 	.ascii	"vepu_pp_finish\000"
-	.type	__func__.39078, %object
-	.size	__func__.39078, 12
-__func__.39078:
+	.type	__func__.39001, %object
+	.size	__func__.39001, 12
+__func__.39001:
 	.ascii	"vepu_pp_run\000"
-	.type	__func__.39030, %object
-	.size	__func__.39030, 19
-__func__.39030:
+	.type	__func__.38953, %object
+	.size	__func__.38953, 19
+__func__.38953:
 	.ascii	"vepu_pp_alloc_task\000"
-	.type	__func__.39103, %object
-	.size	__func__.39103, 12
-__func__.39103:
+	.type	__func__.39026, %object
+	.size	__func__.39026, 12
+__func__.39026:
 	.ascii	"vepu_pp_isr\000"
 	.space	2
 	.type	vepu_pp_data, %object

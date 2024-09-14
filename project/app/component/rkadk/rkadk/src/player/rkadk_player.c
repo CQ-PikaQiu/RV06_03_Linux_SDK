@@ -18,7 +18,6 @@
 #include "rkadk_log.h"
 #include "rkadk_signal.h"
 #include "rkadk_thread.h"
-#include "rkadk_param.h"
 #include "rkadk_media_comm.h"
 #include "rkadk_player.h"
 #include "rkadk_demuxer.h"
@@ -141,10 +140,10 @@ typedef struct {
 typedef struct {
   const RKADK_CHAR *dstFilePath;
   RKADK_S32 chnNum;
-  RKADK_S32 sampleRate;
-  RKADK_S32 reSmpSampleRate;
-  RKADK_S32 channel;
-  RKADK_S32 deviceChannel;
+  RKADK_S32 sampleRate;        //device samplerate
+  RKADK_S32 reSmpSampleRate;   //file demuxer samplerate
+  RKADK_S32 channel;           //file demuxer channel
+  RKADK_S32 deviceChannel;     //device channel
   RKADK_S32 bitWidth;
   RKADK_S32 devId;
   RKADK_S32 periodCount;
@@ -165,6 +164,7 @@ typedef struct {
   RKADK_S32 clrChnBuf;
   RKADK_S32 clrPubAttr;
   RKADK_S32 getPubAttr;
+  RKADK_U32 u32SpeakerVolume;
 } RKADK_PLAYER_AO_CTX_S;
 
 typedef struct {
@@ -224,6 +224,8 @@ typedef struct {
   RKADK_PLAYER_EVENT_FN pfnPlayerCallback;
 
   RKADK_PLAYER_SNAPSHOT_PARAM_S stSnapshotParam;
+
+  RKADK_U32 u32VdecWaterline; /* frames = left frames waiting for decode + pics waiting for output */
 } RKADK_PLAYER_HANDLE_S;
 
 static void RKADK_PLAYER_ProcessEvent(RKADK_PLAYER_HANDLE_S *pstPlayer,
@@ -438,10 +440,10 @@ static RKADK_S32 SetVoCtx(RKADK_PLAYER_VO_CTX_S *pstVoCtx, RKADK_PLAYER_FRAME_IN
   return RKADK_SUCCESS;
 }
 
-static RKADK_S32 AdecCtxInit(RKADK_PLAYER_ADEC_CTX_S *pstAdecCtx) {
+static RKADK_S32 AdecCtxInit(RKADK_PLAYER_ADEC_CTX_S *pstAdecCtx, RKADK_PLAYER_AUDIO_CFG_S *pstAudioCfg) {
   memset(pstAdecCtx, 0, sizeof(RKADK_PLAYER_ADEC_CTX_S));
 
-  pstAdecCtx->chnIndex = PLAYER_ADEC_CHN;
+  pstAdecCtx->chnIndex = pstAudioCfg->u32AdecChnId;
   pstAdecCtx->sampleRate = 16000;
   pstAdecCtx->channel = 2;
   pstAdecCtx->decMode = ADEC_MODE_STREAM;
@@ -474,26 +476,16 @@ static RKADK_S32 CreateAdec(RKADK_PLAYER_ADEC_CTX_S *pstAdecCtx) {
   return ret;
 }
 
-static RKADK_S32 AoCtxInit(RKADK_PLAYER_AO_CTX_S *pstAoCtx, RKADK_PLAYER_AUDIO_CFG_S *pstAudioCfg) {
-  RKADK_PARAM_AUDIO_CFG_S *pstAudioParam = RKADK_PARAM_GetAudioCfg();
-  if (!pstAudioParam) {
-    RKADK_LOGE("RKADK_PARAM_GetAudioCfg failed");
-    return RKADK_FAILURE;
-  }
-
+static void AoCtxInit(RKADK_PLAYER_AO_CTX_S *pstAoCtx, RKADK_PLAYER_AUDIO_CFG_S *pstAudioCfg) {
   memset(pstAoCtx, 0, sizeof(RKADK_PLAYER_AO_CTX_S));
 
   pstAoCtx->dstFilePath     = RKADK_NULL;
   pstAoCtx->chnNum          = 1;
-  pstAoCtx->sampleRate      = AUDIO_SAMPLE_RATE;
   pstAoCtx->reSmpSampleRate = 0;
-  pstAoCtx->deviceChannel   = AUDIO_DEVICE_CHANNEL;
   pstAoCtx->channel         = 2;
-  pstAoCtx->bitWidth        = AUDIO_BIT_WIDTH;
+  pstAoCtx->bitWidth        = AUDIO_BIT_WIDTH_16;
   pstAoCtx->periodCount     = 4;
   pstAoCtx->periodSize      = 1024;
-  memcpy(pstAoCtx->cardName, pstAudioParam->ao_audio_node,
-         strlen(pstAudioParam->ao_audio_node));
   pstAoCtx->devId           = pstAudioCfg->u32AoDevId;
   pstAoCtx->chnIndex        = pstAudioCfg->u32AoChnId;
   pstAoCtx->setVolume       = 100;
@@ -510,8 +502,29 @@ static RKADK_S32 AoCtxInit(RKADK_PLAYER_AO_CTX_S *pstAoCtx, RKADK_PLAYER_AUDIO_C
   pstAoCtx->clrChnBuf       = 0;
   pstAoCtx->clrPubAttr      = 0;
   pstAoCtx->getPubAttr      = 0;
+  pstAoCtx->u32SpeakerVolume = pstAudioCfg->u32SpeakerVolume;
+  RKADK_LOGD("u32SpeakerVolume: %d", pstAoCtx->u32SpeakerVolume);
 
-  return RKADK_SUCCESS;
+  if (pstAudioCfg->pSoundCard) {
+    memcpy(pstAoCtx->cardName, pstAudioCfg->pSoundCard, strlen(pstAudioCfg->pSoundCard));
+  } else {
+    memcpy(pstAoCtx->cardName, "hw:0,0", strlen("hw:0,0"));
+    RKADK_LOGI("Ao use default soundcard[hw:0,0]");
+  }
+
+  if (pstAudioCfg->u32AoChannle > 0) {
+    pstAoCtx->deviceChannel = pstAudioCfg->u32AoChannle;
+  } else {
+    pstAoCtx->deviceChannel = 2;
+    RKADK_LOGI("Ao use default device channle[2]");
+  }
+
+  if (pstAudioCfg->u32AoSampleRate > 0) {
+    pstAoCtx->sampleRate = pstAudioCfg->u32AoSampleRate;
+  } else {
+    pstAoCtx->sampleRate = 16000;
+    RKADK_LOGI("Ao use default sampleRate[16000]");
+  }
 }
 
 static RKADK_VOID QueryAoFlowGraphStat(AUDIO_DEV aoDevId, AO_CHN aoChn) {
@@ -974,19 +987,12 @@ static void AoVolumeControl(RKADK_PLAYER_HANDLE_S *pstPlayer) {
   AUDIO_FADE_S aFade;
   aFade.bFade = RK_FALSE;
   RK_BOOL mute;
-  RKADK_PARAM_COMM_CFG_S *pstCommCfg = NULL;
-
-  pstCommCfg = RKADK_PARAM_GetCommCfg();
-  if (!pstCommCfg) {
-    RKADK_LOGE("RKADK_PARAM_GetCommCfg failed");
-    return;
-  }
 
   aFade.enFadeOutRate = (AUDIO_FADE_RATE_E)pstPlayer->stAoCtx.setFadeRate;
   aFade.enFadeInRate = (AUDIO_FADE_RATE_E)pstPlayer->stAoCtx.setFadeRate;
   mute = (pstPlayer->stAoCtx.setMute == 0) ? RK_FALSE : RK_TRUE;
   RK_MPI_AO_SetMute(pstPlayer->stAoCtx.devId, mute, &aFade);
-  RK_MPI_AO_SetVolume(pstPlayer->stAoCtx.devId, pstCommCfg->speaker_volume);
+  RK_MPI_AO_SetVolume(pstPlayer->stAoCtx.devId, pstPlayer->stAoCtx.u32SpeakerVolume);
 }
 
 static void SendVideoData(RKADK_VOID *ptr) {
@@ -997,6 +1003,8 @@ static void SendVideoData(RKADK_VOID *ptr) {
   RKADK_S32 ret = 0;
   RKADK_S32 flagGetTframe = 0;
   RKADK_S32 voSendTime = 0, frameTime = 0, costtime = 0;
+  VDEC_CHN_STATUS_S stStatus;
+  bool bWaterline = true;
 
   if (pstPlayer->stDemuxerParam.videoAvgFrameRate <= 0) {
     RKADK_LOGE("Invalid video framerate[%d]", pstPlayer->stDemuxerParam.videoAvgFrameRate);
@@ -1008,7 +1016,17 @@ static void SendVideoData(RKADK_VOID *ptr) {
   memset(&tFrame, 0, sizeof(VIDEO_FRAME_INFO_S));
 
   while (!pstPlayer->bStopSendStream) {
-    if (pstPlayer->enStatus != RKADK_PLAYER_STATE_PAUSE || pstPlayer->enSeekStatus == RKADK_PLAYER_SEEK_VIDEO_DONE) {
+    ret = RK_MPI_VDEC_QueryStatus(pstPlayer->stVdecCtx.chnIndex, &stStatus);
+    if (ret == RK_SUCCESS) {
+      if ((stStatus.u32LeftStreamFrames + stStatus.u32LeftPics) < pstPlayer->u32VdecWaterline)
+        bWaterline = false;
+      else
+        bWaterline = true;
+    } else {
+      RKADK_LOGE("Query vdec status failed[%x]", ret);
+    }
+
+    if ((pstPlayer->enStatus != RKADK_PLAYER_STATE_PAUSE && bWaterline) || pstPlayer->enSeekStatus == RKADK_PLAYER_SEEK_VIDEO_DONE) {
       if (pstPlayer->stVdecCtx.chnFd > 0) {
         ret = VdecPollEvent(MAX_TIME_OUT_MS, pstPlayer->stVdecCtx.chnFd);
         if (ret < 0)
@@ -1250,6 +1268,8 @@ static void SendData(RKADK_VOID *ptr) {
   RK_U32 bufferOffset = 0, originOffset = 0;
   RK_U64 firstAudioTimeStamp = -1;
   RK_U8 *cacheFrame = RK_NULL, *originFrame = RK_NULL;
+  VDEC_CHN_STATUS_S stStatus;
+  bool bWaterline = true;
 
   memset(&stFrmInfo, 0, sizeof(AUDIO_FRAME_INFO_S));
   memset(&stFrmInfoCache, 0, sizeof(AUDIO_FRAME_INFO_S));
@@ -1369,7 +1389,17 @@ static void SendData(RKADK_VOID *ptr) {
       }
     }
 
-    if (pstPlayer->enStatus != RKADK_PLAYER_STATE_PAUSE || pstPlayer->enSeekStatus == RKADK_PLAYER_SEEK_VIDEO_DONE) {
+    ret = RK_MPI_VDEC_QueryStatus(pstPlayer->stVdecCtx.chnIndex, &stStatus);
+    if (ret == RK_SUCCESS) {
+      if ((stStatus.u32LeftStreamFrames + stStatus.u32LeftPics) < pstPlayer->u32VdecWaterline)
+        bWaterline = false;
+      else
+        bWaterline = true;
+    } else {
+      RKADK_LOGE("Query vdec status failed[%x]", ret);
+    }
+
+    if ((pstPlayer->enStatus != RKADK_PLAYER_STATE_PAUSE && bWaterline) || pstPlayer->enSeekStatus == RKADK_PLAYER_SEEK_VIDEO_DONE) {
       if (pstPlayer->enSeekStatus == RKADK_PLAYER_SEEK_VIDEO_DONE) {
         if (pstPlayer->enStatus == RKADK_PLAYER_STATE_PAUSE) {
           //send sFrame to vo
@@ -2299,15 +2329,12 @@ RKADK_S32 RKADK_PLAYER_Create(RKADK_MW_PTR *pPlayer,
       goto __FAILED;
     }
 
-    if (AdecCtxInit(&pstPlayer->stAdecCtx)) {
+    if (AdecCtxInit(&pstPlayer->stAdecCtx, &pstPlayCfg->stAudioCfg)) {
       RKADK_LOGE("Create ADEC ctx failed");
       goto __FAILED;
     }
 
-    if(AoCtxInit(&pstPlayer->stAoCtx, &pstPlayCfg->stAudioCfg)) {
-      RKADK_LOGE("Create AO ctx failed");
-      goto __FAILED;
-    }
+    AoCtxInit(&pstPlayer->stAoCtx, &pstPlayCfg->stAudioCfg);
   }
 
   pthread_mutex_init(&(pstPlayer->mutex), NULL);
@@ -3210,5 +3237,23 @@ RKADK_S32 RKADK_PLAYER_Snapshot(RKADK_MW_PTR pPlayer) {
     RKADK_LOGD("Have been in snapshot");
   }
 
+  return 0;
+}
+
+RKADK_S32 RKADK_PLAYER_SetVdecWaterline(RKADK_MW_PTR pPlayer, RKADK_U32 u32VdecWaterline) {
+  RKADK_PLAYER_HANDLE_S *pstPlayer;
+  RKADK_U32 u32VdecTotalLeftFrames = 0;
+
+  RKADK_CHECK_POINTER(pPlayer, RKADK_FAILURE);
+  pstPlayer = (RKADK_PLAYER_HANDLE_S *)pPlayer;
+
+  u32VdecTotalLeftFrames = pstPlayer->stVdecCtx.frameBufferCnt + pstPlayer->stVdecCtx.streamBufferCnt;
+  if (u32VdecWaterline > u32VdecTotalLeftFrames) {
+    RKADK_LOGE("Invalid vdec waterline: %d, frameBufferCnt: %d, streamBufferCnt: %d",
+      u32VdecWaterline, pstPlayer->stVdecCtx.frameBufferCnt, pstPlayer->stVdecCtx.streamBufferCnt);
+    return -1;
+  }
+
+  pstPlayer->u32VdecWaterline = u32VdecWaterline;
   return 0;
 }

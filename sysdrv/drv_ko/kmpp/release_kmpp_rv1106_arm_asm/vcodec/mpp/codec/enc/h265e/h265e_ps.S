@@ -287,7 +287,7 @@ h265e_set_sps:
 	ldrd	r0, r1, [r5, #144]
 	str	r3, [sp, #156]
 	bl	__aeabi_idiv
-	movw	r3, #4724
+	movw	r3, #4728
 	str	r0, [sp, #12]
 	ldr	r0, [r5, r3]
 	bl	mpp_enc_ref_cfg_get_cpb_info
@@ -413,9 +413,9 @@ h265e_set_sps:
 	ldr	r1, [r5, #624]
 	strd	r2, r2, [r4, #144]
 	strb	r1, [r4, #3]
-	ldr	r2, [r5, #784]
+	ldr	r2, [r5, #788]
 	cbz	r2, .L31
-	ldr	r3, [r5, #780]
+	ldr	r3, [r5, #784]
 	clz	r3, r3
 	lsrs	r3, r3, #5
 .L31:
@@ -533,11 +533,11 @@ h265e_set_sps:
 	str	r2, [r4, r0]
 	movw	r0, #4560
 	str	r2, [r4, r0]
-	ldr	r2, [r5, #828]
+	ldr	r2, [r5, #832]
 	cbz	r2, .L39
 	movw	r2, #4460
 	strb	r3, [r4, r2]
-	ldr	r3, [r5, #828]
+	ldr	r3, [r5, #832]
 	str	r3, [r1]
 .L39:
 	movw	r2, #4470
@@ -614,13 +614,15 @@ h265e_set_pps:
 	strh	r0, [r1]	@ movhi
 	strd	r0, r0, [r1, #24]
 	ldr	r0, [r3, #108]
-	str	r2, [r1, #724]
-	movs	r2, #0
 	cmp	r0, #2
-	strb	r2, [r1, #2]
 	ittt	ne
 	movne	r0, #1
 	strbne	r0, [r1]
+	ldrne	r0, [r3, #780]
+	str	r2, [r1, #724]
+	mov	r2, #0
+	strb	r2, [r1, #2]
+	it	ne
 	strne	r0, [r1, #36]
 	ldr	r0, [r3, #772]
 	strb	r2, [r1, #20]
@@ -633,7 +635,7 @@ h265e_set_pps:
 	str	r0, [r1, #32]
 	ldr	r0, [r3, #752]
 	strb	r0, [r1, #5]
-	ldr	r0, [r3, #792]
+	ldr	r0, [r3, #796]
 	cmp	r0, r2
 	ite	eq
 	moveq	r5, r4
@@ -641,7 +643,7 @@ h265e_set_pps:
 	strb	r5, [r1, #4]
 	bne	.L59
 	strb	r0, [r1, #6]
-	ldr	r2, [r3, #796]
+	ldr	r2, [r3, #800]
 	cbz	r2, .L60
 	strb	r4, [r1, #7]
 .L61:
@@ -664,16 +666,16 @@ h265e_set_pps:
 	strb	r2, [r1, #11]
 	pop	{r4, r5, pc}
 .L60:
-	ldr	r2, [r3, #800]
+	ldr	r2, [r3, #804]
 	cmp	r2, #0
 	ite	ne
 	movne	r2, #1
 	moveq	r2, #0
 	strb	r2, [r1, #7]
 	bne	.L61
-	ldr	r2, [r3, #796]
-	str	r2, [r1, #708]
 	ldr	r2, [r3, #800]
+	str	r2, [r1, #708]
+	ldr	r2, [r3, #804]
 .L65:
 	str	r2, [r1, #712]
 	b	.L61

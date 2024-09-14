@@ -379,25 +379,25 @@ mpp_pid_calc:
 	.size	mpp_pid_calc, .-mpp_pid_calc
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__func__.8447, %object
-	.size	__func__.8447, 14
-__func__.8447:
+	.type	__func__.8458, %object
+	.size	__func__.8458, 14
+__func__.8458:
 	.ascii	"mpp_data_init\000"
-	.type	__FUNCTION__.8448, %object
-	.size	__FUNCTION__.8448, 14
-__FUNCTION__.8448:
+	.type	__FUNCTION__.8459, %object
+	.size	__FUNCTION__.8459, 14
+__FUNCTION__.8459:
 	.ascii	"mpp_data_init\000"
-	.type	__FUNCTION__.8452, %object
-	.size	__FUNCTION__.8452, 16
-__FUNCTION__.8452:
+	.type	__FUNCTION__.8463, %object
+	.size	__FUNCTION__.8463, 16
+__FUNCTION__.8463:
 	.ascii	"mpp_data_deinit\000"
-	.type	__FUNCTION__.8457, %object
-	.size	__FUNCTION__.8457, 16
-__FUNCTION__.8457:
+	.type	__FUNCTION__.8468, %object
+	.size	__FUNCTION__.8468, 16
+__FUNCTION__.8468:
 	.ascii	"mpp_data_update\000"
-	.type	__FUNCTION__.8469, %object
-	.size	__FUNCTION__.8469, 13
-__FUNCTION__.8469:
+	.type	__FUNCTION__.8480, %object
+	.size	__FUNCTION__.8480, 13
+__FUNCTION__.8480:
 	.ascii	"mpp_data_avg\000"
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:

@@ -100,8 +100,8 @@ extern "C" {
 #define AVS_MAX_IN_HEIGHT              4096
 #define AVS_MIN_IN_WIDTH               720
 #define AVS_MIN_IN_HEIGHT              720
-#define AVS_MAX_OUT_WIDTH              4096
-#define AVS_MAX_OUT_HEIGHT             4096
+#define AVS_MAX_OUT_WIDTH              5120
+#define AVS_MAX_OUT_HEIGHT             5120
 #define AVS_MIN_OUT_WIDTH              256
 #define AVS_MIN_OUT_HEIGHT             256
 

@@ -516,7 +516,7 @@ jpege_proc_hal:
 	movs	r3, #0
 	strd	r3, r3, [r4, #136]
 	str	r3, [r4, #132]
-	ldr	r2, [r5, #3428]
+	ldr	r2, [r5, #3432]
 	cbz	r2, .L66
 	ldr	r3, [r5, #16]
 	cmp	r2, #2
@@ -524,7 +524,7 @@ jpege_proc_hal:
 	asr	r9, r3, #4
 	bne	.L67
 	ldr	r1, [r5, #12]
-	ldr	r3, [r5, #3432]
+	ldr	r3, [r5, #3436]
 	adds	r1, r1, #15
 	asrs	r1, r1, #4
 	mul	r2, r1, r9
@@ -733,7 +733,7 @@ _copy_from_user.constprop.1:
 	bic	r3, r3, #31
 	ldr	r3, [r3, #8]
 	.syntax unified
-@ 157 "./include/linux/uaccess.h" 1
+@ 157 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/include/linux/uaccess.h" 1
 	.syntax unified
 adds r2, r1, #64; sbcscc r2, r2, r3; movcc r3, #0
 @ 0 "" 2
@@ -1164,21 +1164,21 @@ jpege_proc_cfg:
 	str	r3, [r5, #596]
 	orrs	r4, r4, r0
 .L210:
-	ldr	r3, [r5, #3424]
+	ldr	r3, [r5, #3428]
 	cbz	r3, .L202
 	lsls	r1, r3, #31
 	itttt	mi
-	ldrmi	r2, [r5, #3428]
-	strmi	r2, [r7, #3428]
 	ldrmi	r2, [r5, #3432]
 	strmi	r2, [r7, #3432]
+	ldrmi	r2, [r5, #3436]
+	strmi	r2, [r7, #3436]
 	lsls	r2, r3, #30
 	itt	mi
-	ldrmi	r3, [r5, #3432]
-	strmi	r3, [r7, #3432]
+	ldrmi	r3, [r5, #3436]
+	strmi	r3, [r7, #3436]
 	movs	r3, #0
-	str	r3, [r7, #3424]
-	str	r3, [r5, #3424]
+	str	r3, [r7, #3428]
+	str	r3, [r5, #3428]
 .L202:
 	ldr	r3, [r6]
 	lsls	r3, r3, #31
@@ -1226,45 +1226,45 @@ jpege_proc_cfg:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__FUNCTION__.26070, %object
-	.size	__FUNCTION__.26070, 20
-__FUNCTION__.26070:
+	.type	__FUNCTION__.26071, %object
+	.size	__FUNCTION__.26071, 20
+__FUNCTION__.26071:
 	.ascii	"jpege_proc_prep_cfg\000"
-	.type	__func__.26074, %object
-	.size	__func__.26074, 20
-__func__.26074:
+	.type	__func__.26075, %object
+	.size	__func__.26075, 20
+__func__.26075:
 	.ascii	"jpege_proc_prep_cfg\000"
-	.type	__func__.26174, %object
-	.size	__func__.26174, 17
-__func__.26174:
+	.type	__func__.26175, %object
+	.size	__func__.26175, 17
+__func__.26175:
 	.ascii	"jpege_add_Prefix\000"
-	.type	__func__.26153, %object
-	.size	__func__.26153, 15
-__func__.26153:
+	.type	__func__.26154, %object
+	.size	__func__.26154, 15
+__func__.26154:
 	.ascii	"jpege_proc_hal\000"
-	.type	__func__.26062, %object
-	.size	__func__.26062, 16
-__func__.26062:
+	.type	__func__.26063, %object
+	.size	__func__.26063, 16
+__func__.26063:
 	.ascii	"jpege_deinit_v2\000"
-	.type	__FUNCTION__.26063, %object
-	.size	__FUNCTION__.26063, 16
-__FUNCTION__.26063:
+	.type	__FUNCTION__.26064, %object
+	.size	__FUNCTION__.26064, 16
+__FUNCTION__.26064:
 	.ascii	"jpege_deinit_v2\000"
-	.type	__func__.26051, %object
-	.size	__func__.26051, 14
-__func__.26051:
+	.type	__func__.26052, %object
+	.size	__func__.26052, 14
+__func__.26052:
 	.ascii	"jpege_init_v2\000"
-	.type	__func__.26100, %object
-	.size	__func__.26100, 20
-__func__.26100:
+	.type	__func__.26101, %object
+	.size	__func__.26101, 20
+__func__.26101:
 	.ascii	"jpege_proc_jpeg_cfg\000"
-	.type	__FUNCTION__.26085, %object
-	.size	__FUNCTION__.26085, 24
-__FUNCTION__.26085:
+	.type	__FUNCTION__.26086, %object
+	.size	__FUNCTION__.26086, 24
+__FUNCTION__.26086:
 	.ascii	"jpege_gen_qt_by_qfactor\000"
-	.type	__func__.26086, %object
-	.size	__func__.26086, 24
-__func__.26086:
+	.type	__func__.26087, %object
+	.size	__func__.26087, 24
+__func__.26087:
 	.ascii	"jpege_gen_qt_by_qfactor\000"
 	.type	jpege_luma_quantizer, %object
 	.size	jpege_luma_quantizer, 64
@@ -1400,13 +1400,13 @@ jpege_chroma_quantizer:
 	.byte	99
 	.byte	99
 	.byte	99
-	.type	__FUNCTION__.26101, %object
-	.size	__FUNCTION__.26101, 20
-__FUNCTION__.26101:
+	.type	__FUNCTION__.26102, %object
+	.size	__FUNCTION__.26102, 20
+__FUNCTION__.26102:
 	.ascii	"jpege_proc_jpeg_cfg\000"
-	.type	__func__.26116, %object
-	.size	__func__.26116, 15
-__func__.26116:
+	.type	__func__.26117, %object
+	.size	__func__.26117, 15
+__func__.26117:
 	.ascii	"jpege_proc_cfg\000"
 	.space	3
 	.type	api_jpege, %object

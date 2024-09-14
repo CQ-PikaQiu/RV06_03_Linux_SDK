@@ -353,10 +353,10 @@ h264e_proc_show:
 	str	r3, [sp]
 	ldr	r3, .L82+52
 	bl	seq_printf
-	ldr	r0, [r4, #3428]
+	ldr	r0, [r4, #3432]
 	bl	strof_bool
-	ldr	r10, [r4, #3428]
-	ldr	fp, [r4, #3432]
+	ldr	r10, [r4, #3432]
+	ldr	fp, [r4, #3436]
 	mov	r9, r0
 	movs	r0, #0
 	bl	strof_bool
@@ -464,7 +464,7 @@ h264e_proc_prep_cfg:
 	mov	r8, r1
 	cmp	r5, #0
 	bne	.L85
-	movs	r1, #231
+	movs	r1, #235
 	ldr	r3, .L155
 	str	r1, [sp]
 	ldr	r2, .L155+4
@@ -490,7 +490,7 @@ h264e_proc_prep_cfg:
 	strd	r1, r3, [r4, #20]
 	mov	r2, r1
 	ldr	r0, .L155+12
-	movw	r1, #289
+	movw	r1, #293
 	bl	printk
 	b	.L96
 .L102:
@@ -500,7 +500,7 @@ h264e_proc_prep_cfg:
 	ble	.L115
 .L105:
 	strd	r1, r0, [sp]
-	movw	r1, #305
+	movw	r1, #309
 	b	.L154
 .L115:
 	movs	r5, #0
@@ -509,7 +509,7 @@ h264e_proc_prep_cfg:
 	cmp	r5, #0
 	bne	.L109
 	ldr	r3, [r4, #16]
-	movw	r1, #331
+	movw	r1, #335
 	ldr	r0, .L155+16
 	str	r3, [sp, #4]
 	ldr	r3, [r4, #12]
@@ -597,7 +597,7 @@ h264e_proc_prep_cfg:
 	bge	.L100
 	strd	r1, r3, [sp]
 	mov	r3, r6
-	mov	r1, #276
+	mov	r1, #280
 	ldr	r0, .L155+20
 	bl	printk
 	ldr	r3, [r4, #4]
@@ -621,7 +621,7 @@ h264e_proc_prep_cfg:
 	ble	.L115
 .L103:
 	strd	r1, r0, [sp]
-	movw	r1, #299
+	movw	r1, #303
 .L154:
 	ldr	r0, .L155+24
 	mvn	r5, #5
@@ -633,7 +633,7 @@ h264e_proc_prep_cfg:
 	ldrd	r3, r2, [r4, #48]
 	orrs	r1, r2, r3
 	beq	.L106
-	mov	r1, #312
+	mov	r1, #316
 	ldr	r0, .L155+28
 	bl	printk
 	mvn	r5, #5
@@ -651,12 +651,12 @@ h264e_proc_prep_cfg:
 	bls	.L108
 .L107:
 	strd	r1, r0, [sp]
-	movw	r1, #321
+	movw	r1, #325
 	ldr	r0, .L155+32
 	mvn	r5, #5
 	bl	printk
 .L109:
-	mov	r2, #326
+	mov	r2, #330
 	ldr	r1, .L155+36
 	ldr	r0, .L155+40
 	bl	printk
@@ -700,7 +700,7 @@ h264e_proc_hal:
 	ldr	r3, [r7]
 	lsls	r2, r3, #31
 	bpl	.L158
-	movw	r2, #659
+	movw	r2, #663
 	ldr	r1, .L170+4
 	ldr	r0, .L170+8
 	bl	printk
@@ -739,7 +739,7 @@ h264e_proc_hal:
 	str	r3, [r4, r0]
 	movw	r3, #5220
 	str	r1, [r4, r3]
-	movw	r3, #4724
+	movw	r3, #4728
 	ldr	r0, [r2, r3]
 	bl	mpp_enc_ref_cfg_get_cpb_info
 	ldr	r2, [r5, #700]
@@ -747,7 +747,7 @@ h264e_proc_hal:
 	cmp	r9, r2
 	beq	.L159
 	mov	r3, r9
-	mov	r1, #676
+	mov	r1, #680
 	ldr	r0, .L170+12
 	bl	printk
 	str	r9, [r5, #700]
@@ -803,7 +803,7 @@ h264e_proc_hal:
 	ldr	r3, [r7]
 	lsls	r3, r3, #31
 	bpl	.L163
-	mov	r2, #712
+	mov	r2, #716
 	ldr	r1, .L170+4
 	ldr	r0, .L170+16
 	bl	printk
@@ -849,7 +849,7 @@ h264e_proc_dpb:
 	ldr	r3, [r6]
 	lsls	r2, r3, #31
 	bpl	.L173
-	movw	r2, #621
+	movw	r2, #625
 	ldr	r1, .L188+4
 	ldr	r0, .L188+8
 	bl	printk
@@ -909,7 +909,7 @@ h264e_proc_dpb:
 	ldr	r3, [r6]
 	lsls	r3, r3, #31
 	bpl	.L179
-	movw	r2, #649
+	movw	r2, #653
 	ldr	r1, .L188+4
 	ldr	r0, .L188+12
 	bl	printk
@@ -951,7 +951,7 @@ h264e_gen_hdr:
 	ldr	r3, [r6]
 	lsls	r2, r3, #31
 	bpl	.L191
-	movw	r2, #535
+	movw	r2, #539
 	ldr	r1, .L203+4
 	ldr	r0, .L203+8
 	bl	printk
@@ -1000,7 +1000,7 @@ h264e_gen_hdr:
 	ldr	r3, [r6]
 	lsls	r3, r3, #31
 	bpl	.L193
-	mov	r2, #556
+	mov	r2, #560
 	ldr	r1, .L203+4
 	ldr	r0, .L203+12
 	bl	printk
@@ -1032,14 +1032,14 @@ h264e_start:
 	ldr	r3, [r4]
 	lsls	r2, r3, #31
 	bpl	.L207
-	movw	r2, #562
+	movw	r2, #566
 	ldr	r1, .L212+4
 	ldr	r0, .L212+8
 	bl	printk
 	ldr	r3, [r4]
 	lsls	r3, r3, #31
 	bpl	.L207
-	movw	r2, #605
+	movw	r2, #609
 	ldr	r1, .L212+4
 	ldr	r0, .L212+12
 	bl	printk
@@ -1072,7 +1072,7 @@ h264e_deinit:
 	ldr	r2, [r5]
 	lsls	r2, r2, #31
 	bpl	.L215
-	movs	r2, #215
+	movs	r2, #219
 	ldr	r1, .L231+4
 	ldr	r0, .L231+8
 	bl	printk
@@ -1094,7 +1094,7 @@ h264e_deinit:
 	ldr	r3, [r5]
 	lsls	r3, r3, #31
 	bpl	.L218
-	movs	r2, #222
+	movs	r2, #226
 	ldr	r1, .L231+4
 	ldr	r0, .L231+16
 	bl	printk
@@ -1125,19 +1125,19 @@ h264e_init:
 	.save {r4, r5, r6, r7, r8, r9, lr}
 	.pad #12
 	mov	r5, r0
-	ldr	r7, .L249
+	ldr	r7, .L250
 	mov	r4, r1
 	ldr	r3, [r7]
 	lsls	r3, r3, #31
 	bpl	.L234
-	movs	r2, #182
-	ldr	r1, .L249+4
-	ldr	r0, .L249+8
+	movs	r2, #186
+	ldr	r1, .L250+4
+	ldr	r0, .L250+8
 	bl	printk
 .L234:
 	ldr	r3, [r4, #4]
 	mov	r1, #1024
-	ldr	r0, .L249+12
+	ldr	r0, .L250+12
 	add	r8, r5, #5152
 	str	r3, [r5]
 	movw	r3, #5156
@@ -1145,11 +1145,11 @@ h264e_init:
 	bl	mpp_osal_malloc
 	str	r0, [r8]
 	cbnz	r0, .L235
-	movs	r1, #187
-	ldr	r3, .L249+12
+	movs	r1, #191
+	ldr	r3, .L250+12
 	str	r1, [sp]
-	ldr	r2, .L249+16
-	ldr	r0, .L249+20
+	ldr	r2, .L250+16
+	ldr	r0, .L250+20
 	bl	printk
 .L235:
 	movw	r3, #5156
@@ -1163,11 +1163,11 @@ h264e_init:
 	bne	.L233
 	ldr	r3, [r5, r6]
 	cbnz	r3, .L238
-	movs	r1, #191
-	ldr	r3, .L249+12
+	movs	r1, #195
+	ldr	r3, .L250+12
 	str	r1, [sp]
-	ldr	r2, .L249+24
-	ldr	r0, .L249+20
+	ldr	r2, .L250+24
+	ldr	r0, .L250+20
 	bl	printk
 .L238:
 	ldr	r3, [r4, #8]
@@ -1200,20 +1200,30 @@ h264e_init:
 	movs	r3, #31
 	mov	ip, #66
 	strd	ip, r3, [r4, #620]
-	movw	r3, #4732
+	add	r3, r4, #4736
 	movs	r2, #1
 	cmp	r5, #16
+	mov	r1, #6
+	str	r2, [r3]
+	movw	r3, #4740
+	str	r6, [r4, r3]
+	movw	r3, #4744
+	mov	r2, #3
 	str	r2, [r4, r3]
-	add	r3, r4, #4736
-	str	r6, [r3]
-	mov	r3, r6
+	movw	r2, #4748
+	mov	r3, #2
+	str	r3, [r4, r2]
+	movw	r2, #4752
+	str	r3, [r4, r2]
+	movw	r2, #4756
+	str	r1, [r4, r2]
+	mov	r2, r6
 	beq	.L239
 	bcc	.L240
 	cmp	r5, #18
 	bhi	.L240
-	movs	r3, #2
-.L240:
 	str	r3, [r4, #604]
+.L249:
 	movs	r3, #12
 	strd	r3, r3, [r4, #608]
 	b	.L241
@@ -1223,34 +1233,34 @@ h264e_init:
 	strd	r3, r3, [r4, #608]
 	strd	r6, r6, [r4, #648]
 .L241:
-	ldr	r0, .L249+28
+	ldr	r0, .L250+28
 	movs	r3, #0
-	ldr	r1, .L249+32
+	ldr	r1, .L250+32
 	movs	r2, #2
 	str	r3, [r4, #8]
-	movs	r5, #60
+	movs	r5, #10
 	str	r3, [r4, #36]
 	strd	r0, r1, [r4, #116]
-	movs	r0, #1
-	ldr	r1, .L249+36
+	movs	r0, #30
+	ldr	r1, .L250+36
+	strd	r3, r0, [r4, #140]
 	str	r3, [r4, #56]
-	strd	r2, r3, [r4, #48]
 	strd	r1, r3, [r4, #124]
-	movs	r1, #30
+	movs	r1, #1
+	strd	r2, r3, [r4, #48]
+	strd	r0, r1, [r4, #132]
+	movs	r0, #60
 	strd	r3, r3, [r4, #60]
-	strd	r1, r0, [r4, #132]
-	strd	r3, r1, [r4, #140]
 	str	r3, [r4, #104]
-	str	r0, [r4, #148]
-	str	r5, [r4, #152]
-	movs	r5, #10
-	str	r0, [r4, #160]
-	movs	r0, #26
-	str	r1, [r4, #204]
+	str	r1, [r4, #148]
+	str	r0, [r4, #152]
+	str	r1, [r4, #160]
 	movs	r1, #160
-	strd	r3, r5, [r4, #224]
+	str	r0, [r4, #204]
+	movs	r0, #26
 	strd	r5, r1, [r4, #208]
 	movs	r1, #51
+	strd	r3, r5, [r4, #224]
 	str	r3, [r4, #232]
 	movs	r3, #28
 	strd	r2, r2, [r4, #40]
@@ -1265,18 +1275,21 @@ h264e_init:
 	str	r1, [r4, #260]
 	lsls	r4, r3, #31
 	bpl	.L233
-	movs	r2, #207
-	ldr	r1, .L249+4
-	ldr	r0, .L249+40
+	movs	r2, #211
+	ldr	r1, .L250+4
+	ldr	r0, .L250+40
 	bl	printk
 .L233:
 	mov	r0, r8
 	add	sp, sp, #12
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, pc}
-.L250:
+.L240:
+	str	r2, [r4, #604]
+	b	.L249
+.L251:
 	.align	2
-.L249:
+.L250:
 	.word	.LANCHOR1
 	.word	.LANCHOR0+122
 	.word	.LC34
@@ -1304,140 +1317,140 @@ h264e_proc_cfg:
 	.save {r4, r5, r6, r7, lr}
 	.pad #12
 	mov	r5, r2
-	ldr	r7, .L295
+	ldr	r7, .L296
 	mov	r3, r0
 	ldr	r4, [r0, #4]
 	mov	r6, r1
 	ldr	r2, [r7]
 	lsls	r0, r2, #31
-	bpl	.L252
+	bpl	.L253
 	strd	r1, r5, [sp]
-	mov	r2, #490
-	ldr	r1, .L295+4
-	ldr	r0, .L295+8
+	mov	r2, #494
+	ldr	r1, .L296+4
+	ldr	r0, .L296+8
 	bl	printk
-.L252:
-	ldr	r3, .L295+12
+.L253:
+	ldr	r3, .L296+12
 	cmp	r6, r3
-	beq	.L253
-	bhi	.L254
+	beq	.L254
+	bhi	.L255
 	subs	r3, r3, #6
 	cmp	r6, r3
-	beq	.L255
+	beq	.L256
 	adds	r3, r3, #2
 	cmp	r6, r3
-	beq	.L256
-.L257:
-	movw	r1, #519
-	ldr	r0, .L295+16
+	beq	.L257
+.L258:
+	movw	r1, #523
+	ldr	r0, .L296+16
 	bl	printk
 	mov	r6, #-1
-	b	.L258
-.L254:
-	ldr	r3, .L295+20
+	b	.L259
+.L255:
+	ldr	r3, .L296+20
 	cmp	r6, r3
-	beq	.L268
-	ldr	r3, .L295+24
+	beq	.L269
+	ldr	r3, .L296+24
 	cmp	r6, r3
-	bne	.L257
+	bne	.L258
 	ldr	r2, [r5]
 	movs	r6, #0
 	lsls	r0, r2, #31
 	itttt	mi
 	ldrmi	r3, [r5, #4]
-	strmi	r3, [r4, #3428]
-	ldrmi	r3, [r5, #8]
 	strmi	r3, [r4, #3432]
+	ldrmi	r3, [r5, #8]
+	strmi	r3, [r4, #3436]
 	lsls	r1, r2, #30
 	itt	mi
 	ldrmi	r3, [r5, #8]
-	strmi	r3, [r4, #3432]
-	ldr	r3, [r4, #3424]
+	strmi	r3, [r4, #3436]
+	ldr	r3, [r4, #3428]
 	orrs	r3, r3, r2
-	str	r3, [r4, #3424]
+	str	r3, [r4, #3428]
 	str	r6, [r5]
-	b	.L258
-.L255:
+	b	.L259
+.L256:
 	ldr	r6, [r5, #8]
-	cbz	r6, .L260
+	cbz	r6, .L261
 	add	r1, r5, #8
 	add	r0, r4, #8
 	bl	h264e_proc_prep_cfg
 	mov	r6, r0
-.L260:
+.L261:
 	ldr	r3, [r5, #596]
-	cbz	r3, .L261
+	cbz	r3, .L262
 	add	r1, r5, #596
 	add	r0, r4, #596
 	bl	h264e_proc_h264_cfg
 	orrs	r6, r6, r0
-.L261:
-	ldr	r3, [r5, #3424]
-	cbz	r3, .L258
+.L262:
+	ldr	r3, [r5, #3428]
+	cbz	r3, .L259
 	lsls	r1, r3, #31
 	itttt	mi
-	ldrmi	r2, [r5, #3428]
-	strmi	r2, [r4, #3428]
 	ldrmi	r2, [r5, #3432]
 	strmi	r2, [r4, #3432]
+	ldrmi	r2, [r5, #3436]
+	strmi	r2, [r4, #3436]
 	lsls	r2, r3, #30
 	itt	mi
-	ldrmi	r2, [r5, #3432]
-	strmi	r2, [r4, #3432]
-	ldr	r2, [r4, #3424]
+	ldrmi	r2, [r5, #3436]
+	strmi	r2, [r4, #3436]
+	ldr	r2, [r4, #3428]
 	orrs	r3, r3, r2
-	str	r3, [r4, #3424]
+	str	r3, [r4, #3428]
 	movs	r3, #0
-	str	r3, [r5, #3424]
-.L258:
+	str	r3, [r5, #3428]
+.L259:
 	ldr	r3, [r4, #168]
 	cmp	r3, #2
-	bne	.L266
+	bne	.L267
 	ldr	r3, [r4, #176]
-	cbnz	r3, .L266
+	cbnz	r3, .L267
 	ldr	r3, [r4, #604]
 	cmp	r3, #2
-	bne	.L266
-	mov	r1, #478
-	ldr	r0, .L295+28
+	bne	.L267
+	mov	r1, #482
+	ldr	r0, .L296+28
 	bl	printk
-	movw	r1, #479
-	ldr	r0, .L295+32
+	movw	r1, #483
+	ldr	r0, .L296+32
 	bl	printk
 	movs	r3, #1
 	str	r3, [r4, #176]
-.L266:
+.L267:
 	ldr	r3, [r7]
 	lsls	r3, r3, #31
-	bpl	.L251
+	bpl	.L252
 	mov	r3, r6
-	movw	r2, #526
-	ldr	r1, .L295+4
-	ldr	r0, .L295+36
+	movw	r2, #530
+	ldr	r1, .L296+4
+	ldr	r0, .L296+36
 	bl	printk
-.L251:
+.L252:
 	mov	r0, r6
 	add	sp, sp, #12
 	@ sp needed
 	pop	{r4, r5, r6, r7, pc}
-.L256:
+.L257:
 	mov	r1, r5
 	add	r0, r4, #8
 	bl	h264e_proc_prep_cfg
-.L294:
+.L295:
 	mov	r6, r0
-	b	.L258
-.L253:
+	b	.L259
+.L254:
 	adds	r1, r5, #4
 	add	r0, r4, #596
 	bl	h264e_proc_h264_cfg
-	b	.L294
-.L268:
+	b	.L295
+.L269:
 	movs	r6, #0
-	b	.L258
-.L296:
+	b	.L259
+.L297:
 	.align	2
-.L295:
+.L296:
 	.word	.LANCHOR1
 	.word	.LANCHOR0+144
 	.word	.LC39
@@ -1455,49 +1468,49 @@ h264e_proc_cfg:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__FUNCTION__.32221, %object
-	.size	__FUNCTION__.32221, 20
-__FUNCTION__.32221:
+	.type	__FUNCTION__.32153, %object
+	.size	__FUNCTION__.32153, 20
+__FUNCTION__.32153:
 	.ascii	"h264e_proc_prep_cfg\000"
-	.type	__func__.32226, %object
-	.size	__func__.32226, 20
-__func__.32226:
+	.type	__func__.32158, %object
+	.size	__func__.32158, 20
+__func__.32158:
 	.ascii	"h264e_proc_prep_cfg\000"
-	.type	__func__.32296, %object
-	.size	__func__.32296, 15
-__func__.32296:
+	.type	__func__.32228, %object
+	.size	__func__.32228, 15
+__func__.32228:
 	.ascii	"h264e_proc_hal\000"
-	.type	__func__.32286, %object
-	.size	__func__.32286, 15
-__func__.32286:
+	.type	__func__.32218, %object
+	.size	__func__.32218, 15
+__func__.32218:
 	.ascii	"h264e_proc_dpb\000"
-	.type	__func__.32268, %object
-	.size	__func__.32268, 14
-__func__.32268:
+	.type	__func__.32200, %object
+	.size	__func__.32200, 14
+__func__.32200:
 	.ascii	"h264e_gen_hdr\000"
-	.type	__func__.32273, %object
-	.size	__func__.32273, 12
-__func__.32273:
+	.type	__func__.32205, %object
+	.size	__func__.32205, 12
+__func__.32205:
 	.ascii	"h264e_start\000"
-	.type	__func__.32213, %object
-	.size	__func__.32213, 13
-__func__.32213:
+	.type	__func__.32145, %object
+	.size	__func__.32145, 13
+__func__.32145:
 	.ascii	"h264e_deinit\000"
-	.type	__FUNCTION__.32214, %object
-	.size	__FUNCTION__.32214, 13
-__FUNCTION__.32214:
+	.type	__FUNCTION__.32146, %object
+	.size	__FUNCTION__.32146, 13
+__FUNCTION__.32146:
 	.ascii	"h264e_deinit\000"
-	.type	__func__.32203, %object
-	.size	__func__.32203, 11
-__func__.32203:
+	.type	__func__.32135, %object
+	.size	__func__.32135, 11
+__func__.32135:
 	.ascii	"h264e_init\000"
-	.type	__FUNCTION__.32204, %object
-	.size	__FUNCTION__.32204, 11
-__FUNCTION__.32204:
+	.type	__FUNCTION__.32136, %object
+	.size	__FUNCTION__.32136, 11
+__FUNCTION__.32136:
 	.ascii	"h264e_init\000"
-	.type	__func__.32252, %object
-	.size	__func__.32252, 15
-__func__.32252:
+	.type	__func__.32184, %object
+	.size	__func__.32184, 15
+__func__.32184:
 	.ascii	"h264e_proc_cfg\000"
 	.space	1
 	.type	api_h264e, %object

@@ -82,6 +82,12 @@ ARCH := arm64
 SYSDRV_CROSS_CFLAGS += -mtune=cortex-a76.cortex-a55
 endif
 
+ifeq ($(SYSDRV_BUILD_RECOVERY),y)
+export SYSDRV_KERNEL_OBJS_OUTPUT_DIR := $(CURRENT_DIR)/source/objs_kernel_recovery
+export SYSDRV_KERNEL_UPDATE_DTB := n
+endif
+export SYSDRV_KERNEL_OBJS_OUTPUT_DIR ?= $(CURRENT_DIR)/source/objs_kernel
+
 ################################################################################
 ##   Public function and export
 ################################################################################
@@ -195,6 +201,32 @@ endef
 
 #
 ########## {{{
+# DO NOT RUN THIS TARGET
+# $(1)   PKG $(CURRENT_DIR)
+# $(2)   PKG $(PKG_NAME)
+# $(3)   PKG OBJECTS DIR
+#
+define MAROC_PKG_RELEASE_ASM_NEW
+@(pkg_src=$(strip $(1)/$(strip $(2))); \
+pkg_name=$(strip $(2)); \
+pkg_dir=$(strip $(3)); \
+pkg_dst=$(strip $(1)/release_$(strip $(2))_$(CHIP)_$(ARCH)_asm); \
+test ! -d $$pkg_src || test ! -d $$pkg_src/.git || (\
+	rm -rf $$pkg_dst; \
+	mkdir -p $$pkg_dst; \
+	echo "obj-y += $$pkg_name.o" > $$pkg_dst/Makefile ; \
+	for item in `cd $$pkg_dir && find "./" -name "*\.s" -type f`; do \
+		mkdir -p $$pkg_dst/`dirname $$item` ; \
+		echo "$$pkg_name-objs += $${item/%\.s/\.o}" >> $$pkg_dst/Makefile ; \
+		cp -f $$pkg_dir/$$item "$$pkg_dst/$${item/%\.s/\.S}"; \
+	done ;\
+	git --git-dir=$$pkg_src/.git log -1 > $$pkg_dst/release_version.txt; \
+	););
+endef
+######### }}}
+
+#
+########## {{{
 # $(1)   PKG $(CURRENT_DIR)
 # $(2)   PKG $(PKG_NAME)
 # $(3)   PKG $(PKG_BIN)
@@ -273,10 +305,6 @@ $(eval $(call MACRO_CHECK_ENABLE_PKG, RK_ENABLE_I2C_TOOLS))
 # Enable build sysstat
 CONFIG_SYSDRV_ENABLE_SYSSTAT=n
 $(eval $(call MACRO_CHECK_ENABLE_PKG, RK_ENABLE_SYSSTAT))
-
-# Enable build recovery
-CONFIG_SYSDRV_ENABLE_RECOVERY=n
-$(eval $(call MACRO_CHECK_ENABLE_PKG, RK_ENABLE_RECOVERY))
 
 # Enable build fio
 CONFIG_SYSDRV_ENABLE_FIO=n

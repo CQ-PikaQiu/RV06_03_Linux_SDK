@@ -25,7 +25,7 @@ h264e_sps_update:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 8
 	@ frame_needed = 0, uses_anonymous_args = 0
-	movw	r3, #4724
+	movw	r3, #4728
 	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	mov	r10, r0
@@ -650,13 +650,13 @@ h264e_sps_dump:
 	.global	level_infos
 	.section	.rodata
 	.set	.LANCHOR1,. + 0
-	.type	__func__.9312, %object
-	.size	__func__.9312, 17
-__func__.9312:
+	.type	__func__.9324, %object
+	.size	__func__.9324, 17
+__func__.9324:
 	.ascii	"h264e_sps_update\000"
-	.type	__FUNCTION__.9316, %object
-	.size	__FUNCTION__.9316, 17
-__FUNCTION__.9316:
+	.type	__FUNCTION__.9328, %object
+	.size	__FUNCTION__.9328, 17
+__FUNCTION__.9328:
 	.ascii	"h264e_sps_update\000"
 	.data
 	.align	2

@@ -437,6 +437,15 @@ RockIvaRetCode ROCKIVA_SetParam(RockIvaParams* params, const char* key, const ch
  */
 RockIvaRetCode ROCKIVA_GetVersion(const uint32_t maxLen, char* version);
 
+/**
+ * @brief 切换工作状态（使能/关闭跟踪，建议只对目标检测模块使用，如果设置为ROCKIVA_MODE_PICTURE模式，一些依赖跟踪的模块结果会异常）
+ * 
+ * @param handle [in] handle
+ * @param mode [in] 工作模式
+ * @return RockIvaRetCode 
+ */
+RockIvaRetCode ROCKIVA_SetWorkMode(RockIvaHandle handle, RockIvaWorkMode mode);
+
 #ifdef __cplusplus
 }
 #endif /* end of __cplusplus */

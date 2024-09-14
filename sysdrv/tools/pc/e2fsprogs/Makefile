@@ -16,4 +16,5 @@ ifneq ($(SYSDRV_DIR_OUT_PC),)
 	cp -f   $(CURRENT_DIR)/resize2fs   $(SYSDRV_DIR_OUT_PC);
 	cp -f   $(CURRENT_DIR)/tune2fs     $(SYSDRV_DIR_OUT_PC);
 	cp -f   $(CURRENT_DIR)/mkfs_ext4.sh     $(SYSDRV_DIR_OUT_PC);
+	cp -f   $(CURRENT_DIR)/mke2fs.conf     $(SYSDRV_DIR_OUT_PC);
 endif

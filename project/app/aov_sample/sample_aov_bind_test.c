@@ -41,26 +41,40 @@ static void print_usage(const RK_CHAR *name) {
 	printf("\t-o | --output_path: set audio output file path, Default NULL\n");
 }
 
+#if defined(RV1126)
+#define MOUNT_DEV_1 "/dev/mmcblk2p1"
+#define MOUNT_DEV_2 "/dev/mmcblk2"
+#else
+#define MOUNT_DEV_1 "/dev/mmcblk1p1"
+#define MOUNT_DEV_2 "/dev/mmcblk1"
+#endif
+
 static int mount_sdcard() {
 	// mount sd
 	int ret = RK_SUCCESS;
-	if (access("/dev/mmcblk1p1", F_OK) == 0) {
-		ret = mount("/dev/mmcblk1p1", MOUNT_PATH, "vfat", 0, NULL);
+	if (access(MOUNT_DEV_1, F_OK) == 0) {
+		// system("mount -t vfat /dev/mmcblk1p1 /mnt/sdcard/");
+		ret = mount(MOUNT_DEV_1, "/mnt/sdcard", "vfat", 0, NULL);
 		if (ret != 0)
 			printf("[%s()] mount failed because %s\n", __func__, strerror(errno));
 		else
 			printf("[%s()] mount success\n", __func__);
-	} else if (access("/dev/mmcblk1", F_OK) == 0) {
-		ret = mount("/dev/mmcblk1", MOUNT_PATH, "vfat", 0, NULL);
+	} else if (access(MOUNT_DEV_2, F_OK) == 0) {
+		// system("mount -t vfat /dev/mmcblk1 /mnt/sdcard/");
+		ret = mount(MOUNT_DEV_2, "/mnt/sdcard", "vfat", 0, NULL);
 		if (ret != 0)
 			printf("[%s()] mount failed because %s\n", __func__, strerror(errno));
 		else
 			printf("[%s()] mount success\n", __func__);
 	} else {
-		printf("[%s()] no appropriate parttion!\n", __func__);
+		printf("[%s()] bad mount path!\n", __func__);
+		// goto SAMPLE_COMM_AOV_CopyRawStreamToSdcard_end;
 		ret = RK_FAILURE;
 	}
-	return ret;
+	if (ret == EBUSY)
+		return RK_SUCCESS;
+	else
+		return ret;
 }
 
 static int unmount_sdcard() {
@@ -189,7 +203,7 @@ static int ai_chn_init(RK_S32 InputSampleRate, RK_S32 OutputSampleRate,
 	RK_BOOL needResample = (InputSampleRate != OutputSampleRate) ? RK_TRUE : RK_FALSE;
 
 	RK_MPI_SYS_Init();
-#ifdef RV1126_RV1109
+#ifdef RV1126
 	// 这是RV1126 声卡打开设置，RV1106设置无效，可以不设置
 	ret = RK_MPI_AMIX_SetControl(s32DevId, "Capture MIC Path", (char *)"Main Mic");
 	if (ret != RK_SUCCESS) {
@@ -299,7 +313,7 @@ static int ao_chn_init(RK_S32 s32ReSmpSampleRate, RK_S32 s32SampleRate,
 
 	memset(&pstParams, 0, sizeof(AO_CHN_PARAM_S));
 	memset(&aoAttr, 0, sizeof(AIO_ATTR_S));
-#ifdef RV1126_RV1109
+#ifdef RV1126
 	/*==============================================================================*/
 	// 这是RV1126 声卡打开设置，RV1106设置无效，可以不设置
 	ret = RK_MPI_AMIX_SetControl(s32DevId, "Playback Path", (char *)"SPK");
@@ -480,13 +494,17 @@ int main(int argc, char *argv[]) {
 	if (enable_ethernet)
 		SAMPLE_COMM_AOV_BindEthernet();
 	if (enable_audio) {
-		// FIXME:
-		// Just for rv1106 test now.
+#if defined(RV1106)
 		system("insmod /oem/usr/ko/snd-soc-rockchip-i2s-tdm.ko");
 		system("insmod /oem/usr/ko/snd-soc-rv1106.ko");
 		system("insmod /oem/usr/ko/snd-soc-simple-card-utils.ko");
 		system("insmod /oem/usr/ko/snd-soc-simple-card.ko");
-		SAMPLE_COMM_AOV_BindSoundcard();
+#elif defined(RV1126)
+		system("insmod /oem/usr/ko/snd-soc-simple-card-utils.ko");
+		system("insmod /oem/usr/ko/snd-soc-simple-card.ko");
+		system("insmod /oem/usr/ko/snd-soc-rockchip-i2s-tdm.ko");
+		system("insmod /oem/usr/ko/snd-soc-rockchip-pdm.ko");
+#endif
 	}
 
 	SAMPLE_COMM_AOV_SetSuspendTime(100);
@@ -568,7 +586,7 @@ int main(int argc, char *argv[]) {
 			}
 			ret = mount_sdcard();
 			if (ret != RK_SUCCESS) {
-				printf("[%s()] mount sdcard failed!", __func__);
+				printf("[%s()] mount sdcard failed!\n", __func__);
 				break;
 			}
 			calculate_md5(new_buf, sizeof(new_buf));

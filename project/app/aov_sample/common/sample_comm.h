@@ -50,6 +50,7 @@ extern "C" {
 #include "rockiva/rockiva_face_api.h"
 #include "rockiva/rockiva_image.h"
 #endif
+#include "rkmuxer.h"
 #include "sample_comm_isp.h"
 
 /*******************************************************
@@ -60,6 +61,9 @@ extern "C" {
 #define RK_ALIGN_2(x) RK_ALIGN(x, 2)
 #define RK_ALIGN_16(x) RK_ALIGN(x, 16)
 #define RK_ALIGN_32(x) RK_ALIGN(x, 32)
+#define VIDEOFRAMECNT 10240
+#define AUDIOFRAMECNT 12288
+#define AENC_MUTE_DURATION 36000
 typedef void *(*Thread_Func)(void *param);
 
 /*******************************************************
@@ -139,6 +143,38 @@ typedef struct _rkMpiVOCtx {
 	VO_CHN_ATTR_S stChnAttr;
 } SAMPLE_VO_CTX_S;
 
+typedef struct _rkMpiVStream {
+	RK_CHAR *pData;
+	RK_U32 u32Len;
+	RK_U64 u64PTS;
+	RK_S32 s32KeyFrame;
+} SAMPLE_MPI_VSTREAM_S;
+
+typedef struct _rkMpiAStream {
+	RK_CHAR *pData;
+	RK_U32 u32Len;
+	RK_U64 u64PTS;
+	RK_U32 u32MuteCnt;
+} SAMPLE_MPI_ASTREAM_S;
+
+typedef struct _rkMpiMuxer {
+	VideoParam stVideoParam;
+	AudioParam stAudioParam;
+	SAMPLE_MPI_VSTREAM_S astVideoStream[VIDEOFRAMECNT];
+	SAMPLE_MPI_ASTREAM_S astAudioStream[AUDIOFRAMECNT];
+	RK_S32 s32VideoFrmCnt;
+	RK_S32 s32AudioFrmCnt;
+	RK_U64 u64VSrcPts;
+	RK_U64 u64ASrcPts;
+	RK_S32 s32AudioDataSize;
+	RK_S32 s32VideoDataSize;
+	RK_S32 s32VencChnId;
+	pthread_t s32AencThreadId;
+	pthread_mutex_t stMutex;
+	RK_BOOL bIsRecordingMp4;
+	RK_CHAR *pBuffer;
+} SAMPLE_MPI_MUXER_S;
+
 typedef struct _rkMpiVENCCtx {
 	RK_BOOL bSvcIfEnable;
 	RK_BOOL bMotionDeblurIfEnable;
@@ -175,7 +211,42 @@ typedef struct _rkMpiAENCCtx {
 	AENC_CHN s32ChnId;
 	AUDIO_STREAM_S stFrame;
 	AENC_CHN_ATTR_S stChnAttr;
+	pthread_t getStreamThread;
+	Thread_Func getStreamCbFunc;
 } SAMPLE_AENC_CTX_S;
+
+#define WEB_VIEW_RECT_W 704
+#define WEB_VIEW_RECT_H 480
+#define MAX_WCH_BYTE 128
+typedef struct text_data {
+	wchar_t wch[MAX_WCH_BYTE];
+	unsigned int font_size;
+	unsigned int font_color;
+	unsigned int color_inverse;
+	const char *font_path;
+	char format[128];
+} text_data_s;
+typedef struct border_data {
+	int color_index;
+	int color_key;
+	int thick;
+	int display_style;
+} border_data_s;
+typedef struct osd_data {
+	int type;
+	union {
+		const char *image;
+		text_data_s text;
+		border_data_s border;
+	};
+	int width;
+	int height;
+	unsigned char *buffer;
+	unsigned int size;
+	int origin_x;
+	int origin_y;
+	int enable;
+} osd_data_s;
 
 typedef struct _rkMpiRGNCtx {
 	const char *srcFileBmpName;
@@ -191,6 +262,7 @@ typedef struct _rkMpiRGNCtx {
 	RGN_HANDLE rgnHandle;
 	RGN_ATTR_S stRgnAttr;
 	RGN_CHN_ATTR_S stRgnChnAttr;
+	osd_data_s st_osd_data;
 } SAMPLE_RGN_CTX_S;
 
 typedef struct _rkMpiVPSSCtx {
@@ -296,6 +368,7 @@ RK_S32 SAMPLE_COMM_VI_DestroyChn(SAMPLE_VI_CTX_S *ctx);
 RK_S32 SAMPLE_COMM_VI_GetChnFrame(SAMPLE_VI_CTX_S *ctx, void **pdata);
 RK_S32 SAMPLE_COMM_VI_ReleaseChnFrame(SAMPLE_VI_CTX_S *ctx);
 
+RK_S32 SAMPLE_COMM_AI_SetAttr(SAMPLE_AI_CTX_S *ctx);
 RK_S32 SAMPLE_COMM_AI_CreateChn(SAMPLE_AI_CTX_S *ctx);
 RK_S32 SAMPLE_COMM_AI_DestroyChn(SAMPLE_AI_CTX_S *ctx);
 RK_S32 SAMPLE_COMM_AI_GetFrame(SAMPLE_AI_CTX_S *ctx, void **pdata);
@@ -322,12 +395,16 @@ RK_S32 SAMPLE_COMM_VENC_GetStream(SAMPLE_VENC_CTX_S *ctx, void **pdata);
 RK_S32 SAMPLE_COMM_VENC_ReleaseStream(SAMPLE_VENC_CTX_S *ctx);
 RK_S32 SAMPLE_COMM_VENC_DestroyChn(SAMPLE_VENC_CTX_S *ctx);
 
+RK_S32 SAMPLE_COMM_AENC_SetAttr(SAMPLE_AENC_CTX_S *ctx);
 RK_S32 SAMPLE_COMM_AENC_CreateChn(SAMPLE_AENC_CTX_S *ctx);
+RK_S32 SAMPLE_COMM_AENC_SendLastFrame(SAMPLE_AENC_CTX_S *ctx);
 RK_S32 SAMPLE_COMM_AENC_GetStream(SAMPLE_AENC_CTX_S *ctx, void **pdata);
 RK_S32 SAMPLE_COMM_AENC_ReleaseStream(SAMPLE_AENC_CTX_S *ctx);
 RK_S32 SAMPLE_COMM_AENC_DestroyChn(SAMPLE_AENC_CTX_S *ctx);
 
 RK_S32 SAMPLE_COMM_RGN_CreateChn(SAMPLE_RGN_CTX_S *ctx);
+RK_S32 SAMPLE_COMM_RGN_DrawRectFromIVA(SAMPLE_RGN_CTX_S *ctx, RK_BOOL bDraw);
+RK_S32 SAMPLE_COMM_RGN_DrawOsd(SAMPLE_RGN_CTX_S *ctx, RK_BOOL bAOV, RK_FLOAT Fps);
 RK_S32 SAMPLE_COMM_RGN_DestroyChn(SAMPLE_RGN_CTX_S *ctx);
 
 RK_S32 SAMPLE_COMM_Bind(const MPP_CHN_S *pstSrcChn, const MPP_CHN_S *pstDestChn);
@@ -341,9 +418,11 @@ RK_S32 SAMPLE_COMM_IVA_Destroy(SAMPLE_IVA_CTX_S *ctx);
 RK_S32 SAMPLE_COMM_IVA_Push_Result(const void *iva_result);
 void *SAMPLE_COMM_IVA_Pop_Result();
 void SAMPLE_COMM_IVA_Release_Result(const void *iva_result);
+RK_S32 SAMPLE_COMM_IVA_SetWorkMode(SAMPLE_IVA_CTX_S *ctx, RockIvaWorkMode wMode);
 #endif
 
 RK_S32 SAMPLE_COMM_IVS_Create(SAMPLE_IVS_CTX_S *ctx);
+RK_S32 SAMPLE_COMM_IVS_bMove(SAMPLE_IVS_CTX_S *ctx, VIDEO_FRAME_INFO_S *stVFrame);
 RK_S32 SAMPLE_COMM_IVS_Destroy(RK_S32 s32IvsChnid);
 
 RK_S32 SAMPLE_COMM_TDE_Create(SAMPLE_TDE_CTX_S *ctx);
@@ -362,11 +441,28 @@ RK_VOID SAMPLE_COMM_CheckFd(RK_BOOL bStart);
 
 RK_S32 SAMPLE_COMM_ECHO(RK_CHAR *file_path, RK_CHAR *buf, RK_U32 lenth);
 
+RK_S32 SAMPLE_COMM_WriteReg(RK_S32 addr, RK_S32 value);
+
+RK_S32 SAMPLE_COMM_ReadReg(RK_S32 addr, RK_U8 *buf, RK_U32 len);
+
+RK_S32 SAMPLE_COMM_DumpReg(RK_S32 addr, RK_U32 len);
+
 #if _SAMPLE_AOV_ENABLE_KLOG_
 RK_VOID SAMPLE_COMM_KLOG(const RK_CHAR *log);
 #else
 #define SAMPLE_COMM_KLOG(xxx)
 #endif
+RK_S32 SAMPLE_COMM_ExtractValueFromCmdline(const char *param);
+RK_S32 SAMPLE_COMM_DumpDebugInfoToTmp(RK_VOID);
+
+int SAMPLE_COMM_MuxerInit(SAMPLE_MPI_MUXER_S **pMuxer, SAMPLE_VENC_CTX_S *pVenc);
+int SAMPLE_COMM_MuxerDeinit(SAMPLE_MPI_MUXER_S **pMuxer);
+void SAMPLE_COMM_MuxerMuteAFrame(SAMPLE_MPI_MUXER_S *pMuxer);
+void SAMPLE_COMM_MuxerVFrame(SAMPLE_MPI_MUXER_S *pMuxer, RK_U32 u32Len, RK_U64 u64PTS,
+                             RK_S32 s32KeyFrame, void *pData);
+void SAMPLE_COMM_MuxerAFrame(SAMPLE_MPI_MUXER_S *pMuxer, RK_U32 u32Len, RK_U64 u64PTS,
+                             void *pData);
+int SAMPLE_COMM_MuxerWrite(SAMPLE_MPI_MUXER_S *pstMuxer);
 
 #ifdef __cplusplus
 #if __cplusplus

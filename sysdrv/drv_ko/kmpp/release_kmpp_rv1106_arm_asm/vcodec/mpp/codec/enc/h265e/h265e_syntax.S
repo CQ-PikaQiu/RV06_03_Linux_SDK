@@ -577,10 +577,10 @@ h265e_syntax_fill:
 	ldr	r1, [r5, #340]
 	bfi	r3, r1, #5, #1
 	strb	r3, [r6, r2]
-	ldr	r1, [r8, #812]
+	ldr	r1, [r8, #816]
 	bfi	r3, r1, #6, #1
 	strb	r3, [r6, r2]
-	ldr	r1, [r8, #816]
+	ldr	r1, [r8, #820]
 	bfi	r3, r1, #7, #1
 	strb	r3, [r6, r2]
 	ldrb	r2, [r5, #14]	@ zero_extendqisi2
@@ -785,13 +785,13 @@ h265e_syntax_fill:
 	.size	h265e_syntax_fill, .-h265e_syntax_fill
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__FUNCTION__.9606, %object
-	.size	__FUNCTION__.9606, 20
-__FUNCTION__.9606:
+	.type	__FUNCTION__.9619, %object
+	.size	__FUNCTION__.9619, 20
+__FUNCTION__.9619:
 	.ascii	"fill_ref_parameters\000"
-	.type	__FUNCTION__.9546, %object
-	.size	__FUNCTION__.9546, 24
-__FUNCTION__.9546:
+	.type	__FUNCTION__.9559, %object
+	.size	__FUNCTION__.9559, 24
+__FUNCTION__.9559:
 	.ascii	"fill_picture_parameters\000"
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:

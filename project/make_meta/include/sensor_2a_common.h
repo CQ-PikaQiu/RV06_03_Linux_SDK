@@ -29,15 +29,16 @@ struct awb_init_cfg {
 };
 
 struct rtt_2a_res {
-    uint32_t day_or_night; //0: invalid l:day 2:night
+    uint32_t day_or_night; // 0: invalid l:day 2:night
     uint32_t awb_gain; //0~-15bit: rgain 16~31bit: bgain
     uint32_t exp;
     uint32_t isp_dgain;
     uint32_t reg_time;
     uint32_t reg_gain;
+    uint32_t dcg_mode;
     uint32_t ae_stats[AE_GRID_STATS]; // only G channel (l6bit)
-    uint32_t ae_diff_th; //unit:%
-    uint32_t nr_diff_th; //unit:%
+    uint32_t ae_diff_th;//unit:%
+    uint32_t nr_diff_th;//unit:%
     uint32_t last_lodif_0;
     uint32_t last_lodif_1;
     uint32_t last_hidif_0;

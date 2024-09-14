@@ -1,8 +1,8 @@
-commit c0e5c92c8cfdb7f994ae6e2d4037fda38c633284
+commit cd321b8121fda6ed1bedb60d20fef84a1659815a
 Author: hjl <jialong.huang@rock-chips.com>
-Date:   Fri Jan 12 18:09:50 2024 +0800
+Date:   Tue Apr 30 15:20:39 2024 +0800
 
-    fastboot: set first exp if start once
+    iqfiles: fix enhance_curve bug in ainr sc4336_CMK-OT01_40IRC_F16.json
     
     Signed-off-by: hjl <jialong.huang@rock-chips.com>
-    Change-Id: I23a9339de83b25a4ae64532fa941494b945edae0
+    Change-Id: I1c25325da8e43d2b4af5780749faae34a49c124e

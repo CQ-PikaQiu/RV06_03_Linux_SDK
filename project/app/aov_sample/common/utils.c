@@ -83,9 +83,9 @@ RK_S32 draw_rect_8bpp(RK_U64 buffer, RK_U32 width, RK_U32 height, int rgn_x, int
 	RK_U8 color = 0;
 
 	if (color_index == RGN_COLOR_LUT_INDEX_0)
-		color = 0x1;
+		color = 13; // blue
 	if (color_index == RGN_COLOR_LUT_INDEX_1)
-		color = 0x2;
+		color = 10; // red
 	// LOG_DEBUG("YUV %dx%d, rgn (%d,%d,%d,%d), line pixel %d\n", width, height, rgn_x,
 	// rgn_y, rgn_w,
 	//          rgn_h, line_pixel);

@@ -430,13 +430,13 @@ h264e_marking_rd_op:
 	.size	h264e_marking_rd_op, .-h264e_marking_rd_op
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__func__.9801, %object
-	.size	__func__.9801, 20
-__func__.9801:
+	.type	__func__.9819, %object
+	.size	__func__.9819, 20
+__func__.9819:
 	.ascii	"h264e_reorder_wr_op\000"
-	.type	__func__.9822, %object
-	.size	__func__.9822, 20
-__func__.9822:
+	.type	__func__.9840, %object
+	.size	__func__.9840, 20
+__func__.9840:
 	.ascii	"h264e_marking_wr_op\000"
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:

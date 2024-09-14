@@ -105,6 +105,21 @@ typedef enum {
     ROCKIVA_GLASSES_TYPE_SUNGLASSES      = 3    /* 太阳眼镜 （预留）*/
 } RockIvaFaceGlassesType;
 
+/* 是否有胡子 */
+typedef enum {
+    ROCKIVA_BEARD_TYPE_UNKNOWN      = 0,        /* 未知 */
+    ROCKIVA_BEARD_TYPE_YES          = 1,        /* 有胡子 */
+    ROCKIVA_BEARD_TYPE_NO           = 2         /* 没有胡子 */
+} RockIvaFaceBeardType;
+
+/* 人种 */
+typedef enum {
+    ROCKIVA_RACE_TYPE_UNKNOWN      = 0,        /* 未知 */
+    ROCKIVA_RACE_TYPE_YELLOW       = 1,        /* 黄色人种 */
+    ROCKIVA_RACE_TYPE_WHITE        = 2,        /* 白色人种 */
+    ROCKIVA_RACE_TYPE_BLACK        = 3         /* 黑色人种 */
+} RockIvaFaceRaceType;
+
 /* 是否微笑 */
 typedef enum {
     ROCKIVA_SMILE_TYPE_UNKNOWN      = 0,        /* 未知 */
@@ -119,12 +134,19 @@ typedef enum {
     ROCKIVA_MASK_TYPE_NO           = 2          /* 不戴口罩 */
 } RockIvaFaceMaskType;
 
-/* 是否有胡子 */
+/* 是否戴帽子 */
 typedef enum {
-    ROCKIVA_BEARD_TYPE_UNKNOWN      = 0,        /* 未知 */
-    ROCKIVA_BEARD_TYPE_YES          = 1,        /* 有胡子 */
-    ROCKIVA_BEARD_TYPE_NO           = 2         /* 没有胡子 */
-} RockIvaFaceBeardType;
+    ROCKIVA_HAT_TYPE_UNKNOWN      = 0,        /* 未知 */
+    ROCKIVA_HAT_TYPE_YES          = 1,        /* 戴帽子 */
+    ROCKIVA_HAT_TYPE_NO           = 2         /* 不戴帽子 */
+} RockIvaFaceHatType;
+
+/* 是否活体 */
+typedef enum {
+    ROCKIVA_LIVENESS_TYPE_UNKNOWN      = 0,         /* 未知 */
+    ROCKIVA_LIVENESS_TYPE_YES          = 1,         /* 真人 */
+    ROCKIVA_LIVENESS_TYPE_NO           = 2          /* 假人 */
+} RockIvaFaceLivenessType;
 
 /* 抓拍类型 */
 typedef enum {
@@ -147,8 +169,20 @@ typedef enum {
     ROCKIVA_FACE_QUALITY_CLARITY_FAIL,              /* 人脸模糊 */
     ROCKIVA_FACE_QUALITY_ANGLE_FAIL,                /* 人脸角度过大 */
     ROCKIVA_FACE_QUALITY_MASK_FAIL,                 /* 人脸遮挡 */
-    ROCKIVA_FACE_QUALITY_USER_ABANDON               /* 用户丢弃人脸 */
+    ROCKIVA_FACE_QUALITY_COMPLETE_FAIL,             /* 人脸不完整 */
+    ROCKIVA_FACE_QUALITY_USER_ABANDON,              /* 用户丢弃人脸 */
+    ROCKIVA_FACE_LIVENESS_FAIL                      /* 人脸活体失败 */
 } RockIvaFaceQualityResultCode;
+
+/* 人脸坐姿 */
+typedef enum {
+    ROCKIVA_FACE_POSE_STATE_NONE,                   /* 人脸坐姿未知 */
+    ROCKIVA_FACE_POSE_STATE_NORMAL,                 /* 人脸坐姿正常 */
+    ROCKIVA_FACE_POSE_STATE_HUNCHBACK,              /* 人脸坐姿驼背、趴下、低头 */
+    ROCKIVA_FACE_POSE_STATE_UP,                     /* 人脸坐姿仰头 */
+    ROCKIVA_FACE_POSE_STATE_SIDE,                   /* 人脸坐姿侧脸 */
+    ROCKIVA_FACE_POSE_STATE_TILT                    /* 人脸坐姿歪头 */
+} RockIvaFacePoseState;
 
 /* ---------------------------规则配置----------------------------------- */
 
@@ -159,6 +193,8 @@ typedef struct {
     uint8_t faceAttributeEnable;                /* 人脸属性分析业务 1:有效 */
     uint8_t relatedPersonEnable;                /* 是否关联人体 1：有效 */
     uint8_t faceLandmarkEnable;                 /* 人脸关键点 1：使能5点 2: 使能5点和106点 */
+    uint8_t facePoseEnable;                     /* 人脸坐姿业务 1：有效 */
+    uint8_t faceLivenessEnable;                 /* 人脸活体检测业务 1：有效 */
 } RockIvaFaceTaskType;
 
 /* 人脸SDK处理能力 */
@@ -171,14 +207,29 @@ typedef struct {
 /* 人脸质量过滤配置 */
 typedef struct {
     uint16_t minScore;                         /* 最小质量分(默认0不过滤) */
-    uint16_t minSize;                          /* 最小人脸大小（万分比[0-10000]，默认0为30像素） */
-    uint16_t minPd;                            /* 最小瞳距（像素值，默认0不限制）*/
+    uint16_t minSize;                          /* 最小人脸宽度大小（万分比[0-10000]，默认0为30像素） */
+    uint16_t maxSize;                          /* 最大人脸宽度大小（万分比[0-10000]，默认0不限制） */
+    uint16_t minSizeHeight;                    /* 最小人脸高度大小（万分比[0-10000]，默认0不限制） */
+    uint16_t maxSizeHeight;                    /* 最大人脸高度大小（万分比[0-10000]，默认0不限制） */
+    uint16_t minPd;                            /* 最小瞳距（像素值，默认0为不限制）*/
     uint16_t minClarity;                       /* 最小清晰度（默认0不过滤） */
     RockIvaAngle maxAngle;                     /* 最大人脸角度（默认0不过滤） */
     uint16_t minEyescore;                      /* 眼睛遮挡阈值，低于该阈值将被当作遮挡过滤，值范围[0,100] */
     uint16_t minNoseScore;                     /* 鼻子遮挡阈值，低于该阈值将被当作遮挡过滤，值范围[0,100] */
     uint16_t minMouthScore;                    /* 嘴巴遮挡阈值，低于该阈值将被当作遮挡过滤，值范围[0,100] */
+    uint16_t minOcclusionScore;                /* 脸部遮挡阈值，低于该阈值将被当作遮挡过滤，值范围[0,100] */
+    uint16_t minCompleteScore;                 /* 脸部完整阈值，低于该阈值将被当作不完整人脸过滤，值范围[0,100] */
 } RockIvaFaceQualityConfig;
+
+/* 人脸坐姿检测配置 */
+typedef struct {
+    uint32_t maxFrame;                          /* 常状态持续帧数，超过阈值进行告警，实际应用需设大一点避免频繁告警 */
+    uint32_t maxStep;                           /* 当前帧间隔检出有效人脸和头肩帧超过阈值后，不再进行告警 */
+    uint16_t minSize;                           /* 最小人脸大小（万分比[0-10000]） */
+    uint16_t faceWidth;                         /* 正常坐姿状态下人脸宽度（万分比[0-10000]） */
+    uint16_t faceHeight;                        /* 正常坐姿状态下人脸高度（万分比[0-10000]） */
+    uint16_t headY0;                            /* 正常坐姿状态下头肩检测框y0坐标（万分比[0-10000]） */
+} RockIvaFacePoseConfig;
 
 /* 抓拍上报图像配置 */
 typedef struct {
@@ -192,7 +243,7 @@ typedef struct {
 
 /* 人脸抓拍规则设置 */
 typedef struct {
-    uint8_t sensitivity;                          /* 检测灵敏度[1,100] */
+    uint8_t detectScore;                          /* 人脸检测分数阈值[1,100] */
     uint8_t detectAreaEn;                         /* 是否设置检测区域[0关 1开] */
     RockIvaArea detectArea;                       /* 检测区域 */
     uint8_t qualityFilterMode;                    /* 人脸质量过滤模式 [0不满足不上报，1不满足也上报但不进行人脸分析] */
@@ -212,6 +263,7 @@ typedef struct {
 typedef struct {
     RockIvaFaceWorkMode mode;                     /* 人脸任务模式 */
     RockIvaFaceRule faceCaptureRule;              /* 人脸抓拍规则 */
+    RockIvaFacePoseConfig facePoseConfig;         /* 人脸坐姿检测参数配置 */
     RockIvaFaceTaskType faceTaskType;             /* 人脸业务类型：人脸抓拍业务/人脸识别业务 */
 } RockIvaFaceTaskParams;
 
@@ -223,12 +275,14 @@ typedef struct {
 typedef struct {
     RockIvaFaceGenderType gender;         /* 性别 */
     RockIvaFaceAgeType age;               /* 年龄 */
-    RockIvaFaceEmotionType emotion;       /* 情感 */
+    RockIvaFaceEmotionType emotion;       /* 情感（暂不支持） */
     RockIvaFaceGlassesType eyeGlass;      /* 眼镜 */
     RockIvaFaceSmileType smile;           /* 笑容 */
     RockIvaFaceMaskType mask;             /* 口罩 */
-    RockIvaFaceBeardType beard;           /* 胡子 */
-    uint32_t attractive;                  /* 颜值 */
+    RockIvaFaceBeardType beard;           /* 胡子（暂不支持） */
+    RockIvaFaceRaceType race;             /* 人种 */
+    RockIvaFaceHatType hat;               /* 帽子 */
+    uint32_t attractive;                  /* 颜值（暂不支持） */
 } RockIvaFaceAttribute;
 
 /* 人脸质量信息 */
@@ -241,6 +295,8 @@ typedef struct {
     uint16_t mouthScore;        /* 嘴巴遮挡分数（值范围[0,100]，值越低表示遮挡越严重） */
     uint16_t faceScore;         /* 人脸分数（值范围[0,100]）*/
     uint16_t pd;                /* 人脸瞳距（基于输入图像的像素值） */
+    uint16_t occlusionScore;    /* 人脸遮挡分（值范围[0,100]，值越低表示遮挡越严重） */
+    uint16_t completeScore;     /* 人脸完整分（值范围[0,100]，值越高表示人脸越完整） */
 } RockIvaFaceQualityInfo;
 
 /* 单个目标人脸检测基本信息 */
@@ -253,10 +309,23 @@ typedef struct {
     RockIvaFaceState faceState;                           /* 人脸状态 */
     RockIvaObjectInfo person;                             /* 关联的人体检测信息 */
     RockIvaObjectInfo faceOnIR;                           /* IR图像中关联的人脸 */
+    RockIvaObjectInfo head;                               /* 关联的人头检测信息 */
     uint32_t landmarksNum;                                /* 人脸关键点数量 */
     RockIvaPoint landmarks[106];                          /* 人脸关键点 */
     RockIvaFaceMaskType mask;                             /* 口罩 */
+    RockIvaFaceLivenessType liveness;                     /* 人脸活体结果 */
 } RockIvaFaceInfo;
+
+/* 单个目标头肩检测基本信息 */
+typedef struct {
+    uint32_t objId;                                       /* 目标ID[0,2^32) */
+    uint32_t frameId;                                     /* 头肩所在帧序号 */
+    uint32_t detScore;                                    /* 目标检测分数 [1-100] */
+    RockIvaRectangle headRect;                            /* 头肩区域原始位置 */
+    RockIvaFaceQualityInfo faceQuality;                   /* 人脸质量信息 */
+    RockIvaFacePoseState facePoseState;                   /* 人脸坐姿状态 */
+    RockIvaObjectInfo face;                               /* 关联的人脸检测信息 */
+} RockIvaHeadInfo;
 
 /* 单个目标人脸分析信息 */
 typedef struct {
@@ -294,6 +363,15 @@ typedef struct {
     uint32_t num;                                            /* 人脸结果数量 */
     RockIvaFaceCapResult faceResults[ROCKIVA_FACE_MAX_FACE_NUM];    /* 人脸结果 */
 } RockIvaFaceCapResults;
+
+/* 人脸坐姿处理结果 */
+typedef struct {
+    uint32_t frameId;                                        /* 帧ID */
+    uint32_t channelId;                                      /* 通道号 */
+    RockIvaImage frame;                                      /* 对应的输入图像帧 */
+    uint32_t objNum;                                         /* 头肩个数 */
+    RockIvaHeadInfo headInfo[ROCKIVA_FACE_MAX_FACE_NUM];     /* 各目标检测信息 */
+} RockIvaFacePostureResult;
 
 /* 入库特征对应的详细信息，用户输入 */
 typedef struct {
@@ -343,9 +421,24 @@ typedef void(*ROCKIVA_FACE_DetResultCallback)(const RockIvaFaceDetResult *result
 typedef void(*ROCKIVA_FACE_AnalyseResultCallback)(const RockIvaFaceCapResults *result, const RockIvaExecuteStatus status,
                                         void *userdata);
 
+/**
+ * @brief 检测结果回调函数
+ * 
+ * result 结果
+ * status 状态码
+ * userdata 用户自定义数据
+ */
+typedef void(*ROCKIVA_FACE_PostureResultCallback)(const RockIvaFacePostureResult *result, const RockIvaExecuteStatus status,
+                                        void *userdata);
+
+/**
+ * @brief 人脸回调
+ * 
+ */
 typedef struct {
     ROCKIVA_FACE_DetResultCallback detCallback;
     ROCKIVA_FACE_AnalyseResultCallback analyseCallback;
+    ROCKIVA_FACE_PostureResultCallback postureCallback;
 } RockIvaFaceCallback;
 
 /**

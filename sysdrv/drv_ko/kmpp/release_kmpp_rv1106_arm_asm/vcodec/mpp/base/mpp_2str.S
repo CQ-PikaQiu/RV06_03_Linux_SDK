@@ -314,15 +314,15 @@ strof_suprmode:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	ctx_type_str.5751, %object
-	.size	ctx_type_str.5751, 12
-ctx_type_str.5751:
+	.type	ctx_type_str.5762, %object
+	.size	ctx_type_str.5762, 12
+ctx_type_str.5762:
 	.word	.LC70
 	.word	.LC71
 	.word	.LC72
-	.type	coding_type_str0.5755, %object
-	.size	coding_type_str0.5755, 44
-coding_type_str0.5755:
+	.type	coding_type_str0.5766, %object
+	.size	coding_type_str0.5766, 44
+coding_type_str0.5766:
 	.word	.LC59
 	.word	.LC60
 	.word	.LC61
@@ -334,9 +334,9 @@ coding_type_str0.5755:
 	.word	.LC67
 	.word	.LC68
 	.word	.LC69
-	.type	coding_type_str1.5756, %object
-	.size	coding_type_str1.5756, 28
-coding_type_str1.5756:
+	.type	coding_type_str1.5767, %object
+	.size	coding_type_str1.5767, 28
+coding_type_str1.5767:
 	.word	.LC52
 	.word	.LC53
 	.word	.LC54
@@ -344,9 +344,9 @@ coding_type_str1.5756:
 	.word	.LC56
 	.word	.LC57
 	.word	.LC58
-	.type	yuv_fmt_str.5760, %object
-	.size	yuv_fmt_str.5760, 64
-yuv_fmt_str.5760:
+	.type	yuv_fmt_str.5771, %object
+	.size	yuv_fmt_str.5771, 64
+yuv_fmt_str.5771:
 	.word	.LC36
 	.word	.LC37
 	.word	.LC38
@@ -363,9 +363,9 @@ yuv_fmt_str.5760:
 	.word	.LC49
 	.word	.LC50
 	.word	.LC51
-	.type	rgb_fmt_str.5761, %object
-	.size	rgb_fmt_str.5761, 56
-rgb_fmt_str.5761:
+	.type	rgb_fmt_str.5772, %object
+	.size	rgb_fmt_str.5772, 56
+rgb_fmt_str.5772:
 	.word	.LC22
 	.word	.LC23
 	.word	.LC24
@@ -380,29 +380,29 @@ rgb_fmt_str.5761:
 	.word	.LC33
 	.word	.LC34
 	.word	.LC35
-	.type	rc_mode_str.5765, %object
-	.size	rc_mode_str.5765, 20
-rc_mode_str.5765:
+	.type	rc_mode_str.5776, %object
+	.size	rc_mode_str.5776, 20
+rc_mode_str.5776:
 	.word	.LC17
 	.word	.LC18
 	.word	.LC19
 	.word	.LC20
 	.word	.LC21
-	.type	gop_mode_str.5769, %object
-	.size	gop_mode_str.5769, 8
-gop_mode_str.5769:
+	.type	gop_mode_str.5780, %object
+	.size	gop_mode_str.5780, 8
+gop_mode_str.5780:
 	.word	.LC15
 	.word	.LC16
-	.type	rotation_str.5773, %object
-	.size	rotation_str.5773, 16
-rotation_str.5773:
+	.type	rotation_str.5784, %object
+	.size	rotation_str.5784, 16
+rotation_str.5784:
 	.word	.LC11
 	.word	.LC12
 	.word	.LC13
 	.word	.LC14
-	.type	mode_str.5796, %object
-	.size	mode_str.5796, 12
-mode_str.5796:
+	.type	mode_str.5807, %object
+	.size	mode_str.5807, 12
+mode_str.5807:
 	.word	.LC7
 	.word	.LC9
 	.word	.LC10

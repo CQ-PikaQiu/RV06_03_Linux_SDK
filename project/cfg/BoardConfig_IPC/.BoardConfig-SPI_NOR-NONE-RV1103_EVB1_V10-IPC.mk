@@ -79,3 +79,12 @@ export RK_ENABLE_ADBD=n
 export RK_ENABLE_ROCKCHIP_TEST=y
 
 export RK_PRE_BUILD_OEM_SCRIPT=rv1103-spi_nor-post.sh
+
+# config AUDIO model
+export RK_AUDIO_MODEL=NONE
+
+# config AI-ISP model
+export RK_AIISP_MODEL=NONE
+
+# config NPU model
+export RK_NPU_MODEL="object_detection_pfp_896x512.data"

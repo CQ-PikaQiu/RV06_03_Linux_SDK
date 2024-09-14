@@ -57,6 +57,8 @@ RK_S32 SAMPLE_COMM_VI_CreateChn(SAMPLE_VI_CTX_S *ctx) {
 		// 1-3.bind dev/pipe
 		ctx->stBindPipe.u32Num = 1;
 		ctx->stBindPipe.PipeId[0] = ctx->u32PipeId;
+		if (!ctx->bIfQuickStart)
+			ctx->stBindPipe.bUserStartPipe[0] = 1;
 		s32Ret = RK_MPI_VI_SetDevBindPipe(ctx->s32DevId, &ctx->stBindPipe);
 		if (s32Ret != RK_SUCCESS) {
 			RK_LOGE("RK_MPI_VI_SetDevBindPipe failed with %#x!\n", s32Ret);

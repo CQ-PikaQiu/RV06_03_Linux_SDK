@@ -1,17 +1,15 @@
 {
-    "APP_VERSION": "v1.87",
+    "APP_VERSION": "v1.94",
     "LOG": true,
+    "ScanIntervalMS": 500,
     "Download": {
         "TransferMode": "USB",
         "Device": "",
         "Baudrate": "1500000",
         "Reset": true,
-        "ScanIntervalMS": 500,
         "DefaultJson": ""
     },
-    "SDcard": {
-        "ScanIntervalMS": 500
-    },
+    "SDcard": {},
     "Firmware": {
         "Storage": [
             "FLASH",
@@ -43,8 +41,11 @@
             "RK2206": "220A",
             "RV1108": "110A",
             "RV1106": "1106",
-            "RV1103": "1106"
+            "RV1103": "1106",
+            "RV1103B": "110E",
+            "RK3576": "350E",
+            "RK2118": "210B"
         }
     },
-    "CHIP": ""
+    "CHIP": "RV1106"
 }

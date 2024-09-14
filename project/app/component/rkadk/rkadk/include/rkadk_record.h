@@ -23,6 +23,7 @@ extern "C" {
 
 #include "rkadk_common.h"
 #include "rkadk_muxer.h"
+#include "file_common.h"
 
 typedef RKADK_MUXER_FPS_ATTR_S RKADK_RECORD_FPS_ATTR_S;
 typedef RKADK_MUXER_MANUAL_SPLIT_ATTR_S RKADK_REC_MANUAL_SPLIT_ATTR_S;
@@ -44,12 +45,6 @@ typedef struct {
   RKADK_POST_ISP_ATTR_S *pstPostIspAttr;
 } RKADK_RECORD_ATTR_S;
 
-typedef struct {
-  const char *pSdcardPath;
-  RKADK_U32 u32WriteCache; /* write cache size(byte), default 1M */
-  RKADK_U32 u32TotalCache; /* total cache size(byte), default 10M */
-} FILE_CACHE_ATTR_S;
-
 /****************************************************************************/
 /*                            Interface Definition                          */
 /****************************************************************************/
@@ -58,7 +53,7 @@ typedef struct {
  * @return 0 success
  * @return others failure
  */
-RKADK_S32 RKADK_RECORD_FileCacheInit(FILE_CACHE_ATTR_S *pstFileCacheAttr);
+RKADK_S32 RKADK_RECORD_FileCacheInit(FILE_CACHE_ARG *pstFileCacheAttr);
 
 /**
  * @brief deinitialize file cache
@@ -66,6 +61,8 @@ RKADK_S32 RKADK_RECORD_FileCacheInit(FILE_CACHE_ATTR_S *pstFileCacheAttr);
  * @return others failure
  */
 RKADK_S32 RKADK_RECORD_FileCacheDeInit();
+
+void RKADK_RECORD_FileCacheSetMode(RKADK_REC_TYPE_E enRecType);
 
 /**
  * @brief create a new recorder

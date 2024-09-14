@@ -70,7 +70,7 @@ node_delete_callback:
 	cmp	r2, r0
 	bne	.L5
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r7, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -82,7 +82,7 @@ node_delete_callback:
 	beq	.L6
 .L10:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r7	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -93,7 +93,7 @@ node_delete_callback:
 .L5:
 	str	r4, [r3]
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r5, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -104,7 +104,7 @@ node_delete_callback:
 	subs	r2, r2, #1
 	str	r2, [r1, #28]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r5	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -173,7 +173,7 @@ osd_sync_callback:
 	cmp	r3, #1
 	bne	.L19
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r6, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -183,7 +183,7 @@ osd_sync_callback:
 	adds	r0, r0, #12
 	bl	complete_all
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r6	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -212,7 +212,7 @@ vrgn_release:
 	ldr	r5, [r4, #160]
 	bl	mpi_obj_unref
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r8, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -234,7 +234,7 @@ vrgn_release:
 	bne	.L26
 .L27:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r8	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -323,7 +323,7 @@ vrgn_ioctl:
 	pop	{r4, r5, r6, r7, r8, pc}
 .L35:
 	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
+@ 87 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
 	cmp	r4, r1
 	sbc	r1, r4, r4
 .inst.w 0xf3af8014
@@ -721,7 +721,7 @@ filter_callback:
 	sub	sp, sp, #24
 	mov	r7, r1
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r8, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -765,7 +765,7 @@ filter_callback:
 	add	r0, r5, #168
 	bl	up
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r8	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -816,7 +816,7 @@ vrgn_thread_fn:
 	add	r0, r9, #168
 	bl	down
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r1, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -829,7 +829,7 @@ vrgn_thread_fn:
 	cbnz	r6, .L109
 .L108:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r1	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -839,7 +839,7 @@ vrgn_thread_fn:
 	mov	r0, r6
 	bl	list_del
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r1	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -862,7 +862,7 @@ vrgn_thread_fn:
 	cmp	r3, #0
 	beq	.L110
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r3, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -879,7 +879,7 @@ vrgn_thread_fn:
 	bne	.L125
 	ldr	r3, [sp, #52]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r3	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -1515,7 +1515,7 @@ vrgn_upate_canvas_sync:
 	b	.L223
 .L222:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r3, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -1524,7 +1524,7 @@ vrgn_upate_canvas_sync:
 	movs	r2, #0
 	str	r2, [r0, #12]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r3	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -1891,7 +1891,7 @@ rgn_attach_node:
 	str	r3, [r4, #96]
 .L271:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r10, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -1968,7 +1968,7 @@ rgn_attach_node:
 	ldr	r3, .L287+16
 	str	r3, [r4, #120]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r10	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -2151,7 +2151,7 @@ vrgn_attach_chn:
 	ldr	r2, [r4, #1136]	@ unaligned
 	str	r2, [r0, #8]	@ unaligned
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -2161,7 +2161,7 @@ vrgn_attach_chn:
 	adds	r3, r3, #1
 	str	r3, [r5, #28]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -2265,7 +2265,7 @@ rgn_dettach_node:
 	movs	r0, #3
 	bl	vlog
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r7, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -2309,7 +2309,7 @@ rgn_dettach_node:
 	str	r3, [r4, #16]
 .L320:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r7	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -2401,7 +2401,7 @@ vrgn_dettach_chn:
 	bl	vlog
 .L335:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -2411,7 +2411,7 @@ vrgn_dettach_chn:
 	subs	r3, r3, #1
 	str	r3, [r5, #28]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/gzc/otter_ipc_linux-bat-e3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -2780,17 +2780,17 @@ vrgn_exit:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR0,. + 0
-	.type	__func__.38311, %object
-	.size	__func__.38311, 21
-__func__.38311:
+	.type	__func__.36582, %object
+	.size	__func__.36582, 21
+__func__.36582:
 	.ascii	"node_delete_callback\000"
-	.type	__func__.38623, %object
-	.size	__func__.38623, 13
-__func__.38623:
+	.type	__func__.36894, %object
+	.size	__func__.36894, 13
+__func__.36894:
 	.ascii	"vrgn_release\000"
-	.type	__func__.38579, %object
-	.size	__func__.38579, 11
-__func__.38579:
+	.type	__func__.36850, %object
+	.size	__func__.36850, 11
+__func__.36850:
 	.ascii	"vrgn_ioctl\000"
 	.space	3
 	.type	tp, %object
@@ -2835,77 +2835,77 @@ fmt:
 	.word	.LC77
 	.word	65562
 	.word	.LC78
-	.type	__func__.38474, %object
-	.size	__func__.38474, 13
-__func__.38474:
+	.type	__func__.36745, %object
+	.size	__func__.36745, 13
+__func__.36745:
 	.ascii	"vrgn_version\000"
-	.type	__func__.38601, %object
-	.size	__func__.38601, 10
-__func__.38601:
+	.type	__func__.36872, %object
+	.size	__func__.36872, 10
+__func__.36872:
 	.ascii	"vrgn_open\000"
-	.type	__func__.38235, %object
-	.size	__func__.38235, 16
-__func__.38235:
+	.type	__func__.36506, %object
+	.size	__func__.36506, 16
+__func__.36506:
 	.ascii	"filter_callback\000"
-	.type	__func__.38172, %object
-	.size	__func__.38172, 15
-__func__.38172:
+	.type	__func__.36443, %object
+	.size	__func__.36443, 15
+__func__.36443:
 	.ascii	"vrgn_thread_fn\000"
-	.type	__func__.38153, %object
-	.size	__func__.38153, 24
-__func__.38153:
+	.type	__func__.36424, %object
+	.size	__func__.36424, 24
+__func__.36424:
 	.ascii	"vrgn_set_osd_frame_info\000"
-	.type	__func__.38160, %object
-	.size	__func__.38160, 10
-__func__.38160:
+	.type	__func__.36431, %object
+	.size	__func__.36431, 10
+__func__.36431:
 	.ascii	"do_ex_osd\000"
-	.type	__func__.38484, %object
-	.size	__func__.38484, 12
-__func__.38484:
+	.type	__func__.36755, %object
+	.size	__func__.36755, 12
+__func__.36755:
 	.ascii	"vrgn_create\000"
-	.type	__func__.38535, %object
-	.size	__func__.38535, 13
-__func__.38535:
+	.type	__func__.36806, %object
+	.size	__func__.36806, 13
+__func__.36806:
 	.ascii	"vrgn_destroy\000"
-	.type	__func__.38544, %object
-	.size	__func__.38544, 23
-__func__.38544:
+	.type	__func__.36815, %object
+	.size	__func__.36815, 23
+__func__.36815:
 	.ascii	"vrgn_upate_canvas_sync\000"
-	.type	__func__.38557, %object
-	.size	__func__.38557, 15
-__func__.38557:
+	.type	__func__.36828, %object
+	.size	__func__.36828, 15
+__func__.36828:
 	.ascii	"vrgn_info_sync\000"
-	.type	__func__.38565, %object
-	.size	__func__.38565, 20
-__func__.38565:
+	.type	__func__.36836, %object
+	.size	__func__.36836, 20
+__func__.36836:
 	.ascii	"vrgn_request_buffer\000"
-	.type	__func__.38346, %object
-	.size	__func__.38346, 22
-__func__.38346:
+	.type	__func__.36617, %object
+	.size	__func__.36617, 22
+__func__.36617:
 	.ascii	"set_osd_invert_buffer\000"
-	.type	__func__.38434, %object
-	.size	__func__.38434, 16
-__func__.38434:
+	.type	__func__.36705, %object
+	.size	__func__.36705, 16
+__func__.36705:
 	.ascii	"rgn_attach_node\000"
-	.type	__func__.38497, %object
-	.size	__func__.38497, 16
-__func__.38497:
+	.type	__func__.36768, %object
+	.size	__func__.36768, 16
+__func__.36768:
 	.ascii	"vrgn_attach_chn\000"
-	.type	__func__.38448, %object
-	.size	__func__.38448, 17
-__func__.38448:
+	.type	__func__.36719, %object
+	.size	__func__.36719, 17
+__func__.36719:
 	.ascii	"rgn_dettach_node\000"
-	.type	__func__.38515, %object
-	.size	__func__.38515, 17
-__func__.38515:
+	.type	__func__.36786, %object
+	.size	__func__.36786, 17
+__func__.36786:
 	.ascii	"vrgn_dettach_chn\000"
-	.type	__func__.38466, %object
-	.size	__func__.38466, 22
-__func__.38466:
+	.type	__func__.36737, %object
+	.size	__func__.36737, 22
+__func__.36737:
 	.ascii	"update_canvas_to_node\000"
-	.type	__func__.38528, %object
-	.size	__func__.38528, 27
-__func__.38528:
+	.type	__func__.36799, %object
+	.size	__func__.36799, 27
+__func__.36799:
 	.ascii	"vrgn_update_canvas_to_chns\000"
 	.type	vrgn_ioctls, %object
 	.size	vrgn_ioctls, 180
@@ -2996,12 +2996,12 @@ g_vrgn_dev:
 .LC5:
 	.ascii	"-1\000"
 .LC6:
-	.ascii	"vmpi:a9dd19f6acbf3ae9d621a285aa64278d958f9b03-v1.4."
-	.ascii	"67\000"
+	.ascii	"vmpi:28ee389dbc33c2c7db812cd08e54fd3a0f2f992b-v1.4."
+	.ascii	"81\000"
 .LC7:
 	.ascii	"module: %s\012version: %s\012build: %s\012\000"
 .LC8:
-	.ascii	"-2024-01-22-17:02:23\000"
+	.ascii	"-2024-05-24-16:21:01\000"
 .LC9:
 	.ascii	"*****************************************rgn list**"
 	.ascii	"*********************************************\012\000"

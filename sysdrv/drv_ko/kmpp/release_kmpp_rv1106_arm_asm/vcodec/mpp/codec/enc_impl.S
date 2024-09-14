@@ -488,53 +488,53 @@ enc_impl_proc_debug:
 	.size	enc_impl_proc_debug, .-enc_impl_proc_debug
 	.section	.rodata
 	.set	.LANCHOR0,. + 0
-	.type	__func__.9331, %object
-	.size	__func__.9331, 14
-__func__.9331:
-	.ascii	"enc_impl_init\000"
-	.type	__FUNCTION__.9334, %object
-	.size	__FUNCTION__.9334, 14
-__FUNCTION__.9334:
-	.ascii	"enc_impl_init\000"
 	.type	__func__.9344, %object
-	.size	__func__.9344, 16
+	.size	__func__.9344, 14
 __func__.9344:
+	.ascii	"enc_impl_init\000"
+	.type	__FUNCTION__.9347, %object
+	.size	__FUNCTION__.9347, 14
+__FUNCTION__.9347:
+	.ascii	"enc_impl_init\000"
+	.type	__func__.9357, %object
+	.size	__func__.9357, 16
+__func__.9357:
 	.ascii	"enc_impl_deinit\000"
-	.type	__FUNCTION__.9345, %object
-	.size	__FUNCTION__.9345, 16
-__FUNCTION__.9345:
+	.type	__FUNCTION__.9358, %object
+	.size	__FUNCTION__.9358, 16
+__FUNCTION__.9358:
 	.ascii	"enc_impl_deinit\000"
-	.type	__func__.9353, %object
-	.size	__func__.9353, 18
-__func__.9353:
+	.type	__func__.9366, %object
+	.size	__func__.9366, 18
+__func__.9366:
 	.ascii	"enc_impl_proc_cfg\000"
-	.type	__func__.9360, %object
-	.size	__func__.9360, 17
-__func__.9360:
+	.type	__func__.9373, %object
+	.size	__func__.9373, 17
+__func__.9373:
 	.ascii	"enc_impl_gen_hdr\000"
-	.type	__func__.9367, %object
-	.size	__func__.9367, 15
-__func__.9367:
+	.type	__func__.9380, %object
+	.size	__func__.9380, 15
+__func__.9380:
 	.ascii	"enc_impl_start\000"
-	.type	__func__.9374, %object
-	.size	__func__.9374, 18
-__func__.9374:
+	.type	__func__.9387, %object
+	.size	__func__.9387, 18
+__func__.9387:
 	.ascii	"enc_impl_proc_dpb\000"
-	.type	__func__.9381, %object
-	.size	__func__.9381, 18
-__func__.9381:
+	.type	__func__.9394, %object
+	.size	__func__.9394, 18
+__func__.9394:
 	.ascii	"enc_impl_proc_hal\000"
-	.type	__func__.9392, %object
-	.size	__func__.9392, 20
-__func__.9392:
+	.type	__func__.9405, %object
+	.size	__func__.9405, 20
+__func__.9405:
 	.ascii	"enc_impl_add_prefix\000"
-	.type	__func__.9399, %object
-	.size	__func__.9399, 16
-__func__.9399:
+	.type	__func__.9412, %object
+	.size	__func__.9412, 16
+__func__.9412:
 	.ascii	"enc_impl_sw_enc\000"
-	.type	__func__.9406, %object
-	.size	__func__.9406, 20
-__func__.9406:
+	.type	__func__.9419, %object
+	.size	__func__.9419, 20
+__func__.9419:
 	.ascii	"enc_impl_proc_debug\000"
 	.data
 	.align	2

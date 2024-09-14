@@ -49,7 +49,7 @@ ____atomic_set_bit:
 	.save {r4, r5, lr}
 	lsrs	r2, r0, #5
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r4, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -62,7 +62,7 @@ ____atomic_set_bit:
 	orrs	r0, r0, r5
 	str	r0, [r1, r2, lsl #2]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r4	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -105,7 +105,7 @@ mpp_taskqueue_pending_to_run:
 	.save {r4, lr}
 	mov	r3, r1
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r4, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -115,7 +115,7 @@ mpp_taskqueue_pending_to_run:
 	add	r0, r3, #20
 	bl	list_move_tail
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r4	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -138,11 +138,11 @@ mpp_chnl_is_running:
 	push	{r4, r5, lr}
 	.save {r4, r5, lr}
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r1, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r4, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -158,10 +158,10 @@ mpp_chnl_is_running:
 	movs	r0, #0
 .L6:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r4	@ local_irq_restore
 @ 0 "" 2
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r1	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -269,7 +269,7 @@ mpp_session_get_idle_task:
 	.pad #16
 	mov	r6, r0
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r7, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -289,7 +289,7 @@ mpp_session_get_idle_task:
 	movs	r3, #0
 .L26:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r7	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -360,7 +360,7 @@ mpp_session_attach_workqueue:
 	bl	printk
 .L38:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r1, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -373,7 +373,7 @@ mpp_session_attach_workqueue:
 	strd	r5, r3, [r4, #176]
 	str	r2, [r3]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r1	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -515,7 +515,7 @@ _copy_from_user:
 	mov	r4, r2
 	ldr	r3, [r3, #8]
 	.syntax unified
-@ 157 "./include/linux/uaccess.h" 1
+@ 157 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/include/linux/uaccess.h" 1
 	.syntax unified
 adds r5, r1, r2; sbcscc r5, r5, r3; movcc r3, #0
 @ 0 "" 2
@@ -656,7 +656,7 @@ mpp_chnl_get_iova_addr:
 	ldr	r1, [r2]
 	b	mpp_dma_get_iova
 .L89:
-	mov	r2, #2560
+	movw	r2, #2584
 	ldr	r1, .L90
 	ldr	r0, .L90+4
 	bl	printk
@@ -683,7 +683,7 @@ atomic_fetch_add_relaxed.constprop.19:
 	mov	r3, r0
 	pld	[r0]
 	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
+@ 223 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_fetch_add
 1:	ldrex	r0, [r3]
 	add	r2, r0, #1
@@ -709,7 +709,7 @@ atomic_add.constprop.23:
 	@ link register save eliminated.
 	pld	[r0]
 	.syntax unified
-@ 223 "./arch/arm/include/asm/atomic.h" 1
+@ 223 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_add
 1:	ldrex	r3, [r0]
 	add	r3, r3, #1
@@ -820,7 +820,7 @@ mpp_process_task_default:
 	bl	refcount_warn_saturate
 .L102:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r1, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -833,7 +833,7 @@ mpp_process_task_default:
 	strd	r0, r2, [r4, #4]
 	str	r3, [r2]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r1	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -932,7 +932,7 @@ put_task_msgs:
 	strd	r3, r3, [r4, #44]
 	strd	r3, r3, [r4, #52]
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r6, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -942,7 +942,7 @@ put_task_msgs:
 	add	r0, r4, #8
 	bl	list_move_tail
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r6	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -1007,7 +1007,7 @@ mpp_detach_workqueue:
 	ldr	r1, [r0, #96]
 	cbz	r1, .L135
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r6, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -1027,7 +1027,7 @@ mpp_detach_workqueue:
 	bl	list_del_init
 	str	r5, [r4, #96]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r6	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -1147,7 +1147,7 @@ mpp_chnl_open:
 	bl	mutex_unlock
 .L154:
 	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
+@ 87 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
 	cmp	r6, #29
 	sbc	r3, r6, r6
 .inst.w 0xf3af8014
@@ -1226,7 +1226,7 @@ mpp_dev_open:
 	sub	r9, r5, #12
 	lsls	r2, r3, #26
 	bpl	.L186
-	movw	r2, #1707
+	movw	r2, #1731
 	ldr	r1, .L199+4
 	ldr	r0, .L199+8
 	bl	printk
@@ -1259,7 +1259,7 @@ mpp_dev_open:
 	str	r4, [r8, #128]
 	lsls	r3, r3, #26
 	bpl	.L189
-	movw	r2, #1725
+	movw	r2, #1749
 	ldr	r1, .L199+4
 	ldr	r0, .L199+24
 	bl	printk
@@ -1341,7 +1341,7 @@ mpp_free_task:
 	add	r3, r4, #32
 	pld	[r3]
 	.syntax unified
-@ 224 "./arch/arm/include/asm/atomic.h" 1
+@ 224 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_sub
 1:	ldrex	r2, [r3]
 	sub	r2, r2, #1
@@ -1354,7 +1354,7 @@ mpp_free_task:
 	add	r3, r5, #80
 	pld	[r3]
 	.syntax unified
-@ 224 "./arch/arm/include/asm/atomic.h" 1
+@ 224 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_sub
 1:	ldrex	r2, [r3]
 	sub	r2, r2, #1
@@ -1390,7 +1390,7 @@ kref_put.constprop.24:
 	.save {r4, lr}
 	pld	[r0]
 	.syntax unified
-@ 224 "./arch/arm/include/asm/atomic.h" 1
+@ 224 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/atomic.h" 1
 	@ atomic_fetch_sub
 1:	ldrex	r4, [r0]
 	sub	r2, r4, #1
@@ -1429,7 +1429,7 @@ mpp_session_clear.constprop.10:
 	push	{r3, r4, r5, r6, r7, lr}
 	.save {r3, r4, r5, r6, r7, lr}
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r7, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -1444,7 +1444,7 @@ mpp_session_clear.constprop.10:
 	cmp	r6, r4
 	bne	.L220
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r7	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -1508,7 +1508,7 @@ mpp_process_request:
 	cmp	r3, #0
 	bne	.L266
 	ldr	r3, [r5]
-	movw	r2, #1431
+	movw	r2, #1455
 	ldr	r1, .L340+8
 	ldr	r0, .L340+12
 	str	r3, [sp]
@@ -1532,7 +1532,7 @@ mpp_process_request:
 	movs	r2, #120
 	ldr	r1, .L340+8
 	str	r2, [sp]
-	movw	r2, #1383
+	movw	r2, #1407
 	ldr	r0, .L340+16
 	mvn	r4, #11
 	bl	printk
@@ -1558,7 +1558,7 @@ mpp_process_request:
 	ldr	r3, [r5, #32]
 	cmp	r3, #0
 	beq	.L262
-	movw	r2, #1415
+	movw	r2, #1439
 	ldr	r1, .L340+8
 	ldr	r0, .L340+24
 	mvn	r4, #109
@@ -1583,7 +1583,7 @@ mpp_process_request:
 .L337:
 	subs	r1, r1, #1
 	.syntax unified
-@ 1287 "drivers/kmpp/mpp/mpp_common.c" 1
+@ 1311 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_common.c" 1
 	.ifnc r0,r0; .ifnc r0r0,fpr11; .ifnc r0r0,r11fp; .ifnc r0r0,ipr12; .ifnc r0r0,r12ip; .err; .endif; .endif; .endif; .endif; .endif
 	.ifnc r2,r2; .ifnc r2r2,fpr11; .ifnc r2r2,r11fp; .ifnc r2r2,ipr12; .ifnc r2r2,r12ip; .err; .endif; .endif; .endif; .endif; .endif
 	.ifnc r1,r1; .ifnc r1r1,fpr11; .ifnc r1r1,r11fp; .ifnc r1r1,ipr12; .ifnc r1r1,r12ip; .err; .endif; .endif; .endif; .endif; .endif
@@ -1613,7 +1613,7 @@ mpp_process_request:
 	ldr	r1, [r3, #8]
 	subs	r1, r1, #1
 	.syntax unified
-@ 1300 "drivers/kmpp/mpp/mpp_common.c" 1
+@ 1324 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_common.c" 1
 	.ifnc r0,r0; .ifnc r0r0,fpr11; .ifnc r0r0,r11fp; .ifnc r0r0,ipr12; .ifnc r0r0,r12ip; .err; .endif; .endif; .endif; .endif; .endif
 	.ifnc r2,r2; .ifnc r2r2,fpr11; .ifnc r2r2,r11fp; .ifnc r2r2,ipr12; .ifnc r2r2,r12ip; .err; .endif; .endif; .endif; .endif; .endif
 	.ifnc r1,r1; .ifnc r1r1,fpr11; .ifnc r1r1,r11fp; .ifnc r1r1,ipr12; .ifnc r1r1,r12ip; .err; .endif; .endif; .endif; .endif; .endif
@@ -1632,7 +1632,7 @@ mpp_process_request:
 	bl	printk
 .L241:
 	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
+@ 87 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
 	cmp	r5, #29
 	sbc	r2, r5, r5
 .inst.w 0xf3af8014
@@ -1696,7 +1696,7 @@ mpp_process_request:
 	ldr	r1, [r3, #8]
 	subs	r1, r1, #1
 	.syntax unified
-@ 1320 "drivers/kmpp/mpp/mpp_common.c" 1
+@ 1344 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_common.c" 1
 	.ifnc r0,r0; .ifnc r0r0,fpr11; .ifnc r0r0,r11fp; .ifnc r0r0,ipr12; .ifnc r0r0,r12ip; .err; .endif; .endif; .endif; .endif; .endif
 	.ifnc r2,r2; .ifnc r2r2,fpr11; .ifnc r2r2,r11fp; .ifnc r2r2,ipr12; .ifnc r2r2,r12ip; .err; .endif; .endif; .endif; .endif; .endif
 	.ifnc r1,r1; .ifnc r1r1,fpr11; .ifnc r1r1,r11fp; .ifnc r1r1,ipr12; .ifnc r1r1,r12ip; .err; .endif; .endif; .endif; .endif; .endif
@@ -1715,7 +1715,7 @@ mpp_process_request:
 	cmp	r2, #256
 	beq	.L270
 .L248:
-	movw	r2, #1265
+	movw	r2, #1289
 	ldr	r1, .L342
 	ldr	r0, .L342+4
 	bl	printk
@@ -1754,7 +1754,7 @@ mpp_process_request:
 	ldr	r1, [r3, #8]
 	subs	r1, r1, #1
 	.syntax unified
-@ 1329 "drivers/kmpp/mpp/mpp_common.c" 1
+@ 1353 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_common.c" 1
 	.ifnc r0,r0; .ifnc r0r0,fpr11; .ifnc r0r0,r11fp; .ifnc r0r0,ipr12; .ifnc r0r0,r12ip; .err; .endif; .endif; .endif; .endif; .endif
 	.ifnc r2,r2; .ifnc r2r2,fpr11; .ifnc r2r2,r11fp; .ifnc r2r2,ipr12; .ifnc r2r2,r12ip; .err; .endif; .endif; .endif; .endif; .endif
 	.ifnc r1,r1; .ifnc r1r1,fpr11; .ifnc r1r1,r11fp; .ifnc r1r1,ipr12; .ifnc r1r1,r12ip; .err; .endif; .endif; .endif; .endif; .endif
@@ -1775,14 +1775,14 @@ mpp_process_request:
 	cmp	r6, #28
 	bls	.L250
 	movs	r3, #29
-	movw	r2, #1335
+	movw	r2, #1359
 	ldr	r1, .L342+12
 	ldr	r0, .L342+16
 	bl	printk
 	b	.L339
 .L250:
 	.syntax unified
-@ 87 "./arch/arm/include/asm/barrier.h" 1
+@ 87 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/barrier.h" 1
 	cmp	r6, #29
 	sbc	r2, r6, r6
 .inst.w 0xf3af8014
@@ -1845,7 +1845,7 @@ mpp_process_request:
 	ldr	r1, [r3, #8]
 	subs	r1, r1, #1
 	.syntax unified
-@ 1372 "drivers/kmpp/mpp/mpp_common.c" 1
+@ 1396 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_common.c" 1
 	.ifnc r0,r0; .ifnc r0r0,fpr11; .ifnc r0r0,r11fp; .ifnc r0r0,ipr12; .ifnc r0r0,r12ip; .err; .endif; .endif; .endif; .endif; .endif
 	.ifnc r2,r2; .ifnc r2r2,fpr11; .ifnc r2r2,r11fp; .ifnc r2r2,ipr12; .ifnc r2r2,r12ip; .err; .endif; .endif; .endif; .endif; .endif
 	.ifnc r1,r1; .ifnc r1r1,fpr11; .ifnc r1r1,r11fp; .ifnc r1r1,ipr12; .ifnc r1r1,r12ip; .err; .endif; .endif; .endif; .endif; .endif
@@ -1869,7 +1869,7 @@ mpp_process_request:
 	add	r0, r5, #44
 	bl	_copy_from_user
 	cbz	r0, .L261
-	movw	r2, #1389
+	movw	r2, #1413
 	ldr	r1, .L342+12
 	ldr	r0, .L342+20
 	bl	printk
@@ -1992,7 +1992,7 @@ get_task_msgs:
 	.pad #12
 	mov	r5, r0
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r7, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -2008,7 +2008,7 @@ get_task_msgs:
 	mov	r1, r6
 	bl	list_move_tail
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r7	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -2020,7 +2020,7 @@ get_task_msgs:
 	pop	{r4, r5, r6, r7, pc}
 .L358:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r7	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -2045,7 +2045,7 @@ get_task_msgs:
 	str	r0, [r4, #8]
 	str	r0, [r4, #12]
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r7, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -2057,7 +2057,7 @@ get_task_msgs:
 	adds	r3, r3, #1
 	str	r3, [r5, #220]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r7	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -2098,7 +2098,7 @@ mpp_taskqueue_get_pending_task:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -2110,7 +2110,7 @@ mpp_taskqueue_get_pending_task:
 	subne	r0, r3, #20
 	moveq	r0, #0
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -2131,7 +2131,7 @@ mpp_taskqueue_get_running_task:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -2143,7 +2143,7 @@ mpp_taskqueue_get_running_task:
 	subne	r0, r3, #20
 	moveq	r0, #0
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -2169,7 +2169,7 @@ mpp_taskqueue_pop_running:
 	ldr	r3, [r3, #12]
 	cbz	r3, .L377
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r4, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -2178,7 +2178,7 @@ mpp_taskqueue_pop_running:
 	add	r0, r1, #20
 	bl	list_del_init
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r4	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -2232,7 +2232,7 @@ mpp_dev_ioctl:
 	ldr	r3, [r7]
 	lsls	r3, r3, #26
 	bpl	.L380
-	movw	r2, #1668
+	movw	r2, #1692
 	ldr	r1, .L472+4
 	ldr	r0, .L472+8
 	bl	printk
@@ -2242,7 +2242,7 @@ mpp_dev_ioctl:
 	cbnz	r3, .L382
 .L381:
 	mov	r3, r6
-	movw	r2, #1671
+	movw	r2, #1695
 	ldr	r1, .L472+4
 	mvn	r4, #21
 	ldr	r0, .L472+12
@@ -2282,7 +2282,7 @@ mpp_dev_ioctl:
 	str	r9, [sp, #36]
 	beq	.L422
 	mov	r3, r4
-	movw	r2, #1473
+	movw	r2, #1497
 	ldr	r1, .L472+28
 	ldr	r0, .L472+32
 	bl	printk
@@ -2290,7 +2290,7 @@ mpp_dev_ioctl:
 	mvn	r4, #21
 .L387:
 	mov	r3, r4
-	movw	r2, #1690
+	movw	r2, #1714
 	ldr	r1, .L472+4
 	ldr	r0, .L472+36
 	bl	printk
@@ -2321,7 +2321,7 @@ mpp_dev_ioctl:
 	cbz	r0, .L390
 	mov	r3, r2
 	ldr	r1, .L472+28
-	mov	r2, #1488
+	mov	r2, #1512
 	ldr	r0, .L472+44
 	bl	printk
 .L393:
@@ -2356,7 +2356,7 @@ mpp_dev_ioctl:
 	str	r3, [sp, #20]
 	bne	.L395
 	mvn	r3, #8
-	movw	r2, #1517
+	movw	r2, #1541
 	str	r3, [sp, #28]
 	ldr	r1, .L472+28
 	ldr	r3, [sp, #48]
@@ -2369,7 +2369,7 @@ mpp_dev_ioctl:
 	adds	r0, r0, #12
 	ldr	r3, [r3, #8]
 	.syntax unified
-@ 177 "./include/linux/uaccess.h" 1
+@ 177 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/include/linux/uaccess.h" 1
 	.syntax unified
 adds r2, r0, #4; sbcscc r2, r2, r3; movcc r3, #0
 @ 0 "" 2
@@ -2377,7 +2377,7 @@ adds r2, r0, #4; sbcscc r2, r2, r3; movcc r3, #0
 	.syntax unified
 	cbz	r3, .L396
 .L398:
-	mov	r2, #1520
+	mov	r2, #1544
 	ldr	r1, .L472+28
 	ldr	r0, .L472+52
 	bl	printk
@@ -2397,7 +2397,7 @@ adds r2, r0, #4; sbcscc r2, r2, r3; movcc r3, #0
 	cmp	r10, #0
 	beq	.L414
 	.syntax unified
-@ 39 "./arch/arm/include/asm/irqflags.h" 1
+@ 39 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		cpsie i			@ arch_local_irq_enable
 @ 0 "" 2
 	.thumb
@@ -2415,7 +2415,7 @@ adds r2, r0, #4; sbcscc r2, r2, r3; movcc r3, #0
 	ldr	r3, [r7]
 	lsls	r3, r3, #26
 	bpl	.L379
-	mov	r2, #1696
+	mov	r2, #1720
 	ldr	r1, .L472+4
 	ldr	r0, .L472+56
 	bl	printk
@@ -2479,7 +2479,7 @@ adds r2, r0, #4; sbcscc r2, r2, r3; movcc r3, #0
 	movs	r3, #16
 	ldr	r1, .L472+28
 	strd	r2, r3, [sp]
-	movw	r2, #1565
+	movw	r2, #1589
 	ldr	r3, [r6, #4]
 	ldr	r0, .L472+68
 	bl	printk
@@ -2510,7 +2510,7 @@ adds r2, r0, #4; sbcscc r2, r2, r3; movcc r3, #0
 	mov	r4, r0
 	cbz	r0, .L406
 	str	r0, [sp, #4]
-	movw	r2, #1579
+	movw	r2, #1603
 	ldr	r3, [r8]
 	ldr	r1, .L472+28
 	ldr	r0, .L472+72
@@ -2564,7 +2564,7 @@ adds r2, r0, #4; sbcscc r2, r2, r3; movcc r3, #0
 	cmp	fp, #0
 	beq	.L411
 	.syntax unified
-@ 39 "./arch/arm/include/asm/irqflags.h" 1
+@ 39 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		cpsie i			@ arch_local_irq_enable
 @ 0 "" 2
 	.thumb
@@ -2573,7 +2573,7 @@ adds r2, r0, #4; sbcscc r2, r2, r3; movcc r3, #0
 	bl	mpp_taskqueue_trigger_work
 .L411:
 	.syntax unified
-@ 49 "./arch/arm/include/asm/irqflags.h" 1
+@ 49 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		cpsid i			@ arch_local_irq_disable
 @ 0 "" 2
 	.thumb
@@ -2613,7 +2613,7 @@ adds r2, r0, #4; sbcscc r2, r2, r3; movcc r3, #0
 	bl	mpp_wait_result
 	cbz	r0, .L417
 	str	r0, [sp]
-	movw	r2, #1652
+	movw	r2, #1676
 	ldr	r3, [r8, #4]
 	mov	r1, r10
 	mov	r0, fp
@@ -2686,7 +2686,7 @@ mpp_chnl_add_req:
 	beq	.L478
 	mov	r3, r2
 	ldr	r1, .L504+4
-	movw	r2, #1226
+	movw	r2, #1250
 	ldr	r0, .L504+8
 	bl	printk
 .L489:
@@ -2769,7 +2769,7 @@ mpp_chnl_add_req:
 	movs	r2, #16
 	ldr	r1, .L504+12
 	str	r2, [sp]
-	movw	r2, #2513
+	movw	r2, #2537
 	ldr	r0, .L504+16
 	mvn	r5, #21
 	bl	printk
@@ -2807,7 +2807,7 @@ mpp_power_on:
 	movs	r2, #1
 	pld	[r3]
 	.syntax unified
-@ 66 "./arch/arm/include/asm/cmpxchg.h" 1
+@ 66 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/cmpxchg.h" 1
 	@	__xchg4
 1:	ldrex	r1, [r3]
 	strex	r0, r2, [r3]
@@ -2879,7 +2879,7 @@ mpp_power_off:
 	add	r2, r0, #124
 	pld	[r2]
 	.syntax unified
-@ 66 "./arch/arm/include/asm/cmpxchg.h" 1
+@ 66 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/cmpxchg.h" 1
 	@	__xchg4
 1:	ldrex	r1, [r2]
 	strex	r5, r3, [r2]
@@ -2902,7 +2902,7 @@ mpp_power_off:
 .L524:
 	ldr	r5, [r4]
 	bl	ktime_get_mono_fast_ns
-	strd	r0, [r5, #272]
+	strd	r0, [r5, #248]
 	movs	r1, #13
 .L531:
 	ldr	r0, [r4]
@@ -2963,7 +2963,7 @@ mpp_session_deinit:
 	mov	r5, sp
 	strd	r5, r5, [sp]
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r7, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -2986,7 +2986,7 @@ mpp_session_deinit:
 	cmp	r0, r8
 	bne	.L541
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r7	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -3055,7 +3055,7 @@ mpp_session_pop_pending:
 	push	{r4, lr}
 	.save {r4, lr}
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r4, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -3064,7 +3064,7 @@ mpp_session_pop_pending:
 	adds	r0, r1, #4
 	bl	list_del_init
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r4	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -3090,7 +3090,7 @@ mpp_session_clean_detach:
 	.save {r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	mov	r6, r0
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r4, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -3107,7 +3107,7 @@ mpp_session_clean_detach:
 	bne	.L556
 .L557:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r4	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -3126,7 +3126,7 @@ mpp_session_clean_detach:
 	addw	r0, r0, #2204
 	bl	atomic_add.constprop.23
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r1, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -3135,7 +3135,7 @@ mpp_session_clean_detach:
 	add	r0, r7, #20
 	bl	list_del_init
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r1	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -3156,7 +3156,7 @@ mpp_session_clean_detach:
 	subs	r3, r3, #1
 	str	r3, [r6, #48]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r4	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -3177,7 +3177,7 @@ mpp_session_clean_detach:
 	mov	r0, r8
 	bl	mpp_session_deinit
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r4, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -3220,7 +3220,7 @@ mpp_session_detach_workqueue:
 	ldr	r3, [r4, #12]
 	ldr	r1, [r3, #96]
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r6, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -3238,7 +3238,7 @@ mpp_session_detach_workqueue:
 	adds	r3, r3, #1
 	str	r3, [r1, #48]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r6	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -3273,13 +3273,13 @@ mpp_dev_release:
 	ldr	r2, [r5]
 	lsls	r3, r2, #26
 	bpl	.L593
-	movw	r2, #1734
+	movw	r2, #1758
 	ldr	r1, .L602+4
 	ldr	r0, .L602+8
 	bl	printk
 .L593:
 	cbnz	r4, .L594
-	movw	r2, #1737
+	movw	r2, #1761
 	ldr	r1, .L602+4
 	ldr	r0, .L602+12
 	bl	printk
@@ -3299,7 +3299,7 @@ mpp_dev_release:
 	str	r4, [r6, #128]
 	ands	r0, r0, #32
 	beq	.L592
-	movw	r2, #1751
+	movw	r2, #1775
 	ldr	r1, .L602+4
 	ldr	r0, .L602+16
 	bl	printk
@@ -3335,13 +3335,13 @@ mpp_chnl_release:
 	ldr	r3, [r3]
 	lsls	r3, r3, #26
 	bpl	.L605
-	movw	r2, #2472
+	mov	r2, #2496
 	ldr	r1, .L612+4
 	ldr	r0, .L612+8
 	bl	printk
 .L605:
 	cbnz	r5, .L606
-	movw	r2, #2474
+	movw	r2, #2498
 	ldr	r1, .L612+4
 	ldr	r0, .L612+12
 	bl	printk
@@ -3383,7 +3383,7 @@ mpp_session_get_pending_task:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -3395,7 +3395,7 @@ mpp_session_get_pending_task:
 	subne	r0, r3, #4
 	moveq	r0, #0
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -3423,7 +3423,7 @@ mpp_wait_result_default:
 	mov	r4, r0
 	cbnz	r0, .L618
 	mov	r3, r6
-	mov	r2, #1004
+	movw	r2, #1028
 	ldr	r1, .L641
 	mvn	r5, #4
 	ldr	r0, .L641+4
@@ -3475,7 +3475,7 @@ mpp_wait_result_default:
 	str	r2, [sp, #16]
 	ldr	r2, [r4, #2276]
 	strd	r3, r2, [sp, #8]
-	mov	r2, #1020
+	movw	r2, #1044
 	ldr	r3, [r6, #4]
 	str	r3, [sp, #4]
 	ldr	r3, [r6]
@@ -3500,7 +3500,7 @@ mpp_wait_result_default:
 	lsls	r3, r3, #22
 	bpl	.L628
 	ldr	r3, [r4, #2252]
-	movw	r2, #1027
+	movw	r2, #1051
 	ldr	r1, .L641
 	ldr	r0, .L641+16
 	strd	r3, r5, [sp, #12]
@@ -3744,7 +3744,7 @@ mpp_check_req:
 	mov	r3, r1
 	ldr	r0, .L675
 	ldr	r1, .L675+4
-	movw	r2, #1771
+	movw	r2, #1795
 	str	r4, [sp]
 .L673:
 	bl	printk
@@ -3757,7 +3757,7 @@ mpp_check_req:
 	bcs	.L669
 	strd	r2, r0, [sp]
 	mov	r3, r4
-	movw	r2, #1777
+	movw	r2, #1801
 	ldr	r1, .L675+4
 	ldr	r0, .L675+8
 	bl	printk
@@ -3771,7 +3771,7 @@ mpp_check_req:
 	cmp	r6, r3
 	bcs	.L670
 	str	r6, [sp]
-	movw	r2, #1782
+	movw	r2, #1806
 	ldr	r1, .L675+4
 	ldr	r0, .L675+12
 	b	.L673
@@ -3780,7 +3780,7 @@ mpp_check_req:
 	ble	.L671
 	str	r6, [sp]
 	mov	r3, r4
-	movw	r2, #1787
+	movw	r2, #1811
 	ldr	r1, .L675+4
 	ldr	r0, .L675+16
 	b	.L673
@@ -3790,7 +3790,7 @@ mpp_check_req:
 	strd	r2, r6, [sp]
 	mov	r3, r4
 	ldr	r1, .L675+4
-	mov	r2, #1792
+	mov	r2, #1816
 	ldr	r0, .L675+20
 	bl	printk
 	ldr	r1, [r5, #8]
@@ -3833,7 +3833,7 @@ mpp_extract_reg_offset_info:
 	cmp	r3, #60
 	bls	.L678
 	movs	r3, #60
-	movw	r2, #1807
+	movw	r2, #1831
 	strd	r0, r3, [sp]
 	mov	r3, r5
 	ldr	r1, .L683
@@ -3852,7 +3852,7 @@ mpp_extract_reg_offset_info:
 	ldr	r1, [r1, #16]
 	bge	.L680
 .L681:
-	movw	r2, #1812
+	movw	r2, #1836
 	ldr	r1, .L683
 	ldr	r0, .L683+8
 	bl	printk
@@ -3892,7 +3892,7 @@ mpp_query_reg_offset_info:
 	ldr	r2, [r5]
 	lsls	r2, r2, #26
 	bpl	.L686
-	movw	r2, #1823
+	movw	r2, #1847
 	ldr	r1, .L696+4
 	ldr	r0, .L696+8
 	bl	printk
@@ -3901,7 +3901,7 @@ mpp_query_reg_offset_info:
 	ldr	r3, [r5]
 	lsls	r3, r3, #26
 	bpl	.L695
-	mov	r2, #1832
+	mov	r2, #1856
 	ldr	r1, .L696+4
 	ldr	r0, .L696+12
 	bl	printk
@@ -3956,7 +3956,7 @@ mpp_translate_reg_offset_info:
 	ldr	r3, [r4]
 	lsls	r1, r3, #26
 	bpl	.L699
-	movw	r2, #1841
+	movw	r2, #1865
 	ldr	r1, .L712+4
 	ldr	r0, .L712+8
 	bl	printk
@@ -3965,7 +3965,7 @@ mpp_translate_reg_offset_info:
 	ldr	r3, [r4]
 	lsls	r2, r3, #26
 	bpl	.L711
-	movw	r2, #1853
+	movw	r2, #1877
 	ldr	r1, .L712+4
 	ldr	r0, .L712+12
 	bl	printk
@@ -4072,7 +4072,7 @@ mpp_task_dump_mem_region:
 	mov	r6, r0
 	mov	r4, r1
 	cbz	r1, .L721
-	movw	r2, #1910
+	movw	r2, #1934
 	ldr	r1, .L723
 	ldr	r0, .L723+4
 	add	r5, r4, #28
@@ -4100,7 +4100,7 @@ mpp_task_dump_mem_region:
 	str	r2, [sp, #4]
 	add	r2, r3, #8
 	str	r2, [sp]
-	movw	r2, #1916
+	movw	r2, #1940
 	ldr	r3, [r3, #16]
 	bl	printk
 	mov	r3, r4
@@ -4150,7 +4150,7 @@ mpp_task_dump_reg:
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, pc}
 .L727:
-	movw	r2, #1931
+	movw	r2, #1955
 	ldr	r1, .L735+4
 	ldr	r0, .L735+8
 	bl	printk
@@ -4171,7 +4171,7 @@ mpp_task_dump_reg:
 	ldr	r2, [r2, r4, lsl #2]
 	strd	r3, r2, [sp]
 	mov	r3, r4
-	movw	r2, #1941
+	movw	r2, #1965
 	adds	r4, r4, #1
 	bl	printk
 	b	.L729
@@ -4207,7 +4207,7 @@ mpp_task_dump_hw_reg:
 	lsls	r3, r3, #21
 	bpl	.L742
 	ldr	r3, [r0, #4]
-	movw	r2, #1956
+	movw	r2, #1980
 	ldr	r1, .L743+4
 	ldr	r0, .L743+8
 	ldr	r3, [r3, #4]
@@ -4228,7 +4228,7 @@ mpp_task_dump_hw_reg:
 	lsls	r2, r4, #2
 	add	r3, r3, r2
 	.syntax unified
-@ 113 "./arch/arm/include/asm/io.h" 1
+@ 113 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/io.h" 1
 	ldr r3, [r3]
 @ 0 "" 2
 	.thumb
@@ -4236,7 +4236,7 @@ mpp_task_dump_hw_reg:
 	strd	r2, r3, [sp]
 	mov	r1, r7
 	mov	r3, r4
-	movw	r2, #1961
+	movw	r2, #1985
 	mov	r0, r8
 	adds	r4, r4, #1
 	bl	printk
@@ -4362,7 +4362,7 @@ mpp_dev_probe:
 	str	r10, [r4, #108]
 	str	r10, [r4, #112]
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	fp, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -4381,7 +4381,7 @@ mpp_dev_probe:
 	bl	_dev_err
 .L756:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, fp	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -4558,10 +4558,10 @@ mpp_dev_probe:
 	ldr	r3, [r4, #60]
 	add	r3, r3, r2
 	.syntax unified
-@ 113 "./arch/arm/include/asm/io.h" 1
+@ 113 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/io.h" 1
 	ldr r6, [r3]
 @ 0 "" 2
-@ 732 "drivers/kmpp/mpp/mpp_common.h" 1
+@ 747 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/drivers/kmpp/mpp/mpp_common.h" 1
 	dsb 
 @ 0 "" 2
 	.thumb
@@ -4759,7 +4759,7 @@ mpp_dev_irq:
 	bne	.L823
 	addw	r7, r5, #2200
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -4769,7 +4769,7 @@ mpp_dev_irq:
 	orr	r1, r3, #8
 	str	r1, [r5, #2200]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -4777,7 +4777,7 @@ mpp_dev_irq:
 	lsls	r2, r3, #28
 	bpl	.L827
 	ldr	r3, [r6, #52]
-	movw	r2, #2135
+	movw	r2, #2159
 	ldr	r1, .L835
 	movs	r4, #1
 	ldr	r0, .L835+4
@@ -5047,7 +5047,7 @@ mpp_task_timeout_work:
 	mov	r7, r0
 	ldr	r9, [r5, #2308]
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r2, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -5057,55 +5057,60 @@ mpp_task_timeout_work:
 	orr	r1, r3, #8
 	str	r1, [r0, #-8]
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r2	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	lsls	r3, r3, #28
 	bpl	.L921
-	movw	r2, #619
-	ldr	r1, .L940
-	ldr	r0, .L940+4
+	movw	r2, #618
+	ldr	r1, .L943
+	ldr	r0, .L943+4
 	pop	{r4, r5, r6, r7, r8, r9, r10, lr}
 	b	printk
 .L921:
 	ldr	r3, [r5, #2276]
-	movw	r2, #623
-	ldr	r1, .L940
-	ldr	r0, .L940+8
+	movw	r2, #622
+	ldr	r1, .L943
+	ldr	r0, .L943+8
 	bl	printk
 	ldr	r6, [r5]
 	cbnz	r6, .L922
-	ldr	r1, .L940
+	ldr	r1, .L943
 	mov	r3, r5
-	ldr	r0, .L940+12
-	movw	r2, #626
-.L939:
+	ldr	r0, .L943+12
+	movw	r2, #625
+.L942:
 	pop	{r4, r5, r6, r7, r8, r9, r10, lr}
 	b	printk
 .L922:
 	ldr	r3, [r6, #12]
 	cbnz	r3, .L923
 	mov	r3, r6
-	mov	r2, #632
-	ldr	r1, .L940
-	ldr	r0, .L940+16
-	b	.L939
+	movw	r2, #631
+	ldr	r1, .L943
+	ldr	r0, .L943+16
+	b	.L942
 .L923:
 	ldr	r4, [r5, #2292]
 	cmp	r4, #0
 	it	eq
 	moveq	r4, r3
+	ldr	r3, [r4, #4]
+	ldr	r3, [r3, #16]
+	ldr	r3, [r3, #64]
+	cbz	r3, .L929
 	mov	r0, r4
-	bl	rkvenc_dump_dbg
+	blx	r3
+.L929:
 	ldr	r0, [r4, #100]
-	cbz	r0, .L925
+	cbz	r0, .L926
 	ldr	r3, [r0]
-	cbz	r3, .L925
+	cbz	r3, .L926
 	adds	r0, r0, #4
 	bl	up_read
-.L925:
+.L926:
 	sub	r8, r7, #8
 	mov	r0, r4
 	bl	mpp_dev_reset
@@ -5133,9 +5138,9 @@ mpp_task_timeout_work:
 	bx	r3	@ indirect register sibling call
 .L920:
 	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
-.L941:
+.L944:
 	.align	2
-.L940:
+.L943:
 	.word	.LANCHOR1+494
 	.word	.LC101
 	.word	.LC102
@@ -5159,30 +5164,30 @@ mpp_task_finish:
 	mov	r6, r0
 	ldr	r4, [r1, #2292]
 	mov	r5, r1
-	cbnz	r4, .L943
+	cbnz	r4, .L946
 	ldr	r4, [r0, #12]
-.L943:
+.L946:
 	ldr	r3, [r4, #12]
 	ldr	r8, [r5, #2308]
 	ldr	r3, [r3, #36]
-	cbz	r3, .L944
+	cbz	r3, .L947
 	mov	r1, r5
 	mov	r0, r4
 	blx	r3
-.L944:
+.L947:
 	ldr	r0, [r4, #100]
-	cbz	r0, .L945
+	cbz	r0, .L948
 	ldr	r3, [r0]
-	cbz	r3, .L945
+	cbz	r3, .L948
 	adds	r0, r0, #4
 	bl	up_read
-.L945:
+.L948:
 	ldr	r3, [r4, #72]
 	cmp	r3, #0
-	ble	.L946
+	ble	.L949
 	mov	r0, r4
 	bl	mpp_dev_reset
-.L946:
+.L949:
 	addw	r7, r5, #2200
 	mov	r0, r4
 	bl	mpp_power_off
@@ -5200,12 +5205,12 @@ mpp_task_finish:
 	ldr	r0, [r4, #96]
 	bl	mpp_taskqueue_pop_running
 	ldr	r3, [r6, #240]
-	cbz	r3, .L947
+	cbz	r3, .L950
 	cmp	r8, #0
-	beq	.L947
+	beq	.L950
 	ldr	r0, [r6, #196]
 	blx	r3
-.L947:
+.L950:
 	movs	r0, #0
 	pop	{r4, r5, r6, r7, r8, pc}
 	.fnend
@@ -5223,19 +5228,19 @@ mpp_time_record:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r3, lr}
 	.save {r3, lr}
-	ldr	r3, .L971
+	ldr	r3, .L974
 	ldr	r3, [r3]
 	lsls	r3, r3, #23
-	bpl	.L964
-	cbz	r0, .L964
+	bpl	.L967
+	cbz	r0, .L967
 	add	r0, r0, #2256
 	bl	ktime_get_real_ts64
-.L964:
+.L967:
 	movs	r0, #0
 	pop	{r3, pc}
-.L972:
+.L975:
 	.align	2
-.L971:
+.L974:
 	.word	mpp_dev_debug
 	.fnend
 	.size	mpp_time_record, .-mpp_time_record
@@ -5250,82 +5255,126 @@ mpp_chnl_run_task:
 	.fnstart
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, r7, r8, r9, r10, lr}
-	.save {r4, r5, r6, r7, r8, r9, r10, lr}
-	mov	r7, r0
-	ldr	r6, [r0, #12]
-	ldr	r9, [r6, #96]
+	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	mov	r5, r0
+	ldr	r10, [r0, #12]
+	.pad #20
+	sub	sp, sp, #20
+	mov	r6, r1
+	ldr	r9, [r10, #96]
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
-		mrs	r10, cpsr	@ arch_local_irq_save
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		mrs	fp, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r3, .L1004
+	ldr	r3, .L1022
 	ldr	r2, [r3]
 	mov	r8, r3
 	tst	r2, #512
-	beq	.L977
+	beq	.L985
 	ldr	r3, [r0, #196]
-	mov	r2, #940
-	ldr	r1, .L1004+4
-	ldr	r0, .L1004+8
+	movw	r2, #941
+	ldr	r1, .L1022+4
+	ldr	r0, .L1022+8
 	bl	printk
-.L977:
-	mov	r0, r7
+.L985:
+	mov	r0, r5
 	bl	mpp_session_get_idle_task
 	mov	r4, r0
 	cmp	r0, #0
-	beq	.L986
-	ldr	r5, [r6, #148]
-	cmp	r5, #0
-	bne	.L987
-	ldr	r3, [r0, #2204]
-	cmp	r3, #0
-	ble	.L976
-	mov	r1, r0
+	beq	.L995
+	ldr	r7, [r10, #148]
+	cmp	r7, #0
+	bne	.L996
+	cbz	r6, .L980
+	ldr	r3, [r6, #8]
+	ldr	r1, [r0, #2324]
+	adds	r2, r3, #7
+	bic	r2, r2, #7
+	cmp	r2, r1
+	bne	.L981
+	ldr	r2, [r6, #12]
+	ldr	r0, [r0, #2328]
+	adds	r2, r2, #7
+	bic	r2, r2, #7
+	cmp	r2, r0
+	beq	.L980
+.L981:
+	ldr	r2, [r8]
+	lsls	r0, r2, #13
+	bpl	.L983
+	ldr	r2, [r4, #2328]
+	ldr	r0, .L1022+12
+	strd	r1, r2, [sp, #4]
+	ldr	r2, [r6, #12]
+	ldr	r1, [r5, #196]
+	str	r2, [sp]
+	ldr	r2, [r4, #2276]
+	bl	printk
+.L983:
+	addw	r0, r4, #2204
+	bl	atomic_add.constprop.23
+	addw	r1, r4, #2200
+	movs	r0, #7
+	bl	____atomic_set_bit
+	mov	r1, r4
 	mov	r0, r9
 	bl	mpp_taskqueue_pop_pending
-	b	.L977
-.L976:
-	ldr	r3, [r6, #12]
+	ldr	r3, [r5, #240]
+	cbz	r3, .L980
+	ldr	r0, [r5, #196]
+	blx	r3
+.L980:
+	ldr	r3, [r4, #2204]
+	cmp	r3, #0
+	ble	.L984
+	mov	r1, r4
+	mov	r0, r9
+	bl	mpp_taskqueue_pop_pending
+	b	.L985
+.L984:
+	ldr	r3, [r10, #12]
 	ldr	r3, [r3, #20]
-	cbz	r3, .L978
-	mov	r1, r0
-	mov	r0, r6
+	cbz	r3, .L986
+	mov	r1, r4
+	mov	r0, r10
 	blx	r3
 	mov	r4, r0
-	cbnz	r0, .L979
-.L981:
+	cbnz	r0, .L987
+.L989:
 	ldr	r3, [r8]
 	lsls	r2, r3, #22
-	bmi	.L980
-.L1003:
-	mvn	r5, #15
-.L975:
+	bmi	.L988
+.L1021:
+	mvn	r7, #15
+.L978:
 	mov	r0, r9
 	bl	mpp_session_clean_detach
 	ldr	r3, [r8]
 	lsls	r3, r3, #22
-	bpl	.L985
-	ldr	r3, [r7, #196]
-	movw	r2, #990
-	ldr	r1, .L1004+4
-	ldr	r0, .L1004+12
+	bpl	.L994
+	ldr	r3, [r5, #196]
+	movw	r2, #1014
+	ldr	r1, .L1022+4
+	ldr	r0, .L1022+16
 	bl	printk
-.L985:
+.L994:
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
-		msr	cpsr_c, r10	@ local_irq_restore
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
+		msr	cpsr_c, fp	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	mov	r0, r5
-	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
-.L978:
+	mov	r0, r7
+	add	sp, sp, #20
+	@ sp needed
+	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
+.L986:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r1, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -5334,65 +5383,72 @@ mpp_chnl_run_task:
 	mov	r3, r9
 	ldr	r2, [r3, #60]!
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r1	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	cmp	r2, r3
-	bne	.L981
-.L979:
+	bne	.L989
+.L987:
+	cbz	r6, .L990
+	ldr	r3, [r6]
+	str	r3, [r4, #2316]
+	ldr	r3, [r6, #4]
+	str	r3, [r4, #2320]
+.L990:
 	ldr	r6, [r4, #2292]
-	cbnz	r6, .L982
+	cbnz	r6, .L991
 	ldr	r3, [r4]
 	ldr	r6, [r3, #12]
-.L982:
+.L991:
 	mov	r1, r4
 	mov	r0, r9
 	bl	mpp_taskqueue_pending_to_run
 	ldr	r0, [r6, #100]
-	cbz	r0, .L983
+	cbz	r0, .L992
 	ldr	r3, [r0]
-	cbz	r3, .L983
+	cbz	r3, .L992
 	adds	r0, r0, #4
 	bl	down_read
-.L983:
+.L992:
 	add	r0, r6, #132
 	bl	down_read
 	mov	r0, r4
 	bl	mpp_time_record
 	ldr	r3, [r6, #12]
 	ldr	r3, [r3, #24]
-	cbz	r3, .L984
+	cbz	r3, .L993
 	mov	r1, r4
 	mov	r0, r6
 	blx	r3
-.L984:
+.L993:
 	addw	r1, r4, #2200
 	movs	r0, #2
 	bl	____atomic_set_bit
-	b	.L975
-.L980:
-	ldr	r3, [r7, #196]
-	movw	r2, #973
-	ldr	r1, .L1004+4
-	ldr	r0, .L1004+16
+	b	.L978
+.L988:
+	ldr	r3, [r5, #196]
+	mov	r2, #992
+	ldr	r1, .L1022+4
+	ldr	r0, .L1022+20
 	bl	printk
-	b	.L1003
-.L986:
-	mvn	r5, #10
-	b	.L975
-.L987:
-	movs	r5, #0
-	b	.L975
-.L1005:
+	b	.L1021
+.L995:
+	mvn	r7, #10
+	b	.L978
+.L996:
+	movs	r7, #0
+	b	.L978
+.L1023:
 	.align	2
-.L1004:
+.L1022:
 	.word	mpp_dev_debug
 	.word	.LANCHOR1+516
 	.word	.LC104
-	.word	.LC106
 	.word	.LC105
+	.word	.LC107
+	.word	.LC106
 	.fnend
 	.size	mpp_chnl_run_task, .-mpp_chnl_run_task
 	.align	1
@@ -5409,51 +5465,51 @@ mpp_task_worker_default:
 	.save {r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	.pad #20
 	sub	sp, sp, #20
-	ldr	r7, .L1057
+	ldr	r7, .L1075
 	ldr	r6, [r0, #80]
 	ldr	r3, [r7]
 	lsls	r0, r3, #26
-	bpl	.L1007
+	bpl	.L1025
 	movw	r2, #858
-	ldr	r1, .L1057+4
-	ldr	r0, .L1057+8
+	ldr	r1, .L1075+4
+	ldr	r0, .L1075+8
 	bl	printk
-.L1007:
+.L1025:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	fp, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
 	.thumb
 	.syntax unified
-	ldr	r8, .L1057+28
-.L1008:
+	ldr	r8, .L1075+28
+.L1026:
 	mov	r0, r6
 	bl	mpp_taskqueue_get_pending_task
 	mov	r4, r0
-	cbz	r0, .L1018
+	cbz	r0, .L1036
 	ldr	r3, [r0, #2204]
 	cmp	r3, #0
-	ble	.L1010
+	ble	.L1028
 	mov	r1, r0
 	mov	r0, r6
 	bl	mpp_taskqueue_pop_pending
-	b	.L1008
-.L1010:
+	b	.L1026
+.L1028:
 	ldr	r3, [r0]
 	ldr	r0, [r3, #12]
 	ldr	r3, [r0, #12]
 	ldr	r3, [r3, #20]
-	cbz	r3, .L1012
+	cbz	r3, .L1030
 	mov	r1, r4
 	blx	r3
 	mov	r4, r0
-	cbnz	r0, .L1013
-.L1018:
+	cbnz	r0, .L1031
+.L1036:
 	mov	r0, r6
 	bl	mpp_session_clean_detach
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, fp	@ local_irq_restore
 @ 0 "" 2
 	.thumb
@@ -5461,9 +5517,9 @@ mpp_task_worker_default:
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L1012:
+.L1030:
 	.syntax unified
-@ 29 "./arch/arm/include/asm/irqflags.h" 1
+@ 29 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		mrs	r1, cpsr	@ arch_local_irq_save
 	cpsid	i
 @ 0 "" 2
@@ -5472,19 +5528,19 @@ mpp_task_worker_default:
 	mov	r3, r6
 	ldr	r2, [r3, #60]!
 	.syntax unified
-@ 171 "./arch/arm/include/asm/irqflags.h" 1
+@ 171 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/irqflags.h" 1
 		msr	cpsr_c, r1	@ local_irq_restore
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	cmp	r2, r3
-	bne	.L1018
-.L1013:
+	bne	.L1036
+.L1031:
 	ldr	r5, [r4, #2292]
-	cbnz	r5, .L1014
+	cbnz	r5, .L1032
 	ldr	r3, [r4]
 	ldr	r5, [r3, #12]
-.L1014:
+.L1032:
 	addw	r9, r4, #2200
 	mov	r1, r4
 	mov	r0, r6
@@ -5495,44 +5551,44 @@ mpp_task_worker_default:
 	ldr	r3, [r7]
 	ldr	r10, [r4]
 	lsls	r1, r3, #26
-	bpl	.L1015
+	bpl	.L1033
 	movw	r2, #810
 	mov	r1, r8
-	ldr	r0, .L1057+8
+	ldr	r0, .L1075+8
 	bl	printk
-.L1015:
+.L1033:
 	ldr	r3, [r5, #8]
 	ldr	r3, [r3, #32]
-	cbz	r3, .L1016
+	cbz	r3, .L1034
 	mov	r0, r5
 	blx	r3
-	cbz	r0, .L1017
+	cbz	r0, .L1035
 	ldr	r0, [r5]
-	ldr	r1, .L1057+12
+	ldr	r1, .L1075+12
 	bl	_dev_err
 	mov	r1, r4
 	mov	r0, r6
 	bl	mpp_taskqueue_pop_running
-	b	.L1018
-.L1016:
+	b	.L1036
+.L1034:
 	ldr	r0, [r5, #64]
 	bl	mpp_set_grf
-.L1017:
+.L1035:
 	mov	r0, r5
 	bl	mpp_power_on
 	mov	r0, r4
 	bl	mpp_time_record
 	ldr	r3, [r7]
 	lsls	r2, r3, #22
-	bpl	.L1019
+	bpl	.L1037
 	ldr	r2, [r5]
 	ldr	r3, [r2, #44]
-	cbnz	r3, .L1020
+	cbnz	r3, .L1038
 	ldr	r3, [r2]
-.L1020:
+.L1038:
 	ldr	r2, [r4, #2200]
 	mov	r1, r8
-	ldr	r0, .L1057+16
+	ldr	r0, .L1075+16
 	str	r2, [sp, #12]
 	ldr	r2, [r4, #2276]
 	str	r2, [sp, #8]
@@ -5542,27 +5598,27 @@ mpp_task_worker_default:
 	str	r2, [sp]
 	movw	r2, #830
 	bl	printk
-.L1019:
+.L1037:
 	ldrb	r3, [r5, #36]	@ zero_extendqisi2
-	cbz	r3, .L1021
+	cbz	r3, .L1039
 	ldr	r3, [r5, #8]
 	ldr	r3, [r3, #20]
-	cbz	r3, .L1021
+	cbz	r3, .L1039
 	mov	r1, r4
 	mov	r0, r5
 	blx	r3
-.L1021:
+.L1039:
 	ldr	r0, [r5, #100]
-	cbz	r0, .L1022
+	cbz	r0, .L1040
 	ldr	r3, [r0]
-	cbz	r3, .L1022
+	cbz	r3, .L1040
 	adds	r0, r0, #4
 	bl	down_read
-.L1022:
+.L1040:
 	mov	r1, r9
 	movs	r0, #2
 	bl	____atomic_set_bit
-	ldr	r1, .L1057+20
+	ldr	r1, .L1075+20
 	movs	r3, #20
 	add	r2, r4, #2208
 	movs	r0, #1
@@ -5570,27 +5626,27 @@ mpp_task_worker_default:
 	bl	queue_delayed_work_on
 	ldr	r3, [r5, #12]
 	ldr	r3, [r3, #24]
-	cbz	r3, .L1023
+	cbz	r3, .L1041
 	mov	r1, r4
 	mov	r0, r5
 	blx	r3
-.L1023:
+.L1041:
 	ldr	r3, [r7]
 	lsls	r3, r3, #26
-	bpl	.L1008
+	bpl	.L1026
 	movw	r2, #846
 	mov	r1, r8
-	ldr	r0, .L1057+24
+	ldr	r0, .L1075+24
 	bl	printk
-	b	.L1008
-.L1058:
+	b	.L1026
+.L1076:
 	.align	2
-.L1057:
+.L1075:
 	.word	mpp_dev_debug
 	.word	.LANCHOR1+534
 	.word	.LC12
-	.word	.LC107
 	.word	.LC108
+	.word	.LC109
 	.word	system_wq
 	.word	.LC13
 	.word	.LANCHOR1+558
@@ -5614,25 +5670,25 @@ mpp_time_diff:
 	.pad #32
 	sub	sp, sp, #32
 	ldr	r5, [r0]
-	cbnz	r6, .L1060
+	cbnz	r6, .L1078
 	ldr	r6, [r5, #12]
-.L1060:
+.L1078:
 	add	r0, sp, #16
 	bl	ktime_get_real_ts64
-	ldr	r3, .L1066
+	ldr	r3, .L1084
 	ldr	r3, [r3]
 	lsls	r3, r3, #23
-	bpl	.L1061
+	bpl	.L1079
 	ldr	r3, [r6]
 	ldr	r1, [r3, #44]
-	cbnz	r1, .L1062
+	cbnz	r1, .L1080
 	ldr	r1, [r3]
-.L1062:
+.L1080:
 	ldr	r6, [r4, #2256]
 	ldr	r2, [sp, #16]
 	ldr	r3, [sp, #20]
 	subs	r2, r2, r6
-	ldr	r6, .L1066+4
+	ldr	r6, .L1084+4
 	ldr	r0, [r4, #2260]
 	umull	fp, ip, r2, r6
 	sbc	r0, r3, r0
@@ -5640,7 +5696,7 @@ mpp_time_diff:
 	ldr	r6, [r4, #2264]
 	ldr	r0, [sp, #24]
 	subs	r0, r0, r6
-	ldr	r6, .L1066+8
+	ldr	r6, .L1084+8
 	smull	r6, r7, r0, r6
 	asrs	r0, r0, #31
 	rsb	r0, r0, r7, asr #6
@@ -5648,22 +5704,22 @@ mpp_time_diff:
 	adc	r3, ip, r0, asr #31
 	strd	r2, [sp, #8]
 	ldr	r3, [r4, #2276]
-	ldr	r0, .L1066+12
+	ldr	r0, .L1084+12
 	str	r3, [sp]
 	ldrd	r2, r3, [r5]
 	bl	printk
-.L1061:
+.L1079:
 	movs	r0, #0
 	add	sp, sp, #32
 	@ sp needed
 	pop	{r4, r5, r6, r7, fp, pc}
-.L1067:
+.L1085:
 	.align	2
-.L1066:
+.L1084:
 	.word	mpp_dev_debug
 	.word	1000000
 	.word	274877907
-	.word	.LC109
+	.word	.LC110
 	.fnend
 	.size	mpp_time_diff, .-mpp_time_diff
 	.align	1
@@ -5680,47 +5736,47 @@ mpp_write_req:
 	push	{r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	.save {r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	mov	r8, r0
-	ldr	r10, .L1076
+	ldr	r10, .L1094
 	mov	r9, r1
-	ldr	fp, .L1076+4
+	ldr	fp, .L1094+4
 	mov	r7, r3
 	mov	r4, r2
-.L1069:
+.L1087:
 	cmp	r7, r4
-	bhi	.L1072
+	bhi	.L1090
 	movs	r0, #0
 	pop	{r3, r4, r5, r6, r7, r8, r9, r10, fp, pc}
-.L1072:
+.L1090:
 	ldr	r3, [sp, #40]
 	cmp	r3, r4
-	beq	.L1070
+	beq	.L1088
 	ldr	r3, [r10]
 	lsls	r6, r4, #2
 	ldr	r5, [r9, r4, lsl #2]
 	lsls	r3, r3, #19
-	bpl	.L1071
+	bpl	.L1089
 	mov	r3, r5
 	mov	r2, r6
 	bic	r1, r4, #-1073741824
 	mov	r0, fp
 	bl	printk
-.L1071:
+.L1089:
 	ldr	r3, [r8, #60]
 	add	r6, r6, r3
 	.syntax unified
-@ 95 "./arch/arm/include/asm/io.h" 1
+@ 95 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/io.h" 1
 	str r5, [r6]
 @ 0 "" 2
 	.thumb
 	.syntax unified
-.L1070:
+.L1088:
 	adds	r4, r4, #1
-	b	.L1069
-.L1077:
+	b	.L1087
+.L1095:
 	.align	2
-.L1076:
+.L1094:
 	.word	mpp_dev_debug
-	.word	.LC110
+	.word	.LC111
 	.fnend
 	.size	mpp_write_req, .-mpp_write_req
 	.align	1
@@ -5737,42 +5793,42 @@ mpp_read_req:
 	push	{r4, r5, r6, r7, r8, r9, r10, lr}
 	.save {r4, r5, r6, r7, r8, r9, r10, lr}
 	mov	r6, r0
-	ldr	r8, .L1085
+	ldr	r8, .L1103
 	mov	r7, r1
-	ldr	r9, .L1085+4
+	ldr	r9, .L1103+4
 	mov	r5, r3
 	mov	r4, r2
-.L1079:
+.L1097:
 	cmp	r5, r4
-	bhi	.L1081
+	bhi	.L1099
 	movs	r0, #0
 	pop	{r4, r5, r6, r7, r8, r9, r10, pc}
-.L1081:
+.L1099:
 	ldr	r3, [r6, #60]
 	lsls	r2, r4, #2
 	add	r3, r3, r2
 	.syntax unified
-@ 113 "./arch/arm/include/asm/io.h" 1
+@ 113 "/home/cww/ipc-sdk/otter3/sysdrv/source/kernel/arch/arm/include/asm/io.h" 1
 	ldr r10, [r3]
 @ 0 "" 2
 	.thumb
 	.syntax unified
 	ldr	r3, [r8]
 	lsls	r3, r3, #18
-	bpl	.L1080
+	bpl	.L1098
 	mov	r3, r10
 	bic	r1, r4, #-1073741824
 	mov	r0, r9
 	bl	printk
-.L1080:
+.L1098:
 	str	r10, [r7, r4, lsl #2]
 	adds	r4, r4, #1
-	b	.L1079
-.L1086:
+	b	.L1097
+.L1104:
 	.align	2
-.L1085:
+.L1103:
 	.word	mpp_dev_debug
-	.word	.LC111
+	.word	.LC112
 	.fnend
 	.size	mpp_read_req, .-mpp_read_req
 	.align	1
@@ -5794,37 +5850,37 @@ mpp_get_clk_info:
 	mov	r8, r2
 	bl	mpp_dev_of_node
 	mov	r2, r8
-	ldr	r1, .L1090
+	ldr	r1, .L1108
 	mov	r4, r0
 	bl	of_property_match_string
 	subs	r5, r0, #0
-	blt	.L1089
+	blt	.L1107
 	mov	r1, r8
 	ldr	r0, [r7]
 	bl	devm_clk_get
 	mov	r3, r6
 	mov	r2, r5
-	ldr	r1, .L1090+4
+	ldr	r1, .L1108+4
 	str	r0, [r3], #8
 	mov	r0, r4
 	bl	of_property_read_u32_index
 	add	r3, r6, #12
 	mov	r2, r5
-	ldr	r1, .L1090+8
+	ldr	r1, .L1108+8
 	mov	r0, r4
 	bl	of_property_read_u32_index
 	movs	r0, #0
-.L1087:
+.L1105:
 	pop	{r4, r5, r6, r7, r8, pc}
-.L1089:
+.L1107:
 	mvn	r0, #21
-	b	.L1087
-.L1091:
+	b	.L1105
+.L1109:
 	.align	2
-.L1090:
-	.word	.LC112
+.L1108:
 	.word	.LC113
 	.word	.LC114
+	.word	.LC115
 	.fnend
 	.size	mpp_get_clk_info, .-mpp_get_clk_info
 	.align	1
@@ -5842,46 +5898,46 @@ mpp_set_clk_info_rate_hz:
 	.save {r3, lr}
 	mov	r3, r1
 	ldr	r1, [r0]
-	cbz	r1, .L1093
-	cbz	r2, .L1093
+	cbz	r1, .L1111
+	cbz	r2, .L1111
 	cmp	r3, #4
-	bhi	.L1094
+	bhi	.L1112
 	tbb	[pc, r3]
-.L1096:
-	.byte	(.L1100-.L1096)/2
-	.byte	(.L1099-.L1096)/2
-	.byte	(.L1098-.L1096)/2
-	.byte	(.L1097-.L1096)/2
-	.byte	(.L1095-.L1096)/2
+.L1114:
+	.byte	(.L1118-.L1114)/2
+	.byte	(.L1117-.L1114)/2
+	.byte	(.L1116-.L1114)/2
+	.byte	(.L1115-.L1114)/2
+	.byte	(.L1113-.L1114)/2
 	.p2align 1
-.L1099:
+.L1117:
 	str	r2, [r0, #4]
-.L1093:
+.L1111:
 	movs	r0, #0
 	pop	{r3, pc}
-.L1098:
+.L1116:
 	str	r2, [r0, #20]
-	b	.L1093
-.L1097:
+	b	.L1111
+.L1115:
 	str	r2, [r0, #8]
-	b	.L1093
-.L1095:
+	b	.L1111
+.L1113:
 	str	r2, [r0, #12]
-	b	.L1093
-.L1100:
+	b	.L1111
+.L1118:
 	str	r2, [r0, #16]
-	b	.L1093
-.L1094:
-	movw	r2, #2296
-	ldr	r1, .L1107
-	ldr	r0, .L1107+4
+	b	.L1111
+.L1112:
+	mov	r2, #2320
+	ldr	r1, .L1125
+	ldr	r0, .L1125+4
 	bl	printk
-	b	.L1093
-.L1108:
+	b	.L1111
+.L1126:
 	.align	2
-.L1107:
+.L1125:
 	.word	.LANCHOR1+571
-	.word	.LC115
+	.word	.LC116
 	.fnend
 	.size	mpp_set_clk_info_rate_hz, .-mpp_set_clk_info_rate_hz
 	.align	1
@@ -5898,34 +5954,34 @@ mpp_get_clk_info_rate_hz:
 	@ link register save eliminated.
 	mov	r2, r0
 	ldr	r0, [r0]
-	cbz	r0, .L1109
+	cbz	r0, .L1127
 	ldr	r0, [r2, #4]
-	cbnz	r0, .L1109
+	cbnz	r0, .L1127
 	cmp	r1, #3
-	beq	.L1111
+	beq	.L1129
 	cmp	r1, #4
-	beq	.L1112
+	beq	.L1130
 	cmp	r1, #2
-	bne	.L1113
+	bne	.L1131
 	ldr	r0, [r2, #20]
-	ldr	r3, .L1118
+	ldr	r3, .L1136
 	cmp	r0, #0
 	it	eq
 	moveq	r0, r3
 	bx	lr
-.L1112:
+.L1130:
 	ldr	r0, [r2, #12]
-	cbnz	r0, .L1109
-.L1111:
+	cbnz	r0, .L1127
+.L1129:
 	ldr	r0, [r2, #8]
-	cbnz	r0, .L1109
-.L1113:
+	cbnz	r0, .L1127
+.L1131:
 	ldr	r0, [r2, #16]
-.L1109:
+.L1127:
 	bx	lr
-.L1119:
+.L1137:
 	.align	2
-.L1118:
+.L1136:
 	.word	50000000
 	.fnend
 	.size	mpp_get_clk_info_rate_hz, .-mpp_get_clk_info_rate_hz
@@ -5944,19 +6000,19 @@ mpp_clk_set_rate:
 	.save {r3, r4, r5, lr}
 	mov	r5, r0
 	ldr	r4, [r0]
-	cbz	r4, .L1122
+	cbz	r4, .L1140
 	bl	mpp_get_clk_info_rate_hz
-	cbz	r0, .L1120
+	cbz	r0, .L1138
 	str	r0, [r5, #24]
 	mov	r1, r0
 	mov	r0, r4
 	bl	clk_set_rate
 	movs	r0, #0
-.L1120:
+.L1138:
 	pop	{r3, r4, r5, pc}
-.L1122:
+.L1140:
 	mvn	r0, #21
-	b	.L1120
+	b	.L1138
 	.fnend
 	.size	mpp_clk_set_rate, .-mpp_clk_set_rate
 	.align	1
@@ -5974,14 +6030,14 @@ mpp_procfs_create_u32:
 	.save {lr}
 	.pad #12
 	str	r3, [sp]
-	ldr	r3, .L1125
+	ldr	r3, .L1143
 	bl	proc_create_data
 	add	sp, sp, #12
 	@ sp needed
 	ldr	pc, [sp], #4
-.L1126:
+.L1144:
 	.align	2
-.L1125:
+.L1143:
 	.word	.LANCHOR1+596
 	.fnend
 	.size	mpp_procfs_create_u32, .-mpp_procfs_create_u32
@@ -5993,124 +6049,124 @@ mpp_procfs_create_u32:
 	.section	.rodata
 	.align	2
 	.set	.LANCHOR1,. + 0
-	.type	__func__.40401, %object
-	.size	__func__.40401, 26
-__func__.40401:
+	.type	__func__.40320, %object
+	.size	__func__.40320, 26
+__func__.40320:
 	.ascii	"mpp_session_get_idle_task\000"
-	.type	__func__.41707, %object
-	.size	__func__.41707, 23
-__func__.41707:
+	.type	__func__.41626, %object
+	.size	__func__.41626, 23
+__func__.41626:
 	.ascii	"mpp_chnl_get_iova_addr\000"
-	.type	__func__.40801, %object
-	.size	__func__.40801, 25
-__func__.40801:
+	.type	__func__.40718, %object
+	.size	__func__.40718, 25
+__func__.40718:
 	.ascii	"mpp_process_task_default\000"
-	.type	__func__.41365, %object
-	.size	__func__.41365, 13
-__func__.41365:
+	.type	__func__.41284, %object
+	.size	__func__.41284, 13
+__func__.41284:
 	.ascii	"mpp_dev_open\000"
-	.type	__func__.40775, %object
-	.size	__func__.40775, 14
-__func__.40775:
+	.type	__func__.40694, %object
+	.size	__func__.40694, 14
+__func__.40694:
 	.ascii	"mpp_free_task\000"
-	.type	__func__.41025, %object
-	.size	__func__.41025, 17
-__func__.41025:
+	.type	__func__.40944, %object
+	.size	__func__.40944, 17
+__func__.40944:
 	.ascii	"mpp_get_cmd_butt\000"
-	.type	__func__.41204, %object
-	.size	__func__.41204, 20
-__func__.41204:
+	.type	__func__.41123, %object
+	.size	__func__.41123, 20
+__func__.41123:
 	.ascii	"mpp_process_request\000"
-	.type	__func__.40510, %object
-	.size	__func__.40510, 14
-__func__.40510:
+	.type	__func__.40429, %object
+	.size	__func__.40429, 14
+__func__.40429:
 	.ascii	"get_task_msgs\000"
-	.type	__func__.41345, %object
-	.size	__func__.41345, 14
-__func__.41345:
+	.type	__func__.41264, %object
+	.size	__func__.41264, 14
+__func__.41264:
 	.ascii	"mpp_dev_ioctl\000"
-	.type	__func__.41274, %object
-	.size	__func__.41274, 17
-__func__.41274:
+	.type	__func__.41193, %object
+	.size	__func__.41193, 17
+__func__.41193:
 	.ascii	"mpp_collect_msgs\000"
-	.type	__func__.41332, %object
-	.size	__func__.41332, 14
-__func__.41332:
+	.type	__func__.41251, %object
+	.size	__func__.41251, 14
+__func__.41251:
 	.ascii	"mpp_msgs_wait\000"
-	.type	__func__.41009, %object
-	.size	__func__.41009, 17
-__func__.41009:
+	.type	__func__.40928, %object
+	.size	__func__.40928, 17
+__func__.40928:
 	.ascii	"mpp_parse_msg_v1\000"
-	.type	__func__.41695, %object
-	.size	__func__.41695, 17
-__func__.41695:
+	.type	__func__.41614, %object
+	.size	__func__.41614, 17
+__func__.41614:
 	.ascii	"mpp_chnl_add_req\000"
-	.type	__func__.41371, %object
-	.size	__func__.41371, 16
-__func__.41371:
+	.type	__func__.41290, %object
+	.size	__func__.41290, 16
+__func__.41290:
 	.ascii	"mpp_dev_release\000"
-	.type	__func__.41685, %object
-	.size	__func__.41685, 17
-__func__.41685:
+	.type	__func__.41604, %object
+	.size	__func__.41604, 17
+__func__.41604:
 	.ascii	"mpp_chnl_release\000"
-	.type	__func__.40932, %object
-	.size	__func__.40932, 24
-__func__.40932:
+	.type	__func__.40851, %object
+	.size	__func__.40851, 24
+__func__.40851:
 	.ascii	"mpp_wait_result_default\000"
 .LC55:
 	.ascii	"shared_\000"
 	.space	24
-	.type	__func__.41381, %object
-	.size	__func__.41381, 14
-__func__.41381:
+	.type	__func__.41300, %object
+	.size	__func__.41300, 14
+__func__.41300:
 	.ascii	"mpp_check_req\000"
-	.type	__func__.41391, %object
-	.size	__func__.41391, 28
-__func__.41391:
+	.type	__func__.41310, %object
+	.size	__func__.41310, 28
+__func__.41310:
 	.ascii	"mpp_extract_reg_offset_info\000"
-	.type	__func__.41396, %object
-	.size	__func__.41396, 26
-__func__.41396:
+	.type	__func__.41315, %object
+	.size	__func__.41315, 26
+__func__.41315:
 	.ascii	"mpp_query_reg_offset_info\000"
-	.type	__func__.41406, %object
-	.size	__func__.41406, 30
-__func__.41406:
+	.type	__func__.41325, %object
+	.size	__func__.41325, 30
+__func__.41325:
 	.ascii	"mpp_translate_reg_offset_info\000"
-	.type	__func__.41435, %object
-	.size	__func__.41435, 25
-__func__.41435:
+	.type	__func__.41354, %object
+	.size	__func__.41354, 25
+__func__.41354:
 	.ascii	"mpp_task_dump_mem_region\000"
-	.type	__func__.41458, %object
-	.size	__func__.41458, 18
-__func__.41458:
+	.type	__func__.41377, %object
+	.size	__func__.41377, 18
+__func__.41377:
 	.ascii	"mpp_task_dump_reg\000"
-	.type	__func__.41472, %object
-	.size	__func__.41472, 21
-__func__.41472:
+	.type	__func__.41391, %object
+	.size	__func__.41391, 21
+__func__.41391:
 	.ascii	"mpp_task_dump_hw_reg\000"
-	.type	__func__.41548, %object
-	.size	__func__.41548, 12
-__func__.41548:
+	.type	__func__.41467, %object
+	.size	__func__.41467, 12
+__func__.41467:
 	.ascii	"mpp_dev_irq\000"
-	.type	__func__.40794, %object
-	.size	__func__.40794, 22
-__func__.40794:
+	.type	__func__.40711, %object
+	.size	__func__.40711, 22
+__func__.40711:
 	.ascii	"mpp_task_timeout_work\000"
-	.type	__func__.40914, %object
-	.size	__func__.40914, 18
-__func__.40914:
-	.ascii	"mpp_chnl_run_task\000"
-	.type	__func__.40846, %object
-	.size	__func__.40846, 24
-__func__.40846:
-	.ascii	"mpp_task_worker_default\000"
 	.type	__func__.40833, %object
-	.size	__func__.40833, 13
+	.size	__func__.40833, 18
 __func__.40833:
+	.ascii	"mpp_chnl_run_task\000"
+	.type	__func__.40763, %object
+	.size	__func__.40763, 24
+__func__.40763:
+	.ascii	"mpp_task_worker_default\000"
+	.type	__func__.40750, %object
+	.size	__func__.40750, 13
+__func__.40750:
 	.ascii	"mpp_task_run\000"
-	.type	__func__.41619, %object
-	.size	__func__.41619, 25
-__func__.41619:
+	.type	__func__.41538, %object
+	.size	__func__.41538, 25
+__func__.41538:
 	.ascii	"mpp_set_clk_info_rate_hz\000"
 	.type	procfs_fops_u32, %object
 	.size	procfs_fops_u32, 44
@@ -6151,7 +6207,6 @@ g_mpp_svr_fn_ops:
 	.type	enc_info_item_name, %object
 	.size	enc_info_item_name, 44
 enc_info_item_name:
-	.word	.LC116
 	.word	.LC117
 	.word	.LC118
 	.word	.LC119
@@ -6162,27 +6217,28 @@ enc_info_item_name:
 	.word	.LC124
 	.word	.LC125
 	.word	.LC126
+	.word	.LC127
 	.type	mpp_device_name, %object
 	.size	mpp_device_name, 116
 mpp_device_name:
-	.word	.LC127
 	.word	.LC128
 	.word	.LC129
 	.word	.LC130
 	.word	.LC131
-	.space	12
 	.word	.LC132
-	.word	.LC133
-	.space	8
-	.word	.LC134
 	.space	12
+	.word	.LC133
+	.word	.LC134
+	.space	8
 	.word	.LC135
+	.space	12
 	.word	.LC136
 	.word	.LC137
-	.space	20
 	.word	.LC138
-	.space	12
+	.space	20
 	.word	.LC139
+	.space	12
+	.word	.LC140
 	.bss
 	.align	2
 	.set	.LANCHOR2,. + 0
@@ -6190,15 +6246,15 @@ mpp_device_name:
 	.size	g_srv, 4
 g_srv:
 	.space	4
-	.type	__key.40802, %object
-	.size	__key.40802, 0
-__key.40802:
-	.type	__key.40971, %object
-	.size	__key.40971, 0
-__key.40971:
-	.type	__key.41493, %object
-	.size	__key.41493, 0
-__key.41493:
+	.type	__key.40719, %object
+	.size	__key.40719, 0
+__key.40719:
+	.type	__key.40890, %object
+	.size	__key.40890, 0
+__key.40890:
+	.type	__key.41412, %object
+	.size	__key.41412, 0
+__key.41412:
 	.section	.rodata.str1.1,"aMS",%progbits,1
 .LC0:
 	.ascii	"\0016rk_vcodec: %s:%d: task %d %#lx session %p chan"
@@ -6447,77 +6503,80 @@ __key.41493:
 .LC104:
 	.ascii	"\0016rk_vcodec: %s:%d: chan_id %d ++\012\000"
 .LC105:
+	.ascii	"\0016rk_vcodec: chan %d task %d resolution not matc"
+	.ascii	"h [%d %d] != [%d %d]\012\000"
+.LC106:
 	.ascii	"\0016rk_vcodec: %s:%d: chan_id %d device is busy no"
 	.ascii	"w\012\000"
-.LC106:
-	.ascii	"\0016rk_vcodec: %s:%d: chan_id %d --\012\000"
 .LC107:
-	.ascii	"set grf failed\012\000"
+	.ascii	"\0016rk_vcodec: %s:%d: chan_id %d --\012\000"
 .LC108:
+	.ascii	"set grf failed\012\000"
+.LC109:
 	.ascii	"\0016rk_vcodec: %s:%d: %s session %d:%d task=%d sta"
 	.ascii	"te=0x%lx\012\000"
-.LC109:
+.LC110:
 	.ascii	"\0016rk_vcodec: %s: session %d:%d task %d time: %ll"
 	.ascii	"d us\012\000"
-.LC110:
-	.ascii	"\0016rk_vcodec: write reg[%03d]: %04x: 0x%08x\012\000"
 .LC111:
-	.ascii	"\0016rk_vcodec: read reg[%03d] %04x: 0x%08x\012\000"
+	.ascii	"\0016rk_vcodec: write reg[%03d]: %04x: 0x%08x\012\000"
 .LC112:
-	.ascii	"clock-names\000"
+	.ascii	"\0016rk_vcodec: read reg[%03d] %04x: 0x%08x\012\000"
 .LC113:
-	.ascii	"rockchip,normal-rates\000"
+	.ascii	"clock-names\000"
 .LC114:
-	.ascii	"rockchip,advanced-rates\000"
+	.ascii	"rockchip,normal-rates\000"
 .LC115:
-	.ascii	"\0013rk_vcodec: %s:%d: error mode %d\012\000"
+	.ascii	"rockchip,advanced-rates\000"
 .LC116:
-	.ascii	"null\000"
+	.ascii	"\0013rk_vcodec: %s:%d: error mode %d\012\000"
 .LC117:
-	.ascii	"width\000"
+	.ascii	"null\000"
 .LC118:
-	.ascii	"height\000"
+	.ascii	"width\000"
 .LC119:
-	.ascii	"format\000"
+	.ascii	"height\000"
 .LC120:
-	.ascii	"fps_in\000"
+	.ascii	"format\000"
 .LC121:
-	.ascii	"fps_out\000"
+	.ascii	"fps_in\000"
 .LC122:
-	.ascii	"rc_mode\000"
+	.ascii	"fps_out\000"
 .LC123:
-	.ascii	"bitrate\000"
+	.ascii	"rc_mode\000"
 .LC124:
-	.ascii	"gop_size\000"
+	.ascii	"bitrate\000"
 .LC125:
-	.ascii	"fps_calc\000"
+	.ascii	"gop_size\000"
 .LC126:
-	.ascii	"profile\000"
+	.ascii	"fps_calc\000"
 .LC127:
-	.ascii	"VDPU1\000"
+	.ascii	"profile\000"
 .LC128:
-	.ascii	"VDPU2\000"
+	.ascii	"VDPU1\000"
 .LC129:
-	.ascii	"VDPU1_PP\000"
+	.ascii	"VDPU2\000"
 .LC130:
-	.ascii	"VDPU2_PP\000"
+	.ascii	"VDPU1_PP\000"
 .LC131:
-	.ascii	"AV1DEC\000"
+	.ascii	"VDPU2_PP\000"
 .LC132:
-	.ascii	"HEVC_DEC\000"
+	.ascii	"AV1DEC\000"
 .LC133:
-	.ascii	"RKVDEC\000"
+	.ascii	"HEVC_DEC\000"
 .LC134:
-	.ascii	"AVSPLUS_DEC\000"
+	.ascii	"RKVDEC\000"
 .LC135:
-	.ascii	"RKVENC\000"
+	.ascii	"AVSPLUS_DEC\000"
 .LC136:
-	.ascii	"VEPU1\000"
+	.ascii	"RKVENC\000"
 .LC137:
-	.ascii	"VEPU2\000"
+	.ascii	"VEPU1\000"
 .LC138:
-	.ascii	"VEPU22\000"
+	.ascii	"VEPU2\000"
 .LC139:
+	.ascii	"VEPU22\000"
+.LC140:
 	.ascii	"IEP2\000"
 	.section	___ksymtab+get_mppdev_svr_ops,"a"
 	.align	2

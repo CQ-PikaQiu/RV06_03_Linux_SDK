@@ -82,3 +82,12 @@ export RK_PRE_BUILD_OEM_SCRIPT=rv1103-spi_nor-post.sh
 
 export RK_ENABLE_WIFI=y
 export RK_ENABLE_WIFI_CHIP=RTL8188FTV
+
+# config AUDIO model
+export RK_AUDIO_MODEL=NONE
+
+# config AI-ISP model
+export RK_AIISP_MODEL=NONE
+
+# config NPU model
+export RK_NPU_MODEL="object_detection_pfp_896x512.data"

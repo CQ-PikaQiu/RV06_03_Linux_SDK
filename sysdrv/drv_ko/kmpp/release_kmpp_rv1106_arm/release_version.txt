@@ -1,8 +1,16 @@
-commit 1b83b745c9c084445c8ab5c00097b26fc80eb72d
+commit 424abb9bffcc6f077daa00572bca1301c757e079
 Author: Yandong Lin <yandong.lin@rock-chips.com>
-Date:   Tue Jan 9 18:42:26 2024 +0800
+Date:   Thu Apr 25 11:21:07 2024 +0800
 
-    [vcodec]: reset chan_create flag when chan destory
+    [mpp_enc]: fix wrap enc sw timeout when resolution switch
+    
+    1. Drop task if resolution mismatch that will happen in resolution switch
+    case.
+    2. In the case of wrapping, when switching resolutions, need to ensure
+    that the wrapping frame being encoded finish.
+    
+    relative redmine:
+    https://redmine.rock-chips.com/issues/479306
     
     Signed-off-by: Yandong Lin <yandong.lin@rock-chips.com>
-    Change-Id: Ie52abf7ca077a707c297e1069559c4e21ce0b626
+    Change-Id: I68777eb1bb2a2ddd9bad6ee2f610ff6d3e487544
