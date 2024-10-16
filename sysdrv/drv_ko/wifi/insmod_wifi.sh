@@ -37,6 +37,14 @@ if [ $? -eq 0 ];then
 	insmod aic_btusb.ko
 fi
 
+cat /proc/device-tree/wireless-wlan/wifi_chip_type | grep "AIC8800DC"
+if [ $? -eq 0 ];then
+	echo host > /sys/devices/platform/ff3e0000.usb2-phy/otg_mode
+	insmod aic_load_fw.ko aic_fw_path=/oem/usr/ko/aic_fw/
+	insmod aic8800_fdrv.ko
+	insmod aic_btusb.ko
+fi
+
 #AIC8800DW
 cat /sys/bus/sdio/devices/*/uevent | grep "8800"
 if [ $? -eq 0 ];then
@@ -106,5 +114,17 @@ if [ $? -eq 0 ];then
 	insmod atbm603x_.ko
 fi
 
+sleep 5s
+
+ifconfig -a | grep "wlan0"
+if [ $? -eq 0 ];then
+	ifconfig wlan0 up
+fi
+
 #start wifi app
-rkwifi_server start &
+ifconfig | grep "wlan0"
+if [ $? -eq 0 ];then
+	# rkwifi_server start &
+	wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf &
+	udhcpc -i wlan0
+fi
