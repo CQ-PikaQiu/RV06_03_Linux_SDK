@@ -10,7 +10,7 @@ export RK_CHIP=rv1106
 export RK_TARGET_ROOTFS=buildroot
 
 # Target Toolchain Cross Compile
-export RK_TOOLCHAIN_CROSS=arm-rockchip830-linux-uclibcgnueabihf
+export RK_TOOLCHAIN_CROSS=arm-none-linux-gnueabihf
 
 # Target boot medium: emmc/spi_nor/spi_nand
 export RK_BOOT_MEDIUM=spi_nand
@@ -28,7 +28,7 @@ export RK_KERNEL_DEFCONFIG=rv1106_lbc_defconfig
 export RK_KERNEL_DTS=rv1106g-lubancat-io.dts
 
 # buildroot defconfig
-export RK_BUILDROOT_DEFCONFIG=rv1106_lbc_defconfig
+export RK_BUILDROOT_DEFCONFIG=rv1106_lbc_rv06_defconfig
 
 #misc image
 export RK_MISC=wipe_all-misc.img
@@ -37,13 +37,13 @@ export RK_MISC=wipe_all-misc.img
 # RK_CAMERA_SENSOR_IQFILES format:
 #     "iqfile1 iqfile2 iqfile3 ..."
 # ./build.sh media and copy <SDK root dir>/output/out/media_out/isp_iqfiles/$RK_CAMERA_SENSOR_IQFILES
-export RK_CAMERA_SENSOR_IQFILES="sc4336_OT01_40IRC_F16.bin sc3336_CMK-OT2119-PC1_30IRC-F16.bin sc530ai_CMK-OT2115-PC1_30IRC-F16.bin gc2093_SIDA209300461_60IRC_F20.bin"
+export RK_CAMERA_SENSOR_IQFILES="ov8858_HS5885-BNSM1018-V01_default.bin sc4336_OT01_40IRC_F16.bin sc3336_CMK-OT2119-PC1_30IRC-F16.bin sc530ai_CMK-OT2115-PC1_30IRC-F16.bin gc2093_SIDA209300461_60IRC_F20.bin"
 
 # Config sensor lens CAC calibrattion bin files
 export RK_CAMERA_SENSOR_CAC_BIN="CAC_sc4336_OT01_40IRC_F16 CAC_sc530ai_CMK-OT2115-PC1_30IRC-F16"
 
 # Config CMA size in environment
-export RK_BOOTARGS_CMA_SIZE="1M"
+export RK_BOOTARGS_CMA_SIZE="36M"
 
 # config partition in environment
 # RK_PARTITION_CMD_IN_ENV format:
@@ -75,8 +75,10 @@ export RK_PARTITION_FS_TYPE_CFG=rootfs@IGNORE@ubifs
 # app config
 export RK_APP_TYPE=RKIPC_RV1106
 
+export RK_LVGL_APP_CONFIG=y
+
 # build ipc web backend
-# export RK_APP_IPCWEB_BACKEND=y
+export RK_APP_IPCWEB_BACKEND=y
 
 # enable install app to oem partition
 export RK_BUILD_APP_TO_OEM_PARTITION=n
