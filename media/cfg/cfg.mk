@@ -6,7 +6,7 @@ export CONFIG_RK_MEDIA_CROSS=arm-rockchip830-linux-uclibcgnueabihf
 
 #------------------------------------------------
 # Enable libdrm
-export CONFIG_LIBDRM=y
+export CONFIG_LIBDRM=n
 
 #------------------------------------------------
 # Rockchip's MPP(Multimedia Processing Platform)
