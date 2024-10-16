@@ -1,5 +1,55 @@
 // SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 
+
+/{
+	ext_cam_24m_clk: external-camera-24m-clock {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <24000000>;
+		clock-output-names = "ext_cam_24m_clk";
+	}; 
+
+	vdd_cam_5v: vdd-cam-5v-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "vdd_cam_5v";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+
+	cam_dovdd: cam-dovdd {
+		compatible = "regulator-fixed";
+		regulator-name = "cam_dovdd";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		vin-supply = <&vdd_cam_5v>;
+	};
+
+	cam_avdd: cam-avdd {
+		compatible = "regulator-fixed";
+		regulator-name = "cam_avdd";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+		vin-supply = <&vdd_cam_5v>;
+	};
+
+	cam_dvdd: cam-dvdd {
+		compatible = "regulator-fixed";
+		regulator-name = "cam_dvdd";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1200000>;
+		vin-supply = <&vdd_cam_5v>;
+	};
+};
+
+
 &csi2_dphy_hw {
 	status = "okay";
 };
@@ -18,13 +68,7 @@
 
 			csi_dphy1_input0: endpoint@0 {
 				reg = <0>;
-				remote-endpoint = <&gc2053_cam0_out>;
-				data-lanes = <1 2>;
-			};
-
-			csi_dphy1_input1: endpoint@1 {
-				reg = <1>;
-				remote-endpoint = <&sc4336_cam0_out>;
+				remote-endpoint = <&ov8858_cam0_out>;
 				data-lanes = <1 2>;
 			};
 		};
@@ -56,16 +100,9 @@
 
 			csi_dphy2_input0: endpoint@0 {
 				reg = <0>;
-				remote-endpoint = <&gc2053_cam1_out>;
+				remote-endpoint = <&ov8858_cam1_out>;
 				data-lanes = <1 2>;
 			};
-
-			csi_dphy2_input1: endpoint@1 {
-				reg = <1>;
-				remote-endpoint = <&sc4336_cam1_out>;
-				data-lanes = <1 2>;
-			};
-
 		};
 
 		port@1 {
@@ -87,45 +124,44 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c4m2_xfer>;
 
-	gc2053_cam0: gc2053-cam0@37 {
-		compatible = "galaxycore,gc2053";
+	dw9714_cam0: dw9714-cam0@c {
 		status = "okay";
-		reg = <0x37>;
-		clocks = <&cru MCLK_REF_MIPI0>;
-		clock-names = "xvclk";
-		reset-gpios = <&gpio5 1 GPIO_ACTIVE_LOW>;
-		pwdn-gpios = <&gpio5 0 GPIO_ACTIVE_LOW>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&mipi_refclk_out0>;
+		compatible = "dongwoon,dw9714";
+		reg = <0xc>;
 		rockchip,camera-module-index = <0>;
+		rockchip,vcm-max-current = <100>;
+		rockchip,vcm-start-current = <0>;
+		rockchip,vcm-rated-current = <100>;
+		rockchip,vcm-step-mode = <0xd>;
+		rockchip,vcm-dlc-enable = <0>;
+		rockchip,vcm-mclk = <0>;	
+		rockchip,vcm-t-src = <0>;
 		rockchip,camera-module-facing = "back";
-		rockchip,camera-module-name = "CMK-OT2274-V10";
-		rockchip,camera-module-lens-name = "28IRC-F20";
-		port {
-			gc2053_cam0_out: endpoint {
-				remote-endpoint = <&csi_dphy1_input0>;
-				data-lanes = <1 2>;
-			};
-		};
 	};
 
-	sc4336_cam0: sc4336-cam0@30 {
-		compatible = "smartsens,sc4336";
+	ov8858_cam0: ov8858-cam0@36 {
+		compatible = "ovti,ov8858";
 		status = "okay";
-		reg = <0x30>;
-		clocks = <&cru MCLK_REF_MIPI0>;
+		reg = <0x36>;
+		clocks = <&ext_cam_24m_clk>;
 		clock-names = "xvclk";
-		reset-gpios = <&gpio5 1 GPIO_ACTIVE_HIGH>;
 		pwdn-gpios = <&gpio5 0 GPIO_ACTIVE_HIGH>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&mipi_refclk_out0>;
+		reset-gpios = <&gpio5 1 GPIO_ACTIVE_HIGH>;
+
+		dovdd-supply= <&cam_dovdd>; /* 1.8v */
+		avdd-supply = <&cam_avdd>;  /* 2.8v */
+		dvdd-supply = <&cam_dvdd>;  /* 1.2v */
+
 		rockchip,camera-module-index = <0>;
 		rockchip,camera-module-facing = "back";
-		rockchip,camera-module-name = "OT01";
-		rockchip,camera-module-lens-name = "40IRC_F16";
+		rockchip,camera-module-name = "HS5885-BNSM1018-V01";
+		rockchip,camera-module-lens-name = "default";
+		lens-focus = <&dw9714_cam0>;
+
 		port {
-			sc4336_cam0_out: endpoint {
-				remote-endpoint = <&csi_dphy1_input1>;
+			/* MIPI CSI-2 bus endpoint */
+			ov8858_cam0_out: endpoint {
+				remote-endpoint = <&csi_dphy1_input0>;
 				data-lanes = <1 2>;
 			};
 		};
@@ -138,49 +174,48 @@
     pinctrl-names = "default";
     pinctrl-0 = <&i2c3m2_xfer>;
 
-	gc2053_cam1: gc2053-cam1@37 {
-		compatible = "galaxycore,gc2053";
+	dw9714_cam1: dw9714-cam1@c {
 		status = "okay";
-		reg = <0x37>;
-		clocks = <&cru MCLK_REF_MIPI1>;
+		compatible = "dongwoon,dw9714";
+		reg = <0xc>;
+		rockchip,camera-module-index = <0>;
+		rockchip,vcm-max-current = <100>;
+		rockchip,vcm-start-current = <0>;
+		rockchip,vcm-rated-current = <100>;
+		rockchip,vcm-step-mode = <0xd>;
+		rockchip,vcm-dlc-enable = <0>;
+		rockchip,vcm-mclk = <0>;	
+		rockchip,vcm-t-src = <0>;
+		rockchip,camera-module-facing = "back";
+	};
+
+	ov8858_cam1: ov8858-cam1@36 {
+		compatible = "ovti,ov8858";
+		status = "okay";
+		reg = <0x36>;
+		clocks = <&ext_cam_24m_clk>;
 		clock-names = "xvclk";
-		reset-gpios = <&gpio5 3 GPIO_ACTIVE_LOW>;
-		pwdn-gpios = <&gpio5 2 GPIO_ACTIVE_LOW>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&mipi_refclk_out1>;
+		pwdn-gpios = <&gpio5 2 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio5 3 GPIO_ACTIVE_HIGH>;
+
+		dovdd-supply= <&cam_dovdd>; /* 1.8v */
+		avdd-supply = <&cam_avdd>;  /* 2.8v */
+		dvdd-supply = <&cam_dvdd>;  /* 1.2v */
+
 		rockchip,camera-module-index = <1>;
 		rockchip,camera-module-facing = "back";
-		rockchip,camera-module-name = "CMK-OT2274-V10";
-		rockchip,camera-module-lens-name = "28IRC-F20";
+		rockchip,camera-module-name = "HS5885-BNSM1018-V01";
+		rockchip,camera-module-lens-name = "default";
+		lens-focus = <&dw9714_cam0>;
+
 		port {
-			gc2053_cam1_out: endpoint {
+			/* MIPI CSI-2 bus endpoint */
+			ov8858_cam1_out: endpoint {
 				remote-endpoint = <&csi_dphy2_input0>;
 				data-lanes = <1 2>;
 			};
 		};
 	};
-
-	sc4336_cam1: sc4336-cam1@30 {
-		compatible = "smartsens,sc4336";
-		status = "okay";
-		reg = <0x30>;
-		clocks = <&cru MCLK_REF_MIPI1>;
-		clock-names = "xvclk";
-		reset-gpios = <&gpio5 3 GPIO_ACTIVE_HIGH>;
-		pwdn-gpios = <&gpio5 2 GPIO_ACTIVE_HIGH>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&mipi_refclk_out1>;
-		rockchip,camera-module-index = <1>;
-		rockchip,camera-module-facing = "back";
-		rockchip,camera-module-name = "OT01";
-		rockchip,camera-module-lens-name = "40IRC_F16";
-		port {
-			sc4336_cam1_out: endpoint {
-				remote-endpoint = <&csi_dphy2_input1>;
-				data-lanes = <1 2>;
-			};
-		};
-	};	
 };
 
 &mipi0_csi2 {

@@ -6,12 +6,15 @@
 /dts-v1/;
 
 #include "rv1106.dtsi"
-// #include "rv1106-amp.dtsi"
-#include "rv1106-evb.dtsi"
-#include <dt-bindings/display/media-bus-format.h>
 
+//screen
+// #include "rv1106g-lubancat-screen-7-inch.dtsi"
+#include "rv1106g-lubancat-screen-5-inch.dtsi"
+// #include "rv1106g-lubancat-screen-4-inch.dtsi"
+
+//camara
 // #include "rv1106g-lubancat-single-cam.dtsi"
-#include "rv1106g-lubancat-dual-cam.dtsi"
+// #include "rv1106g-lubancat-dual-cam.dtsi"
 
 / {
     model = "LubanCat RV1106 IO Board";
@@ -34,33 +37,11 @@
 		};
 	};
 
-	dsm_sound: dsm-sound {
-		status = "disabled";
-		compatible = "simple-audio-card";
-		simple-audio-card,format = "i2s";
-		simple-audio-card,mclk-fs = <256>;
-		simple-audio-card,name = "rockchip,dsm-sound";
-		simple-audio-card,bitclock-master = <&sndcodec>;
-		simple-audio-card,frame-master = <&sndcodec>;
-		sndcpu: simple-audio-card,cpu {
-			sound-dai = <&i2s0_8ch>;
-		};
-		sndcodec: simple-audio-card,codec {
-			sound-dai = <&dsm>;
-		};
+	restart-poweroff {
+		compatible = "restart-poweroff";
 	};
 
-	vdd_0v9: vdd-0v9 {
-		compatible = "regulator-fixed";
-		regulator-name = "vdd_0v9";
-		regulator-always-on;
-		regulator-boot-on;
-		regulator-min-microvolt = <900000>;
-		regulator-max-microvolt = <900000>;
-		vin-supply = <&vcc5v0_sys>;
-	};
-
-	adc-keys {
+	adc-key0 {
 		compatible = "adc-keys";
 		io-channels = <&saradc 0>;
 		io-channel-names = "buttons";
@@ -72,11 +53,19 @@
 			linux,code = <KEY_VOLUMEUP>;
 			press-threshold-microvolt = <0>;
 		};
+	};
+
+	adc-key1 {
+		compatible = "adc-keys";
+		io-channels = <&saradc 1>;
+		io-channel-names = "buttons";
+		poll-interval = <100>;
+		keyup-threshold-microvolt = <1800000>;
 
 		key_volumedown-key {
 			label = "key_volumedown";
 			linux,code = <KEY_VOLUMEDOWN>;
-			press-threshold-microvolt = <400781>;
+			press-threshold-microvolt = <0>;
 		};
 	};
 
@@ -93,15 +82,15 @@
 
 		fephy_spd_led: fephy-spd-led {
 			label = "fephy_spd_led";
-			linux,default-trigger = "heartbeat";
-			default-state = "on";
+			linux,default-trigger = "netdev";
+			default-state = "off";
 			gpios = <&gpio3 RK_PC5 GPIO_ACTIVE_HIGH>;
 		};
 
 		fephy_link_led: fephy-link-led {
 			label = "fephy_link_led";
-			linux,default-trigger = "heartbeat";
-			default-state = "on";
+			linux,default-trigger = "netdev";
+			default-state = "off";
 			gpios = <&gpio3 RK_PD3 GPIO_ACTIVE_HIGH>;
 		};
 	};
@@ -109,7 +98,7 @@
 	backlight: backlight {
 		status = "okay";
 		compatible = "pwm-backlight";
-		pwms = <&pwm0 0 25000 0>;
+		pwms = <&pwm0 0 50000 0>;
 		brightness-levels = <
 			  0   1   2   3   4   5   6   7
 			  8   9  10  11  12  13  14  15
@@ -150,10 +139,29 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 		ranges;
+
+		linux,cma {
+			compatible = "shared-dma-pool";
+			inactive;
+			reusable;
+			size = <0x1000000>;
+			linux,cma-default;
+		};
+
 		drm_logo: drm-logo@00000000 {
 			compatible = "rockchip,drm-logo";
 			reg = <0x0 0x0>;
 		};
+	};
+
+	vdd_0v9: vdd-0v9 {
+		compatible = "regulator-fixed";
+		regulator-name = "vdd_0v9";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <900000>;
+		regulator-max-microvolt = <900000>;
+		vin-supply = <&vcc5v0_sys>;
 	};
 
 	vcc5v0_sys: vcc5v0-sys {
@@ -205,6 +213,42 @@
 		vin-supply = <&vcc5v0_sys>;
 	};
 
+	vcc_lcd: vcc-lcd {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_lcd";
+		regulator-always-on;
+		enable-active-high;
+		regulator-boot-on;
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		gpio = <&gpio0 RK_PA6 GPIO_ACTIVE_HIGH>;
+		vin-supply = <&vcc5v0_sys>;
+	};
+
+	vcc_cam0: vcc-cam0 {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_cam0";
+		regulator-always-on;
+		enable-active-high;
+		regulator-boot-on;
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		gpio = <&gpio3 RK_PC4 GPIO_ACTIVE_HIGH>;
+		vin-supply = <&vcc5v0_sys>;
+	};
+
+	vcc_cam1: vcc-cam1 {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_cam1";
+		regulator-always-on;
+		enable-active-high;
+		regulator-boot-on;
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		gpio = <&gpio3 RK_PC6 GPIO_ACTIVE_HIGH>;
+		vin-supply = <&vcc5v0_sys>;
+	};	
+
 	wifi_usb: wifi-usb {
 		compatible = "regulator-fixed";
 		regulator-name = "wifi_usb";
@@ -214,20 +258,23 @@
 		regulator-max-microvolt = <3300000>;	
 		gpio = <&gpio5 5 GPIO_ACTIVE_LOW>;
 	};
+
+	wireless_wlan: wireless-wlan {
+		compatible = "wlan-platdata";
+		wifi_chip_type = "AIC8800DC";
+		status = "okay";
+	};
+
 };
 
 &acodec {
 	#sound-dai-cells = <0>;
-	pa-ctl-gpios = <&gpio5 7 GPIO_ACTIVE_HIGH>;
+	pa-ctl-gpios = <&gpio5 7 GPIO_ACTIVE_LOW>;
 	status = "okay";
 };
 
 &cpu0 {
 	cpu-supply = <&vdd_0v9>;
-};
-
-&dsm {
-	status = "disabled";
 };
 
 &gmac {
@@ -247,14 +294,13 @@
 		gpio-controller;
 		#gpio-cells = <2>;
 		//  = <&gpio5 0 GPIO_ACTIVE_LOW>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_pca9535>;
+		interrupt-parent = <&gpio0>;
+		interrupts = <&gpio0 RK_PA3 GPIO_ACTIVE_LOW>;
+		interrupt-controller;
+		#interrupt-cells = <12>;
 	};
-};
-
-&i2c4 {
-    status = "okay";
-    clock-frequency = <400000>;
-    pinctrl-names = "default";
-    pinctrl-0 = <&i2c4m2_xfer>;
 };
 
 &i2s0_8ch {
@@ -318,14 +364,68 @@
 	};
 };
 
+&fiq_debugger {
+	rockchip,irq-mode-enable = <1>;
+	status = "okay";
+};
+
+&mpp_srv {
+	status = "okay";
+};
+
+&mpp_vcodec {
+	status = "okay";
+};
+
+&npu {
+	status = "okay";
+};
+
+&rga2 {
+	status = "okay";
+};
+
+&rkdvbm {
+	status = "okay";
+};
+
+&rkvenc {
+	status = "okay";
+};
+
+&rkvenc_pp {
+	status = "okay";
+};
+
+&rng {
+	status = "okay";
+};
+
+&rve {
+	status = "okay";
+};
+
+&tsadc {
+	status = "okay";
+};
+
+&u2phy {
+	status = "okay";
+};
+
+&u2phy_otg {
+	status = "okay";
+};
+
+&usbdrd {
+	status = "okay";
+};
+
 &usbdrd_dwc3 {
     extcon = <&u2phy>;
 	status = "okay";
     /* dr_mode = "host"; */
 };
-
-
-
 
 &display_subsystem {
 	status = "okay";
@@ -336,43 +436,6 @@
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&lcd_pins>;
-
-	panel: panel {
-		compatible = "simple-panel";
-		status = "okay";
-		backlight = <&backlight>;
-		bus-format = <MEDIA_BUS_FMT_RGB666_1X18>;
-        enable-gpios = <&gpio0 RK_PA6 GPIO_ACTIVE_HIGH>;
-        enable-delay-ms = <20>;
-		reset-gpios = <&gpio1 RK_PA3 GPIO_ACTIVE_LOW>;
-		reset-delay-ms = <10>;
-
-		display-timings {
-			native-mode = <&timing0>;
-
-			timing0: timing0 {
-				clock-frequency = <16500000>;
-				hactive = <480>;
-				vactive = <480>;
-				hback-porch = <43>;
-				hfront-porch = <8>;
-				vback-porch = <15>;
-				vfront-porch = <12>;
-				hsync-len = <4>;
-				vsync-len = <10>; //value range <2~22>
-				hsync-active = <0>;
-				vsync-active = <0>;
-				de-active = <0>;
-				pixelclk-active = <1>;
-			};
-		};
-
-		port {
-			panel_in_rgb: endpoint {
-				remote-endpoint = <&rgb_out_panel>;
-			};
-		};
-	};
 
 	ports {
 		rgb_out: port@1 {
@@ -393,9 +456,17 @@
 };
 
 &route_rgb {
-    status = "okay";
+    status = "disabled";
 };
 
 &vop {
 	status = "okay";
+};
+
+&pinctrl {
+	io-expand {
+		pinctrl_pca9535: pinctrl-pca9535 {
+			rockchip,pins = <0 RK_PA3 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
 };
