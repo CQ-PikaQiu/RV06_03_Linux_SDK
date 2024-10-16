@@ -10,7 +10,7 @@ export RK_CHIP=rv1106
 export RK_TARGET_ROOTFS=buildroot
 
 # Target Toolchain Cross Compile
-export RK_TOOLCHAIN_CROSS=arm-none-linux-gnueabihf
+export RK_TOOLCHAIN_CROSS=arm-rockchip830-linux-uclibcgnueabihf
 
 # Target boot medium: emmc/spi_nor/spi_nand
 export RK_BOOT_MEDIUM=spi_nand
