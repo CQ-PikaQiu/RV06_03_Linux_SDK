@@ -3366,7 +3366,7 @@ static int ov8858_check_sensor_id(struct ov8858 *ov8858,
 			ov8858->cfg_num = ARRAY_SIZE(supported_modes_r2a_4lane);
 		} else {
 			ov8858_global_regs = ov8858_global_regs_r2a_2lane;
-			ov8858->cur_mode = &supported_modes_r2a_2lane[0];
+			ov8858->cur_mode = &supported_modes_r2a_2lane[1];
 			supported_modes = supported_modes_r2a_2lane;
 			ov8858->cfg_num = ARRAY_SIZE(supported_modes_r2a_2lane);
 		}
@@ -3434,7 +3434,7 @@ static int ov8858_parse_of(struct ov8858 *ov8858)
 		dev_info(dev, "lane_num(%d)  pixel_rate(%u)\n",
 				 ov8858->lane_num, ov8858->pixel_rate);
 	} else {
-		ov8858->cur_mode = &supported_modes_r2a_2lane[0];
+		ov8858->cur_mode = &supported_modes_r2a_2lane[1];
 		supported_modes = supported_modes_r2a_2lane;
 		ov8858->cfg_num = ARRAY_SIZE(supported_modes_r2a_2lane);
 
