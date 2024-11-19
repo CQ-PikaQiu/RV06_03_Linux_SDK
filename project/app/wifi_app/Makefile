@@ -42,11 +42,13 @@ ifeq ($(PKG_USE_THUMB2),YES)
 PKG_CONF_OPTS += -mthumb -Wa,-mimplicit-it=thumb -mthumb-interwork
 endif
 
+ifeq ($(RK_ENABLE_WIFI_APP),y)
+PKG_TARGET += build-wifi
 ifeq ($(RK_ENABLE_WIFI),y)
 PKG_TARGET += build-wifi
-else
 ifneq (, $(filter RK_WIFI_APP,$(RK_APP_TYPE)))
 PKG_TARGET += build-wifi
+endif
 endif
 endif
 
