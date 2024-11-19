@@ -87,6 +87,7 @@ export RK_BUILD_APP_TO_OEM_PARTITION=n
 export RK_ENABLE_ROCKCHIP_TEST=y
 
 # enable build wifi
+export RK_ENABLE_WIFI_APP=n
 export RK_ENABLE_WIFI=y
 export RK_ENABLE_WIFI_CHIP=AIC8800D80
 export RK_ENABLE_ADBD=y
