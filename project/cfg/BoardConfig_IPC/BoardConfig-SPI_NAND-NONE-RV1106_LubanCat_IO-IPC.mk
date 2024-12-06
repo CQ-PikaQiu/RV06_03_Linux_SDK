@@ -73,12 +73,12 @@ export RK_PARTITION_FS_TYPE_CFG=rootfs@IGNORE@ubifs
 # export RK_UBIFS_COMP=lzo
 
 # app config
-export RK_APP_TYPE=RKIPC_RV1106
+# export RK_APP_TYPE=RKIPC_RV1106
 
 export RK_LVGL_APP_CONFIG=y
 
 # build ipc web backend
-export RK_APP_IPCWEB_BACKEND=y
+export RK_APP_IPCWEB_BACKEND=n
 
 # enable install app to oem partition
 export RK_BUILD_APP_TO_OEM_PARTITION=n
