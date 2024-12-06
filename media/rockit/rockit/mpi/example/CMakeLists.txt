@@ -4,7 +4,10 @@ add_definitions(-fno-rtti)
 add_compile_options(-std=c++11)
 add_definitions(-std=c++11 -Wno-attributes -Wno-deprecated-declarations -DANDROID_STL=c++_shared)
 
-include_directories(include)
+include_directories(include
+                    ${CMAKE_CURRENT_LIST_DIR}/../../../../rga/release_rga_rv1106_arm-rockchip830-linux-uclibcgnueabihf/include/rga
+                    ${CMAKE_CURRENT_LIST_DIR}/../../../../rga/release_rga_rv1106_arm-rockchip830-linux-uclibcgnueabihf/rga_samples/utils/allocator/include
+                    )
 
 set(RT_TEST_COMM_STATIC   rt_test_comm)
 

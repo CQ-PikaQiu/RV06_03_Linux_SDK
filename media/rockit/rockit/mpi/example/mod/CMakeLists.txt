@@ -67,6 +67,11 @@ set(RK_MPI_TEST_VI_SRC
     test_mpi_vi.cpp
 )
 
+set(RK_MPI_TEST_VI_EMBEDFIRE_SRC
+    test_mpi_vi_embedfire.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../../../rga/release_rga_rv1106_arm-rockchip830-linux-uclibcgnueabihf/rga_samples/utils/allocator/dma_alloc.cpp
+)
+
 set(RK_MPI_TEST_VI_DUP_SRC
     test_mpi_vi_dup.cpp
 )
@@ -192,6 +197,10 @@ install(TARGETS rk_mpi_aenc_test RUNTIME DESTINATION "bin")
 add_executable(rk_mpi_vi_test ${RK_MPI_TEST_VI_SRC} ${RK_MPI_TEST_COMMON_SRC})
 target_link_libraries(rk_mpi_vi_test ${ROCKIT_DEP_COMMON_LIBS})
 install(TARGETS rk_mpi_vi_test RUNTIME DESTINATION "bin")
+
+add_executable(rk_mpi_vi_embedfire_test ${RK_MPI_TEST_VI_EMBEDFIRE_SRC} ${RK_MPI_TEST_COMMON_SRC})
+target_link_libraries(rk_mpi_vi_embedfire_test ${ROCKIT_DEP_COMMON_LIBS} ${CMAKE_CURRENT_LIST_DIR}/../../../../../rga/release_rga_rv1106_arm-rockchip830-linux-uclibcgnueabihf/lib/librga.so)
+install(TARGETS rk_mpi_vi_embedfire_test RUNTIME DESTINATION "bin")
 
 add_executable(rk_mpi_vi_dup_test ${RK_MPI_TEST_VI_DUP_SRC} ${RK_MPI_TEST_COMMON_SRC})
 target_link_libraries(rk_mpi_vi_dup_test ${ROCKIT_DEP_COMMON_LIBS})
