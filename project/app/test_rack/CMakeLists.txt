@@ -40,6 +40,7 @@ include_directories(
     lv_port/
     include
     custom/
+    test/
     generated/
     generated/guider_fonts
     generated/guider_customer_fonts
@@ -59,11 +60,12 @@ set(CXX_SRCS
 
 file(GLOB_RECURSE GENERATED_SOURCES generated/*.c)
 file(GLOB_RECURSE CUSTOM_SOURCES custom/*.c)
+file(GLOB_RECURSE test_SOURCES test/*.c)
 
 add_subdirectory(lvgl)
 add_subdirectory(lv_drivers)
 
-ADD_EXECUTABLE(test_rack ${CUSTOM_SOURCES} ${GENERATED_SOURCES} ${CXX_SRCS})
+ADD_EXECUTABLE(test_rack ${CUSTOM_SOURCES} ${test_SOURCES} ${GENERATED_SOURCES} ${CXX_SRCS}) 
 
 # Add linker flags for rpath and rpath-link
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,${LIB_DIR}")

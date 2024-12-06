@@ -18,156 +18,258 @@
 
 #include "custom.h"
 
-extern int r_value;
-extern int g_value;
-extern int b_value;
-extern lv_ui guider_ui;
 
-static void screen_r_slider_event_handler (lv_event_t *e)
+extern struct project_pass_t project_pass;
+extern int stop_sound_btn;
+extern int start_sound_btn;
+extern int test_btn;
+extern int eth_btn;
+extern int tf_btn;
+extern int gpio_btn;
+extern int bee_btn;
+
+static void screen_test_btn_event_handler (lv_event_t *e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
 
 	switch (code) {
-	case LV_EVENT_VALUE_CHANGED:
+	case LV_EVENT_CLICKED:
 	{
-		r_value = lv_slider_get_value(guider_ui.screen_r_slider);
-	lv_label_set_text_fmt(guider_ui.screen_r_value, "%d", r_value);
+		test_btn=1;
 		break;
 	}
 	default:
 		break;
 	}
 }
-static void screen_g_slider_event_handler (lv_event_t *e)
+static void screen_eth_btn_event_handler (lv_event_t *e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
 
 	switch (code) {
-	case LV_EVENT_VALUE_CHANGED:
+	case LV_EVENT_CLICKED:
 	{
-		g_value = lv_slider_get_value(guider_ui.screen_g_slider);
-	lv_label_set_text_fmt(guider_ui.screen_g_value, "%d", g_value);
+		eth_btn=1;
 		break;
 	}
 	default:
 		break;
 	}
 }
-static void screen_b_slider_event_handler (lv_event_t *e)
+static void screen_tf_btn_event_handler (lv_event_t *e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
 
 	switch (code) {
-	case LV_EVENT_VALUE_CHANGED:
+	case LV_EVENT_CLICKED:
 	{
-		b_value = lv_slider_get_value(guider_ui.screen_b_slider);
-	lv_label_set_text_fmt(guider_ui.screen_b_value, "%d", b_value);
-	
+		tf_btn=1;
 		break;
 	}
 	default:
 		break;
 	}
 }
-static void screen_r_add_event_handler (lv_event_t *e)
+static void screen_gpio_btn_event_handler (lv_event_t *e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
 
 	switch (code) {
-	case LV_EVENT_PRESSED:
+	case LV_EVENT_CLICKED:
 	{
-		r_value++;
-	lv_label_set_text_fmt(guider_ui.screen_r_value, "%d", r_value);
+		gpio_btn=1;
 		break;
 	}
 	default:
 		break;
 	}
 }
-static void screen_r_sub_event_handler (lv_event_t *e)
+static void screen_key_pass_btn_event_handler (lv_event_t *e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
 
 	switch (code) {
-	case LV_EVENT_PRESSED:
+	case LV_EVENT_CLICKED:
 	{
-		r_value--;
-	lv_label_set_text_fmt(guider_ui.screen_r_value, "%d", r_value);
+		project_pass.key_pass=1;
+	next_page();
 		break;
 	}
 	default:
 		break;
 	}
 }
-static void screen_g_add_event_handler (lv_event_t *e)
+static void screen_key_no_pass_btn_event_handler (lv_event_t *e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
 
 	switch (code) {
-	case LV_EVENT_PRESSED:
+	case LV_EVENT_CLICKED:
 	{
-		g_value++;
-	lv_label_set_text_fmt(guider_ui.screen_g_value, "%d", g_value);
+		project_pass.key_pass=0;
+	next_page();
 		break;
 	}
 	default:
 		break;
 	}
 }
-static void screen_b_add_event_handler (lv_event_t *e)
+static void screen_sound_pass_btn_event_handler (lv_event_t *e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
 
 	switch (code) {
-	case LV_EVENT_PRESSED:
+	case LV_EVENT_CLICKED:
 	{
-		b_value++;
-	lv_label_set_text_fmt(guider_ui.screen_b_value, "%d", b_value);
+		project_pass.sound_pass=1;
+	next_page();
 		break;
 	}
 	default:
 		break;
 	}
 }
-static void screen_g_sub_event_handler (lv_event_t *e)
+static void screen_sound_no_pass_btn_event_handler (lv_event_t *e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
 
 	switch (code) {
-	case LV_EVENT_PRESSED:
+	case LV_EVENT_CLICKED:
 	{
-		g_value--;
-	lv_label_set_text_fmt(guider_ui.screen_g_value, "%d", g_value);
+		project_pass.sound_pass=0;
+	next_page();
 		break;
 	}
 	default:
 		break;
 	}
 }
-static void screen_b_sub_event_handler (lv_event_t *e)
+static void screen_stop_btn_event_handler (lv_event_t *e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
 
 	switch (code) {
-	case LV_EVENT_PRESSED:
+	case LV_EVENT_CLICKED:
 	{
-		b_value--;
-	lv_label_set_text_fmt(guider_ui.screen_b_value, "%d", b_value);
+		stop_sound_btn=1;
 		break;
 	}
 	default:
 		break;
 	}
 }
-static void screen_set_event_handler (lv_event_t *e)
+static void screen_start_btn_event_handler (lv_event_t *e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
 
 	switch (code) {
-	case LV_EVENT_PRESSED:
+	case LV_EVENT_CLICKED:
 	{
-		int btn_color=r_value << 16 | g_value << 8 | b_value;
-		lv_canvas_fill_bg(guider_ui.screen_canvas, lv_color_hex(btn_color), 255);
+		start_sound_btn=1;
+		break;
+	}
+	default:
+		break;
+	}
+}
+static void screen_cam_no_pass_btn_event_handler (lv_event_t *e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+
+	switch (code) {
+	case LV_EVENT_CLICKED:
+	{
+		project_pass.cam_pass=0;
+	next_page();
+		break;
+	}
+	default:
+		break;
+	}
+}
+static void screen_cam_pass_btn_event_handler (lv_event_t *e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+
+	switch (code) {
+	case LV_EVENT_CLICKED:
+	{
+		project_pass.cam_pass=1;
+	next_page();
+		break;
+	}
+	default:
+		break;
+	}
+}
+static void screen_screen_pass_btn_event_handler (lv_event_t *e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+
+	switch (code) {
+	case LV_EVENT_CLICKED:
+	{
+		project_pass.screen_pass=1;
+	next_page();
+		break;
+	}
+	default:
+		break;
+	}
+}
+static void screen_screen_no_pass_btn_event_handler (lv_event_t *e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+
+	switch (code) {
+	case LV_EVENT_CLICKED:
+	{
+		project_pass.screen_pass=0;
+	next_page();
+		break;
+	}
+	default:
+		break;
+	}
+}
+static void screen_bee_no_pass_btn_event_handler (lv_event_t *e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+
+	switch (code) {
+	case LV_EVENT_CLICKED:
+	{
+		project_pass.bee_pass=0;
+	next_page();
+		break;
+	}
+	default:
+		break;
+	}
+}
+static void screen_bee_pass_btn_event_handler (lv_event_t *e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+
+	switch (code) {
+	case LV_EVENT_CLICKED:
+	{
+		project_pass.bee_pass=1;
+	next_page();
+		break;
+	}
+	default:
+		break;
+	}
+}
+static void screen_bee_btn_event_handler (lv_event_t *e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+
+	switch (code) {
+	case LV_EVENT_CLICKED:
+	{
+		bee_btn=1;
 		break;
 	}
 	default:
@@ -176,16 +278,23 @@ static void screen_set_event_handler (lv_event_t *e)
 }
 void events_init_screen(lv_ui *ui)
 {
-	lv_obj_add_event_cb(ui->screen_r_slider, screen_r_slider_event_handler, LV_EVENT_ALL, ui);
-	lv_obj_add_event_cb(ui->screen_g_slider, screen_g_slider_event_handler, LV_EVENT_ALL, ui);
-	lv_obj_add_event_cb(ui->screen_b_slider, screen_b_slider_event_handler, LV_EVENT_ALL, ui);
-	lv_obj_add_event_cb(ui->screen_r_add, screen_r_add_event_handler, LV_EVENT_ALL, ui);
-	lv_obj_add_event_cb(ui->screen_r_sub, screen_r_sub_event_handler, LV_EVENT_ALL, ui);
-	lv_obj_add_event_cb(ui->screen_g_add, screen_g_add_event_handler, LV_EVENT_ALL, ui);
-	lv_obj_add_event_cb(ui->screen_b_add, screen_b_add_event_handler, LV_EVENT_ALL, ui);
-	lv_obj_add_event_cb(ui->screen_g_sub, screen_g_sub_event_handler, LV_EVENT_ALL, ui);
-	lv_obj_add_event_cb(ui->screen_b_sub, screen_b_sub_event_handler, LV_EVENT_ALL, ui);
-	lv_obj_add_event_cb(ui->screen_set, screen_set_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_test_btn, screen_test_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_eth_btn, screen_eth_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_tf_btn, screen_tf_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_gpio_btn, screen_gpio_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_key_pass_btn, screen_key_pass_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_key_no_pass_btn, screen_key_no_pass_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_sound_pass_btn, screen_sound_pass_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_sound_no_pass_btn, screen_sound_no_pass_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_stop_btn, screen_stop_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_start_btn, screen_start_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_cam_no_pass_btn, screen_cam_no_pass_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_cam_pass_btn, screen_cam_pass_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_screen_pass_btn, screen_screen_pass_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_screen_no_pass_btn, screen_screen_no_pass_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_bee_no_pass_btn, screen_bee_no_pass_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_bee_pass_btn, screen_bee_pass_btn_event_handler, LV_EVENT_ALL, ui);
+	lv_obj_add_event_cb(ui->screen_bee_btn, screen_bee_btn_event_handler, LV_EVENT_ALL, ui);
 }
 
 void events_init(lv_ui *ui)

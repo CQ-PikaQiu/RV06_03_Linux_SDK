@@ -20,27 +20,86 @@ typedef struct
   
 	lv_obj_t *screen;
 	bool screen_del;
-	lv_obj_t *screen_r_slider;
-	lv_obj_t *screen_g_slider;
-	lv_obj_t *screen_b_slider;
-	lv_obj_t *screen_r_add;
-	lv_obj_t *screen_r_add_label;
-	lv_obj_t *screen_r_sub;
-	lv_obj_t *screen_r_sub_label;
-	lv_obj_t *screen_g_add;
-	lv_obj_t *screen_g_add_label;
-	lv_obj_t *screen_b_add;
-	lv_obj_t *screen_b_add_label;
-	lv_obj_t *screen_g_sub;
-	lv_obj_t *screen_g_sub_label;
-	lv_obj_t *screen_b_sub;
-	lv_obj_t *screen_b_sub_label;
-	lv_obj_t *screen_r_value;
-	lv_obj_t *screen_g_value;
-	lv_obj_t *screen_b_value;
-	lv_obj_t *screen_set;
-	lv_obj_t *screen_set_label;
-	lv_obj_t *screen_canvas;
+	lv_obj_t *screen_list;
+	lv_obj_t *screen_list_tab_1;
+	lv_obj_t *screen_list_tab_2;
+	lv_obj_t *screen_list_tab_3;
+	lv_obj_t *screen_list_tab_4;
+	lv_obj_t *screen_list_tab_5;
+	lv_obj_t *screen_list_tab_6;
+	lv_obj_t *screen_list_tab_7;
+	lv_obj_t *screen_canvas_1;
+	lv_obj_t *screen_label_2;
+	lv_obj_t *screen_test_btn;
+	lv_obj_t *screen_test_btn_label;
+	lv_obj_t *screen_canvas_2;
+	lv_obj_t *screen_canvas_4;
+	lv_obj_t *screen_label_5;
+	lv_obj_t *screen_eth_pass;
+	lv_obj_t *screen_tf_pass;
+	lv_obj_t *screen_gpio_pass;
+	lv_obj_t *screen_label_7;
+	lv_obj_t *screen_tf_no_pass;
+	lv_obj_t *screen_eth_no_pass;
+	lv_obj_t *screen_gpio_no_pass;
+	lv_obj_t *screen_eth_btn;
+	lv_obj_t *screen_eth_btn_label;
+	lv_obj_t *screen_tf_btn;
+	lv_obj_t *screen_tf_btn_label;
+	lv_obj_t *screen_gpio_btn;
+	lv_obj_t *screen_gpio_btn_label;
+	lv_obj_t *screen_label_3;
+	lv_obj_t *screen_label_8;
+	lv_obj_t *screen_label_4;
+	lv_obj_t *screen_label_11;
+	lv_obj_t *screen_label_14;
+	lv_obj_t *screen_label_15;
+	lv_obj_t *screen_eth_send;
+	lv_obj_t *screen_tf_write;
+	lv_obj_t *screen_eth_rcv;
+	lv_obj_t *screen_tf_read;
+	lv_obj_t *screen_eth_status;
+	lv_obj_t *screen_tf_status;
+	lv_obj_t *screen_eth_test;
+	lv_obj_t *screen_gpio_test;
+	lv_obj_t *screen_tf_test;
+	lv_obj_t *screen_adc_key;
+	lv_obj_t *screen_rec_key;
+	lv_obj_t *screen_label_17;
+	lv_obj_t *screen_label_18;
+	lv_obj_t *screen_key_pass_btn;
+	lv_obj_t *screen_key_pass_btn_label;
+	lv_obj_t *screen_key_no_pass_btn;
+	lv_obj_t *screen_key_no_pass_btn_label;
+	lv_obj_t *screen_sound_pass_btn;
+	lv_obj_t *screen_sound_pass_btn_label;
+	lv_obj_t *screen_sound_no_pass_btn;
+	lv_obj_t *screen_sound_no_pass_btn_label;
+	lv_obj_t *screen_stop_btn;
+	lv_obj_t *screen_stop_btn_label;
+	lv_obj_t *screen_start_btn;
+	lv_obj_t *screen_start_btn_label;
+	lv_obj_t *screen_img_1;
+	lv_obj_t *screen_img_2;
+	lv_obj_t *screen_cam_no_pass_btn;
+	lv_obj_t *screen_cam_no_pass_btn_label;
+	lv_obj_t *screen_cam_pass_btn;
+	lv_obj_t *screen_cam_pass_btn_label;
+	lv_obj_t *screen_screen_pass_btn;
+	lv_obj_t *screen_screen_pass_btn_label;
+	lv_obj_t *screen_screen_no_pass_btn;
+	lv_obj_t *screen_screen_no_pass_btn_label;
+	lv_obj_t *screen_red;
+	lv_obj_t *screen_green;
+	lv_obj_t *screen_blue;
+	lv_obj_t *screen_bee_no_pass_btn;
+	lv_obj_t *screen_bee_no_pass_btn_label;
+	lv_obj_t *screen_bee_pass_btn;
+	lv_obj_t *screen_bee_pass_btn_label;
+	lv_obj_t *screen_bee_btn;
+	lv_obj_t *screen_bee_btn_label;
+	lv_obj_t *screen_table_1;
+	lv_obj_t *screen_label_1;
 }lv_ui;
 
 typedef void (*ui_setup_scr_t)(lv_ui * ui);
@@ -75,10 +134,23 @@ extern lv_ui guider_ui;
 
 
 void setup_scr_screen(lv_ui *ui);
+LV_IMG_DECLARE(_pass_alpha_100x100);
+LV_IMG_DECLARE(_pass_alpha_100x100);
+LV_IMG_DECLARE(_pass_alpha_100x100);
+LV_IMG_DECLARE(_no_pass_alpha_100x100);
+LV_IMG_DECLARE(_no_pass_alpha_100x100);
+LV_IMG_DECLARE(_no_pass_alpha_100x100);
+LV_IMG_DECLARE(_test_alpha_100x100);
+LV_IMG_DECLARE(_test_alpha_100x100);
+LV_IMG_DECLARE(_test_alpha_100x100);
 
-LV_FONT_DECLARE(lv_font_Amiko_Regular_32)
+LV_FONT_DECLARE(lv_font_SourceHanSerifCN2_20)
+LV_FONT_DECLARE(lv_font_SourceHanSerifCN2_12)
+LV_FONT_DECLARE(lv_font_SourceHanSerifCN2_16)
+LV_FONT_DECLARE(lv_font_SourceHanSerifCN2_36)
+LV_FONT_DECLARE(lv_font_SourceHanSerifCN2_24)
+LV_FONT_DECLARE(lv_font_SourceHanSerifCN2_23)
 LV_FONT_DECLARE(lv_font_Amiko_Regular_16)
-LV_FONT_DECLARE(lv_font_Amiko_Regular_12)
 
 
 #ifdef __cplusplus

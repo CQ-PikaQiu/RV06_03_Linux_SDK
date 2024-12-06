@@ -15,7 +15,41 @@ extern "C" {
 
 #include "gui_guider.h"
 
+
+// 创建各个项目是否通过的结构体
+typedef struct project_pass_t {
+    int bee_pass;
+    int cam_pass;
+    int eth_pass;
+    int key_pass;
+    int sound_pass;
+    int screen_pass;
+    int tf_pass;
+    int gpio_pass;
+} project_pass_t;
+
 void custom_init(lv_ui *ui);
+void set_eth_pass_status(int status);
+void set_eth_attr(int type,double value);
+void set_eth_dect(int value);
+void set_usb_dect(int value);
+void set_tf_dect(int value);
+void set_tf_attr(int type,double value);
+void set_usb_attr(int type,double value);
+void set_tf_pass_status(int status);
+void set_usb_pass_status(int status);
+void set_gpio_pass_status(int status);
+int next_page();
+void init_result();
+void update_eth_result(int status,double send,double rcv);
+void update_tf_result(int status,double write,double read);
+void update_gpio_result(int status);
+void update_key_result(int status);
+void update_sound_result(int status);
+void update_cam_result(int status);
+void update_screen_result(int status);
+void update_bee_result(int status);
+
 
 #ifdef __cplusplus
 }

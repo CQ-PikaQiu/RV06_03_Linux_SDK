@@ -13,6 +13,20 @@
 #include "generated/gui_guider.h"
 #include "generated/events_init.h"
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/fb.h>
+#include <linux/input.h>
+//poll头文件
+#include <poll.h>
+#include <signal.h>
+#include <sys/wait.h>
+
+#include "cam.h"
+#include "eth.h"
+#include "tf.h"
+#include "custom.h"
 
 lv_ui guider_ui;
 
@@ -22,8 +36,100 @@ lv_ui guider_ui;
 pthread_mutex_t lv_task_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
-void* lv_task_thread(void* arg) {
+eth_dev_t eth_dev;
+tf_dev_t tf_dev;
 
+int stop_sound_btn;
+int start_sound_btn;
+int test_btn;
+int eth_btn;
+int tf_btn;
+int gpio_btn;
+int bee_btn;
+
+struct project_pass_t project_pass={-1};
+struct project_pass_t project_pass_old={-1};
+
+
+int check_gpio(int outgpio,int outgpio_desc,int ingpio,int ingpio_desc){
+    FILE *fp;
+    char str[20];
+    char result[20];
+    int value;
+    int ret=0;
+    sprintf(str,"gpioset %d %d=0",outgpio,outgpio_desc);
+    system(str);
+    sprintf(str,"gpioget %d %d",ingpio,ingpio_desc);
+    fp =popen(str,"r");
+
+    fgets(result,8,fp);
+    pclose(fp);
+    value=atoi(result);
+    if(value!=0){
+        ret++;
+    }
+
+    sprintf(str,"gpioset %d %d=1",outgpio,outgpio_desc);
+    system(str);
+    sprintf(str,"gpioget %d %d",ingpio,ingpio_desc);
+    fp =popen(str,"r");
+
+    fgets(result,8,fp);
+    pclose(fp);
+    value=atoi(result);
+    if(value!=1){
+        ret++;
+    }
+
+    if(ret)
+        return -1;
+    else
+        return 0; 
+}
+
+void check_project_pass() {
+    if(project_pass_old.eth_pass != project_pass.eth_pass){
+        project_pass_old.eth_pass = project_pass.eth_pass;
+        update_eth_result(project_pass.eth_pass,eth_dev.send_speed,eth_dev.rcv_speed);
+    }
+
+    if(project_pass_old.tf_pass != project_pass.tf_pass){
+        project_pass_old.tf_pass = project_pass.tf_pass;
+        update_tf_result(project_pass.tf_pass,tf_dev.write_speed,tf_dev.read_speed);
+    }
+
+    if(project_pass_old.gpio_pass != project_pass.gpio_pass){
+        project_pass_old.gpio_pass = project_pass.gpio_pass;
+        update_gpio_result(project_pass.gpio_pass);
+    }
+
+    if(project_pass_old.bee_pass != project_pass.bee_pass){
+        project_pass_old.bee_pass = project_pass.bee_pass;
+        update_bee_result(project_pass_old.bee_pass);
+    }
+
+    if(project_pass_old.screen_pass != project_pass.screen_pass){
+        project_pass_old.screen_pass = project_pass.screen_pass;
+        update_screen_result(project_pass.screen_pass);
+    }
+
+    if(project_pass_old.cam_pass != project_pass.cam_pass){
+        project_pass_old.cam_pass = project_pass.cam_pass;
+        update_cam_result(project_pass.cam_pass);
+    }
+
+    if(project_pass_old.key_pass != project_pass.key_pass){
+        project_pass_old.key_pass = project_pass.key_pass;
+        update_key_result(project_pass.key_pass);
+    }
+
+    if(project_pass_old.sound_pass != project_pass.sound_pass){
+        project_pass_old.sound_pass = project_pass.sound_pass;
+        update_sound_result(project_pass.sound_pass);
+    }
+}
+
+void* lv_task_thread(void* arg) {
     while (1) {
         pthread_mutex_lock(&lv_task_mutex);
         lv_task_handler();
@@ -34,17 +140,243 @@ void* lv_task_thread(void* arg) {
     return NULL;
 }
 
+void* eth_test_thread() {
+    if(eth_dev.link_status){
+        set_eth_pass_status(0);
+        set_eth_attr(2,0.00);
+        set_eth_attr(1,0.00);
+
+        eth_dev.send_speed=eth_send_test("192.168.103.200");
+        set_eth_attr(1,eth_dev.send_speed);
+        eth_dev.rcv_speed=eth_rsv_test("192.168.103.200");
+        set_eth_attr(2,eth_dev.rcv_speed);
+
+        if(check_eth_pass(eth_dev.send_speed,eth_dev.rcv_speed)){
+            set_eth_pass_status(1);
+            project_pass.eth_pass=1;
+        }else{
+            set_eth_pass_status(-1);
+            project_pass.eth_pass=0;
+        }
+            
+    }else{
+        set_eth_pass_status(-1);
+        project_pass.eth_pass=0;
+    }
+        
+
+    return NULL;
+}
+
+void* tf_test_thread() {
+    if(tf_dev.link_status){
+        set_tf_pass_status(0);
+        set_tf_attr(2,0.00);
+        set_tf_attr(1,0.00);
+
+        tf_dev.write_speed=tf_write_test();
+        set_tf_attr(1,tf_dev.write_speed);
+        tf_dev.read_speed=tf_read_test();
+        set_tf_attr(2,tf_dev.read_speed);
+
+        if(check_tf_pass(tf_dev.read_speed,tf_dev.read_speed)){
+            set_tf_pass_status(1);
+            project_pass.tf_pass=1;
+        }else{
+            set_tf_pass_status(-1);
+            project_pass.tf_pass=0;
+        }
+            
+    }else{
+        set_tf_pass_status(-1);
+        project_pass.tf_pass=0;
+    }
+
+    return NULL;
+}
+
+void* gpio_test_thread() {
+    printf("goio_test\n");
+    int count=0;
+    set_gpio_pass_status(0);
+    //定义二维数组
+    int gpio_out[12][2]={{1,0},{1,1},{1,8},{1,9},{4,0},{4,1},{4,7},{4,5},{0,0},{0,1},{0,4},{0,5}};
+    int gpio_in[12][2]={{5,4},{5,5},{5,6},{5,7},{5,8},{5,9},{5,10},{5,11},{5,12},{5,13},{5,14},{5,15}};
+    for(int i=0;i<12;i++){
+        if(check_gpio(gpio_out[i][0],gpio_out[i][1],gpio_in[i][0],gpio_in[i][1])!=0){
+            printf("group %d :fail \n",i);
+            count++;
+        }
+        else
+            printf("group %d :pass \n",i);
+    }
+
+    if(count==0){
+        set_gpio_pass_status(1);
+        project_pass.gpio_pass=1;
+    }else{
+        set_gpio_pass_status(-1);
+        project_pass.gpio_pass=0;
+    }
+
+    return NULL;
+}
+void* test_thread() {
+    printf("test\n");
+    eth_test_thread();
+    tf_test_thread();
+    gpio_test_thread();
+    next_page();
+    return NULL;
+}
+
+void* bee_test_thread() {
+    system("gpioset 0 2=1");
+    sleep(1);
+    system("gpioset 0 2=0");
+    return NULL;
+}
+
+void* start_sound() {
+    system("arecord -f cd -Dhw:0 | aplay -Dhw:0 &");
+    return NULL;
+}
+
+void* stop_sound() {
+    system("pkill arecord");
+    return NULL;
+}
+
+void* read_key(void* arg) {
+    //读取/dev/input/event0和/dev/input/event1，并使用poll进行非阻塞读取，event0读取KEY_VOLUMEUP，evevt1读取KEY_VOLUMEDOWN
+
+    struct pollfd fds[2];
+    fds[0].fd = open("/dev/input/event0", O_RDONLY);
+    fds[1].fd = open("/dev/input/event1", O_RDONLY);
+    fds[0].events = POLLIN;
+    fds[1].events = POLLIN;
+
+    while (1) {
+        int ret = poll(fds, 2, -1);
+        if (ret < 0) {
+            perror("poll");
+            break;
+        }
+        if (fds[0].revents & POLLIN) {
+            struct input_event ev;
+            read(fds[0].fd, &ev, sizeof(struct input_event));
+            if (ev.type == EV_KEY && ev.value == 1) {
+                if (ev.code == KEY_VOLUMEUP) {
+                    lv_canvas_fill_bg(guider_ui.screen_adc_key, lv_color_hex(0x3d3d3d), 255);
+                }
+            }else if (ev.type == EV_KEY && ev.value == 0) {
+                if (ev.code == KEY_VOLUMEUP) {
+                    lv_canvas_fill_bg(guider_ui.screen_adc_key, lv_color_hex(0xadadad), 255);
+                }
+            }
+        }
+        if (fds[1].revents & POLLIN) {
+            struct input_event ev;
+            read(fds[1].fd, &ev, sizeof(struct input_event));
+            if (ev.type == EV_KEY && ev.value == 1) {
+                if (ev.code == KEY_VOLUMEDOWN) {
+                    lv_canvas_fill_bg(guider_ui.screen_rec_key, lv_color_hex(0x3d3d3d), 255);
+                }
+            }else if (ev.type == EV_KEY && ev.value == 0) {
+                if (ev.code == KEY_VOLUMEDOWN) {
+                    lv_canvas_fill_bg(guider_ui.screen_rec_key, lv_color_hex(0xadadad), 255);
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
+void* hardware_monitor_thread() {
+    while(1){
+        if(eth_detect()!=eth_dev.link_status){
+            eth_dev.link_status=eth_detect();
+            set_eth_dect(eth_dev.link_status); 
+        }
+
+        if(tf_detect()!=tf_dev.link_status){
+            tf_dev.link_status=tf_detect();
+            set_tf_dect(tf_dev.link_status);
+        }
+
+        if(eth_btn==1){
+            
+            pthread_t eth_test_thread_id;
+            int ret = pthread_create(&eth_test_thread_id, NULL, eth_test_thread, NULL);
+            if (ret != 0) {
+                perror("pthread_create");
+                exit(EXIT_FAILURE);
+            }
+            eth_btn=0;
+        }
+
+        if(tf_btn==1){
+            pthread_t tf_test_thread_id;
+            int ret = pthread_create(&tf_test_thread_id, NULL, tf_test_thread, NULL);
+            if (ret != 0) {
+                perror("pthread_create");
+                exit(EXIT_FAILURE);
+            }
+            tf_btn=0;
+        }
+
+
+        if(gpio_btn==1){
+            pthread_t gpio_test_thread_id;
+            int ret = pthread_create(&gpio_test_thread_id, NULL, gpio_test_thread, NULL);
+            if (ret != 0) {
+                perror("pthread_create");
+                exit(EXIT_FAILURE);
+            }
+            gpio_btn=0;
+        }
+
+        if(test_btn==1){
+            pthread_t test_thread_id;
+            int ret = pthread_create(&test_thread_id, NULL, test_thread, NULL);
+            if (ret != 0) {
+                perror("pthread_create");
+                exit(EXIT_FAILURE);
+            }
+            test_btn=0;
+        }
+
+        if(bee_btn==1){
+            pthread_t bee_test_thread_id;
+            int ret = pthread_create(&bee_test_thread_id, NULL, bee_test_thread, NULL);
+            if (ret != 0) { 
+                perror("pthread_create");
+                exit(EXIT_FAILURE);
+            }
+            bee_btn=0;
+        }
+
+        if(stop_sound_btn==1){
+            stop_sound();
+            stop_sound_btn=0;
+        }
+
+        if(start_sound_btn==1){
+            start_sound();
+            start_sound_btn=0;
+        }
+
+        check_project_pass();
+
+        usleep(100000);
+    }
+}
+
 int main(int argc, char *argv[]) {
     lv_disp_drv_t disp_drv;
     pthread_t lv_task_thread_id;
+    pthread_t hardware_monitor_thread_id;
     int ret;
-
-    printf("lvgl_app -> usr\n");
-    printf("lvgl_app 0 -> lv_demo_widgets\n");
-    printf("lvgl_app 1 -> lv_demo_music\n");
-    printf("lvgl_app 2 -> lv_demo_benchmark\n");
-    printf("lvgl_app 3 -> lv_demo_stress\n");
-    printf("lvgl_app 4 -> usr\n");
 
     /*LittlevGL init*/
     lv_init();
@@ -83,31 +415,8 @@ int main(int argc, char *argv[]) {
     indev_drv.read_cb = evdev_read;
     lv_indev_drv_register(&indev_drv);
 
-    if(argc == 2){
-        switch(atoi(argv[1])) {
-        case 0:
-            lv_demo_widgets();
-            break;
-        case 1:
-            lv_demo_music();
-            break;
-        case 2:
-            lv_demo_benchmark();
-            break;
-        case 3:
-            lv_demo_stress();
-            break;
-        case 4:
-            setup_ui(&guider_ui);
-            events_init(&guider_ui);
-            break;
-        default:
-            return 0;
-        }
-    }else{
-        setup_ui(&guider_ui);
-        events_init(&guider_ui);
-    }
+    setup_ui(&guider_ui);
+    events_init(&guider_ui);
 
     ret = pthread_create(&lv_task_thread_id, NULL, lv_task_thread, NULL);
     if (ret != 0) {
@@ -115,10 +424,28 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    while(1){
-        sleep(1);
+    ret = pthread_create(&hardware_monitor_thread_id, NULL, hardware_monitor_thread, NULL);
+    if (ret != 0) {
+        perror("pthread_create");
+        exit(EXIT_FAILURE);
     }
 
+    init_result();
+
+    eth_dev.link_status=eth_detect();
+    set_eth_dect(eth_dev.link_status);
+
+    tf_dev.link_status=tf_detect();
+    set_tf_dect(tf_dev.link_status);
+
+    // double send=eth_send_test("192.168.103.200");
+    // double rsv=eth_rsv_test("192.168.103.200");
+    // printf("send:%lf,rsv:%lf\n",send,rsv);
+    // set_eth_attr(1,send);
+    // set_eth_attr(2,rsv);
+    // set_tf_attr(1,tf_write_test());
+    // set_tf_attr(2,tf_read_test());
+    read_key(NULL);
     // deinit
     pthread_mutex_destroy(&lv_task_mutex);
     pthread_join(lv_task_thread_id, NULL);
