@@ -71,6 +71,12 @@
 				remote-endpoint = <&ov8858_out>;
 				data-lanes = <1 2>;
 			};
+
+			csi_dphy_input1: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&sc530ai_out>;
+				data-lanes = <1 2>;
+			};
 		};
 
 		port@1 {
@@ -134,6 +140,28 @@
 			};
 		};
 	};
+
+	sc530ai: sc530ai@30 {
+		compatible = "smartsens,sc530ai";
+		status = "okay";
+		reg = <0x30>;
+		clocks = <&ext_cam_24m_clk>;
+		clock-names = "xvclk";
+		pwdn-gpios = <&gpio5 0 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio5 1 GPIO_ACTIVE_HIGH>;
+		rockchip,camera-module-index = <0>;
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "CMK-OT2115-PC1";
+		rockchip,camera-module-lens-name = "30IRC-F16";
+		port {
+			sc530ai_out: endpoint {
+				remote-endpoint = <&csi_dphy_input1>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+
+
 };
 
 &mipi0_csi2 {
