@@ -13,8 +13,8 @@
 // #include "rv1106g-lubancat-screen-4-inch.dtsi"
 
 //camara
-// #include "rv1106g-lubancat-single-cam.dtsi"
-#include "rv1106g-lubancat-dual-cam.dtsi"
+#include "rv1106g-lubancat-single-cam.dtsi"
+// #include "rv1106g-lubancat-dual-cam.dtsi"
 
 / {
     model = "LubanCat RV1106 IO Board";
@@ -72,13 +72,6 @@
 	leds: leds {
 		status = "okay";
 		compatible = "gpio-leds";
-
-		sys_led: sys-led {
-			label = "sys_led";
-			linux,default-trigger = "heartbeat";
-			default-state = "on";
-			gpios = <&gpio5 4 GPIO_ACTIVE_HIGH>;
-		};
 
 		fephy_spd_led: fephy-spd-led {
 			label = "fephy_spd_led";
@@ -201,18 +194,6 @@
 		vin-supply = <&vcc_3v3>;
 	};
 
-	vcc5v0_usb_host: vcc5v0-usb-host {
-		compatible = "regulator-fixed";
-		regulator-name = "vcc5v0_usb_host";
-		regulator-always-on;
-		enable-active-high;
-		regulator-boot-on;
-		regulator-min-microvolt = <5000000>;
-		regulator-max-microvolt = <5000000>;
-		gpio = <&gpio5 6 GPIO_ACTIVE_HIGH>;
-		vin-supply = <&vcc5v0_sys>;
-	};
-
 	vcc_lcd: vcc-lcd {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc_lcd";
@@ -252,7 +233,6 @@
 
 &acodec {
 	#sound-dai-cells = <0>;
-	pa-ctl-gpios = <&gpio5 7 GPIO_ACTIVE_LOW>;
 	status = "okay";
 };
 
