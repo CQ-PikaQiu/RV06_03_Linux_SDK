@@ -69,73 +69,16 @@ post_chk()
 		cd $default_ko_dir && sh insmod_ko.sh && cd -
 	fi
 
-	network_init &
-	check_linker /userdata   /oem/usr/www/userdata
-	check_linker /media/usb0 /oem/usr/www/usb0
-	check_linker /mnt/sdcard /oem/usr/www/sdcard
-	# if /data/rkipc not exist, cp /usr/share
-	rkipc_ini=/userdata/rkipc.ini
-	default_rkipc_ini=/tmp/rkipc-factory-config.ini
+	# network_init &
 
-	if [ ! -f "/oem/usr/share/rkipc.ini" ]; then
-		lsmod | grep sc530ai
-		if [ $? -eq 0 ] ;then
-			ln -s -f /oem/usr/share/rkipc-500w.ini $default_rkipc_ini
-		fi
-		lsmod | grep sc4336
-		if [ $? -eq 0 ] ;then
-			ln -s -f /oem/usr/share/rkipc-400w.ini $default_rkipc_ini
-		fi
-		lsmod | grep sc3336
-		if [ $? -eq 0 ] ;then
-			ln -s -f /oem/usr/share/rkipc-300w.ini $default_rkipc_ini
-		fi
-		lsmod | grep imx415
-		if [ $? -eq 0 ] ;then
-			ln -s -f /oem/usr/share/rkipc-800w.ini $default_rkipc_ini
-		fi
-	fi
-	tmp_md5=/tmp/.rkipc-ini.md5sum
-	data_md5=/userdata/.rkipc-default.md5sum
-	md5sum $default_rkipc_ini > $tmp_md5
-	chk_rkipc=`cat $tmp_md5|awk '{print $1}'`
-	rm $tmp_md5
-	if [ ! -f $data_md5 ];then
-		md5sum $default_rkipc_ini > $data_md5
-	fi
-	grep -w $chk_rkipc $data_md5
-	if [ $? -ne 0 ] ;then
-		rm -f $rkipc_ini
-		echo "$chk_rkipc" > $data_md5
-	fi
-
-	if [ ! -f "$default_rkipc_ini" ];then
-		echo "Error: not found rkipc.ini !!!"
-		exit -1
-	fi
-	if [ ! -f "$rkipc_ini" ]; then
-		cp $default_rkipc_ini $rkipc_ini -f
-	fi
-
-	if [ ! -f "/userdata/image.bmp" ]; then
-		cp -fa /oem/usr/share/image.bmp /userdata/
-	fi
-
-	if [ -f "/oem/usr/share/speaker_test.wav" ];then
-		rk_mpi_ao_test -i /oem/usr/share/speaker_test.wav --sound_card_name=hw:0,0 --device_ch=2 --device_rate=8000 --input_rate=8000 --input_ch=2 --set_volume 50
-	fi
-
-	if [ -d "/oem/usr/share/iqfiles" ];then
-		rkipc -a /oem/usr/share/iqfiles &
-	else
-		rkipc &
-	fi
+	# start app
+	/oem/usr/bin/lvgl_app &
 }
 
 rcS
 
 ulimit -c unlimited
-echo "/data/core-%p-%e" > /proc/sys/kernel/core_pattern
+# echo "/data/core-%p-%e" > /proc/sys/kernel/core_pattern
 # echo 0 > /sys/devices/platform/rkcif-mipi-lvds/is_use_dummybuf
 
 echo 1 > /proc/sys/vm/overcommit_memory
