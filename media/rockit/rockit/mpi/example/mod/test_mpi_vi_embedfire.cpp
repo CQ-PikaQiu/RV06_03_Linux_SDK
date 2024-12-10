@@ -17,23 +17,6 @@
 #include "rk_mpi_vi.h"
 #include "rk_mpi_mb.h"
 #include "rk_mpi_sys.h"
-#include "rk_mpi_venc.h"
-#include "rk_mpi_vpss.h"
-#include "rk_mpi_vo.h"
-#include "rk_mpi_rgn.h"
-#include "rk_mpi_cal.h"
-#include "rk_mpi_ivs.h"
-
-#include "rk_common.h"
-#include "rk_comm_rgn.h"
-#include "rk_comm_vi.h"
-#include "rk_comm_vo.h"
-#include "rk_comm_ivs.h"
-
-#include "test_common.h"
-#include "test_comm_utils.h"
-#include "test_comm_argparse.h"
-#include "test_comm_bmp.h"
 
 #include "RgaUtils.h"
 #include "im2d.hpp"
@@ -54,12 +37,6 @@ pthread_mutex_t cam_mutex = PTHREAD_MUTEX_INITIALIZER;
 #define RKISP_DEV  "/proc/rkisp-vir0"
 
 
-typedef struct rkRGN_CFG_S {
-    RGN_ATTR_S stRgnAttr;
-    RGN_CHN_ATTR_S stRgnChnAttr;
-} RGN_CFG_S;
-
-
 typedef struct _rkMpiVICtx {
     RK_S32 maxWidth;
     RK_S32 maxHeight;
@@ -70,7 +47,6 @@ typedef struct _rkMpiVICtx {
     RK_S32 channelId;
     RK_S32 selectFd;
     RK_BOOL bFreeze;
-    RK_BOOL bAttachPool;
     MB_POOL attachPool;
 
     COMPRESS_MODE_E enCompressMode;
@@ -84,9 +60,6 @@ typedef struct _rkMpiVICtx {
     VI_CHN_STATUS_S stChnStatus;
     const char *aEntityName;
     VI_CHN_BUF_WRAP_S stChnWrap;
-    // for vi
-    RGN_CFG_S stViRgn;
-    VENC_STREAM_S stFrame[TEST_VENC_MAX];
 
 } TEST_VI_CTX_S;
 
@@ -94,35 +67,10 @@ typedef struct _rkMpiVICtx {
 TEST_VI_CTX_S *ctx;
 TEST_VI_CTX_S *ctx1;
 
-static MB_POOL create_pool(TEST_VI_CTX_S *pstCtx) {
-    MB_POOL_CONFIG_S stMbPoolCfg;
-    PIC_BUF_ATTR_S stPicBufAttr;
-    MB_PIC_CAL_S stMbPicCalResult;
-    RK_S32 s32Ret = RK_SUCCESS;
-
-    if (pstCtx->stChnAttr.stIspOpt.stMaxSize.u32Width && \
-         pstCtx->stChnAttr.stIspOpt.stMaxSize.u32Height) {
-        stPicBufAttr.u32Width = pstCtx->stChnAttr.stIspOpt.stMaxSize.u32Width;
-        stPicBufAttr.u32Height = pstCtx->stChnAttr.stIspOpt.stMaxSize.u32Height;
-    } else {
-        stPicBufAttr.u32Width = pstCtx->width;
-        stPicBufAttr.u32Height = pstCtx->height;
-    }
-    stPicBufAttr.enCompMode = (COMPRESS_MODE_E)pstCtx->enCompressMode;
-    stPicBufAttr.enPixelFormat = (PIXEL_FORMAT_E)pstCtx->stChnAttr.enPixelFormat;
-    s32Ret = RK_MPI_CAL_VGS_GetPicBufferSize(&stPicBufAttr, &stMbPicCalResult);
-    if (s32Ret != RK_SUCCESS) {
-        RK_LOGE("get picture buffer size failed. err 0x%x", s32Ret);
-        return MB_INVALID_POOLID;
-    }
-
-    memset(&stMbPoolCfg, 0, sizeof(MB_POOL_CONFIG_S));
-    stMbPoolCfg.u64MBSize = stMbPicCalResult.u32MBSize;
-    stMbPoolCfg.u32MBCnt  = 3;
-    stMbPoolCfg.enRemapMode = MB_REMAP_MODE_CACHED;
-    stMbPoolCfg.bPreAlloc = RK_TRUE;
-
-    return RK_MPI_MB_CreatePool(&stMbPoolCfg);
+RK_U64 TEST_COMM_GetNowUs() {
+    struct timespec time = {0, 0};
+    clock_gettime(CLOCK_MONOTONIC, &time);
+    return (RK_U64)time.tv_sec * 1000000 + (RK_U64)time.tv_nsec / 1000; /* microseconds */
 }
 
 RK_S32 test_vi_init(TEST_VI_CTX_S *ctx) {
@@ -184,20 +132,6 @@ RK_S32 test_vi_init(TEST_VI_CTX_S *ctx) {
     if (s32Ret != RK_SUCCESS) {
         RK_LOGE("RK_MPI_VI_SetChnAttr %x", s32Ret);
         goto __FAILED;
-    }
-
-    if (ctx->bAttachPool) {
-        ctx->attachPool = create_pool(ctx);
-        if (ctx->attachPool == MB_INVALID_POOLID) {
-            RK_LOGE("create pool failure");
-            s32Ret = RK_FAILURE;
-            goto __FAILED;
-        }
-
-        s32Ret = RK_MPI_VI_AttachMbPool(ctx->pipeId, ctx->channelId, ctx->attachPool);
-        if (s32Ret != RK_SUCCESS) {
-            goto __FAILED;
-        }
     }
 
     // set wrap mode attr
@@ -274,6 +208,9 @@ static int color_cvt(int ch,void *src_data){
 
     src_buf_size = src_width * src_height * get_bpp_from_format(src_format);
     dst_buf_size = dst_width * dst_height * get_bpp_from_format(dst_format);
+
+    printf("%f,%f\n",get_bpp_from_format(src_format),get_bpp_from_format(dst_format));
+
 
     ret = dma_buf_alloc(RV1106_CMA_HEAP_PATH, src_buf_size, &src_dma_fd, (void **)&src_buf);
     if (ret < 0) {
@@ -412,11 +349,6 @@ static RK_S32 test_vi_get_release_frame_loop(TEST_VI_CTX_S *ctx) {
 __FAILED:
 
 
-    if (ctx->bAttachPool) {
-        RK_MPI_VI_DetachMbPool(ctx->pipeId, ctx->channelId);
-        RK_MPI_MB_DestroyPool(ctx->attachPool);
-    }
-
     // 9. disable one chn
     s32Ret = RK_MPI_VI_DisableChn(ctx->pipeId, ctx->channelId);
     RK_LOGE("RK_MPI_VI_DisableChn %x", s32Ret);
@@ -469,10 +401,6 @@ int main(int argc, const char **argv) {
     ctx->stChnAttr.stFrameRate.s32SrcFrameRate = -1;
     ctx->stChnAttr.stFrameRate.s32DstFrameRate = -1;
 
-    ctx->bAttachPool = RK_FALSE;
-
-
-
     ctx1 = reinterpret_cast<TEST_VI_CTX_S *>(malloc(sizeof(TEST_VI_CTX_S)));
     memset(ctx1, 0, sizeof(TEST_VI_CTX_S));
 
@@ -498,7 +426,6 @@ int main(int argc, const char **argv) {
     ctx1->stChnAttr.stFrameRate.s32SrcFrameRate = -1;
     ctx1->stChnAttr.stFrameRate.s32DstFrameRate = -1;
 
-    ctx1->bAttachPool = RK_FALSE;
 
     int fbfd;
     struct fb_var_screeninfo vinfo;
