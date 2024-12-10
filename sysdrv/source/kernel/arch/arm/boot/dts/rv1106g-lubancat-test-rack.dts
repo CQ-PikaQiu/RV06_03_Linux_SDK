@@ -13,8 +13,8 @@
 // #include "rv1106g-lubancat-screen-4-inch.dtsi"
 
 //camara
-#include "rv1106g-lubancat-single-cam.dtsi"
-// #include "rv1106g-lubancat-dual-cam.dtsi"
+// #include "rv1106g-lubancat-single-cam.dtsi"
+#include "rv1106g-lubancat-dual-cam.dtsi"
 
 / {
     model = "LubanCat RV1106 IO Board";
@@ -246,14 +246,14 @@
 
 &i2c3 {
     status = "okay";
-    clock-frequency = <400000>;
+    clock-frequency = <100000>;
     pinctrl-names = "default";
     pinctrl-0 = <&i2c3m2_xfer>;
 
-	gpio5: gpio-expander@21 {
+	gpio5: gpio-expander@20 {
 		compatible = "nxp,pca9535";
 		status = "okay";
-		reg = <0x21>;
+		reg = <0x20>;
 		gpio-controller;
 		#gpio-cells = <2>;
 		//  = <&gpio5 0 GPIO_ACTIVE_LOW>;
