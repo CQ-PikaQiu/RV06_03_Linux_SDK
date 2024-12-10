@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include "lvgl.h"
 #include "custom.h"
+#include <pthread.h>
 
 /*********************
  *      DEFINES
@@ -31,6 +32,7 @@
  *  STATIC VARIABLES
  **********************/
 extern struct project_pass_t project_pass;
+extern pthread_mutex_t lv_task_mutex;
 /**
  * Create a demo application
  */
@@ -151,12 +153,13 @@ int next_page(){
     int i = lv_tabview_get_tab_act(guider_ui.screen_list);
     int a = i + 1;
     // i = (i + 1) % lv_obj_get_child_cnt(guider_ui.screen_list);
+    // pthread_mutex_lock(&lv_task_mutex);
     lv_tabview_set_act(guider_ui.screen_list, a, LV_ANIM_ON);
     if(a-1 == lv_tabview_get_tab_act(guider_ui.screen_list)){
         a=0;
         lv_tabview_set_act(guider_ui.screen_list, a, LV_ANIM_ON);
     }
-
+    // pthread_mutex_unlock(&lv_task_mutex);
     return a;
 };
 
@@ -208,11 +211,18 @@ void update_key_result(int status){
     }
 }
 
-void update_sound_result(int status){
+void update_sound_result(int status,int state){
+    printf("status:%d\n",status);
     if(status == 1){
         lv_table_set_cell_value(guider_ui.screen_table_1,5,1,"通过");
     }else{
         lv_table_set_cell_value(guider_ui.screen_table_1,5,1,"未通过");
+    }
+    printf("state:%d\n",state);
+    if(state == 1){
+        lv_table_set_cell_value(guider_ui.screen_table_1,5,1,"mic未通过");
+    }else if(state == 2){
+        lv_table_set_cell_value(guider_ui.screen_table_1,5,1,"spk未通过");
     }
 }
 

@@ -45,7 +45,7 @@ void update_eth_result(int status,double send,double rcv);
 void update_tf_result(int status,double write,double read);
 void update_gpio_result(int status);
 void update_key_result(int status);
-void update_sound_result(int status);
+void update_sound_result(int status,int state);
 void update_cam_result(int status);
 void update_screen_result(int status);
 void update_bee_result(int status);

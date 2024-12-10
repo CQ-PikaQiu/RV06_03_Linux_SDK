@@ -47,10 +47,15 @@ include_directories(
     generated/images
     generated/mPythonImages
     ${CMAKE_SOURCE_DIR}/../../../media/rockit/rockit/mpi/sdk/include
+    ${CMAKE_SOURCE_DIR}/../../../media/rga/release_rga_rv1106_arm-rockchip830-linux-uclibcgnueabihf/include/rga/
 )
 
 # Define library directory
-set(LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
+set(LIB_DIR ${CMAKE_SOURCE_DIR}/lib
+            ${CMAKE_SOURCE_DIR}/../../../media/rockit/rockit/lib/lib32
+            ${CMAKE_SOURCE_DIR}/../../../media/rga/release_rga_rv1106_arm-rockchip830-linux-uclibcgnueabihf/lib
+            ${CMAKE_SOURCE_DIR}/../../../media/mpp/release_mpp_rv1106_arm-rockchip830-linux-uclibcgnueabihf/lib
+            )
 link_directories(${LIB_DIR})
 
 set(CXX_SRCS
@@ -76,6 +81,9 @@ target_link_libraries(test_rack
     PRIVATE lvgl::drivers
     PRIVATE lvgl::demos
     PRIVATE lvgl::examples
+    -lrga
+    -lrockchip_mpp
+    -lrockit
     pthread
     m
 )

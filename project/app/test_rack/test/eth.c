@@ -3,7 +3,7 @@
 #include <string.h>
 #include "eth.h"
 
-#define ETH_PASS_SPEED 90.0 //Mbps
+#define ETH_PASS_SPEED 85.0 //Mbps
 
 //detect the eth device.
 int eth_detect(void){

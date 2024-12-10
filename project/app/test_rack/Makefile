@@ -44,6 +44,9 @@ test_rack-build:
 	@make -C output install
 	@cp -vf $(CURRENT_DIR)/RkLunch.sh $(PKG_BIN)/usr/bin
 	@cp -vf $(CURRENT_DIR)/RkLunch-stop.sh $(PKG_BIN)/usr/bin
+	@mkdir -p $(PKG_BIN)/usr/share
+	@cp -vf $(CURRENT_DIR)/resource/test.wav $(PKG_BIN)/usr/share
+
 	$(call MAROC_COPY_PKG_TO_APP_OUTPUT, $(RK_APP_OUTPUT), $(PKG_BIN))
 
 install:
