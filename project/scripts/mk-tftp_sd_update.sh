@@ -89,6 +89,9 @@ function mkcmdline(){
 	if [ "$BOOT_MEDIUM" == "emmc" ];then
 		mkemmc $partitionOffsetSector $fileSizeSector $TFTP_FILE_NAME
 		mkemmc $partitionOffsetSector $fileSizeSector $SD_FILE_NAME
+	elif [ "$BOOT_MEDIUM" == "sd_card" ];then
+		mkspinand $partitionOffset $partitionSize $TFTP_FILE_NAME
+		mkspinand $partitionOffset $partitionSize $SD_FILE_NAME
 	elif [ "$BOOT_MEDIUM" == "spi_nand" ];then
 		mkspinand $partitionOffset $partitionSize $TFTP_FILE_NAME
 		mkspinand $partitionOffset $partitionSize $SD_FILE_NAME
