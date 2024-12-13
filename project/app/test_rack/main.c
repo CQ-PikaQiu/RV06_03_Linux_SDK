@@ -22,6 +22,8 @@
 #include <poll.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <net/if.h>
+#include <netinet/in.h>
 
 #include "cam.h"
 #include "eth.h"
@@ -45,6 +47,8 @@ int key_adc=0;
 int cam0_fault=0;
 int cam1_fault=0;
 int sound_no_pass=0;
+
+int gateway_choice=0;
 
 eth_dev_t eth_dev;
 tf_dev_t tf_dev;
@@ -194,22 +198,51 @@ void* lv_task_thread(void* arg) {
     return NULL;
 }
 
+// 获取本设备的IP和ip的前三个数字
+void get_ip_gateway(char *gateway) {
+
+
+    int sockfd;
+    struct ifreq ifr;
+    struct sockaddr_in *sin;
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);      //创建套接字
+    memset(&ifr, 0, sizeof(ifr));
+    strcpy(ifr.ifr_name, "eth0");
+    ioctl(sockfd, SIOCGIFADDR, &ifr);
+    sin = (struct sockaddr_in *)&ifr.ifr_addr;
+    printf("本设备的IP地址为：%s\n", inet_ntoa(sin->sin_addr));
+    close(sockfd);
+    char ip_str[16];
+    strcpy(ip_str, inet_ntoa(sin->sin_addr));    //将IP地址转换为字符串
+    char ip_part[4][4];
+    sscanf(ip_str, "%d.%d.%d.%d", &ip_part[0][0], &ip_part[0][1], &ip_part[0][2], &ip_part[0][3]);
+    printf("本设备的IP的前三段字符为：%d.%d.%d\n", ip_part[0][0], ip_part[0][1], ip_part[0][2]);
+
+    if(gateway_choice){
+        sprintf(gateway, "%d.%d.%d.200", ip_part[0][0], ip_part[0][1], ip_part[0][2]);
+    }else{
+        sprintf(gateway, "%d.%d.%d.1", ip_part[0][0], ip_part[0][1], ip_part[0][2]);
+    }
+    printf("网关地址为：%s\n", gateway);
+}
+
 void* eth_test_thread() {
     if(eth_dev.link_status){
-
+        char gateway[16];
+        get_ip_gateway(gateway);
         pthread_mutex_lock(&lv_task_mutex);
         set_eth_pass_status(0);
         set_eth_attr(2,0.00);
         set_eth_attr(1,0.00);
         pthread_mutex_unlock(&lv_task_mutex);
 
-        eth_dev.send_speed=eth_send_test("192.168.103.200");
+        eth_dev.send_speed=eth_send_test(gateway);
 
         pthread_mutex_lock(&lv_task_mutex);
         set_eth_attr(1,eth_dev.send_speed);
         pthread_mutex_unlock(&lv_task_mutex);
 
-        eth_dev.rcv_speed=eth_rsv_test("192.168.103.200");
+        eth_dev.rcv_speed=eth_rsv_test(gateway);
 
         pthread_mutex_lock(&lv_task_mutex);
         set_eth_attr(2,eth_dev.rcv_speed);
@@ -295,8 +328,8 @@ void* gpio_test_thread() {
     set_gpio_pass_status(0);
     pthread_mutex_unlock(&lv_task_mutex);
     //定义二维数组
-    int gpio_out[12][2]={{1,0},{1,1},{1,8},{1,9},{4,0},{4,1},{4,7},{4,5},{0,0},{0,1},{0,4},{0,5}};
-    int gpio_in[12][2]={{5,4},{5,5},{5,6},{5,7},{5,8},{5,9},{5,10},{5,11},{5,12},{5,13},{5,14},{5,15}};
+    int gpio_out[12][2]={{1,0},{1,1},{1,8},{1,9},{5,8},{5,9},{5,10},{5,11},{0,0},{0,1},{0,4},{0,5}};
+    int gpio_in[12][2]={{5,4},{5,5},{5,6},{5,7},{4,0},{4,1},{4,7},{4,5},{5,12},{5,13},{5,14},{5,15}};
     for(int i=0;i<12;i++){
         if(check_gpio(gpio_out[i][0],gpio_out[i][1],gpio_in[i][0],gpio_in[i][1])!=0){
             printf("group %d :fail \n",i);
@@ -361,7 +394,7 @@ void* bee_test_thread() {
 }
 
 void* start_sound() {
-    system("arecord -f cd -d 1 -Dhw:0 /root/123.wav & aplay test.wav && aplay -Dhw:0 /root/123.wav &");
+    system("arecord -f cd -d 1 -Dhw:0 /root/123.wav & aplay /oem/usr/share/test.wav && aplay -Dhw:0 /root/123.wav &");
     return NULL;
 }
 
@@ -615,8 +648,6 @@ void* hardware_monitor_thread() {
 }
 
 int main(int argc, char *argv[]) {
-
-    
     pthread_t lv_task_thread_id;
     pthread_t hardware_monitor_thread_id;
     int ret;
@@ -625,7 +656,12 @@ int main(int argc, char *argv[]) {
     lv_init();
 
     fbdev_init();
-
+    printf("argc = %d\n",argc);
+    if(argc > 1){
+        gateway_choice=1;
+        printf("123\n");
+    }
+        
     /*A small buffer for LittlevGL to draw the screen's content*/
     static lv_color_t buf1[DISP_BUF_SIZE];
     static lv_color_t buf2[DISP_BUF_SIZE];
@@ -696,15 +732,6 @@ int main(int argc, char *argv[]) {
     set_tf_dect(tf_dev.link_status);
     pthread_mutex_unlock(&lv_task_mutex);
 
-
-    // double send=eth_send_test("192.168.103.200");
-    // double rsv=eth_rsv_test("192.168.103.200");
-    // printf("send:%lf,rsv:%lf\n",send,rsv);
-    // set_eth_attr(1,send);
-    // set_eth_attr(2,rsv);
-    // set_tf_attr(1,tf_write_test());
-    // set_tf_attr(2,tf_read_test());
-    // cam_init();
     printf("start read_key\n");
     read_key(NULL);
     // deinit

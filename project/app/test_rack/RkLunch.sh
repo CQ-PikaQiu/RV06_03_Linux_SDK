@@ -71,8 +71,10 @@ post_chk()
 
 	network_init &
 
+	rkaiq_3A_server &
+
 	# start app
-	
+	/oem/usr/bin/test_rack &
 }
 
 rcS
