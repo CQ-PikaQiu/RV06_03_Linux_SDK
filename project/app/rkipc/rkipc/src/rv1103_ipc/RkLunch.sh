@@ -78,17 +78,21 @@ post_chk()
 	default_rkipc_ini=/tmp/rkipc-factory-config.ini
 
 	if [ ! -f "/oem/usr/share/rkipc.ini" ]; then
-		lsmod | grep sc530ai
+		media-ctl -p -d /dev/media0 | grep sc530ai
 		if [ $? -eq 0 ] ;then
 			ln -s -f /oem/usr/share/rkipc-500w.ini $default_rkipc_ini
 		fi
-		lsmod | grep sc4336
+		media-ctl -p -d /dev/media0 | grep sc4336
 		if [ $? -eq 0 ] ;then
 			ln -s -f /oem/usr/share/rkipc-400w.ini $default_rkipc_ini
 		fi
-		lsmod | grep sc3336
+		media-ctl -p -d /dev/media0 | grep sc3336
 		if [ $? -eq 0 ] ;then
 			ln -s -f /oem/usr/share/rkipc-300w.ini $default_rkipc_ini
+		fi
+		media-ctl -p -d /dev/media0 | grep sc235hai
+		if [ $? -eq 0 ] ;then
+			ln -s -f /oem/usr/share/rkipc-200w.ini $default_rkipc_ini
 		fi
 	fi
 	tmp_md5=/tmp/.rkipc-ini.md5sum
