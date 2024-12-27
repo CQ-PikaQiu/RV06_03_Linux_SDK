@@ -20,6 +20,8 @@ app_src := $(dir $(app_src))
 all: $(pkg-build)
 	$(foreach target,$(app_src),make -C $(target)||exit -1;)
 	$(call MAROC_COPY_PKG_TO_APP_OUTPUT, $(RK_PROJECT_PATH_APP), $(RK_APP_OUTPUT))
+	@test -f "$(RK_APP_OUTPUT)/bin/RkLunch.sh" || cp -a src/RkLunch* $(RK_APP_OUTPUT)/bin
+
 
 distclean: clean
 
