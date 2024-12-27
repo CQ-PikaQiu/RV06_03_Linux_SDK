@@ -48,16 +48,10 @@ __insmod videobuf2-v4l2.ko
 __insmod videobuf2-vmalloc.ko
 __insmod videobuf2-cma-sg.ko
 
-__insmod imx415.ko
-__insmod os04a10.ko
-__insmod sc4336.ko
-__insmod sc3336.ko
-__insmod sc530ai.ko
-__insmod gc2053.ko
-__insmod sc200ai.ko
-__insmod sc401ai.ko
-__insmod sc431hai.ko
-__insmod sc450ai.ko
+# CAM DRV CHOOSE
+#__insmod sc431hai.ko
+__insmod sc235hai.ko
+
 __insmod techpoint.ko
 
 __insmod video_rkcif.ko
