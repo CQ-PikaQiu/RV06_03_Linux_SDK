@@ -287,9 +287,14 @@ function usage()
 	echo "meta               -build meta (optional)"
 	echo "uboot              -build uboot"
 	echo "kernel             -build kernel"
+	echo "kconfig            -modify kernel defconfig"
 	echo "rootfs             -build rootfs"
 	echo "driver             -build kernel's drivers"
 	echo "sysdrv             -build uboot, kernel, rootfs"
+	echo "brconfig           -modify buildroot defconfig"
+	echo "buildroot          -build buildroot"
+	echo "bbconfig           -modify busybox defconfig"
+	echo "busybox            -build busybox"
 	echo "media              -build rockchip media libraries"
 	echo "app                -build app"
 	echo "recovery           -build recovery"
@@ -629,6 +634,19 @@ function build_sysdrv(){
 	finish_build
 }
 
+function kernel_menuconfig(){
+	echo "============Start building kernel============"
+	echo "TARGET_ARCH          =$RK_ARCH"
+	echo "TARGET_KERNEL_CONFIG =$RK_KERNEL_DEFCONFIG"
+	echo "TARGET_KERNEL_DTS    =$RK_KERNEL_DTS"
+	echo "TARGET_KERNEL_CONFIG_FRAGMENT =$RK_KERNEL_DEFCONFIG_FRAGMENT"
+	echo "=========================================="
+
+	make kernel_menuconfig -C ${SDK_SYSDRV_DIR}
+
+	finish_build
+}
+
 function build_kernel(){
 	check_config RK_KERNEL_DTS RK_KERNEL_DEFCONFIG || return 0
 
@@ -657,6 +675,38 @@ function build_rootfs(){
 	check_config RK_BOOT_MEDIUM || return 0
 
 	make rootfs -C ${SDK_SYSDRV_DIR}
+
+	finish_build
+}
+
+function buildroot_menuconfig(){
+	check_config RK_BOOT_MEDIUM || return 0
+
+	make buildroot_menuconfig -C ${SDK_SYSDRV_DIR}
+
+	finish_build
+}
+
+function buildroot(){
+	check_config RK_BOOT_MEDIUM || return 0
+
+	make buildroot -C ${SDK_SYSDRV_DIR}
+
+	finish_build
+}
+
+function busybox_menuconfig(){
+	check_config RK_BOOT_MEDIUM || return 0
+
+	make busybox_menuconfig -C ${SDK_SYSDRV_DIR}
+
+	finish_build
+}
+
+function busybox(){
+	check_config RK_BOOT_MEDIUM || return 0
+
+	make busybox -C ${SDK_SYSDRV_DIR}
 
 	finish_build
 }
@@ -2424,8 +2474,13 @@ do
 		meta) option=build_meta ;;
 		driver) option=build_driver ;;
 		sysdrv) option=build_sysdrv ;;
+		brconfig) option=buildroot_menuconfig ;;
+		buildroot) option=buildroot ;;
+		bbconfig) option=busybox_menuconfig ;;
+		busybox) option=busybox ;;
 		uboot) option=build_uboot ;;
 		kernel) option=build_kernel ;;
+		kconfig) option=kernel_menuconfig ;;
 		rootfs) option=build_rootfs ;;
 		media) option=build_media ;;
 		app) option=build_app ;;
