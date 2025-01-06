@@ -445,6 +445,15 @@ uboot_clean:
 ##########################################################################################
 #	build kernel
 ##########################################################################################
+kernel_menuconfig:
+	$(MAKE) O=$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR) -C $(KERNEL_DIR) ARCH=$(ARCH) \
+		CROSS_COMPILE=$(CROSS_COMPILE) $(KERNEL_CFG)
+	$(MAKE) O=$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR) -C $(KERNEL_DIR) ARCH=$(ARCH) \
+		CROSS_COMPILE=$(CROSS_COMPILE) menuconfig
+	$(MAKE) O=$(SYSDRV_KERNEL_OBJS_OUTPUT_DIR) -C $(KERNEL_DIR) ARCH=$(ARCH) \
+		CROSS_COMPILE=$(CROSS_COMPILE) savedefconfig
+	cp -v $(SYSDRV_KERNEL_OBJS_OUTPUT_DIR)/defconfig $(KERNEL_DIR)/arch/$(ARCH)/configs/$(KERNEL_CFG)
+
 kernel: prepare
 	@echo -e "$(C_GREEN) ==sysdrv== build kernel  $(C_NORMAL)"
 ifeq ($(SYSDRV_DRIVER_MODULE), y)
@@ -538,6 +547,9 @@ busybox_clean:
 	$(AT)rm -rf $(BUSYBOX_DIR)/$(BUSYBOX_VER)
 	$(AT)rm -rf $(BUSYBOX_DIR)/objs_*
 
+##########################################################################################
+#	build buildroot
+##########################################################################################
 buildroot_menuconfig:
 	cp -v $(SYSDRV_DIR)/tools/board/buildroot/$(BUILDROOT_DEFCONFIG) $(BUILDROOT_DIR)/$(BUILDROOT_VER)/configs/
 	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) $(BUILDROOT_DEFCONFIG) -C $(BUILDROOT_DIR)/$(BUILDROOT_VER)
