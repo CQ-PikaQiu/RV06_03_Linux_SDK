@@ -13,8 +13,8 @@
 // #include "rv1106g-lubancat-screen-4-inch.dtsi"
 
 //camara
-#include "rv1106g-lubancat-single-cam.dtsi"
-// #include "rv1106g-lubancat-dual-cam.dtsi"
+//#include "rv1106g-lubancat-single-cam.dtsi"
+#include "rv1106g-lubancat-dual-cam.dtsi"
 
 &cru {
 	assigned-clocks =
