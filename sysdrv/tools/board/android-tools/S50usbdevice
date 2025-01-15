@@ -383,7 +383,6 @@ program_kill()
 
 usb_device_stop()
 {
-	ps| grep 'udhcpc -i usb0' | grep -v 'grep' | awk '{print $1}' | xargs kill -9
 	echo "host" > /sys/devices/platform/ff3e0000.usb2-phy/otg_mode
 	rm /tmp/.usb_config
 	echo "none" > ${USB_CONFIGFS_DIR}/UDC
@@ -432,9 +431,9 @@ start)
 	UDC=`ls /sys/class/udc/| awk '{print $1}'`
 	echo $UDC > ${USB_CONFIGFS_DIR}/UDC
 	run_binary
-	if [ $RNDIS_EN = "on" ]; then
-		sleep 5 && ifconfig usb0 up && udhcpc -i usb0 &
-	fi
+	# if [ $RNDIS_EN = "on" ]; then
+	# 	sleep 5 && ifconfig usb0 up &
+	# fi
 	;;
 stop)
 	usb_device_stop

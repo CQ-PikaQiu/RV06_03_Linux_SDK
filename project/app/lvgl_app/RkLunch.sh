@@ -44,7 +44,7 @@ network_init()
 	else
 		echo $ethaddr1 > /data/ethaddr.txt
 	fi
-	ifconfig eth0 up && udhcpc -i eth0
+	ifconfig eth0 up
 }
 
 post_chk()
@@ -69,7 +69,7 @@ post_chk()
 		cd $default_ko_dir && sh insmod_ko.sh && cd -
 	fi
 
-	# network_init &
+	network_init &
 
 	# start app
 	/oem/usr/bin/lvgl_app &
