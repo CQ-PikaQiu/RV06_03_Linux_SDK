@@ -591,11 +591,16 @@ ifeq ($(SYSDRV_BUILD_RAMDISK_FLAG),YES)
 	endif
 else
 	tar xf $(BUILDROOT_DIR)/$(BUILDROOT_VER)/output/images/rootfs.tar -C $(SYSDRV_DIR_OUT_ROOTFS)
-	cp $(SYSDRV_DIR)/tools/board/buildroot/shadow_defconfig $(SYSDRV_DIR_OUT_ROOTFS)/etc/shadow
-	cp $(SYSDRV_DIR)/tools/board/buildroot/sshd_defconfig $(SYSDRV_DIR_OUT_ROOTFS)/etc/ssh/sshd_config
+	# cp $(SYSDRV_DIR)/tools/board/buildroot/shadow_defconfig $(SYSDRV_DIR_OUT_ROOTFS)/etc/shadow
+	# cp $(SYSDRV_DIR)/tools/board/buildroot/sshd_defconfig $(SYSDRV_DIR_OUT_ROOTFS)/etc/ssh/sshd_config
 
-	cp $(SYSDRV_DIR)/tools/board/buildroot/S50sshd $(SYSDRV_DIR_OUT_ROOTFS)/etc/init.d/
-	cp $(SYSDRV_DIR)/tools/board/buildroot/S99python $(SYSDRV_DIR_OUT_ROOTFS)/etc/init.d/
+	# cp $(SYSDRV_DIR)/tools/board/buildroot/S50sshd $(SYSDRV_DIR_OUT_ROOTFS)/etc/init.d/
+	# cp $(SYSDRV_DIR)/tools/board/buildroot/S99net_led $(SYSDRV_DIR_OUT_ROOTFS)/etc/init.d/
+	# cp $(SYSDRV_DIR)/tools/board/buildroot/S99python $(SYSDRV_DIR_OUT_ROOTFS)/etc/init.d/
+
+	# cp $(SYSDRV_DIR)/tools/board/buildroot/wpa_supplicant.conf $(SYSDRV_DIR_OUT_ROOTFS)/etc/wpa_supplicant.conf
+ 
+	cp -a $(SYSDRV_DIR)/tools/board/buildroot/overlay/etc/* $(SYSDRV_DIR_OUT_ROOTFS)/etc/
 
 endif
 

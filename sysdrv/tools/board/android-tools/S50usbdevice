@@ -383,6 +383,9 @@ program_kill()
 
 usb_device_stop()
 {
+	ps| grep 'udhcpc -i usb0' | grep -v 'grep' | awk '{print $1}' | xargs kill -9
+	echo "host" > /sys/devices/platform/ff3e0000.usb2-phy/otg_mode
+	rm /tmp/.usb_config
 	echo "none" > ${USB_CONFIGFS_DIR}/UDC
 	program_kill adbd
 	program_kill mtp-server
@@ -392,11 +395,23 @@ usb_device_stop()
 case "$1" in
 start)
 	ifconfig lo up
-	if [ ! -e "/tmp/.usb_config" ]; then
-		echo "$0: Cannot find .usb_config"
-		# exit 0
-		USB_CONFIG_FILE=/tmp/.usb_config
-		echo "usb_adb_en" >> $USB_CONFIG_FILE
+	if [ ! -e "/etc/usb_config" ]; then
+		echo "$0: Cannot find usb_config"
+		exit 0
+	else
+		source /etc/usb_config
+		echo "OTG_MODE: $OTG_MODE"
+		if [ $OTG_MODE = "peripheral" ]; then
+			echo "peripheral" > /sys/devices/platform/ff3e0000.usb2-phy/otg_mode
+			touch /tmp/.usb_config
+			IFS=' ' read -r -a GADGET_ARRAY <<< "$GADGET_CONFIG"
+			for gadget in "${GADGET_ARRAY[@]}"; do
+				echo "$gadget" >> /tmp/.usb_config
+			done
+		else
+			echo "host" > /sys/devices/platform/ff3e0000.usb2-phy/otg_mode
+			exit 0
+		fi
 	fi
 
 	if [ -e /tmp/.usb_config ]; then
@@ -417,6 +432,9 @@ start)
 	UDC=`ls /sys/class/udc/| awk '{print $1}'`
 	echo $UDC > ${USB_CONFIGFS_DIR}/UDC
 	run_binary
+	if [ $RNDIS_EN = "on" ]; then
+		sleep 5 && ifconfig usb0 up && udhcpc -i usb0 &
+	fi
 	;;
 stop)
 	usb_device_stop
