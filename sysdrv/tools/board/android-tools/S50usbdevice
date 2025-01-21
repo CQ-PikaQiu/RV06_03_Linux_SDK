@@ -335,11 +335,21 @@ bind_functions()
 		syslink_function uvc.gs6
 	fi
 
+	if [ $RNDIS_EN = on ];then
+		if [ -f /data/usbaddr.txt ]; then
+			USBADDR=`cat /data/usbaddr.txt`
+		else
+			cat ${USB_FUNCTIONS_DIR}/rndis.gs0 > /data/usbaddr.txt
+		fi
+		echo $USBADDR > ${USB_FUNCTIONS_DIR}/rndis.gs0/dev_addr
+
+		syslink_function rndis.gs0
+	fi
+
 	test $MTP_EN = on && syslink_function mtp.gs0
 	test $NTB_EN = on && syslink_function ffs.ntb
 	test $ADB_EN = on && syslink_function ffs.adb
 	test $ACM_EN = on && syslink_function acm.gs6
-	test $RNDIS_EN = on && syslink_function rndis.gs0
 
 	if [ $HID_EN = on ]; then
 		echo 1 > /sys/kernel/config/usb_gadget/rockchip/functions/hid.usb0/protocol
