@@ -75,7 +75,7 @@ export RK_PARTITION_FS_TYPE_CFG=rootfs@IGNORE@ext4
 # app config
 # export RK_APP_TYPE=RKIPC_RV1106
 
-export RK_TEST_RACK_CONFIG=y
+export RK_LVGL_APP_CONFIG=y
 
 # build ipc web backend
 export RK_APP_IPCWEB_BACKEND=n
