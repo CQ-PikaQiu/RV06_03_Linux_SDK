@@ -113,17 +113,3 @@ fi
 # 	insmod aes_generic.ko
 # 	insmod atbm603x_.ko
 # fi
-
-sleep 5s
-
-ifconfig -a | grep "wlan0"
-if [ $? -eq 0 ];then
-	ifconfig wlan0 up
-fi
-
-#start wifi app
-ifconfig | grep "wlan0"
-if [ $? -eq 0 ];then
-	# rkwifi_server start &
-	wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf &
-fi
