@@ -199,7 +199,7 @@ output/image
 #### Kernel Config
 
 ```shell
-./build.sh kernelconfig
+./build.sh kconfig
 ```
 
 Open the menuconfig interface for the kernel.
@@ -207,7 +207,7 @@ Open the menuconfig interface for the kernel.
 #### Buildroot Config
 
 ```shell
-./build.sh buildrootconfig
+./build.sh brconfig
 ```
 
 Open the menuconfig interface for buildroot.
