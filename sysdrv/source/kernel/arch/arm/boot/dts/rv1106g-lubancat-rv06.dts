@@ -62,28 +62,28 @@
 		compatible = "restart-poweroff";
 	};
 
-	adc-key0 {
+	recovery-key {
 		compatible = "adc-keys";
 		io-channels = <&saradc 0>;
 		io-channel-names = "buttons";
 		poll-interval = <100>;
 		keyup-threshold-microvolt = <1800000>;
 
-		key_volumeup-key {
+		key {
 			label = "key_volumeup";
 			linux,code = <KEY_VOLUMEUP>;
 			press-threshold-microvolt = <0>;
 		};
 	};
 
-	adc-key1 {
+	adc-key {
 		compatible = "adc-keys";
 		io-channels = <&saradc 1>;
 		io-channel-names = "buttons";
 		poll-interval = <100>;
 		keyup-threshold-microvolt = <1800000>;
 
-		key_volumedown-key {
+		key {
 			label = "key_volumedown";
 			linux,code = <KEY_VOLUMEDOWN>;
 			press-threshold-microvolt = <0>;
@@ -307,6 +307,8 @@
     clock-frequency = <400000>;
     pinctrl-names = "default";
     pinctrl-0 = <&i2c3m2_xfer>;
+	#address-cells = <1>;
+	#size-cells = <0>;
 
 	gpio5: gpio-expander@21 {
 		compatible = "nxp,pca9535";
@@ -318,10 +320,16 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_pca9535>;
 		interrupt-parent = <&gpio0>;
-		interrupts = <&gpio0 RK_PA3 GPIO_ACTIVE_LOW>;
+		interrupts = <RK_PA3 GPIO_ACTIVE_LOW>;
 		interrupt-controller;
-		#interrupt-cells = <12>;
+		#interrupt-cells = <2>;
 	};
+};
+
+&uart3 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart3m0_xfer>;
 };
 
 &i2s0_8ch {
@@ -333,16 +341,33 @@
 	status = "okay";
 };
 
-&pwm3 {
-	status = "okay";
-	pinctrl-names = "active";
-	pinctrl-0 = <&pwm3m1_pins>;
-};
-
 &pwm7 {
 	status = "okay";
 	pinctrl-names = "active";
 	pinctrl-0 = <&pwm7m1_pins>;
+};
+
+&spi1 {
+	status = "okay";
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	// SPI gpio模拟多个cs信号 
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi1m0_cs0 &spi1m0_pins>;
+	cs-gpios = <&gpio4 RK_PA4 GPIO_ACTIVE_LOW>, <&gpio5 9 GPIO_ACTIVE_LOW>;
+
+	spi_dev@0 {
+		compatible = "rockchip,spidev";
+		reg = <0>; //chip select 0:cs0  1:cs1
+		spi-max-frequency = <24000000>; //spi output clock
+	};
+
+	spi_dev@1 {
+		compatible = "rockchip,spidev";
+		reg = <1>;
+		spi-max-frequency = <24000000>;
+	};
 };
 
 &rmii_phy {
