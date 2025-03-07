@@ -70,7 +70,7 @@ export CONFIG_RK_CRYPTO=n
 # export CONFIG_ALSA_LIB=y
 
 # Enable libv4l
-# export CONFIG_LIBV4L=y
+export CONFIG_LIBV4L=y
 
 ##------------------------------------------------
 # Rockchip's avs
