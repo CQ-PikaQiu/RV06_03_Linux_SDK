@@ -33,6 +33,22 @@
 				de-active = <0>;
 				pixelclk-active = <1>;
 			};
+
+			timing1: timing1 {
+				clock-frequency = <5670000>;
+				hactive = <800>;
+				vactive = <480>;
+				hback-porch = <46>;
+				hfront-porch = <200>;
+				vback-porch = <23>;
+				vfront-porch = <32>;
+				hsync-len = <4>;
+				vsync-len = <5>; //value range <2~22>
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <0>;
+				pixelclk-active = <0>;
+			};
 		};
 
 		port {
@@ -49,9 +65,18 @@
     pinctrl-names = "default";
     pinctrl-0 = <&i2c4m2_xfer>;
 
-	touchscreen@14 {
+	touchscreen5@14 {
 		compatible = "goodix,gt1151";
 		reg = <0x14>;
+		interrupt-parent = <&gpio1>;
+		interrupts = <RK_PA4 IRQ_TYPE_LEVEL_LOW>;
+		irq-gpios = <&gpio1 RK_PA4 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio1 RK_PA3 GPIO_ACTIVE_LOW>;
+	};
+
+	touchscreen7@5d {
+		compatible = "goodix,gt1151";
+		reg = <0x5d>;
 		interrupt-parent = <&gpio1>;
 		interrupts = <RK_PA4 IRQ_TYPE_LEVEL_LOW>;
 		irq-gpios = <&gpio1 RK_PA4 GPIO_ACTIVE_HIGH>;

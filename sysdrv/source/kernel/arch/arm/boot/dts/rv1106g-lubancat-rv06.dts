@@ -8,9 +8,7 @@
 #include "rv1106.dtsi"
 
 //screen
-// #include "rv1106g-lubancat-screen-7-inch.dtsi"
-#include "rv1106g-lubancat-screen-5-inch.dtsi"
-// #include "rv1106g-lubancat-screen-4-inch.dtsi"
+#include "rv1106g-lubancat-screen-rgb.dtsi"
 
 //camara
 //#include "rv1106g-lubancat-single-cam.dtsi"
