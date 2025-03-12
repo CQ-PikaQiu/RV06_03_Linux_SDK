@@ -37,7 +37,7 @@ export RK_MISC=wipe_all-misc.img
 # RK_CAMERA_SENSOR_IQFILES format:
 #     "iqfile1 iqfile2 iqfile3 ..."
 # ./build.sh media and copy <SDK root dir>/output/out/media_out/isp_iqfiles/$RK_CAMERA_SENSOR_IQFILES
-export RK_CAMERA_SENSOR_IQFILES="ov8858_HS5885-BNSM1018-V01_default.bin sc4336_OT01_40IRC_F16.bin sc3336_CMK-OT2119-PC1_30IRC-F16.bin sc530ai_CMK-OT2115-PC1_30IRC-F16.bin gc2093_SIDA209300461_60IRC_F20.bin"
+export RK_CAMERA_SENSOR_IQFILES="ov8858_HS5885-BNSM1018-V01_default.json sc4336_OT01_40IRC_F16.bin sc3336_CMK-OT2119-PC1_30IRC-F16.bin sc530ai_CMK-OT2115-PC1_30IRC-F16.bin gc2093_SIDA209300461_60IRC_F20.bin"
 
 # Config sensor lens CAC calibrattion bin files
 export RK_CAMERA_SENSOR_CAC_BIN="CAC_sc4336_OT01_40IRC_F16 CAC_sc530ai_CMK-OT2115-PC1_30IRC-F16"
