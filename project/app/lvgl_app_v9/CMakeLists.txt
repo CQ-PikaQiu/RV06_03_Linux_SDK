@@ -9,19 +9,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(PROJECT_NAME lvgl_app_v9)
 
 file(GLOB GUI_GUIDER_SRC 
-    gui-guider/generated/*.c
-    gui-guider/generated/guider_fonts/*.c
-    gui-guider/custom/*.c
+    ${PROJECT_SOURCE_DIR}/gui-guider/generated/*.c
+    ${PROJECT_SOURCE_DIR}/gui-guider/generated/guider_fonts/*.c
+    ${PROJECT_SOURCE_DIR}/gui-guider/generated/images/*.c
+    ${PROJECT_SOURCE_DIR}/gui-guider/generated/guider_customer_fonts/*.c
+    ${PROJECT_SOURCE_DIR}/gui-guider/custom/*.c
     )
 
 set(GUI_GUIDER_INC
-        gui-guider/
-        gui-guider/custom/
-        gui-guider/generated/
-        gui-guider/generated/guider_fonts/
-        gui-guider/generated/guider_customer_fonts
-        gui-guider/generated/images
-        gui-guider/generated/mPythonImages
+        ${PROJECT_SOURCE_DIR}/gui-guider/
+        ${PROJECT_SOURCE_DIR}/gui-guider/custom/
+        ${PROJECT_SOURCE_DIR}/gui-guider/generated/
+        ${PROJECT_SOURCE_DIR}/gui-guider/generated/guider_fonts/
+        ${PROJECT_SOURCE_DIR}/gui-guider/generated/guider_customer_fonts
+        ${PROJECT_SOURCE_DIR}/gui-guider/generated/images
+        ${PROJECT_SOURCE_DIR}/gui-guider/generated/mPythonImages
     )
 
 
