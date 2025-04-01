@@ -9,6 +9,13 @@
 		clock-output-names = "ext_cam_24m_clk";
 	}; 
 
+	ext_cam_37m_clk: external-camera-37m-clock {
+		compatible = "fixed-clock";
+		clock-frequency = <37125000>;
+		clock-output-names = "ext_cam_37m_clk";
+		#clock-cells = <0>;
+	};
+
 	vdd_cam_5v: vdd-cam-5v-regulator {
 		compatible = "regulator-fixed";
 		regulator-name = "vdd_cam_5v";
@@ -71,6 +78,12 @@
 				remote-endpoint = <&ov8858_cam0_out>;
 				data-lanes = <1 2>;
 			};
+
+			csi_dphy1_input1: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&imx415_cam0_out>;
+				data-lanes = <1 2>;
+			};
 		};
 
 		port@1 {
@@ -101,6 +114,12 @@
 			csi_dphy2_input0: endpoint@0 {
 				reg = <0>;
 				remote-endpoint = <&ov8858_cam1_out>;
+				data-lanes = <1 2>;
+			};
+
+			csi_dphy2_input1: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&imx415_cam1_out>;
 				data-lanes = <1 2>;
 			};
 		};
@@ -166,6 +185,32 @@
 			};
 		};
 	};
+
+	imx415_cam0: imx415-cam0@1a {
+		compatible = "sony,imx415";
+		status = "okay";
+		reg = <0x1a>;
+		clocks = <&ext_cam_37m_clk>;
+		clock-names = "xvclk";
+		power-gpios = <&gpio5 0 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio5 1 GPIO_ACTIVE_LOW>;
+
+		dovdd-supply= <&cam_dovdd>; /* 1.8v */
+		avdd-supply = <&cam_avdd>;  /* 2.8v */
+		dvdd-supply = <&cam_dvdd>;  /* 1.2v */
+
+		rockchip,camera-module-index = <0>;
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "CMK-OT2022-PX1";
+		rockchip,camera-module-lens-name = "IR0147-50IRC-8M-F20";
+		rockchip,imx415-capture-mode=<1>; /* 1920x1080 */
+		port {
+			imx415_cam0_out: endpoint {
+				remote-endpoint = <&csi_dphy1_input1>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
 };
 
 &i2c3 {
@@ -212,6 +257,32 @@
 			/* MIPI CSI-2 bus endpoint */
 			ov8858_cam1_out: endpoint {
 				remote-endpoint = <&csi_dphy2_input0>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+
+	imx415_cam1: imx415-cam1@1a {
+		compatible = "sony,imx415";
+		status = "okay";
+		reg = <0x1a>;
+		clocks = <&ext_cam_37m_clk>;
+		clock-names = "xvclk";
+		power-gpios = <&gpio5 2 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio5 3 GPIO_ACTIVE_LOW>;
+
+		dovdd-supply= <&cam_dovdd>; /* 1.8v */
+		avdd-supply = <&cam_avdd>;  /* 2.8v */
+		dvdd-supply = <&cam_dvdd>;  /* 1.2v */
+
+		rockchip,camera-module-index = <1>;
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "CMK-OT2022-PX1";
+		rockchip,camera-module-lens-name = "IR0147-50IRC-8M-F20";
+		rockchip,imx415-capture-mode=<1>; /* 1920x1080 */
+		port {
+			imx415_cam1_out: endpoint {
+				remote-endpoint = <&csi_dphy2_input1>;
 				data-lanes = <1 2>;
 			};
 		};
