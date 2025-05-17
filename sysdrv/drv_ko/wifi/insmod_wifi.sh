@@ -45,6 +45,13 @@ if [ $? -eq 0 ];then
 	insmod aic_btusb.ko
 fi
 
+cat /sys/bus/sdio/devices/*/uevent | grep "C8A1\:0182"
+if [ $? -eq 0 ];then
+	insmod aic8800_bsp.ko
+	# insmod aic8800_btlpm.ko
+	insmod aic8800_fdrv.ko
+fi
+
 # #AIC8800DW
 # cat /sys/bus/sdio/devices/*/uevent | grep "8800"
 # if [ $? -eq 0 ];then
