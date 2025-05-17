@@ -24,6 +24,8 @@ export RK_UBOOT_DEFCONFIG_FRAGMENT=rk-sfc.config
 # Kernel defconfig
 export RK_KERNEL_DEFCONFIG=rv1106_lbc_defconfig
 
+export RK_KERNEL_DEFCONFIG_FRAGMENT=rv1106-pm.config
+
 # Kernel dts
 export RK_KERNEL_DTS=rv1106g-lubancat-rv06.dts
 
