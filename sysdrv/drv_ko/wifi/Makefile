@@ -59,7 +59,7 @@ ifneq ($(findstring $(RK_ENABLE_WIFI_CHIP),"AIC8800DW_USB"),)
 	@make -C aic8800_usb/
 endif
 
-ifneq ($(findstring $(RK_ENABLE_WIFI_CHIP),"AIC8800D80"),)
+ifneq ($(findstring $(RK_ENABLE_WIFI_CHIP),"AIC8800_USB"),)
 	@make -C aic8800_usb/
 	@make -C aic_btusb/
 endif
