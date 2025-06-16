@@ -109,6 +109,9 @@ int main(int argc, char *argv[])
             setup_ui(&guider_ui);
             events_init(&guider_ui);
             break;
+        case 1:
+            lv_demo_widgets();
+            break;
         case 2:
             lv_demo_music();
             break;
