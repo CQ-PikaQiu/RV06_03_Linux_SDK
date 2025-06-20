@@ -74,17 +74,27 @@ export RK_PARTITION_FS_TYPE_CFG=rootfs@IGNORE@ubifs
 # export RK_SQUASHFS_COMP=xz
 # export RK_UBIFS_COMP=lzo
 
+
+# 在====线内是app应用的配置，只能选择一种打开，不用的需要注释掉，
+# 默认是RK_LVGL_APP_V9_CONFIG=y,其他注释掉
+# =====================
 # app config
 # export RK_APP_TYPE=RKIPC_RV1106
+
+# build ipc web backend
+# export RK_APP_IPCWEB_BACKEND=y
+
+# --------------------
 
 # lvgl v8 config
 # export RK_LVGL_APP_CONFIG=y
 
+# --------------------
+
 # lvgl v9 config
 export RK_LVGL_APP_V9_CONFIG=y
 
-# build ipc web backend
-export RK_APP_IPCWEB_BACKEND=n
+# =====================
 
 # enable install app to oem partition
 export RK_BUILD_APP_TO_OEM_PARTITION=n
