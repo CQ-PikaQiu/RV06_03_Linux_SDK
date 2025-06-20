@@ -83,17 +83,12 @@ export RK_PARTITION_FS_TYPE_CFG=rootfs@IGNORE@ubifs
 
 # build ipc web backend
 # export RK_APP_IPCWEB_BACKEND=y
-
 # --------------------
-
 # lvgl v8 config
 # export RK_LVGL_APP_CONFIG=y
-
 # --------------------
-
 # lvgl v9 config
 export RK_LVGL_APP_V9_CONFIG=y
-
 # =====================
 
 # enable install app to oem partition
