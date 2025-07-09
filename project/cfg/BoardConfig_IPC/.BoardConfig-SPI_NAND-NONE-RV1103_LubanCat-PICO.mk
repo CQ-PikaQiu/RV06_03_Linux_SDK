@@ -82,6 +82,12 @@ export RK_BUILD_APP_TO_OEM_PARTITION=n
 # enable rockchip test
 export RK_ENABLE_ROCKCHIP_TEST=y
 
+# enable build wifi
+export RK_ENABLE_WIFI_APP=n
+export RK_ENABLE_WIFI=y
+export RK_ENABLE_WIFI_CHIP=AIC8800D80_SDIO
+export RK_ENABLE_ADBD=y
+
 # Config SPI NAND or SLC NAND
 # RK_NAND_BLOCK_SIZE: block size (default 128 KB)
 # RK_NAND_PAGE_SIZE: page size   (default 2 KB)
