@@ -138,6 +138,8 @@ cleanup:
 
 }
 
+
+
 int motor_init(motor_t motor){
     uint8_t data = 0;
     if(motor.step)
@@ -227,6 +229,33 @@ int motor_start(motor_t motor){
     printf("ms32007 REG 0x09: %x\n", data);
 }
 
+int ir_control(int ro){
+    //0：初始状态
+    //1：正转
+    //2：反转
+    //3:刹车
+    uint8_t data = 0;
+    data = i2c_smbus_read_byte_data(fd, 0X09);
+    data &= 0xF3;
+    data |= (ro << 2);
+    i2c_smbus_write_byte_data(fd, 0X09, data);
+    printf("ms32007 REG 0x09: %x\n", data);
+}
+
+int ir_set_on(){
+    ir_control(1);
+    usleep(100000);
+    ir_control(0);
+    return 0;
+}
+
+int ir_set_off(){
+    ir_control(2);
+    usleep(100000);
+    ir_control(0);
+    return 0;
+}
+
 int motor_stop(motor_t motor){
     uint8_t data = i2c_smbus_read_byte_data(fd, 0X00);
     uint8_t reg_data = 0;
@@ -285,8 +314,8 @@ int ms32007_init(){
 
     motor_a.index = 0;
     motor_a.step = 0;
-    motor_a.cycle = 128;
-    motor_a.pulse = 1023;
+    motor_a.cycle = 256;
+    motor_a.pulse = 512;
     motor_a.rt = 0;
     motor_a.en = 1;
 
@@ -313,38 +342,43 @@ int ms32007_init(){
 
 int main(){
     ms32007_init();
+
+    for(int i = 0; i < 3; i++){
+        ir_set_on();
+        sleep(1);
+        ir_set_off();
+        sleep(1);
+    }
+
     while(running){
-        // motor_a.rt = 0;
-        // motor_set_rt(motor_a);
+        motor_a.rt = 0;
+        motor_set_rt(motor_a);
         
-        // motor_start(motor_a);
-        // sleep(1);
-        // usleep(450000);
-        // motor_start(motor_a);
-        // sleep(1);
-        // usleep(450000);
-        // motor_start(motor_a);
-        // sleep(1);
-        // usleep(450000);
-        // motor_start(motor_a);
-        // sleep(1);
-        // usleep(450000);
+        motor_start(motor_a);
+        sleep(1);
+        usleep(450000);
 
-        // motor_a.rt = 1;
+        motor_a.rt = 1;
+        motor_set_rt(motor_a);
+        motor_start(motor_a);
 
-        // motor_set_rt(motor_a);
-        // motor_start(motor_a);
-        // sleep(1);
-        // usleep(450000);
-        // motor_start(motor_a);
-        // sleep(1);
-        // usleep(450000);
-        // motor_start(motor_a);
-        // sleep(1);
-        // usleep(450000);
-        // motor_start(motor_a);
-        // sleep(1);
-        // usleep(450000);
+        sleep(1);
+        usleep(450000);
+
+        motor_a.rt = 0;
+        motor_set_rt(motor_a);
+        motor_start(motor_a);
+        sleep(1);
+        usleep(450000);
+
+        motor_a.rt = 1;
+        motor_set_rt(motor_a);
+        motor_start(motor_a);
+
+        sleep(1);
+        usleep(450000);
+        
+
 
         motor_b.rt = 0;
         motor_set_rt(motor_b);

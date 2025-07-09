@@ -23,7 +23,7 @@
 #define MS32007_MOTO_B_STOP             1 << 1
 
 // 定义要监控的 GPIO 芯片和引脚
-#define GPIO_CHIP "gpiochip0"  // GPIO 控制器名称（使用 gpiodetect 命令查看）
-#define GPIO_LINE 0           // GPIO 引脚号（使用 gpioinfo 命令查看）
+#define GPIO_CHIP "gpiochip1"  // GPIO 控制器名称（使用 gpiodetect 命令查看）
+#define GPIO_LINE 21           // GPIO 引脚号（使用 gpioinfo 命令查看）
 
 #endif
