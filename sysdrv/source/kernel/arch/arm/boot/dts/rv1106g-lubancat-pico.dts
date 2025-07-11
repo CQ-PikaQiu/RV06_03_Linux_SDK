@@ -55,7 +55,7 @@
 			label = "sys_led";
 			linux,default-trigger = "heartbeat";
 			default-state = "on";
-			gpios = <&gpio0 RK_PA3 GPIO_ACTIVE_HIGH>;
+			gpios = <&gpio0 RK_PA2 GPIO_ACTIVE_HIGH>;
 		};
 	};
 
@@ -132,6 +132,59 @@
 		status = "okay";
 	};
 
+	ext_cam_24m_clk: external-camera-24m-clock {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <24000000>;
+		clock-output-names = "ext_cam_24m_clk";
+	}; 
+
+	ext_cam_37m_clk: external-camera-37m-clock {
+		compatible = "fixed-clock";
+		clock-frequency = <37125000>;
+		clock-output-names = "ext_cam_37m_clk";
+		#clock-cells = <0>;
+	};
+
+	vdd_cam_5v: vdd-cam-5v-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "vdd_cam_5v";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+
+	cam_dovdd: cam-dovdd {
+		compatible = "regulator-fixed";
+		regulator-name = "cam_dovdd";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		vin-supply = <&vdd_cam_5v>;
+	};
+
+	cam_avdd: cam-avdd {
+		compatible = "regulator-fixed";
+		regulator-name = "cam_avdd";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+		vin-supply = <&vdd_cam_5v>;
+	};
+
+	cam_dvdd: cam-dvdd {
+		compatible = "regulator-fixed";
+		regulator-name = "cam_dvdd";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1200000>;
+		vin-supply = <&vdd_cam_5v>;
+	};
+
 };
 
 &uart5 {
@@ -192,14 +245,38 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
+			csi_dphy_input0: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&ov8858_out>;
+				data-lanes = <1 2>;
+			};
+
+			csi_dphy_input1: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&sc530ai_out>;
+				data-lanes = <1 2>;
+			};
+
 			csi_dphy_input2: endpoint@2 {
 				reg = <2>;
-				remote-endpoint = <&sc431hai_out>;
+				remote-endpoint = <&imx415_out>;
 				data-lanes = <1 2>;
 			};
 
 			csi_dphy_input3: endpoint@3 {
 				reg = <3>;
+				remote-endpoint = <&gc4653_out>;
+				data-lanes = <1 2>;
+			};
+
+			csi_dphy_input4: endpoint@4 {
+				reg = <4>;
+				remote-endpoint = <&sc431hai_out>;
+				data-lanes = <1 2>;
+			};
+
+			csi_dphy_input5: endpoint@5 {
+				reg = <5>;
 				remote-endpoint = <&sc235hai_out>;
 				data-lanes = <1 2>;
 			};
@@ -298,6 +375,124 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c0m0_xfer>;
 
+	dw9714: dw9714@c {
+		status = "okay";
+		compatible = "dongwoon,dw9714";
+		reg = <0xc>;
+		rockchip,camera-module-index = <0>;
+		rockchip,vcm-max-current = <100>;
+		rockchip,vcm-start-current = <0>;
+		rockchip,vcm-rated-current = <100>;
+		rockchip,vcm-step-mode = <0xd>;
+		rockchip,vcm-dlc-enable = <0>;
+		rockchip,vcm-mclk = <0>;	
+		rockchip,vcm-t-src = <0>;
+		rockchip,camera-module-facing = "back";
+	};
+
+
+	ov8858: ov8858@36 {
+		compatible = "ovti,ov8858";
+		status = "okay";
+		reg = <0x36>;
+		clocks = <&ext_cam_24m_clk>;
+		clock-names = "xvclk";
+		pwdn-gpios = <&gpio1 RK_PB1 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
+
+		dovdd-supply= <&cam_dovdd>; /* 1.8v */
+		avdd-supply = <&cam_avdd>;  /* 2.8v */
+		dvdd-supply = <&cam_dvdd>;  /* 1.2v */
+
+		rockchip,camera-module-index = <0>;
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "HS5885-BNSM1018-V01";
+		rockchip,camera-module-lens-name = "default";
+		lens-focus = <&dw9714>;
+
+		port {
+			/* MIPI CSI-2 bus endpoint */
+			ov8858_out: endpoint {
+				remote-endpoint = <&csi_dphy_input0>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+
+	sc530ai: sc530ai@30 {
+		compatible = "smartsens,sc530ai";
+		status = "okay";
+		reg = <0x30>;
+		clocks = <&ext_cam_24m_clk>;
+		clock-names = "xvclk";
+		pwdn-gpios = <&gpio1 RK_PB1 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
+		rockchip,camera-module-index = <0>;
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "CMK-OT2115-PC1";
+		rockchip,camera-module-lens-name = "30IRC-F16";
+		port {
+			sc530ai_out: endpoint {
+				remote-endpoint = <&csi_dphy_input1>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+
+	imx415: imx415@1a {
+		compatible = "sony,imx415";
+		status = "okay";
+		reg = <0x1a>;
+		clocks = <&ext_cam_37m_clk>;
+		clock-names = "xvclk";
+		pwdn-gpios = <&gpio1 RK_PB1 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio1 RK_PB0 GPIO_ACTIVE_LOW>;
+
+		dovdd-supply= <&cam_dovdd>; /* 1.8v */
+		avdd-supply = <&cam_avdd>;  /* 2.8v */
+		dvdd-supply = <&cam_dvdd>;  /* 1.2v */
+
+		rockchip,camera-module-index = <0>;
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "CMK-OT2022-PX1";
+		rockchip,camera-module-lens-name = "IR0147-50IRC-8M-F20";
+		rockchip,imx415-capture-mode=<1>; /* 1920x1080 */
+		port {
+			imx415_out: endpoint {
+				remote-endpoint = <&csi_dphy_input2>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+
+	gc4653: gc4653@29 {
+		compatible = "galaxycore,gc4653";
+		status = "okay";
+		reg = <0x29>;
+		clocks = <&ext_cam_24m_clk>;
+		clock-names = "xvclk";
+
+		avdd-supply = <&cam_avdd>;
+		dovdd-supply = <&cam_dovdd>;
+		dvdd-supply = <&cam_dvdd>;
+		pwdn-gpios = <&gpio1 RK_PB1 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
+		
+		rockchip,camera-module-index = <0>;
+		rockchip,camera-module-facing = "front";
+		rockchip,camera-module-name = "YT10120";
+		rockchip,camera-module-lens-name = "30IRC-4M-F20";
+
+		// NO_HDR:0 HDR_X2:5 HDR_X3:6
+		// rockchip,camera-hdr-mode = <0>;
+		port {
+			gc4653_out: endpoint {
+				remote-endpoint = <&csi_dphy_input3>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+
 	sc431hai: sc431hai@30 {
 		compatible = "smartsens,sc431hai";
 		status = "okay";
@@ -314,11 +509,12 @@
 		rockchip,camera-module-lens-name = "30IRC-F16";
 		port {
 			sc431hai_out: endpoint {
-				remote-endpoint = <&csi_dphy_input2>;
+				remote-endpoint = <&csi_dphy_input4>;
 				data-lanes = <1 2>;
 			};
 		};
 	};
+
 
 	sc235hai: sc235hai@30 {
 		compatible = "smartsens,sc235hai";
@@ -336,7 +532,7 @@
 		rockchip,camera-module-lens-name = "30IRC-F16";
 		port {
 			sc235hai_out: endpoint {
-				remote-endpoint = <&csi_dphy_input3>;
+				remote-endpoint = <&csi_dphy_input5>;
 				data-lanes = <1 2>;
 			};
 		};
