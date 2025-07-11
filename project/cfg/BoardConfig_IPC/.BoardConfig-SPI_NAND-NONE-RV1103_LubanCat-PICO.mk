@@ -28,7 +28,7 @@ export RK_KERNEL_DEFCONFIG=rv1103_lbc_pico_defconfig
 export RK_KERNEL_DTS=rv1103g-lubancat-pico.dts
 
 # buildroot defconfig
-export RK_BUILDROOT_DEFCONFIG=rv1103_lbc_pico_defconfig
+export RK_BUILDROOT_DEFCONFIG=rv1106_lbc_defconfig
 
 #misc image
 export RK_MISC=wipe_all-misc.img
@@ -43,7 +43,7 @@ export RK_CAMERA_SENSOR_IQFILES="sc431hai_CMK-OT2115-PC1_30IRC-F16.bin sc235hai_
 export RK_CAMERA_SENSOR_CAC_BIN="CAC_sc4336_OT01_40IRC_F16"
 
 # Config CMA size in environment
-export RK_BOOTARGS_CMA_SIZE="24M"
+export RK_BOOTARGS_CMA_SIZE="28M"
 
 # config partition in environment
 # RK_PARTITION_CMD_IN_ENV format:
@@ -72,7 +72,6 @@ export RK_PARTITION_FS_TYPE_CFG=rootfs@IGNORE@ubifs
 
 # app config
 export RK_APP_TYPE=RKIPC_RV1103
-
 # build ipc web backend
 export RK_APP_IPCWEB_BACKEND=y
 

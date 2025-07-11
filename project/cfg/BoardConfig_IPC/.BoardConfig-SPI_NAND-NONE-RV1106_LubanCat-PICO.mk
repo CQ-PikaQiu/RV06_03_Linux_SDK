@@ -22,7 +22,7 @@ export RK_UBOOT_DEFCONFIG=rv1106_defconfig
 export RK_UBOOT_DEFCONFIG_FRAGMENT=rk-sfc.config
 
 # Kernel defconfig
-export RK_KERNEL_DEFCONFIG=rv1106_lbc_defconfig
+export RK_KERNEL_DEFCONFIG=rv1106_lbc_pico_defconfig
 
 # export RK_KERNEL_DEFCONFIG_FRAGMENT=rv1106-pm.config
 
@@ -30,7 +30,7 @@ export RK_KERNEL_DEFCONFIG=rv1106_lbc_defconfig
 export RK_KERNEL_DTS=rv1106g-lubancat-pico.dts
 
 # buildroot defconfig
-export RK_BUILDROOT_DEFCONFIG=rv1106_lbc_rv06_defconfig
+export RK_BUILDROOT_DEFCONFIG=rv1106_lbc_defconfig
 
 #misc image
 export RK_MISC=wipe_all-misc.img
@@ -45,7 +45,7 @@ export RK_CAMERA_SENSOR_IQFILES="ov8858_HS5885-BNSM1018-V01_default.json imx415_
 export RK_CAMERA_SENSOR_CAC_BIN="CAC_sc4336_OT01_40IRC_F16 CAC_sc530ai_CMK-OT2115-PC1_30IRC-F16"
 
 # Config CMA size in environment
-export RK_BOOTARGS_CMA_SIZE="48M"
+export RK_BOOTARGS_CMA_SIZE="36M"
 
 # config partition in environment
 # RK_PARTITION_CMD_IN_ENV format:
@@ -54,7 +54,7 @@ export RK_BOOTARGS_CMA_SIZE="48M"
 # Note:
 #   If the first partition offset is not 0x0, it must be added. Otherwise, it needn't adding.
 # export RK_PARTITION_CMD_IN_ENV="256K(env),1M@256K(idblock),1M(uboot),5M(boot),160M(rootfs),48M(oem),32M(userdata)"
-export RK_PARTITION_CMD_IN_ENV="256K(env),1M@256K(idblock),1M(uboot),5M(boot),90M(rootfs)"
+export RK_PARTITION_CMD_IN_ENV="256K(env),1M@256K(idblock),1M(uboot),5M(boot),218M(rootfs)"
 
 # config partition's filesystem type (squashfs is readonly)
 # emmc:    squashfs/ext4
@@ -74,17 +74,10 @@ export RK_PARTITION_FS_TYPE_CFG=rootfs@IGNORE@ubifs
 # export RK_SQUASHFS_COMP=xz
 # export RK_UBIFS_COMP=lzo
 
-# app config
-# export RK_APP_TYPE=RKIPC_RV1106
 
-# lvgl v8 config
-# export RK_LVGL_APP_CONFIG=y
-
-# lvgl v9 config
-export RK_LVGL_APP_V9_CONFIG=y
-
+export RK_APP_TYPE=RKIPC_RV1106
 # build ipc web backend
-export RK_APP_IPCWEB_BACKEND=n
+export RK_APP_IPCWEB_BACKEND=y
 
 # enable install app to oem partition
 export RK_BUILD_APP_TO_OEM_PARTITION=n
