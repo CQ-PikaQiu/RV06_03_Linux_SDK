@@ -78,13 +78,17 @@ post_chk()
 	default_rkipc_ini=/tmp/rkipc-factory-config.ini
 
 	if [ ! -f "/oem/usr/share/rkipc.ini" ]; then
-		media-ctl -p -d /dev/media0 | grep ov8858
+		media-ctl -p -d /dev/media0 | grep -E "ov8858"
 		if [ $? -eq 0 ] ;then
-			ln -s -f /oem/usr/share/rkipc-200w-ov8858.ini $default_rkipc_ini
+			ln -s -f /oem/usr/share/rkipc-200w-1632x1224.ini $default_rkipc_ini
 		fi
-		media-ctl -p -d /dev/media0 | grep imx415
+		media-ctl -p -d /dev/media0 | grep -E "imx415|sc235hai"
 		if [ $? -eq 0 ] ;then
-			ln -s -f /oem/usr/share/rkipc-200w-imx415.ini $default_rkipc_ini
+			ln -s -f /oem/usr/share/rkipc-200w-1920x1080.ini $default_rkipc_ini
+		fi
+		media-ctl -p -d /dev/media0 | grep -E "sc431hai|sc4336|gc4653"
+		if [ $? -eq 0 ] ;then
+			ln -s -f /oem/usr/share/rkipc-400w-2560x1440.ini $default_rkipc_ini
 		fi
 	fi
 	tmp_md5=/tmp/.rkipc-ini.md5sum
