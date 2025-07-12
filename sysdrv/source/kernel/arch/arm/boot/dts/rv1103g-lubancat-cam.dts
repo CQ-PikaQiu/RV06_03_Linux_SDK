@@ -9,8 +9,8 @@
 #include "rv1106-evb.dtsi"
 
 / {
-	model = "Embedfire AI CAM";
-	compatible = "embedfire,ai-cam", "rockchip,rv1103";
+	model = "Embedfire 38 AI CAM";
+	compatible = "embedfire,rv1103-ai-cam", "rockchip,rv1103";
 
 	chosen {
 		bootargs = "earlycon=uart8250,mmio32,0xff4c0000 console=ttyFIQ0 root=/dev/mmcblk1p5 rootwait snd_soc_core.prealloc_buffer_size_kbytes=16 coherent_pool=0";

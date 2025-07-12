@@ -9,8 +9,8 @@
 #include "rv1106-evb.dtsi"
 
 / {
-	model = "Luckfox Pico Plus";
-	compatible = "rockchip,rv1103g-38x38-ipc-v10", "rockchip,rv1103";
+	model = "Embedfire IPC CAM";
+	compatible = "rockchip,rv1103g-lubancat-ipc";, "rockchip,rv1103";
 
 	chosen {
 		bootargs = "earlycon=uart8250,mmio32,0xff4c0000 console=ttyFIQ0 root=/dev/mmcblk1p7 rootwait snd_soc_core.prealloc_buffer_size_kbytes=16 coherent_pool=0";

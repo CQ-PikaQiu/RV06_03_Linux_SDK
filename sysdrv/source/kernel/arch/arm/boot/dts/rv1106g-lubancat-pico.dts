@@ -9,8 +9,8 @@
 #include <dt-bindings/input/input.h>
 
 / {
-    model = "LubanCat RV1106 IO Board";
-	compatible = "embedfire,rv1106g-lubancat-io", "rockchip,rv1106";
+    model = "LubanCat RV1106 PICO Board";
+	compatible = "embedfire,rv1106g-lubancat-pico", "rockchip,rv1106";
 
 	chosen {
 		bootargs = "earlycon=uart8250,mmio32,0xff4c0000 console=ttyFIQ0 root=/dev/mmcblk0p5 rootfstype=ext4 rootwait snd_soc_core.prealloc_buffer_size_kbytes=16 coherent_pool=0 net.ifnames=0 biosdevname=0";
