@@ -122,16 +122,6 @@
 		status = "okay";
 	};
 
-	wireless_bluetooth: wireless-bluetooth {
-		compatible = "bluetooth-platdata";
-		uart_rts_gpios = <&gpio1 RK_PD0 GPIO_ACTIVE_LOW>;
-		pinctrl-names = "default", "rts_gpio";
-		pinctrl-0 = <&uart5m1_rtsn>;
-		pinctrl-1 = <&uart5_rts_gpio>;
-		BT,power_gpio = <&gpio2 RK_PB1 GPIO_ACTIVE_HIGH>;
-		status = "okay";
-	};
-
 	ext_cam_24m_clk: external-camera-24m-clock {
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
@@ -187,12 +177,6 @@
 
 };
 
-&uart5 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&uart5m1_xfer &uart5m1_ctsn>;
-	status = "okay";
-};
-
 &sdio {
 	max-frequency = <50000000>;
 	no-sd;
@@ -209,12 +193,6 @@
 };
 
 &pinctrl {
-	wireless-bluetooth {
-		uart5_rts_gpio: uart5-rts-gpio {
-			rockchip,pins = <1 RK_PD0 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-	};
-
 	sdio-pwrseq {
 		wifi_enable_h: wifi-enable-h {
 			rockchip,pins = <1 RK_PC6 RK_FUNC_GPIO &pcfg_pull_none>;
@@ -541,7 +519,6 @@
 
 &acodec {
 	#sound-dai-cells = <0>;
-	pa-ctl-gpios = <&gpio1 RK_PA2 GPIO_ACTIVE_HIGH>;
 	status = "okay";
 };
 
